@@ -460,4 +460,7 @@ TestResult.xml
 nunit-*.xml
 
 
-
+#Ignore the confidential keys and vars
+**/appsettings.json
+**/appsettings.*.json
+**/launchSettings.json

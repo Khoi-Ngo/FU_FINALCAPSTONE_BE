@@ -1,0 +1,31 @@
+services:
+  aisea-api:
+    build:
+      context: ./AISEA.ApiService
+      dockerfile: AISEA.ApiService.WebApi/Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./AISEA.ApiService:/src
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - aisea-worker
+    networks:
+      - aisea-network
+
+  aisea-worker:
+    build:
+      context: ./AISEA.BgService
+      dockerfile: AISEA.BgService.Worker/Dockerfile
+    volumes:
+      - ./AISEA.BgService:/src
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - aisea-network
+
+networks:
+  aisea-network:
+    driver: bridge

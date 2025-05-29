@@ -1,4 +1,4 @@
-# AISEA Backend aka FU CAPSTONE (SUMMER 2025)
+# AISEA Backend aka FU CAPSTONE
 
 This repository contains the backend services for the **AISEA** project, developed using **.NET 8.0**. The solution is split into two main components:
 

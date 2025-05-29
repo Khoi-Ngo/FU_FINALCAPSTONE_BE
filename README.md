@@ -15,12 +15,6 @@ Both services are containerized using Docker and orchestrated with Docker Compos
 - [Prerequisites](#prerequisites)
 - [Setup Instructions](#setup-instructions)
 - [Running the Application](#running-the-application)
-- [Development Workflow](#development-workflow)
-- [Troubleshooting](#troubleshooting)
-- [Production Considerations](#production-considerations)
-- [Extending the Project](#extending-the-project)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 

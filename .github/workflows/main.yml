@@ -16,6 +16,8 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
+          docker rm -f $(docker ps -a -q)
+          docker image rm -f $(docker image list -q)
           cd /home/official_deploy/main/Back-end
           git fetch origin
           git checkout main

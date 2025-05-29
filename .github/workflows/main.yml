@@ -16,7 +16,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
-          cd /home/official_deploy/main
+          cd /home/official_deploy/main/Back-end
           git fetch origin
           git checkout main
           git pull

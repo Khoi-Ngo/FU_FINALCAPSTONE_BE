@@ -3,6 +3,8 @@ name: Docker Compose BE Depoy
 on:
   push:
     branches: [main]
+    tags:
+      - 'FU_CAPST_*'
 
 jobs:
   deploy:

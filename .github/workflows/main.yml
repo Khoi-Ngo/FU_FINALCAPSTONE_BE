@@ -16,8 +16,8 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
-          docker rm -f $(docker ps -a -q)
-          docker image rm -f $(docker image list -q)
+          docker rm -f $(docker ps -a -q --filter "name!=${{ secrets.MAINS_SQL_INSTANCE }}" --filter "name!=${{ secrets.ALT01_SQL_INSTANCE }}")
+          docker image rm -f $(docker image list -q | grep -v "mcr.microsoft.com/mssql/server" | sort -u)
           cd /home/official_deploy/main/Back-end
           git fetch origin
           git checkout main

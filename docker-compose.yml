@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   aisea-api:
     build:
@@ -10,8 +11,10 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT=Development
+      - RedisSettings__ConnectionString=${REDIS_CONNECTION_STRING}
     depends_on:
       - aisea-worker
+      - redis-server
     networks:
       - aisea-network
 
@@ -23,6 +26,18 @@ services:
       - ./AISEA.BgService:/src
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - aisea-network
+
+  redis-server:
+    image: redis:latest
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - aisea-network
 

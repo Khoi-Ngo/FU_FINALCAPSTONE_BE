@@ -11,4 +11,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AISEA.ApiService.BAL\AISEA.ApiService.BAL.csproj" />
+    <ProjectReference Include="..\AISEA.ApiService.SHARED\AISEA.ApiService.SHARED.csproj" />
+  </ItemGroup>
+
 </Project>

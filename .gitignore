@@ -464,3 +464,4 @@ nunit-*.xml
 **/appsettings.json
 **/appsettings.*.json
 **/launchSettings.json
+**/.env

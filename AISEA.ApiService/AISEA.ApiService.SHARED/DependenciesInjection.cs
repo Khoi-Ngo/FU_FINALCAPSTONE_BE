@@ -1,12 +1,33 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.SHARED.Services.Auth;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace AISEA.ApiService.SHARED
 {
-    public class DependenciesInjection
+    public static class DependenciesInjection
     {
-        
+        public static IServiceCollection AddSharedConfig(this IServiceCollection services, IConfiguration configuration)
+        {
+            //adding properties configuration
+            services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.Section));
+            services.Configure<RedisSettings>(configuration.GetSection(RedisSettings.Section));
+            services.Configure<EndpointSettings>(configuration.GetSection(EndpointSettings.Section));
+            services.Configure<AuthTokenSettings>(configuration.GetSection(AuthTokenSettings.Section));
+
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<EndpointSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<AuthTokenSettings>>().Value);
+
+            //adding auto mapper
+
+            //adding JWT
+            services.AddScoped<JWTService>();
+            services.AddScoped<HttpContextUserService>();
+
+            return services;
+        }
     }
 }

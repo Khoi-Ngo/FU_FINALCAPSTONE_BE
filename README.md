@@ -95,7 +95,7 @@ docker-compose up --build
 ```
 
 - This builds the Docker images for `AISEA.ApiService.WebApi` and `AISEA.BgService.Worker`.
-- The Web API will be available at [http://localhost:5000](http://localhost:5000) (adjust if a different port is configured in `appsettings.json` or `Program.cs`).
+- The Web API will be available at [http://localhost:5000](http://localhost:5000)
 - The Worker Service runs in the background and does not expose ports.
 
 **Stop Containers:**  
@@ -113,7 +113,26 @@ docker-compose down
 ```sh
 docker-compose logs aisea-worker
 ```
+## Notes for Implementing Code
 
+### ApiService
+
+#### Packages Structure
+
+- The code follows the 3-layer architecture in .NET Core Web API: **Controller** (API), **BAL** (Business Logic), and **DAL** (Data Access).
+- The **SHARED** folder should only contain:
+  - Utility properties and methods.
+  - Service logic for external APIs (e.g., JWT token generation/validation, mail sending).
+  - **Do not** include application-specific business logic here.
+- Endpoints are secured by default. Use the `[AllowAnonymous]` attribute to allow unauthenticated access for specific endpoints.
+- The middleware handles exceptions (e.g., `InvalidToken`, `NullReferenceException`) and returns HTTP error codes in a consistent JSON format.
+
+#### Error Handling
+
+- For errors caused by invalid user input or business logic violations:
+  - **Do not** return a generic 5XX error.
+  - Instead, define a custom exception type in the **SHARED** project.
+  - Use the `MiddlewareException` class to return a well-formatted, expected error response.
 
 
 

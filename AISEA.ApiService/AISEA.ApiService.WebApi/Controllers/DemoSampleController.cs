@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.SHARED.Const.Enums;
-using AISEA.ApiService.WebApi.Filters;
+using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.WebApi.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,29 +14,31 @@ namespace AISEA.ApiService.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DemoSampleController : ControllerBase
+    public class DemoSampleController : BaseController
     {
-        private readonly IConfiguration _configuration;
         private readonly DemoSampleService _demoSampleService;
 
-        public DemoSampleController(IConfiguration configuration, DemoSampleService demoSampleService)
+        private readonly EndpointSettings _endpointSettings;
+
+        public DemoSampleController(
+            DemoSampleService demoSampleService,
+            EndpointSettings endpointSettings
+        ) : base(endpointSettings)
         {
-            _configuration = configuration;
             _demoSampleService = demoSampleService;
+            _endpointSettings = endpointSettings;
         }
 
         [HttpGet]
         public IActionResult Demo()
         {
-            var dummyValue = _configuration["DummyKey"];
-            return Ok(new { DummyKey = dummyValue });
+            return Ok(new { NonKey = "asdksajdsakjdaskjdsa" });
         }
         [HttpGet("with-role-specified")]
         [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
         public IActionResult DemoWithRoleSpecified()
         {
-            var dummyValue = _configuration["DummyKey"];
-            return Ok(new { DummyKey = dummyValue + "With Role Specified Version" });
+            return Ok(new { NonKey = "asdksajdsakjdaskjdsa" + "With Role Specified Version" });
         }
 
         [HttpPost("login")]
@@ -50,14 +54,14 @@ namespace AISEA.ApiService.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DemoRefreshTokenWithRedis()
         {
-            var res = await _demoSampleService.DemoRefreshTokenWithRedis();
+            var res = await _demoSampleService.DemoRefreshTokenWithRedis(AccessToken, RefreshToken);
             return Ok(res);
         }
 
         [HttpGet("logout")]
         public async Task<IActionResult> DemoLogoutWithRedis()
         {
-            await _demoSampleService.DemoLogoutWithRedis();
+            await _demoSampleService.DemoLogoutWithRedis(AccessToken);
             return Ok();
         }
 

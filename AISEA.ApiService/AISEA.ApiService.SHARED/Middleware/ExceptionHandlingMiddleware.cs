@@ -7,8 +7,10 @@ using System.Security.Authentication;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.Exceptions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
-namespace AISEA.ApiService.WebApi.Middleware;
+namespace AISEA.ApiService.SHARED.Middleware;
 
 public class ExceptionHandlingMiddleware
 {

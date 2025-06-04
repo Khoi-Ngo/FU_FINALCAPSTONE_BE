@@ -113,19 +113,25 @@ docker-compose down
 ```sh
 docker-compose logs aisea-worker
 ```
-## Notes for Implementing Code
+## Implementation Notes
 
 ### ApiService
 
-#### Packages Structure
+#### Package Structure
 
-- The code follows the 3-layer architecture in .NET Core Web API: **Controller** (API), **BAL** (Business Logic), and **DAL** (Data Access).
-- The **SHARED** folder should only contain:
-  - Utility properties and methods.
-  - Service logic for external APIs (e.g., JWT token generation/validation, mail sending).
-  - **Do not** include application-specific business logic here.
+**Reference System Architecture:**  
+![System Architecture Diagram](assets/01.png)
+
+- The project uses a 3-layer architecture in .NET Core Web API:
+  - **Controller** (API)
+  - **BAL** (Business Logic)
+  - **DAL** (Data Access)
+- The **SHARED** folder should only include:
+  - Utility properties and methods
+  - Third-party interfaces (DAL will implement via "Service Agents")
+  - **Do not** include application-specific business logic here
 - Endpoints are secured by default. Use the `[AllowAnonymous]` attribute to allow unauthenticated access for specific endpoints.
-- The middleware handles exceptions (e.g., `InvalidToken`, `NullReferenceException`) and returns HTTP error codes in a consistent JSON format.
+- Middleware handles exceptions (e.g., `InvalidToken`, `NullReferenceException`) and returns HTTP error codes in a consistent JSON format.
 
 #### Error Handling
 

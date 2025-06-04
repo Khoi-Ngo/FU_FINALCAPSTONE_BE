@@ -2,23 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AISEA.ApiService.BAL.Services.Auth;
-using AISEA.ApiService.SHARED.Services.Auth;
+using AISEA.ApiService.SHARED.Interfaces;
+using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.SHARED.Util;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace AISEA.ApiService.WebApi.Filters;
+
+namespace AISEA.ApiService.SHARED.Filters;
 
 public class BlacklistedTokenFilter : IAsyncActionFilter
 {
-    private readonly TokenService _tokenService;
-    private readonly HttpContextUserService _httpContextUserService;
+    private readonly ITokenService _tokenService;
+    private readonly EndpointSettings _endpointSettings;
 
-    public BlacklistedTokenFilter(TokenService tokenService, HttpContextUserService httpContextUserService)
+    public BlacklistedTokenFilter(ITokenService tokenService, EndpointSettings endpointSettings)
     {
         _tokenService = tokenService;
-        _httpContextUserService = httpContextUserService;
+        _endpointSettings = endpointSettings;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -31,7 +34,7 @@ public class BlacklistedTokenFilter : IAsyncActionFilter
             return;
         }
 
-        var accessToken = _httpContextUserService.GetAccessTokenRaw();
+        var accessToken = HttpContextUtil.GetAccessTokenRaw(context, _endpointSettings);
         if (!string.IsNullOrEmpty(accessToken))
         {
             var isValidToken = await _tokenService.IsValidAccessTokenAsync(accessToken);

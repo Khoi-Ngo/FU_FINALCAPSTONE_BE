@@ -2,8 +2,8 @@ using AISEA.ApiService.WebApi;
 using AISEA.ApiService.BAL;
 using AISEA.ApiService.DAL;
 using AISEA.ApiService.SHARED;
-using AISEA.ApiService.WebApi.Middleware;
 using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.SHARED.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 {

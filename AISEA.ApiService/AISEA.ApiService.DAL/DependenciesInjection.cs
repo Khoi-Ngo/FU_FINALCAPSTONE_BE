@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AISEA.ApiService.DAL.Infrastructure;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +43,16 @@ namespace AISEA.ApiService.DAL
             services.AddScoped<IDatabase>(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
             services.AddScoped<IAppRedisRepository, AppRedisRepository>();
+
+            //DATA Helper
+
+            //Adding the auto mapper
+
+
+            //Service Agents
+
+            services.AddScoped<ITokenService,TokenService>();
+            services.AddScoped<IJWTService,JWTService>();
 
             return services;
         }

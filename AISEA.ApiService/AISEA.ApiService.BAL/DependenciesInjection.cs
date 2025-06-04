@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services;
-using AISEA.ApiService.BAL.Services.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +14,6 @@ namespace AISEA.ApiService.BAL
         {
             //adding business logic service
             services.AddScoped<DemoSampleService>();
-            services.AddScoped<TokenService>();
 
             return services;
         }

@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace AISEA.ApiService.WebApi.Filters;
+namespace AISEA.ApiService.SHARED.Filters;
 
 public class PermissionAuthorizeAttribute : AuthorizeAttribute, IAuthorizationFilter
 {

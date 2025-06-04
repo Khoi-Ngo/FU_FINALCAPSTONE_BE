@@ -1,5 +1,4 @@
 using AISEA.ApiService.SHARED.PropConfigs;
-using AISEA.ApiService.SHARED.Services.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,11 +20,8 @@ namespace AISEA.ApiService.SHARED
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<EndpointSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<AuthTokenSettings>>().Value);
 
-            //adding auto mapper
 
-            //adding JWT
-            services.AddScoped<JWTService>();
-            services.AddScoped<HttpContextUserService>();
+            
 
             return services;
         }

@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
-using AISEA.ApiService.WebApi.Filters;
+using AISEA.ApiService.SHARED.Filters;
 
 
 namespace AISEA.ApiService.WebApi
@@ -115,7 +115,7 @@ namespace AISEA.ApiService.WebApi
                     opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
                 });
 
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();//Context helper
 
             return services;
         }

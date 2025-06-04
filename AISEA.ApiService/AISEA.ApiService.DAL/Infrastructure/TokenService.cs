@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 
-namespace AISEA.ApiService.BAL.Services.Auth
+namespace AISEA.ApiService.DAL.Infrastructure
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
         private readonly AuthTokenSettings _authTokenSettings;
         private readonly IAppRedisRepository _appRedisRepository;

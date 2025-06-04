@@ -18,5 +18,9 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidRefreshToken(string message) : base(message) { }
     }
+    public class NotFoundTokenFromClient : Exception
+    {
+        public NotFoundTokenFromClient(string message) : base(message) { }
+    }
 
 }

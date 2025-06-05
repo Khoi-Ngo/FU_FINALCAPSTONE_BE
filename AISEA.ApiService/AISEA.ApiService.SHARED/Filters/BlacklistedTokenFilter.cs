@@ -34,7 +34,7 @@ public class BlacklistedTokenFilter : IAsyncActionFilter
             return;
         }
 
-        var accessToken = HttpContextUtil.GetAccessTokenRaw(context, _endpointSettings);
+        var accessToken = context.HttpContext.Request.Headers[_endpointSettings.AccessTokenPropName].FirstOrDefault()?.Replace("Bearer ", "");
         if (!string.IsNullOrEmpty(accessToken))
         {
             var isValidToken = await _tokenService.IsValidAccessTokenAsync(accessToken);

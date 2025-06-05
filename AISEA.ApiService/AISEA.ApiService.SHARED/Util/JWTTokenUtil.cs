@@ -16,14 +16,14 @@ namespace AISEA.ApiService.SHARED.Util
         {
             return principal.Claims.FirstOrDefault(c => c.Type == name).Value;
         }
-        public static ClaimsPrincipal GetPrincipalFromExpiredToken(string token, JwtSettings jwtSettings)
+        public static ClaimsPrincipal GetPrincipalFromExpiredToken(string token, string secretKey)
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                 ValidateLifetime = false // Ignore expiration for refresh
             };
             var tokenHandler = new JwtSecurityTokenHandler();

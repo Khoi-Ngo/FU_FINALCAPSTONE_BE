@@ -56,7 +56,7 @@ namespace AISEA.ApiService.BAL.Services
         {
          
             //get the user info from expired access token
-            var principal = JWTTokenUtil.GetPrincipalFromExpiredToken(expiredToken, _jwtSettings);
+            var principal = JWTTokenUtil.GetPrincipalFromExpiredToken(expiredToken, _jwtSettings.SecretKey);
             string userName = JWTTokenUtil.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
 
             // Check if refresh token exists in Redis + refresh token belong to the userName

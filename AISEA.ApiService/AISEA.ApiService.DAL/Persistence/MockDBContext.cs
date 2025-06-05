@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AISEA.ApiService.DAL.Abstract;
+namespace AISEA.ApiService.DAL.Persistence;
 
-public class GenericRepository<T> where T : class
+public class MockDBContext
 {
-    
+
 }

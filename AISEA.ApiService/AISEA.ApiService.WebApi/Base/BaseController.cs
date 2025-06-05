@@ -13,9 +13,27 @@ public abstract class BaseController : ControllerBase
         _endpointSettings = endpointSettings;
     }
 
-    protected string AccessToken =>
-        HttpContextUtil.GetAccessTokenRaw(HttpContext, _endpointSettings);
+    protected string AccessToken
+    {
+        get
+        {
+            if (Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
+            {
+                return refreshToken.ToString().Replace("Bearer ", "");
+            }
+            return string.Empty;
+        }
+    }
 
-    protected string RefreshToken =>
-        HttpContextUtil.GetRefreshTokenRaw(HttpContext, _endpointSettings);
+    protected string RefreshToken
+    {
+        get
+        {
+            if (Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
+            {
+                return refreshToken.ToString().Replace("Bearer ", "");
+            }
+            return string.Empty;
+        }
+    }
 }

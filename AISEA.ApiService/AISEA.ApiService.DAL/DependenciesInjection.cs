@@ -17,7 +17,7 @@ namespace AISEA.ApiService.DAL
     {
         public static IServiceCollection AddDALConfig(this IServiceCollection services, IConfiguration configuration)
         {
-            // Adding DbContext
+            // Adding DbContext with NoTracking option
 
             // Adding repositories
 

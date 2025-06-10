@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 namespace AISEA.ApiService.SHARED.PropConfigs
 {
-    public class RedisSettings
+    public class SqlSettings
     {
-        public const string Section = "RedisSettings";
+        public const string Section = "SqlSettings";
         public required string ConnectionString { get; set; }
-
     }
 }

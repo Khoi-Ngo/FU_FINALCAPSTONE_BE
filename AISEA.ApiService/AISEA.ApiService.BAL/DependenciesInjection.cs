@@ -12,8 +12,12 @@ namespace AISEA.ApiService.BAL
     {
         public static IServiceCollection AddBALConfig(this IServiceCollection services, IConfiguration configuration)
         {
-            //adding business logic service
+            //adding business logic service for use-cases
             services.AddScoped<DemoSampleService>();
+
+            //adding business logic mappings profiles
+            //TODO: replace with the exact and accurate folder containing mappings profiles those should be located in BAL Layer instead of scanning all assemblies
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return services;
         }

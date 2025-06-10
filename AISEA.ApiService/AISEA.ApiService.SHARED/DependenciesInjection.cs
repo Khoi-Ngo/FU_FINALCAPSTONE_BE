@@ -14,11 +14,13 @@ namespace AISEA.ApiService.SHARED
             services.Configure<RedisSettings>(configuration.GetSection(RedisSettings.Section));
             services.Configure<EndpointSettings>(configuration.GetSection(EndpointSettings.Section));
             services.Configure<AuthTokenSettings>(configuration.GetSection(AuthTokenSettings.Section));
+            services.Configure<SqlSettings>(configuration.GetSection(SqlSettings.Section));
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<EndpointSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<AuthTokenSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<SqlSettings>>().Value);
 
 
             

@@ -7,6 +7,6 @@ namespace AISEA.ApiService.DAL.Dapper
 {
     public class DemoDapper
     {
-        
+        //writing a raw SQL query using Dapper
     }
 }

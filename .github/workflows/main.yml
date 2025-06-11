@@ -16,10 +16,10 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
-          docker rm -f $(docker ps -a --format '{{.Names}}' | grep -v -E "^(${MAINS_SQL_INSTANCE}|${ALT01_SQL_INSTANCE})$") || true
-          docker rmi -f $(docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep -v 'mcr.microsoft.com/mssql/server' | awk '{print $2}' | sort -u) || true
+          # docker rm -f $(docker ps -a --format '{{.Names}}' | grep -v -E "^(${MAINS_SQL_INSTANCE}|${ALT01_SQL_INSTANCE})$") || true
+          # docker rmi -f $(docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep -v 'mcr.microsoft.com/mssql/server' | awk '{print $2}' | sort -u) || true
           cd /home/official_deploy/main/Back-end
-          git fetch originvddsvdvd
+          git fetch origin
           git checkout main
           git pull
           docker-compose up --build -d 

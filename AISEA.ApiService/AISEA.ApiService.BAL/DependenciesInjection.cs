@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,8 +19,15 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<DemoSampleService>();
 
             //adding business logic mappings profiles
-            //TODO: replace with the exact and accurate folder containing mappings profiles those should be located in BAL Layer instead of scanning all assemblies
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+            //adding business logic validators
+            services.AddValidatorsFromAssembly(
+             Assembly.GetExecutingAssembly(),
+             includeInternalTypes: true
+            );
+            services.AddFluentValidationAutoValidation();
 
             return services;
         }

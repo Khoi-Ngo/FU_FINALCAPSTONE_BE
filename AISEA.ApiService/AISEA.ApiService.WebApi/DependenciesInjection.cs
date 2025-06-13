@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
+using FluentValidation.AspNetCore;
 
 
 namespace AISEA.ApiService.WebApi
@@ -106,6 +107,7 @@ namespace AISEA.ApiService.WebApi
                         .Build();
                     opt.Filters.Add(new AuthorizeFilter(policy));
                     opt.Filters.Add<BlacklistedTokenFilter>();
+                    opt.Filters.Add<ModelStateValidationFilter>();
 
 
                 }).AddJsonOptions(opt =>
@@ -113,6 +115,9 @@ namespace AISEA.ApiService.WebApi
                     //option handling json
                     opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+                }).ConfigureApiBehaviorOptions(opt =>
+                {
+                    opt.SuppressModelStateInvalidFilter = true;
                 });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();//Context helper

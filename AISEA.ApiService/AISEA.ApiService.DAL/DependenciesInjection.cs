@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Infrastructure;
+using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,42 +19,45 @@ namespace AISEA.ApiService.DAL
     {
         public static IServiceCollection AddDALConfig(this IServiceCollection services, IConfiguration configuration)
         {
-            // Adding DbContext with NoTracking option
-
-            // Adding repositories
-
-            // Redis
-            services.AddSingleton<IConnectionMultiplexer>(sp =>
+            #region DBContext
+            services.AddDbContext<AiseaContext>(options =>
             {
-                var redisSettings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
-                var redisConnectionString = redisSettings.ConnectionString;
-
-                if (string.IsNullOrEmpty(redisConnectionString))
-                {
-                    throw new InvalidOperationException("Redis connection string is missing or empty.");
-                }
-
-                var configurationOptions = ConfigurationOptions.Parse(redisConnectionString);
-                configurationOptions.AbortOnConnectFail = false; // Prevent crash on connection failure
-                configurationOptions.ConnectTimeout = 10000; // Optional: Increase timeout
-                configurationOptions.ConnectRetry = 5; // Optional: Retry connection
-
-                return ConnectionMultiplexer.Connect(configurationOptions);
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
+            #endregion
+
+            #region Repositories
+            services.AddScoped<RoleRepository>();
+            #endregion
+
+            #region  Redis
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+                        {
+                            var redisSettings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
+                            var redisConnectionString = redisSettings.ConnectionString;
+
+                            if (string.IsNullOrEmpty(redisConnectionString))
+                            {
+                                throw new InvalidOperationException("Redis connection string is missing or empty.");
+                            }
+
+                            var configurationOptions = ConfigurationOptions.Parse(redisConnectionString);
+                            configurationOptions.AbortOnConnectFail = false; // Prevent crash on connection failure
+                            configurationOptions.ConnectTimeout = 10000; // Optional: Increase timeout
+                            configurationOptions.ConnectRetry = 5; // Optional: Retry connection
+
+                            return ConnectionMultiplexer.Connect(configurationOptions);
+                        });
 
             services.AddScoped<IDatabase>(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
             services.AddScoped<IAppRedisRepository, AppRedisRepository>();
-
-            //DATA Helper
-
-            //Adding the auto mapper
-
+            #endregion
 
             //Service Agents
 
-            services.AddScoped<ITokenService,TokenService>();
-            services.AddScoped<IJWTService,JWTService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IJWTService, JWTService>();
 
             return services;
         }

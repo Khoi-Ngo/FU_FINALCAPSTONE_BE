@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses
 {
-    public class GetUserResponse
+    public class GetRoleResponse
     {
-        
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
     }
 }

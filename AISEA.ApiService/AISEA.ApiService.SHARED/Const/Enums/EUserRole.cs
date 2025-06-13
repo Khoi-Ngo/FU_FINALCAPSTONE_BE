@@ -3,8 +3,10 @@ namespace AISEA.ApiService.SHARED.Const.Enums
     public enum EUserRole
     {
         ADMIN = 1,
-        MANAGER = 2,
-        STUDENT = 3
+        ACADEMIC_STAFF = 2,
+        ADVISOR = 3,
+        MANAGER = 4,
+        STUDENT = 5
 
     }
 }

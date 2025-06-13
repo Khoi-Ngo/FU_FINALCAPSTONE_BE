@@ -1,4 +1,4 @@
-name: Docker Compose BE Depoy
+name: Docker Compose BE Deploy
 
 on:
   push:
@@ -8,20 +8,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy using ssh
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: 22
-        script: |
-          # docker rm -f $(docker ps -a --format '{{.Names}}' | grep -v -E "^(${MAINS_SQL_INSTANCE}|${ALT01_SQL_INSTANCE})$") || true
-          # docker rmi -f $(docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep -v 'mcr.microsoft.com/mssql/server' | awk '{print $2}' | sort -u) || true
-          cd /home/official_deploy/main/Back-end
-          git fetch origin
-          git checkout main
-          git pull
-          docker-compose up --build -d 
-            
-          
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 22
+          script: |
+            # Stop and remove all containers except those with 'sql' or 'redis' in their name or image
+            docker ps -a --format "{{.ID}} {{.Image}} {{.Names}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rm -f
+
+            # Remove all images except those with 'sql' or 'redis' in their name
+            docker images --format "{{.ID}} {{.Repository}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rmi -f
+
+            cd /home/official_deploy/main/Back-end
+            git fetch origin
+            git checkout main
+            git pull
+            docker-compose up --build -d

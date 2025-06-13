@@ -51,6 +51,13 @@ public class DemoSampleController : BaseController
         return Ok(new { NonKey = "asdksajdsakjdaskjdsa" });
     }
 
+    [HttpGet("/demo2")]
+    [AllowAnonymous]
+    public IActionResult Demo2()
+    {
+        return Ok(_sqlSettings.ConnectionString);
+    }
+
     [HttpGet("test-connection")]
     [AllowAnonymous]
     public IActionResult TestConnect()

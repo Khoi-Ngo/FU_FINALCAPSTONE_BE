@@ -48,7 +48,7 @@ public class DemoSampleController : BaseController
     [HttpGet]
     public IActionResult Demo()
     {
-        return Ok(new { NonKey = "asdksajdsakjdaskjdsa" });
+        return Ok(new { NonKey = "Test NonKey" });
     }
 
     [HttpGet("/demo2")]

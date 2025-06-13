@@ -28,7 +28,7 @@ namespace AISEA.ApiService.WebApi
                     options.RequireHttpsMetadata = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        //TODO: Enable audience later
+                        //TODO: Enable audience later when frontend is ready
                         ValidateIssuer = true,
                         ValidateAudience = false,
                         ValidateIssuerSigningKey = true,

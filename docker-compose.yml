@@ -13,10 +13,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - RedisSettings__ConnectionString=${REDIS_CONNECTION_STRING}
       - SqlSettings__ConnectionString=${SQL_CONNECTION_STRING}
-    depends_on:
-      - aisea-worker
-    networks:
-      - aisea-network
 
   aisea-worker:
     build:
@@ -26,10 +22,3 @@ services:
       - ./AISEA.BgService:/src
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    networks:
-      - aisea-network
-
-
-networks:
-  aisea-network:
-    driver: bridge

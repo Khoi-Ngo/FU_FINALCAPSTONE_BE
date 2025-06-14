@@ -48,7 +48,6 @@ jobs:
             git pull
             docker-compose up --build -d
 
-            # Connect rebuilt aisea-api and aisea-worker containers to aisea-network
             echo "Connecting back-end-aisea-api-1 to aisea-network"
             docker network connect aisea-network back-end-aisea-api-1 || true
             echo "Connecting back-end-aisea-worker-1 to aisea-network"

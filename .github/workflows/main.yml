@@ -16,13 +16,10 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: 22
           script: |
-            # Stop and remove all containers except those with 'sql' or 'redis' in their name or image
             docker ps -a --format "{{.ID}} {{.Image}} {{.Names}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rm -f
 
-            # Remove all images except those with 'sql' or 'redis' in their name
             docker images --format "{{.ID}} {{.Repository}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rmi -f
 
-            # Get list of containers connected to aisea-network and disconnect them
             if docker network inspect aisea-network >/dev/null 2>&1; then
               containers=$(docker network inspect aisea-network --format '{{range .Containers}}{{.Name}} {{end}}')
               for container in $containers; do
@@ -32,15 +29,12 @@ jobs:
               sleep 2 # Wait to ensure disconnections are processed
             fi
 
-            # Remove the existing aisea-network if it exists
             echo "Removing aisea-network"
             docker network rm aisea-network || true
 
-            # Create a new aisea-network
             echo "Creating new aisea-network"
             docker network create aisea-network
 
-            # Connect existing redis-server and sqlserver containers to the new network
             echo "Connecting redis-server to aisea-network"
             docker network connect aisea-network redis-server || true
             echo "Connecting sqlserver to aisea-network"
@@ -48,8 +42,6 @@ jobs:
 
             cd /home/main_deploy_dir/Back-end
 
-            # Modify docker-compose.yml to remove networks section
-            sed -i '/networks:/,/driver: bridge/d' docker-compose.yml
 
             git fetch origin
             git checkout main

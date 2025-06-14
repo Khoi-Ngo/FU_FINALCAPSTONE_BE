@@ -32,19 +32,32 @@ jobs:
               sleep 2 # Wait to ensure disconnections are processed
             fi
 
+            # Remove the existing aisea-network if it exists
             echo "Removing aisea-network"
             docker network rm aisea-network || true
 
+            # Create a new aisea-network
             echo "Creating new aisea-network"
             docker network create aisea-network
 
+            # Connect existing redis-server and sqlserver containers to the new network
             echo "Connecting redis-server to aisea-network"
             docker network connect aisea-network redis-server || true
             echo "Connecting sqlserver to aisea-network"
             docker network connect aisea-network sqlserver || true
 
             cd /home/official_deploy/main/Back-end
+
+            # Modify docker-compose.yml to remove networks section
+            sed -i '/networks:/,/driver: bridge/d' docker-compose.yml
+
             git fetch origin
             git checkout main
             git pull
             docker-compose up --build -d
+
+            # Connect rebuilt aisea-api and aisea-worker containers to aisea-network
+            echo "Connecting back-end-aisea-api-1 to aisea-network"
+            docker network connect aisea-network back-end-aisea-api-1 || true
+            echo "Connecting back-end-aisea-worker-1 to aisea-network"
+            docker network connect aisea-network back-end-aisea-worker-1 || true

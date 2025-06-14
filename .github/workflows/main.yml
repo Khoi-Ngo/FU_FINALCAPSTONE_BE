@@ -22,19 +22,28 @@ jobs:
             # Remove all images except those with 'sql' or 'redis' in their name
             docker images --format "{{.ID}} {{.Repository}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rmi -f
 
-            # Disconnect all containers from aisea-network
-            for container in $(docker network inspect aisea-network --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null); do
-              docker network disconnect aisea-network $container || true
-            done
+            # Get list of containers connected to aisea-network and disconnect them
+            if docker network inspect aisea-network >/dev/null 2>&1; then
+              containers=$(docker network inspect aisea-network --format '{{range .Containers}}{{.Name}} {{end}}')
+              for container in $containers; do
+                echo "Disconnecting $container from aisea-network"
+                docker network disconnect -f aisea-network $container || true
+              done
+              sleep 2 # Wait to ensure disconnections are processed
+            fi
 
             # Remove the existing aisea-network if it exists
+            echo "Removing aisea-network"
             docker network rm aisea-network || true
 
             # Create a new aisea-network
+            echo "Creating new aisea-network"
             docker network create aisea-network
 
             # Connect existing redis-server and sqlserver containers to the new network
+            echo "Connecting redis-server to aisea-network"
             docker network connect aisea-network redis-server || true
+            echo "Connecting sqlserver to aisea-network"
             docker network connect aisea-network sqlserver || true
 
             cd /home/official_deploy/main/Back-end

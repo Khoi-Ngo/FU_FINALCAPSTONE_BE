@@ -22,6 +22,16 @@ jobs:
             # Remove all images except those with 'sql' or 'redis' in their name
             docker images --format "{{.ID}} {{.Repository}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rmi -f
 
+            # Remove the existing aisea-network if it exists
+            docker network rm aisea-network || true
+
+            # Create a new aisea-network
+            docker network create aisea-network
+
+            # Connect existing redis-server and sqlserver containers to the new network
+            docker network connect aisea-network redis-server || true
+            docker network connect aisea-network sqlserver || true
+
             cd /home/official_deploy/main/Back-end
             git fetch origin
             git checkout main

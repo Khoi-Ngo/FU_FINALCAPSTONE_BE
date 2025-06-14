@@ -46,7 +46,7 @@ jobs:
             echo "Connecting sqlserver to aisea-network"
             docker network connect aisea-network sqlserver || true
 
-            cd /home/official_deploy/main/Back-end
+            cd /home/main_deploy_dir/Back-end
 
             # Modify docker-compose.yml to remove networks section
             sed -i '/networks:/,/driver: bridge/d' docker-compose.yml

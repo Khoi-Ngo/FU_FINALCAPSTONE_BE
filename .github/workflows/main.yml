@@ -22,6 +22,11 @@ jobs:
             # Remove all images except those with 'sql' or 'redis' in their name
             docker images --format "{{.ID}} {{.Repository}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rmi -f
 
+            # Disconnect all containers from aisea-network
+            for container in $(docker network inspect aisea-network --format '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null); do
+              docker network disconnect aisea-network $container || true
+            done
+
             # Remove the existing aisea-network if it exists
             docker network rm aisea-network || true
 

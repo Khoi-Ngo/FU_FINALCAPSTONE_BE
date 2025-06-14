@@ -16,14 +16,39 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: 22
           script: |
-            # Stop and remove all containers except those with 'sql' or 'redis' in their name or image
             docker ps -a --format "{{.ID}} {{.Image}} {{.Names}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rm -f
 
-            # Remove all images except those with 'sql' or 'redis' in their name
             docker images --format "{{.ID}} {{.Repository}}" | grep -v -i "sql\|redis" | awk '{print $1}' | xargs -r docker rmi -f
 
-            cd /home/official_deploy/main/Back-end
+            if docker network inspect aisea-network >/dev/null 2>&1; then
+              containers=$(docker network inspect aisea-network --format '{{range .Containers}}{{.Name}} {{end}}')
+              for container in $containers; do
+                echo "Disconnecting $container from aisea-network"
+                docker network disconnect -f aisea-network $container || true
+              done
+              sleep 2 # Wait to ensure disconnections are processed
+            fi
+
+            echo "Removing aisea-network"
+            docker network rm aisea-network || true
+
+            echo "Creating new aisea-network"
+            docker network create aisea-network
+
+            echo "Connecting redis-server to aisea-network"
+            docker network connect aisea-network redis-server || true
+            echo "Connecting sqlserver to aisea-network"
+            docker network connect aisea-network sqlserver || true
+
+            cd /home/main_deploy_dir/Back-end
+
+
             git fetch origin
             git checkout main
             git pull
             docker-compose up --build -d
+
+            echo "Connecting back-end-aisea-api-1 to aisea-network"
+            docker network connect aisea-network back-end-aisea-api-1 || true
+            echo "Connecting back-end-aisea-worker-1 to aisea-network"
+            docker network connect aisea-network back-end-aisea-worker-1 || true

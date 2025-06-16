@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.Filters;
@@ -9,7 +5,6 @@ using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
 using Microsoft.Data.SqlClient;
 using AISEA.ApiService.DAL.Repositories;
 using AutoMapper;

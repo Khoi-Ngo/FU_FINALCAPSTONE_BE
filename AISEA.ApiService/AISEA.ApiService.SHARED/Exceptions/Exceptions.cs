@@ -34,4 +34,8 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidUserCreatedException(string message) : base(message) { }
     }
+    public class InvalidAccessTokenException : Exception
+    {
+        public InvalidAccessTokenException(string message) : base(message) { }
+    }
 }

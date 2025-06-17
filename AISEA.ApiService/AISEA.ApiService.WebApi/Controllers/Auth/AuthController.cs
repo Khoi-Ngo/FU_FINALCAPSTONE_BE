@@ -55,18 +55,18 @@ public class AuthController : BaseController
     //     return Ok(res);
     // }
 
-    // [HttpGet("refresh-token")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> DemoRefreshTokenWithRedis()
-    // {
-    //     var res = await _authService.RefreshAsync(AccessToken, RefreshToken);
-    //     return Ok(res);
-    // }
+    [HttpGet("refresh-token")]
+    [AllowAnonymous]
+    public async Task<IActionResult> DemoRefreshTokenWithRedis()
+    {
+        var res = await _authService.RefreshAsync(AccessToken, RefreshToken);
+        return Ok(res);
+    }
 
-    // [HttpGet("logout")]
-    // public async Task<IActionResult> DemoLogoutWithRedis()
-    // {
-    //     await _authService.LogoutAsync(AccessToken);
-    //     return Ok();
-    // }
+    [HttpGet("logout")]
+    public async Task<IActionResult> DemoLogoutWithRedis()
+    {
+        await _authService.LogoutAsync(AccessToken);
+        return Ok("Logout successful.");
+    }
 }

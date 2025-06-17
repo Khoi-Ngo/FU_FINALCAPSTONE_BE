@@ -25,8 +25,6 @@ public class UserController : BaseController
     /// <summary>
     /// Creates a new user with the provided information. Duplicate usernames or emails will result in bad request errors.
     /// </summary>
-    /// <param name="request">The user details required to create a new user.</param>
-    /// <returns>Returns a success message if the user is created successfully.</returns>
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {

@@ -32,7 +32,7 @@ public class AuthService
     {
         // get user info from Google
         var request = new HttpRequestMessage(HttpMethod.Get, _googleAuthSettings.UserInfoUrl);
-        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(token);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await _httpClient.SendAsync(request);
         if (!response.IsSuccessStatusCode)

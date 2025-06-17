@@ -36,13 +36,13 @@ public abstract class BaseController : ControllerBase
             return string.Empty;
         }
     }
-protected string AuthorizationTokenGoogle
+    protected string AuthorizationTokenGoogle
     {
         get
         {
             if (Request.Headers.TryGetValue(_endpointSettings.GoogleAuthTokenPropName, out var authHeader))
             {
-                return authHeader.ToString();//e.g. "Bearer {token}"
+                return authHeader.ToString().Replace("Bearer ", "");
             }
             return string.Empty;
         }

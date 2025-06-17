@@ -16,6 +16,7 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public required string LoginAtPropName { get; set; }
         public required string RandKeySessionPropName { get; set; }
         public required string GoogleAuthTokenPropName { get; set; }
+        public required string RefreshTokenEndpointName { get; set; }
 
     }
 }

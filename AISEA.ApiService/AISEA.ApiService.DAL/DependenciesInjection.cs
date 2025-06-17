@@ -28,6 +28,7 @@ namespace AISEA.ApiService.DAL
 
             #region Repositories
             services.AddScoped<RoleRepository>();
+            services.AddScoped<UserRepository>();
             #endregion
 
             #region  Redis

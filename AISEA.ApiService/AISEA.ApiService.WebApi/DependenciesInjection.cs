@@ -122,6 +122,9 @@ namespace AISEA.ApiService.WebApi
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();//Context helper
 
+            //adding signalR
+            services.AddSignalR();
+
             return services;
         }
     }

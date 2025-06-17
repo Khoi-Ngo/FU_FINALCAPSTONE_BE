@@ -34,19 +34,10 @@ public class AuthService
         _tokenService = tokenService;
         _mapper = mapper;
     }
-    public async Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request)
+    public async Task<AuthResponse> GoogleLoginAsync(string token)
     {
-        if (string.IsNullOrEmpty(request?.Token))
-            throw new EmptyTokenGoogleLoginException("Token is required.");
-        // Validate ID token locally
-        var settings = new GoogleJsonWebSignature.ValidationSettings
-        {
-            Audience = new[] { _googleAuthSettings.client_id },
-            HostedDomain = null // Optional: Restrict to a specific domain
-        };
-        var payload = await GoogleJsonWebSignature.ValidateAsync(request.Token, settings);
-
-        // Extract email
+        // get user info from Google
+        var payload = await GoogleJsonWebSignature.ValidateAsync(token);
         var email = payload.Email;
         if (string.IsNullOrEmpty(email))
             throw new InvalidCGoogleTokenException("Email not found in token.");

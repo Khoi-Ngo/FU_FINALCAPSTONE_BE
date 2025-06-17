@@ -21,22 +21,10 @@ public class AuthController : BaseController
     // Login with google
     [HttpPost("google")]
     [AllowAnonymous]
-    public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginRequest request)
+    public async Task<IActionResult> LoginWithGoogle()
     {
-        var result = await _authService.GoogleLoginAsync(request);
-        return Ok(result);
-    }
-    [HttpGet("/")]
-    [AllowAnonymous]
-    public IActionResult OAuthCallback([FromQuery] string code, [FromQuery] string state)
-    {
-        if (string.IsNullOrEmpty(code))
-        {
-            return BadRequest(new { error = "Missing authorization code" });
-        }
-
-        // Return the code and state for testing
-        return Ok(new { code, state });
+        var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
+        return Ok(res);
     }
 
 

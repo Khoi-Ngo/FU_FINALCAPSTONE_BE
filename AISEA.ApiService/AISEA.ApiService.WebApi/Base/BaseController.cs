@@ -17,9 +17,9 @@ public abstract class BaseController : ControllerBase
     {
         get
         {
-            if (Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
+            if (Request.Headers.TryGetValue(_endpointSettings.AccessTokenPropName, out var accessToken))
             {
-                return refreshToken.ToString().Replace("Bearer ", "");
+                return accessToken.ToString().Replace("Bearer ", "");
             }
             return string.Empty;
         }
@@ -31,7 +31,18 @@ public abstract class BaseController : ControllerBase
         {
             if (Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
             {
-                return refreshToken.ToString().Replace("Bearer ", "");
+                return refreshToken.ToString();
+            }
+            return string.Empty;
+        }
+    }
+protected string AuthorizationTokenGoogle
+    {
+        get
+        {
+            if (Request.Headers.TryGetValue(_endpointSettings.GoogleAuthTokenPropName, out var authHeader))
+            {
+                return authHeader.ToString();//e.g. "Bearer {token}"
             }
             return string.Empty;
         }

@@ -15,5 +15,6 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Auth
         public long RoleId { get; set; }
         public string AccessToken { get; set; } = null!;
         public string RefreshToken { get; set; } = null!;
+        public string AvatarUrl { get; set; }
     }
 }

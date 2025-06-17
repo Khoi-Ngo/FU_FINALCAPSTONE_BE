@@ -19,7 +19,7 @@ public class AuthController : BaseController
     }
 
     // Login with google
-    [HttpPost("google")]
+    [HttpGet("google")]
     [AllowAnonymous]
     public async Task<IActionResult> LoginWithGoogle()
     {

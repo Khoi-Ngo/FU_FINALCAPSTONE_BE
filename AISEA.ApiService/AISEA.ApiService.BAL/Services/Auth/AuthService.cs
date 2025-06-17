@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Authentication;
 using System.Text.Json;
-using System.Threading.Tasks;
-using AISEA.ApiService.DAL.Infrastructure;
 using AISEA.ApiService.DAL.Repositories;
-using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
@@ -34,20 +28,22 @@ public class AuthService
         _tokenService = tokenService;
         _mapper = mapper;
     }
-    public async Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request)
+    public async Task<AuthResponse> GoogleLoginAsync(string token)
     {
-        if (string.IsNullOrEmpty(request?.Token))
-            throw new EmptyTokenGoogleLoginException("Token is required.");
-        // Validate ID token locally
-        var settings = new GoogleJsonWebSignature.ValidationSettings
-        {
-            Audience = new[] { _googleAuthSettings.client_id },
-            HostedDomain = null // Optional: Restrict to a specific domain
-        };
-        var payload = await GoogleJsonWebSignature.ValidateAsync(request.Token, settings);
+        // get user info from Google
+        var request = new HttpRequestMessage(HttpMethod.Get, _googleAuthSettings.UserInfoUrl);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(token);
 
-        // Extract email
-        var email = payload.Email;
+        var response = await _httpClient.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidCGoogleTokenException("Invalid Google access token.");
+
+        var content = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(content);
+        var root = doc.RootElement;
+
+        var email = root.GetProperty(_googleAuthSettings.UserMailRespPropName).GetString();
+
         if (string.IsNullOrEmpty(email))
             throw new InvalidCGoogleTokenException("Email not found in token.");
 

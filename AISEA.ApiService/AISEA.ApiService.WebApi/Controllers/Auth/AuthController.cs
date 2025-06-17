@@ -17,7 +17,10 @@ public class AuthController : BaseController
     {
         _authService = authService;
     }
-
+    /// <summary>
+    /// Login using Google authentication.
+    /// </summary>
+    /// <returns>Returns authentication result using Access Token of GG SSO.</returns>
     // Login with google
     [HttpGet("google")]
     [AllowAnonymous]
@@ -27,7 +30,10 @@ public class AuthController : BaseController
         return Ok(res);
     }
 
-
+    /// <summary>
+    /// Login with username and password. (case FEID)
+    /// </summary>
+    /// <returns>Returns authentication result for the user.</returns>
     // Login with username and password
     [HttpPost("login")]
     [AllowAnonymous]
@@ -55,6 +61,10 @@ public class AuthController : BaseController
     //     return Ok(res);
     // }
 
+    /// <summary>
+    /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
+    /// </summary>
+    /// <returns>Returns new access and refresh tokens if valid.</returns>
     [HttpGet("refresh-token")]
     [AllowAnonymous]
     public async Task<IActionResult> DemoRefreshTokenWithRedis()
@@ -63,6 +73,10 @@ public class AuthController : BaseController
         return Ok(res);
     }
 
+    /// <summary>
+    /// Logs out the current user and blacklists the access token.
+    /// </summary>
+    /// <returns>Returns a success message upon logout.</returns>
     [HttpGet("logout")]
     public async Task<IActionResult> DemoLogoutWithRedis()
     {

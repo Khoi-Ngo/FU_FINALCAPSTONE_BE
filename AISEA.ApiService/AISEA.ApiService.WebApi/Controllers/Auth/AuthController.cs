@@ -2,6 +2,7 @@ using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.Auth;
@@ -19,12 +20,14 @@ public class AuthController : BaseController
 
     // Login with google
     [HttpPost("google")]
+    [AllowAnonymous]
     public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginRequest request)
     {
         var result = await _authService.GoogleLoginAsync(request);
         return Ok(result);
     }
     [HttpGet("/")]
+    [AllowAnonymous]
     public IActionResult OAuthCallback([FromQuery] string code, [FromQuery] string state)
     {
         if (string.IsNullOrEmpty(code))

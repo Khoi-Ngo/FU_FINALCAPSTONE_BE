@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using AISEA.ApiService.DAL.Repositories;
 using AutoMapper;
-using AISEA.ApiService.SHARED.DTOs.Responses;
-using AISEA.ApiService.SHARED.DTOs.Requests;
 using AISEA.ApiService.DAL.Entities;
+using AISEA.ApiService.SHARED.DTOs.Responses.Role;
+using AISEA.ApiService.SHARED.DTOs.Requests.Role;
 
 namespace AISEA.ApiService.WebApi.Controllers;
 

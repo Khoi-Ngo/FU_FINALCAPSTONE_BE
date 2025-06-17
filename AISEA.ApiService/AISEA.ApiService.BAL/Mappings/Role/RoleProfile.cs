@@ -1,6 +1,6 @@
 using AISEA.ApiService.DAL.Entities;
-using AISEA.ApiService.SHARED.DTOs.Requests;
-using AISEA.ApiService.SHARED.DTOs.Responses;
+using AISEA.ApiService.SHARED.DTOs.Requests.Role;
+using AISEA.ApiService.SHARED.DTOs.Responses.Role;
 using AutoMapper;
 
 namespace AISEA.ApiService.BAL.Mappings.Role

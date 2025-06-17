@@ -63,6 +63,11 @@ public class ExceptionHandlingMiddleware
                 statusCode = (int)HttpStatusCode.BadRequest;
                 message = exception.Message;
                 break;
+            case InvalidCGoogleTokenException:
+            case EmptyTokenGoogleLoginException:
+                statusCode = (int)HttpStatusCode.Unauthorized;
+                message = exception.Message;
+                break;
 
             default:
                 logger.LogError(exception, "Unhandled exception");

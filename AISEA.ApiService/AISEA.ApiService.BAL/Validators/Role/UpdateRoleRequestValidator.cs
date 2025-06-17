@@ -1,4 +1,4 @@
-using AISEA.ApiService.SHARED.DTOs.Requests;
+using AISEA.ApiService.SHARED.DTOs.Requests.Role;
 using FluentValidation;
 
 namespace AISEA.ApiService.BAL.Validators.Role;

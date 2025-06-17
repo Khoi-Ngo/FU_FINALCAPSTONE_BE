@@ -22,5 +22,12 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public NotFoundTokenFromClient(string message) : base(message) { }
     }
-
+    public class EmptyTokenGoogleLoginException : Exception
+    {
+        public EmptyTokenGoogleLoginException(string message) : base(message) { }
+    }
+    public class InvalidCGoogleTokenException : Exception
+    {
+        public InvalidCGoogleTokenException(string message) : base(message) { }
+    }
 }

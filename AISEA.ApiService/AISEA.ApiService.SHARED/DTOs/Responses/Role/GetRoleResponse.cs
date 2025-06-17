@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
 
-namespace AISEA.ApiService.SHARED.DTOs.Requests
+namespace AISEA.ApiService.SHARED.DTOs.Responses.Role
 {
-    public class UpdateRoleRequest
+    public class GetRoleResponse
     {
+
         public string Name { get; set; }
 
         public string Description { get; set; }

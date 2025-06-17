@@ -10,5 +10,6 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public const string Section = "GoogleAuth";
 
         public string UserInfoUrl { get; set; } = null!;
+        public string UserMailRespPropName { get; set; } = null!;
     }
 }

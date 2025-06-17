@@ -47,7 +47,6 @@ public class AuthService
         if (string.IsNullOrEmpty(email))
             throw new InvalidCGoogleTokenException("Email not found in token.");
 
-        // Check existing user
         var user = await _userRepository.GetUserByEmailAsync(email);
         if (user is null)
             throw new InvalidCredentialException("User not found with this email.");

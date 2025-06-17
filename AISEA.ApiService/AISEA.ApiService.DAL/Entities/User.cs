@@ -32,7 +32,7 @@ public partial class User : BaseEntity
     public string LastName { get; set; } = null!;
 
     public DateTimeOffset? DateOfBirth { get; set; }
-    public string AvatarUrl { get; set; }
+    public string? AvatarUrl { get; set; }
 
     public long RoleId { get; set; }
 

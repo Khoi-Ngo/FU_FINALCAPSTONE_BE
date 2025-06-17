@@ -1,6 +1,7 @@
 using System.Security.Authentication;
 using System.Text.Json;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
@@ -60,5 +61,10 @@ public class AuthService
         result.AccessToken = accessToken;
         result.RefreshToken = refreshToken;
         return result;
+    }
+
+    public async Task<AuthResponse> LoginAsync(AuthFEIDRequest request)
+    {
+        throw new NotImplementedException();
     }
 }

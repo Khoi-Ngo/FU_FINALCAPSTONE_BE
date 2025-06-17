@@ -30,4 +30,8 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidCGoogleTokenException(string message) : base(message) { }
     }
+    public class InvalidUserCreatedException : Exception
+    {
+        public InvalidUserCreatedException(string message) : base(message) { }
+    }
 }

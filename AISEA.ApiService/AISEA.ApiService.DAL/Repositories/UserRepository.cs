@@ -19,5 +19,13 @@ namespace AISEA.ApiService.DAL.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
+        public async Task<User> GetUserByUsernameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+        public async Task<User> GetUserByEmailOrUsernameAsync(string email, string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == username);
+        }
     }
 }

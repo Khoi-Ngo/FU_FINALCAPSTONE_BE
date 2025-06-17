@@ -1,4 +1,5 @@
 using AISEA.ApiService.DAL.Entities;
+using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
 using AutoMapper;
 
@@ -9,6 +10,7 @@ namespace AISEA.ApiService.BAL.Mappings.User
         public UserProfile()
         {
             CreateMap<DAL.Entities.User, AuthResponse>();
+            CreateMap<CreateUserRequest, DAL.Entities.User>();
         }
     }
 }

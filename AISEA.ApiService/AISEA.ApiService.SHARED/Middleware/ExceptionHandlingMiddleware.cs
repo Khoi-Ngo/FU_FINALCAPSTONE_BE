@@ -68,6 +68,15 @@ public class ExceptionHandlingMiddleware
                 statusCode = (int)HttpStatusCode.Unauthorized;
                 message = exception.Message;
                 break;
+            case InvalidUserCreatedException:
+                statusCode = (int)HttpStatusCode.BadRequest;
+                message = exception.Message;
+                break;
+
+            case InvalidAccessTokenException:
+                statusCode = (int)HttpStatusCode.Unauthorized;
+                message = exception.Message;
+                break;
 
             default:
                 logger.LogError(exception, "Unhandled exception");

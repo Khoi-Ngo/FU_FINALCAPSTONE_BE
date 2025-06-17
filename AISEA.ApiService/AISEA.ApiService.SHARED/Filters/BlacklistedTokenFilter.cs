@@ -26,9 +26,17 @@ public class BlacklistedTokenFilter : IAsyncActionFilter
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        // Skip filter if endpoint allows anonymous access
         var endpoint = context.HttpContext.GetEndpoint();
-        if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+
+        // Get route template from ActionDescriptor
+        var routeTemplate = context.ActionDescriptor.AttributeRouteInfo?.Template;
+
+        // Check if this is the refresh-token endpoint
+        bool isRefreshTokenEndpoint = routeTemplate != null &&
+            routeTemplate.Contains(_endpointSettings.RefreshTokenEndpointName, StringComparison.OrdinalIgnoreCase);
+
+        // Skip filter if endpoint allows anonymous access, except for refresh-token
+        if (!isRefreshTokenEndpoint && endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
         {
             await next();
             return;
@@ -45,7 +53,6 @@ public class BlacklistedTokenFilter : IAsyncActionFilter
             }
         }
 
-        //logic never touch below
         await next();
     }
 }

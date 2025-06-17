@@ -8,6 +8,6 @@ namespace AISEA.ApiService.SHARED.Interfaces
 {
     public interface IJWTService
     {
-        string GenerateAccessToken(string userName);
+        string GenerateAccessToken(string username);
     }
 }

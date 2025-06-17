@@ -27,9 +27,9 @@ namespace AISEA.ApiService.DAL.Infrastructure
         }
 
         //validate refresh token
-        public async Task<bool> IsValidRefreshTokenAsync(string userName, string refreshToken)
+        public async Task<bool> IsValidRefreshTokenAsync(string username, string refreshToken)
         {
-            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{userName}";
+            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
             var isExisted = await _appRedisRepository.KeyExistsAsync(key);
             return isExisted && (await _appRedisRepository.GetValueAsync(key)) == refreshToken;
         }
@@ -46,16 +46,16 @@ namespace AISEA.ApiService.DAL.Infrastructure
         }
 
         //get refresh token
-        public async Task<string> GetRefreshTokenAsync(string userName)
+        public async Task<string> GetRefreshTokenAsync(string username)
         {
-            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{userName}";
+            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
             return await _appRedisRepository.GetValueAsync(key);
         }
 
         //save refresh token
-        public async Task StoreRefreshTokenAsync(string userName, string refreshToken)
+        public async Task StoreRefreshTokenAsync(string username, string refreshToken)
         {
-            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{userName}";
+            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
             await _appRedisRepository.SetValueAsync(key, refreshToken, TimeSpan.FromDays(_authTokenSettings.ExpireRefreshTokenDay));
         }
 

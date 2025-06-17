@@ -24,12 +24,12 @@ public class JWTService : IJWTService
     }
     #endregion
 
-    public string GenerateAccessToken(string userName)
+    public string GenerateAccessToken(string username)
     {
         // Claim attribute for the token
         List<Claim> claims = new List<Claim>
         {
-            new Claim(_endpointSettings.UserNameClaimName, userName),
+            new Claim(_endpointSettings.UserNameClaimName, username),
             new Claim(_endpointSettings.LoginAtPropName, DateTimeOffset.UtcNow.ToString()),
             new Claim(_endpointSettings.RandKeySessionPropName,Guid.NewGuid().ToString() ),
             new Claim(_endpointSettings.AuthorPropName, new Random().Next(1,3) +  "")

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace AISEA.ApiService.SHARED.DTOs.Requests.Auth
 {
-    public class GoogleLoginRequest
+    public class ResetPasswordFEIDRequest
     {
-        public string Token { get; set; }
+        
     }
 }

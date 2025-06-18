@@ -17,6 +17,8 @@ namespace AISEA.ApiService.SHARED
             services.Configure<SqlSettings>(configuration.GetSection(SqlSettings.Section));
             services.Configure<GoogleAuthSettings>(configuration.GetSection(GoogleAuthSettings.Section));
             services.Configure<MailSettings>(configuration.GetSection(MailSettings.Section));
+            services.Configure<VerifyResetPassCodeSettings>(configuration.GetSection(VerifyResetPassCodeSettings.Section));
+
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
@@ -25,6 +27,7 @@ namespace AISEA.ApiService.SHARED
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<SqlSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<GoogleAuthSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<VerifyResetPassCodeSettings>>().Value);
 
             return services;
         }

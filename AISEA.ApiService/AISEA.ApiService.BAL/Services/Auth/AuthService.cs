@@ -7,6 +7,7 @@ using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using BC = BCrypt.Net.BCrypt;
 
 namespace AISEA.ApiService.BAL.Services.Auth;
@@ -20,8 +21,11 @@ public class AuthService
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
     private readonly EndpointSettings _endpointSettings;
+    private readonly IMailService _mailService;
+    private readonly IRedisRepository _redisRepository;
+    private readonly VerifyResetPassCodeSettings _verifyResetPassCodeSettings;
 
-    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, EndpointSettings endpointSettings)
+    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, EndpointSettings endpointSettings, IMailService mailService, IRedisRepository redisRepository, VerifyResetPassCodeSettings verifyResetPassCodeSettings)
     {
         _googleAuthSettings = googleAuthSettings;
         _httpClient = httpClientFactory.CreateClient();
@@ -30,7 +34,34 @@ public class AuthService
         _tokenService = tokenService;
         _mapper = mapper;
         _endpointSettings = endpointSettings;
+        _mailService = mailService;
+        _redisRepository = redisRepository;
+        _verifyResetPassCodeSettings = verifyResetPassCodeSettings;
     }
+
+    public async Task ForgetPasswordAsync(ForgetPasswordFEIDRequest request)
+    {
+        //verify email and verification code are all valid
+        var isValidVerifyResetCode = await _redisRepository.IsValidVerifyResetCodeAsync(request.Email, request.VerificationCode);
+        if (!isValidVerifyResetCode)
+        {
+            throw new InvalidCredentialException("Invalid verification code or email.");
+        }
+
+        //remove the verification code from Redis
+        await _redisRepository.RemoveVerifyResetCodeAsync(request.Email);
+
+        //reset the new password
+        var user = await _userRepository.GetUserByEmailAsync(request.Email);
+        if (user is null)
+        {
+            throw new NotFoundException("User with this email does not exist.");
+        }
+        // Hash and set new password
+        user.Password = BC.EnhancedHashPassword(request.NewPassword);
+        await _userRepository.UpdateAsync(user);
+    }
+
     public async Task<AuthResponse> GoogleLoginAsync(string token)
     {
         // get user info from Google
@@ -139,5 +170,28 @@ public class AuthService
         // Hash and set new password
         user.Password = BC.EnhancedHashPassword(request.NewPassword);
         await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task SendResetCodeAsync(GetVerificationCodeRequest request)
+    {
+        //verify the email exists in the system
+        var user = await _userRepository.GetUserByEmailAsync(request.Email);
+        if (user is null)
+        {
+            throw new NotFoundException("User with this email does not exist.");
+        }
+        // Generate a verification code
+        var verificationCode = GenerateVerificationCode();
+        // using redis repository to store the verification code
+        await _redisRepository.SaveVerifyResetCodeAsync(request.Email, verificationCode, TimeSpan.FromMilliseconds(_verifyResetPassCodeSettings.ExpireMilli));
+        // Send the verification code via email
+        await _mailService.SendEmailAsync(request.Email, _verifyResetPassCodeSettings.Subject, _verifyResetPassCodeSettings.Body.Replace("{code}", verificationCode));
+
+    }
+    private string GenerateVerificationCode(int length = 12, string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+    {
+        var random = new Random();
+        return new string(Enumerable.Repeat(allowedChars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

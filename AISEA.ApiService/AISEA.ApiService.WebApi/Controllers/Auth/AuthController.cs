@@ -43,13 +43,28 @@ public class AuthController : BaseController
     }
 
     // Forget password
-    // [HttpPost("forget-password")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
-    // {
-    //     var res = await _authService.ForgetPasswordAsync(request);
-    //     return Ok(res);
-    // }
+    /// <summary>
+    /// Reset the password after sending the verification code to the user's email.
+    /// </summary>
+    [HttpPost("forget-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
+    {
+        await _authService.ForgetPasswordAsync(request);
+        return Ok("Password reset successful.");
+    }
+
+    // Get Verification Code To Reset Password
+    /// <summary>
+    /// Gets the verification code to reset the password.
+    /// </summary>
+    [HttpPost("send-reset-code")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SendResetCode([FromBody] GetVerificationCodeRequest request)
+    {
+        await _authService.SendResetCodeAsync(request);
+        return Ok("Verification code sent successfully.");
+    }
 
     // Reset password
     /// <summary>

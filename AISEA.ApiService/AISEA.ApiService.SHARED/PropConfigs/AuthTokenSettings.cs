@@ -10,9 +10,5 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public const string Section = "AuthToken";
         public int ExpireAccTokenMilli { get; set; }
         public int ExpireRefreshTokenDay { get; set; }
-        public required string KeyPrefRefreshToken { get; set; }
-        public required string KeyPrefExpireAccessToken { get; set; }
-        public required string FormatValueExpireToken { get; set; }
-
     }
 }

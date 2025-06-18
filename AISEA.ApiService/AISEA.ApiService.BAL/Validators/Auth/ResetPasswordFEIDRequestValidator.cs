@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using FluentValidation;
 
-namespace AISEA.ApiService.BAL.Validators.User
+namespace AISEA.ApiService.BAL.Validators.Auth
 {
     public class ResetPasswordFEIDRequestValidator : AbstractValidator<ResetPasswordFEIDRequest>
     {

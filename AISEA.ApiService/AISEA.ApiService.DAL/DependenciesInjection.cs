@@ -48,7 +48,7 @@ public static class DependenciesInjection
 
         services.AddScoped<IDatabase>(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
-        services.AddScoped<IAppRedisRepository, AppRedisRepository>();
+        services.AddScoped<IRedisRepository, AppRedisRepository>();
         #endregion
 
         //Service Agents

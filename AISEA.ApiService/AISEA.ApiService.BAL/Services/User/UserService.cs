@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
+using AISEA.ApiService.SHARED.DTOs.Responses.User;
 using AISEA.ApiService.SHARED.Exceptions;
 using AutoMapper;
 using BC = BCrypt.Net.BCrypt;

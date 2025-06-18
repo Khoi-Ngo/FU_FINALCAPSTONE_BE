@@ -24,7 +24,7 @@ namespace AISEA.ApiService.BAL.Services.Role
         public async Task UpdateRoleAsync(long roleId, UpdateRoleRequest request)
         {
             var role = await _roleRepository.GetByIdAsync(roleId);
-            if (role == null)
+            if (role is null)
             {
                 throw new KeyNotFoundException($"Role with ID {roleId} not found.");
             }
@@ -38,7 +38,7 @@ namespace AISEA.ApiService.BAL.Services.Role
         public async Task DeleteRoleAsync(long roleId)
         {
             var role = await _roleRepository.GetByIdAsync(roleId);
-            if (role == null)
+            if (role is null)
             {
                 throw new KeyNotFoundException($"Role with ID {roleId} not found.");
             }

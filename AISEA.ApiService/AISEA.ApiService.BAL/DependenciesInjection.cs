@@ -20,7 +20,6 @@ namespace AISEA.ApiService.BAL
             //adding http client factory
             services.AddHttpClient();
             //adding business logic service for use-cases
-            services.AddScoped<DemoSampleService>();
             services.AddScoped<AuthService>();
             services.AddScoped<UserService>();
 

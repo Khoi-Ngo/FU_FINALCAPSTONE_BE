@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.ApiService.DAL.Abstract;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
@@ -33,7 +34,7 @@ public partial class User : BaseEntity
 
     public DateTimeOffset? DateOfBirth { get; set; }
     public string? AvatarUrl { get; set; }
-
+    public EUserStatus Status { get; set; } = EUserStatus.ACTIVE;
     public long RoleId { get; set; }
 
     [InverseProperty("Staff")]

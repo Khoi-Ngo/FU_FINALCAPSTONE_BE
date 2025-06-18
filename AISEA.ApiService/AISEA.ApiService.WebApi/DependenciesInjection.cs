@@ -28,12 +28,11 @@ namespace AISEA.ApiService.WebApi
                     options.RequireHttpsMetadata = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        //TODO: Enable audience later when frontend is ready
                         ValidateIssuer = true,
-                        ValidateAudience = false,
+                        ValidateAudience = true,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = configuration.GetSection(JwtSettings.Section)["Issuer"],
-                        // ValidAudience = ,
+                        ValidAudience = configuration.GetSection(JwtSettings.Section)["Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection(JwtSettings.Section)["SecretKey"]))
                     };
                 });

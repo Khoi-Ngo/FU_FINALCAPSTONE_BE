@@ -43,8 +43,7 @@ public class JWTService : IJWTService
 
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
-            //TODO: Enable audience later
-            // audience: _jwtSettings.Audience,
+            audience: _jwtSettings.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(_jwtSettings.Expires),
             signingCredentials: credentials

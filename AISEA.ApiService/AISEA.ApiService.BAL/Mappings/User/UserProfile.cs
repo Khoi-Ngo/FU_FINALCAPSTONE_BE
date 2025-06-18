@@ -11,6 +11,12 @@ namespace AISEA.ApiService.BAL.Mappings.User
         {
             CreateMap<DAL.Entities.User, AuthResponse>();
             CreateMap<CreateUserRequest, DAL.Entities.User>();
+            CreateMap<DAL.Entities.User, GetUserListResponse>()
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name));
+
+            //TODO: Map User to GetUserDetailResponse more specifically
+            CreateMap<DAL.Entities.User, GetUserDetailResponse>()
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name));
         }
     }
 }

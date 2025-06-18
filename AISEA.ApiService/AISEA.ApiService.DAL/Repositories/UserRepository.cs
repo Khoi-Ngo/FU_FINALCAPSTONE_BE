@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
@@ -27,5 +28,18 @@ namespace AISEA.ApiService.DAL.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == username);
         }
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.Include(u => u.Role).ToListAsync();
+        }
+
+        public async Task<IEnumerable<User>> GetActiveUsersAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Status == EUserStatus.ACTIVE)
+                .Include(u => u.Role)
+                .ToListAsync();
+        }
+
     }
 }

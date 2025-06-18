@@ -32,11 +32,11 @@ public class BlacklistedTokenFilter : IAsyncActionFilter
         var routeTemplate = context.ActionDescriptor.AttributeRouteInfo?.Template;
 
         // Check if this is the refresh-token endpoint
-        bool isRefreshTokenEndpoint = routeTemplate != null &&
+        bool isRefreshTokenEndpoint = routeTemplate is not null &&
             routeTemplate.Contains(_endpointSettings.RefreshTokenEndpointName, StringComparison.OrdinalIgnoreCase);
 
         // Skip filter if endpoint allows anonymous access, except for refresh-token
-        if (!isRefreshTokenEndpoint && endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
+        if (!isRefreshTokenEndpoint && endpoint?.Metadata.GetMetadata<IAllowAnonymous>() is not null)
         {
             await next();
             return;

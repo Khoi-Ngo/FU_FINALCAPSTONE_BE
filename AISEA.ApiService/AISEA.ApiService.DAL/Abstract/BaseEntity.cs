@@ -13,6 +13,7 @@ namespace AISEA.ApiService.DAL.Abstract
         public DateTime? UpdatedAt { get; set; }
         public string? DeletedBy { get; set; }
         public DateTime? DeletedAt { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public string? Note { get; set; }
     }
 }

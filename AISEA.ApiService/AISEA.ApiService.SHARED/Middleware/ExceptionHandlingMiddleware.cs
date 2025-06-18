@@ -77,11 +77,15 @@ public class ExceptionHandlingMiddleware
                 statusCode = (int)HttpStatusCode.Unauthorized;
                 message = exception.Message;
                 break;
+            case KeyNotFoundException keyNotFound:
+                statusCode = (int)HttpStatusCode.NotFound;
+                message = keyNotFound.Message;
+                break;
 
             default:
                 logger.LogError(exception, "Unhandled exception");
                 statusCode = (int)HttpStatusCode.InternalServerError;
-                message = "An unexpected error occurred.";
+                message = exception.Message;
                 break;
         }
 

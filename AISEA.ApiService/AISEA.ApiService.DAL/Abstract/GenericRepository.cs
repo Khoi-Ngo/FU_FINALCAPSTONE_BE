@@ -69,7 +69,7 @@ public class GenericRepository<T> where T : class
     public T GetById(int id)
     {
         var entity = _context.Set<T>().Find(id);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.Entry(entity).State = EntityState.Detached;
         }
@@ -81,7 +81,7 @@ public class GenericRepository<T> where T : class
     public async Task<T> GetByIdAsync(int id)
     {
         var entity = await _context.Set<T>().FindAsync(id);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.Entry(entity).State = EntityState.Detached;
         }
@@ -92,7 +92,7 @@ public class GenericRepository<T> where T : class
     public async Task<T> GetByIdAsync(long id)
     {
         var entity = await _context.Set<T>().FindAsync(id);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.Entry(entity).State = EntityState.Detached;
         }
@@ -104,7 +104,7 @@ public class GenericRepository<T> where T : class
     public T GetById(string code)
     {
         var entity = _context.Set<T>().Find(code);
-        if (entity != null)
+        if (entity is not null)
         {
         }
         _context.Entry(entity).State = EntityState.Detached;
@@ -117,7 +117,7 @@ public class GenericRepository<T> where T : class
     public async Task<T> GetByIdAsync(string code)
     {
         var entity = await _context.Set<T>().FindAsync(code);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.Entry(entity).State = EntityState.Detached;
         }
@@ -129,7 +129,7 @@ public class GenericRepository<T> where T : class
     public T GetById(Guid code)
     {
         var entity = _context.Set<T>().Find(code);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.Entry(entity).State = EntityState.Detached;
         }
@@ -141,7 +141,7 @@ public class GenericRepository<T> where T : class
     public async Task<T> GetByIdAsync(Guid code)
     {
         var entity = await _context.Set<T>().FindAsync(code);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.Entry(entity).State = EntityState.Detached;
         }

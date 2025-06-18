@@ -33,12 +33,69 @@ public class UserController : BaseController
     }
 
     //create multiple users
+    /// <summary>
+    /// Creates multiple users with the provided information. Duplicate usernames or emails will result in bad request errors.
+    /// </summary>
+    [HttpPost("bulk")]
+    public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)
+    {
+        await _userService.CreateUsersAsync(requests);
+        return Ok(new { Message = "Users created successfully." });
+    }
 
     //get all users
+    /// <summary>
+    /// Retrieves all users from the system.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = await _userService.GetAllUsersAsync();
+        return Ok(users);
+    }
+
+    //get all active users
+    /// <summary>
+    /// Retrieves all active users from the system.
+    /// </summary>
+    [HttpGet("active")]
+    public async Task<IActionResult> GetAllActiveUsers()
+    {
+        var users = await _userService.GetAllActiveUsersAsync();
+        return Ok(users);
+    }
 
     //get user by id
+    /// <summary>
+    /// Retrieves a user by their ID.
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        var user = await _userService.GetUserByIdAsync(id);
+        return Ok(user);
+    }
 
-    //update user 
+    //update user
+    /// <summary>
+    /// Updates an existing user.
+    /// </summary>
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
+    {
+        await _userService.UpdateUserAsync(id, request);
+        return Ok("Updated successfully");
+    }
 
     //disable user by id
+    /// <summary>
+    /// Disables a user by their ID.
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DisableUser(int id)
+    {
+        await _userService.DisableUserAsync(id);
+        return Ok("User disabled successfully");
+    }
+
 }

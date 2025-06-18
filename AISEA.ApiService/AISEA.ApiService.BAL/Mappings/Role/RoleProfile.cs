@@ -11,6 +11,7 @@ namespace AISEA.ApiService.BAL.Mappings.Role
         {
             CreateMap<DAL.Entities.Role, GetRoleResponse>();
             CreateMap<UpdateRoleRequest, DAL.Entities.Role>();
+            CreateMap<CreateRoleRequest, DAL.Entities.Role>();
         }
     }
 }

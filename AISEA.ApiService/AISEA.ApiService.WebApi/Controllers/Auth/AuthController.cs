@@ -51,14 +51,16 @@ public class AuthController : BaseController
     //     return Ok(res);
     // }
 
-    // // Reset password
-    // [HttpPost("reset-password")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
-    // {
-    //     var res = await _authService.ResetPasswordAsync(request);
-    //     return Ok(res);
-    // }
+    // Reset password
+    /// <summary>
+    /// Resets the password using current FEID password and new password.
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
+    {
+        await _authService.ResetPasswordAsync(request, AccessToken);
+        return Ok("Password reset successful.");
+    }
 
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.

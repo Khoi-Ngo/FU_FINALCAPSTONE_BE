@@ -6,10 +6,8 @@ using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
-using AISEA.ApiService.SHARED.Util;
 using AutoMapper;
-using Google.Apis.Auth;
-using Microsoft.Extensions.Logging;
+using BC = BCrypt.Net.BCrypt;
 
 namespace AISEA.ApiService.BAL.Services.Auth;
 
@@ -21,11 +19,9 @@ public class AuthService
     private readonly IJWTService _jwtService;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
-    private readonly JwtSettings _jwtSettings;
     private readonly EndpointSettings _endpointSettings;
-    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, JwtSettings jwtSettings, EndpointSettings endpointSettings, ILogger<AuthService> logger)
+    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, EndpointSettings endpointSettings)
     {
         _googleAuthSettings = googleAuthSettings;
         _httpClient = httpClientFactory.CreateClient();
@@ -33,9 +29,7 @@ public class AuthService
         _jwtService = jwtService;
         _tokenService = tokenService;
         _mapper = mapper;
-        _jwtSettings = jwtSettings;
         _endpointSettings = endpointSettings;
-        _logger = logger;
     }
     public async Task<AuthResponse> GoogleLoginAsync(string token)
     {
@@ -102,8 +96,8 @@ public class AuthService
     public async Task<RefreshTokenResponse> RefreshAsync(string accessToken, string refreshToken)
     {
         //get the user info from expired access token
-        var principal = JWTTokenUtil.GetPrincipalFromExpiredToken(accessToken, _jwtSettings.SecretKey);
-        string username = JWTTokenUtil.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
+        var principal = _jwtService.GetPrincipalFromExpiredToken(accessToken);
+        string username = _jwtService.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
 
         // Check if refresh token exists in Redis + refresh token belong to the username
         var isValid = await _tokenService.IsValidRefreshTokenAsync(username, refreshToken);
@@ -125,5 +119,25 @@ public class AuthService
             RefreshToken = newRefreshToken
         };
 
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordFEIDRequest request, string accessToken)
+    {
+        // Get username from access token
+        var username = _jwtService.GetUsernameFromToken(accessToken);
+        // Get user from DB
+        var user = await _userRepository.GetUserByUsernameAsync(username);
+        if (user is null)
+        {
+            throw new NotFoundException("User not found.");
+        }
+        // Compare current password with the one in DB
+        if (!BC.EnhancedVerify(request.CurrentPassword, user.Password))
+        {
+            throw new InvalidCredentialException("Current password is incorrect.");
+        }
+        // Hash and set new password
+        user.Password = BC.EnhancedHashPassword(request.NewPassword);
+        await _userRepository.UpdateAsync(user);
     }
 }

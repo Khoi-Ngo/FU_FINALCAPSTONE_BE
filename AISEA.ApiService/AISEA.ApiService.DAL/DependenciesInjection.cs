@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Infrastructure;
 using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.DAL.Repositories;
@@ -13,54 +9,54 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
-namespace AISEA.ApiService.DAL
+namespace AISEA.ApiService.DAL;
+
+public static class DependenciesInjection
 {
-    public static class DependenciesInjection
+    public static IServiceCollection AddDALConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddDALConfig(this IServiceCollection services, IConfiguration configuration)
+        #region DBContext
+        services.AddDbContext<AiseaContext>(options =>
         {
-            #region DBContext
-            services.AddDbContext<AiseaContext>(options =>
-            {
-                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            });
-            #endregion
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        });
+        #endregion
 
-            #region Repositories
-            services.AddScoped<RoleRepository>();
-            services.AddScoped<UserRepository>();
-            #endregion
+        #region Repositories
+        services.AddScoped<RoleRepository>();
+        services.AddScoped<UserRepository>();
+        #endregion
 
-            #region  Redis
-            services.AddSingleton<IConnectionMultiplexer>(sp =>
+        #region  Redis
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+                    {
+                        var redisSettings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
+                        var redisConnectionString = redisSettings.ConnectionString;
+
+                        if (string.IsNullOrEmpty(redisConnectionString))
                         {
-                            var redisSettings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
-                            var redisConnectionString = redisSettings.ConnectionString;
+                            throw new InvalidOperationException("Redis connection string is missing or empty.");
+                        }
 
-                            if (string.IsNullOrEmpty(redisConnectionString))
-                            {
-                                throw new InvalidOperationException("Redis connection string is missing or empty.");
-                            }
+                        var configurationOptions = ConfigurationOptions.Parse(redisConnectionString);
+                        configurationOptions.AbortOnConnectFail = false; // Prevent crash on connection failure
+                        configurationOptions.ConnectTimeout = 10000; // Optional: Increase timeout
+                        configurationOptions.ConnectRetry = 5; // Optional: Retry connection
 
-                            var configurationOptions = ConfigurationOptions.Parse(redisConnectionString);
-                            configurationOptions.AbortOnConnectFail = false; // Prevent crash on connection failure
-                            configurationOptions.ConnectTimeout = 10000; // Optional: Increase timeout
-                            configurationOptions.ConnectRetry = 5; // Optional: Retry connection
+                        return ConnectionMultiplexer.Connect(configurationOptions);
+                    });
 
-                            return ConnectionMultiplexer.Connect(configurationOptions);
-                        });
+        services.AddScoped<IDatabase>(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
-            services.AddScoped<IDatabase>(sp => sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+        services.AddScoped<IRedisRepository, AppRedisRepository>();
+        #endregion
 
-            services.AddScoped<IAppRedisRepository, AppRedisRepository>();
-            #endregion
+        //Service Agents
 
-            //Service Agents
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IJWTService, JWTService>();
+        services.AddScoped<IMailService, MailService>();
 
-            services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<IJWTService, JWTService>();
-
-            return services;
-        }
+        return services;
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
-using AISEA.ApiService.SHARED.Util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

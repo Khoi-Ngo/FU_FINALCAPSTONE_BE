@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-namespace AISEA.ApiService.SHARED.Interfaces
+namespace AISEA.ApiService.SHARED.Interfaces;
+
+public interface IJWTService
 {
-    public interface IJWTService
-    {
-        string GenerateAccessToken(string username);
-    }
+    string GenerateAccessToken(string username);
+    string GetUsernameFromToken(string token);
+    string GetValueFromPrincipal(ClaimsPrincipal principal, string name);
+    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
 }

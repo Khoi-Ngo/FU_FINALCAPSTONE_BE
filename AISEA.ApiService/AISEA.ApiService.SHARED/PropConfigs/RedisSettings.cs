@@ -9,6 +9,9 @@ namespace AISEA.ApiService.SHARED.PropConfigs
     {
         public const string Section = "RedisSettings";
         public required string ConnectionString { get; set; }
-
+        public required string KeyPrefRefreshToken { get; set; }
+        public required string KeyPrefExpireAccessToken { get; set; }
+        public required string FormatValueExpireToken { get; set; }
+        public required string KeyPrefVerificationResetPassCode { get; set; }
     }
 }

@@ -6,10 +6,9 @@ using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
-using AISEA.ApiService.SHARED.Util;
 using AutoMapper;
-using Google.Apis.Auth;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http.HttpResults;
+using BC = BCrypt.Net.BCrypt;
 
 namespace AISEA.ApiService.BAL.Services.Auth;
 
@@ -21,11 +20,12 @@ public class AuthService
     private readonly IJWTService _jwtService;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
-    private readonly JwtSettings _jwtSettings;
     private readonly EndpointSettings _endpointSettings;
-    private readonly ILogger<AuthService> _logger;
+    private readonly IMailService _mailService;
+    private readonly IRedisRepository _redisRepository;
+    private readonly VerifyResetPassCodeSettings _verifyResetPassCodeSettings;
 
-    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, JwtSettings jwtSettings, EndpointSettings endpointSettings, ILogger<AuthService> logger)
+    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, EndpointSettings endpointSettings, IMailService mailService, IRedisRepository redisRepository, VerifyResetPassCodeSettings verifyResetPassCodeSettings)
     {
         _googleAuthSettings = googleAuthSettings;
         _httpClient = httpClientFactory.CreateClient();
@@ -33,10 +33,35 @@ public class AuthService
         _jwtService = jwtService;
         _tokenService = tokenService;
         _mapper = mapper;
-        _jwtSettings = jwtSettings;
         _endpointSettings = endpointSettings;
-        _logger = logger;
+        _mailService = mailService;
+        _redisRepository = redisRepository;
+        _verifyResetPassCodeSettings = verifyResetPassCodeSettings;
     }
+
+    public async Task ForgetPasswordAsync(ForgetPasswordFEIDRequest request)
+    {
+        //verify email and verification code are all valid
+        var isValidVerifyResetCode = await _redisRepository.IsValidVerifyResetCodeAsync(request.Email, request.VerificationCode);
+        if (!isValidVerifyResetCode)
+        {
+            throw new InvalidCredentialException("Invalid verification code or email.");
+        }
+
+        //remove the verification code from Redis
+        await _redisRepository.RemoveVerifyResetCodeAsync(request.Email);
+
+        //reset the new password
+        var user = await _userRepository.GetUserByEmailAsync(request.Email);
+        if (user is null)
+        {
+            throw new NotFoundException("User with this email does not exist.");
+        }
+        // Hash and set new password
+        user.Password = BC.EnhancedHashPassword(request.NewPassword);
+        await _userRepository.UpdateAsync(user);
+    }
+
     public async Task<AuthResponse> GoogleLoginAsync(string token)
     {
         // get user info from Google
@@ -104,8 +129,8 @@ public class AuthService
     public async Task<RefreshTokenResponse> RefreshAsync(string accessToken, string refreshToken)
     {
         //get the user info from expired access token
-        var principal = JWTTokenUtil.GetPrincipalFromExpiredToken(accessToken, _jwtSettings.SecretKey);
-        string username = JWTTokenUtil.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
+        var principal = _jwtService.GetPrincipalFromExpiredToken(accessToken);
+        string username = _jwtService.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
 
         // Check if refresh token exists in Redis + refresh token belong to the username
         var isValid = await _tokenService.IsValidRefreshTokenAsync(username, refreshToken);
@@ -127,5 +152,48 @@ public class AuthService
             RefreshToken = newRefreshToken
         };
 
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordFEIDRequest request, string accessToken)
+    {
+        // Get username from access token
+        var username = _jwtService.GetUsernameFromToken(accessToken);
+        // Get user from DB
+        var user = await _userRepository.GetUserByUsernameAsync(username);
+        if (user is null)
+        {
+            throw new NotFoundException("User not found.");
+        }
+        // Compare current password with the one in DB
+        if (!BC.EnhancedVerify(request.CurrentPassword, user.Password))
+        {
+            throw new InvalidCredentialException("Current password is incorrect.");
+        }
+        // Hash and set new password
+        user.Password = BC.EnhancedHashPassword(request.NewPassword);
+        await _userRepository.UpdateAsync(user);
+    }
+
+    public async Task SendResetCodeAsync(GetVerificationCodeRequest request)
+    {
+        //verify the email exists in the system
+        var user = await _userRepository.GetUserByEmailAsync(request.Email);
+        if (user is null)
+        {
+            throw new NotFoundException("User with this email does not exist.");
+        }
+        // Generate a verification code
+        var verificationCode = GenerateVerificationCode();
+        // using redis repository to store the verification code
+        await _redisRepository.SaveVerifyResetCodeAsync(request.Email, verificationCode, TimeSpan.FromMilliseconds(_verifyResetPassCodeSettings.ExpireMilli));
+        // Send the verification code via email
+        await _mailService.SendEmailAsync(request.Email, _verifyResetPassCodeSettings.Subject, _verifyResetPassCodeSettings.Body.Replace("{code}", verificationCode));
+
+    }
+    private string GenerateVerificationCode(int length = 12, string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+    {
+        var random = new Random();
+        return new string(Enumerable.Repeat(allowedChars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

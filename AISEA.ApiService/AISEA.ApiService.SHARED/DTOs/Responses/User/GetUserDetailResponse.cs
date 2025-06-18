@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.Const.Enums;
 
-namespace AISEA.ApiService.SHARED.DTOs.Requests.User
+namespace AISEA.ApiService.SHARED.DTOs.Responses.User
 {
-    public class GetUserListResponse
+    public class GetUserDetailResponse
     {
         public string Username { get; set; } = null!;
         public string Email { get; set; } = null!;
@@ -16,6 +16,5 @@ namespace AISEA.ApiService.SHARED.DTOs.Requests.User
         public string? AvatarUrl { get; set; }
         public string RoleName { get; set; }
         public EUserStatus Status { get; set; }
-
     }
 }

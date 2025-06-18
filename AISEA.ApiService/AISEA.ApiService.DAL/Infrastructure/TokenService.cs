@@ -8,30 +8,27 @@ namespace AISEA.ApiService.DAL.Infrastructure
     public class TokenService : ITokenService
     {
         private readonly AuthTokenSettings _authTokenSettings;
-        private readonly IAppRedisRepository _appRedisRepository;
+        private readonly IRedisRepository _redisRepository;
 
-        public TokenService(AuthTokenSettings authTokenSettings, IAppRedisRepository appRedisRepository)
+        public TokenService(AuthTokenSettings authTokenSettings, IRedisRepository redisRepository)
         {
             _authTokenSettings = authTokenSettings;
-            _appRedisRepository = appRedisRepository;
+            _redisRepository = redisRepository;
         }
 
 
         //validate access token
         public async Task<bool> IsValidAccessTokenAsync(string accessToken)
         {
-
-            var key = $"{_authTokenSettings.KeyPrefExpireAccessToken}:{accessToken}";
-            var isExisted = await _appRedisRepository.KeyExistsAsync(key);
+            var isExisted = await _redisRepository.IsAccessTokenExisted(accessToken);
             return !isExisted;
         }
 
         //validate refresh token
         public async Task<bool> IsValidRefreshTokenAsync(string username, string refreshToken)
         {
-            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
-            var isExisted = await _appRedisRepository.KeyExistsAsync(key);
-            return isExisted && (await _appRedisRepository.GetValueAsync(key)) == refreshToken;
+            var isUserNameExisted = await _redisRepository.IsUsernameExisted(username);
+            return isUserNameExisted && (await _redisRepository.GetRefreshTokenAsync(username)) == refreshToken;
         }
 
         //Generate the refresh token
@@ -48,22 +45,19 @@ namespace AISEA.ApiService.DAL.Infrastructure
         //get refresh token
         public async Task<string> GetRefreshTokenAsync(string username)
         {
-            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
-            return await _appRedisRepository.GetValueAsync(key);
+            return await _redisRepository.GetRefreshTokenAsync(username);
         }
 
         //save refresh token
         public async Task StoreRefreshTokenAsync(string username, string refreshToken)
         {
-            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
-            await _appRedisRepository.SetValueAsync(key, refreshToken, TimeSpan.FromDays(_authTokenSettings.ExpireRefreshTokenDay));
+            await _redisRepository.StoreRefreshTokenAsync(username, refreshToken, TimeSpan.FromDays(_authTokenSettings.ExpireRefreshTokenDay));
         }
 
         //add access token to the black list
         public async Task BlacklistAccessTokenAsync(string accessToken)
         {
-            var key = $"{_authTokenSettings.KeyPrefExpireAccessToken}:{accessToken}";
-            await _appRedisRepository.SetValueAsync(key, _authTokenSettings.FormatValueExpireToken, TimeSpan.FromMilliseconds(_authTokenSettings.ExpireAccTokenMilli));
+            await _redisRepository.BlacklistAccessTokenAsync(accessToken, TimeSpan.FromMilliseconds(_authTokenSettings.ExpireAccTokenMilli));
         }
 
     }

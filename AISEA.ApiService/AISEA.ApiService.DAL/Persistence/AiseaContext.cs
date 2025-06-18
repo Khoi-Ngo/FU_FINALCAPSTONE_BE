@@ -23,7 +23,7 @@ public partial class AiseaContext : DbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-  => optionsBuilder.UseSqlServer("Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;");
+  => optionsBuilder.UseSqlServer(_sqlSettings.ConnectionString);
     #endregion
 
     #region DbSets

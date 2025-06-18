@@ -43,22 +43,39 @@ public class AuthController : BaseController
     }
 
     // Forget password
-    // [HttpPost("forget-password")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
-    // {
-    //     var res = await _authService.ForgetPasswordAsync(request);
-    //     return Ok(res);
-    // }
+    /// <summary>
+    /// Reset the password after sending the verification code to the user's email.
+    /// </summary>
+    [HttpPost("forget-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
+    {
+        await _authService.ForgetPasswordAsync(request);
+        return Ok("Password reset successful.");
+    }
 
-    // // Reset password
-    // [HttpPost("reset-password")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
-    // {
-    //     var res = await _authService.ResetPasswordAsync(request);
-    //     return Ok(res);
-    // }
+    // Get Verification Code To Reset Password
+    /// <summary>
+    /// Gets the verification code to reset the password.
+    /// </summary>
+    [HttpPost("send-reset-code")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SendResetCode([FromBody] GetVerificationCodeRequest request)
+    {
+        await _authService.SendResetCodeAsync(request);
+        return Ok("Verification code sent successfully.");
+    }
+
+    // Reset password
+    /// <summary>
+    /// Resets the password using current FEID password and new password.
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
+    {
+        await _authService.ResetPasswordAsync(request, AccessToken);
+        return Ok("Password reset successful.");
+    }
 
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.

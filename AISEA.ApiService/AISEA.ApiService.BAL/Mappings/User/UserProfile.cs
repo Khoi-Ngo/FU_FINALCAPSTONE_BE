@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
+using AISEA.ApiService.SHARED.DTOs.Responses.User;
 using AutoMapper;
 
 namespace AISEA.ApiService.BAL.Mappings.User

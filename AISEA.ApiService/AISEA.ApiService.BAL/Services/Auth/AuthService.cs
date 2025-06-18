@@ -62,8 +62,10 @@ public class AuthService
 
         // Generate tokens
         var accessToken = _jwtService.GenerateAccessToken(user.Username);
-        var storedToken = await _tokenService.GetRefreshTokenAsync(user.Username);
-        var refreshToken = string.IsNullOrEmpty(storedToken) ? _tokenService.GenerateRefreshToken() : storedToken;
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        //saving the refresh token to Redis
+        await _tokenService.StoreRefreshTokenAsync(user.Username, refreshToken);
 
         var result = _mapper.Map<AuthResponse>(user);
         result.AccessToken = accessToken;

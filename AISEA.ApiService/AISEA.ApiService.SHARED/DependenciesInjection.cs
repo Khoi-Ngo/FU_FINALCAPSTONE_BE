@@ -18,6 +18,7 @@ namespace AISEA.ApiService.SHARED
             services.Configure<GoogleAuthSettings>(configuration.GetSection(GoogleAuthSettings.Section));
             services.Configure<MailSettings>(configuration.GetSection(MailSettings.Section));
             services.Configure<VerifyResetPassCodeSettings>(configuration.GetSection(VerifyResetPassCodeSettings.Section));
+            services.Configure<ChatBotSettings>(configuration.GetSection(ChatBotSettings.Section));
 
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
@@ -28,6 +29,8 @@ namespace AISEA.ApiService.SHARED
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<GoogleAuthSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<VerifyResetPassCodeSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatBotSettings>>().Value);
+
 
             return services;
         }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.BAL.Services.Auth;
+using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.BAL.Services.Role;
 using AISEA.ApiService.BAL.Services.User;
 using FluentValidation;
@@ -24,6 +25,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<AuthService>();
             services.AddScoped<UserService>();
             services.AddScoped<RoleService>();
+            services.AddScoped<ChatBotService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AISEA.ApiService.SHARED.Const.Values
 {
-    public class UtilConst
+    public static class UtilConst
     {
         public static string DefaultAvatarUrl = "";
     }

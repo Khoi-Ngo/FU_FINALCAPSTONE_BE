@@ -56,6 +56,7 @@ public static class DependenciesInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<IMailService, MailService>();
+        services.AddScoped<IChatOpenAIService, ChatOpenAIService>();
 
         return services;
     }

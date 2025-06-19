@@ -191,7 +191,6 @@ public class AuthService
 
     public async Task SendResetCodeAsync(GetVerificationCodeRequest request)
     {
-        //trigger
         //verify the email exists in the system
         var user = await _userRepository.GetUserByEmailAsync(request.Email);
         if (user is null)

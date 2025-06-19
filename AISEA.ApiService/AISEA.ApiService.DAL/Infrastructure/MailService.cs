@@ -66,14 +66,9 @@ namespace AISEA.ApiService.DAL.Infrastructure
                 Host = _mailSettings.SmtpHost,
                 Port = _mailSettings.SmtpPort,
                 Credentials = new System.Net.NetworkCredential(_mailSettings.UserName, _mailSettings.Password),
-                EnableSsl = string.Equals(_mailSettings.SecureSocketOption, "StartTls", StringComparison.OrdinalIgnoreCase),
+                EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                Timeout = 20000, // Reduced timeout for better performance
-                ServicePoint =
-                {
-                    ConnectionLeaseTimeout = 60000, // Connection pooling: 1 minute lease
-                    MaxIdleTime = 30000 // Connection pooling: 30 seconds idle
-                }
+                Timeout = 20000,
             };
         }
 

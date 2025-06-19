@@ -9,12 +9,12 @@ namespace AISEA.ApiService.SHARED.PropConfigs
     {
         public const string Section = "MailSettings";
 
-        public string DisplayName { get; set; } = null!;      // e.g., "AISEA"
-        public string From { get; set; } = null!;             // e.g., "aiseafu@jkh8ing8.online"
-        public string SmtpHost { get; set; } = null!;         // e.g., "smtp.zoho.com"
-        public int SmtpPort { get; set; }                     // e.g., 587
-        public string UserName { get; set; } = null!;         // e.g., "aiseafu@jkh8ing8.online"
-        public string Password { get; set; } = null!;         // e.g., "app-password-from-zoho"
-        public string SecureSocketOption { get; set; } = null!; // e.g., "StartTls"
+        public string DisplayName { get; set; } = null!;      
+        public string From { get; set; } = null!;             
+        public string SmtpHost { get; set; } = null!;         
+        public int SmtpPort { get; set; }                     
+        public string UserName { get; set; } = null!;         
+        public string Password { get; set; } = null!;
+        public string SecureSocketOption { get; set; } = null!;
     }
 }

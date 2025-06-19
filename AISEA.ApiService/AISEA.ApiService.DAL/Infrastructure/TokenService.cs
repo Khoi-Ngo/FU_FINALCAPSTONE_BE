@@ -20,15 +20,17 @@ namespace AISEA.ApiService.DAL.Infrastructure
         //validate access token
         public async Task<bool> IsValidAccessTokenAsync(string accessToken)
         {
-            var isExisted = await _redisRepository.IsAccessTokenExisted(accessToken);
-            return !isExisted;
+            var key = $"{_authTokenSettings.KeyPrefExpireAccessToken}:{accessToken}";
+            var isKeyExisted = await _redisRepository.KeyExistsAsync(key);
+            return !isKeyExisted;
         }
 
         //validate refresh token
         public async Task<bool> IsValidRefreshTokenAsync(string username, string refreshToken)
         {
-            var isUserNameExisted = await _redisRepository.IsUsernameExisted(username);
-            return isUserNameExisted && (await _redisRepository.GetRefreshTokenAsync(username)) == refreshToken;
+            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
+            var isKeyExisted = await _redisRepository.KeyExistsAsync(key);
+            return isKeyExisted && (await _redisRepository.GetValueAsync(key)) == refreshToken;
         }
 
         //Generate the refresh token
@@ -45,19 +47,22 @@ namespace AISEA.ApiService.DAL.Infrastructure
         //get refresh token
         public async Task<string> GetRefreshTokenAsync(string username)
         {
-            return await _redisRepository.GetRefreshTokenAsync(username);
+            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
+            return await _redisRepository.GetValueAsync(key);
         }
 
         //save refresh token
         public async Task StoreRefreshTokenAsync(string username, string refreshToken)
         {
-            await _redisRepository.StoreRefreshTokenAsync(username, refreshToken, TimeSpan.FromDays(_authTokenSettings.ExpireRefreshTokenDay));
+            var key = $"{_authTokenSettings.KeyPrefRefreshToken}:{username}";
+            await _redisRepository.SetValueAsync(key, refreshToken, TimeSpan.FromDays(_authTokenSettings.ExpireRefreshTokenDay));
         }
 
         //add access token to the black list
         public async Task BlacklistAccessTokenAsync(string accessToken)
         {
-            await _redisRepository.BlacklistAccessTokenAsync(accessToken, TimeSpan.FromMilliseconds(_authTokenSettings.ExpireAccTokenMilli));
+            var key = $"{_authTokenSettings.KeyPrefExpireAccessToken}:{accessToken}";
+            await _redisRepository.SetValueAsync(key, accessToken, TimeSpan.FromMilliseconds(_authTokenSettings.ExpireAccTokenMilli));
         }
 
     }

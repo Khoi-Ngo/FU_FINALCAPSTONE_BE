@@ -1,3 +1,4 @@
+using System.Formats.Asn1;
 using System.Security.Authentication;
 using System.Text.Json;
 using AISEA.ApiService.DAL.Repositories;
@@ -7,7 +8,6 @@ using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using BC = BCrypt.Net.BCrypt;
 
 namespace AISEA.ApiService.BAL.Services.Auth;
@@ -38,18 +38,33 @@ public class AuthService
         _redisRepository = redisRepository;
         _verifyResetPassCodeSettings = verifyResetPassCodeSettings;
     }
+    private async Task<bool> IsValidVerifyResetCodeAsync(string email, string verificationCode)
+    {
+        var key = $"{_verifyResetPassCodeSettings.KeyPrefVerificationResetPassCode}:{email}";
+        var storedCode = await _redisRepository.GetValueAsync(key);
+        if (string.IsNullOrEmpty(storedCode))
+        {
+            throw new InvalidCredentialException("Verification code has expired or does not exist.");
+        }
+        return storedCode == verificationCode;
+    }
+    private async Task RemoveVerifyResetCodeAsync(string email)
+    {
+        var key = $"{_verifyResetPassCodeSettings.KeyPrefVerificationResetPassCode}:{email}";
+        await _redisRepository.RemoveByKeyAsync(key);
+    }
 
     public async Task ForgetPasswordAsync(ForgetPasswordFEIDRequest request)
     {
         //verify email and verification code are all valid
-        var isValidVerifyResetCode = await _redisRepository.IsValidVerifyResetCodeAsync(request.Email, request.VerificationCode);
+        var isValidVerifyResetCode = await IsValidVerifyResetCodeAsync(request.Email, request.VerificationCode);
         if (!isValidVerifyResetCode)
         {
-            throw new InvalidCredentialException("Invalid verification code or email.");
+            throw new InvalidCredentialException("Incorrect verification code.");
         }
 
         //remove the verification code from Redis
-        await _redisRepository.RemoveVerifyResetCodeAsync(request.Email);
+        await RemoveVerifyResetCodeAsync(request.Email);
 
         //reset the new password
         var user = await _userRepository.GetUserByEmailAsync(request.Email);
@@ -100,7 +115,7 @@ public class AuthService
     {
         // Validate user credentials
         var user = await _userRepository.GetUserByUsernameAsync(request.Username);
-        if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password))
+        if (user is null || !BC.EnhancedVerify(request.Password, user.Password))
         {
             throw new InvalidCredentialException("Invalid username or password.");
         }
@@ -183,9 +198,9 @@ public class AuthService
         // Generate a verification code
         var verificationCode = GenerateVerificationCode();
         // using redis repository to store the verification code
-        await _redisRepository.SaveVerifyResetCodeAsync(request.Email, verificationCode, TimeSpan.FromMilliseconds(_verifyResetPassCodeSettings.ExpireMilli));
+        await SaveVerifyResetCodeAsync(request.Email, verificationCode);
         // Send the verification code via email
-        await _mailService.SendEmailAsync(request.Email, _verifyResetPassCodeSettings.Subject, _verifyResetPassCodeSettings.Body.Replace("{code}", verificationCode));
+        await _mailService.SendEmailAsync(request.Email, _verifyResetPassCodeSettings.Mail.Subject, _verifyResetPassCodeSettings.Mail.Body.Replace("{code}", verificationCode));
 
     }
     private string GenerateVerificationCode(int length = 12, string allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
@@ -193,5 +208,10 @@ public class AuthService
         var random = new Random();
         return new string(Enumerable.Repeat(allowedChars, length)
             .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+    private async Task SaveVerifyResetCodeAsync(string email, string verificationCode)
+    {
+        var key = $"{_verifyResetPassCodeSettings.KeyPrefVerificationResetPassCode}:{email}";
+        await _redisRepository.SetValueAsync(key, verificationCode, TimeSpan.FromMilliseconds(_verifyResetPassCodeSettings.ExpireMilli));
     }
 }

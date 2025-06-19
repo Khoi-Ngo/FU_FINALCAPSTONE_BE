@@ -18,6 +18,19 @@ public class AuthController : BaseController
         _authService = authService;
     }
     /// <summary>
+    /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
+    /// </summary>
+    [HttpGet("refresh-token")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Refresh(
+        [FromHeader(Name = "AccessToken")] string accessToken,
+        [FromHeader(Name = "RefreshToken")] string refreshToken)
+    {
+        var res = await _authService.RefreshAsync(accessToken, refreshToken);
+        return Ok(res);
+    }
+
+    /// <summary>
     /// Login using Google authentication.
     /// </summary>
     /// <returns>Returns authentication result using Access Token of GG SSO.</returns>
@@ -77,22 +90,12 @@ public class AuthController : BaseController
         return Ok("Password reset successful.");
     }
 
-    /// <summary>
-    /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
-    /// </summary>
-    [HttpGet("refresh-token")]
-    [AllowAnonymous]
-    public async Task<IActionResult> DemoRefreshTokenWithRedis()
-    {
-        var res = await _authService.RefreshAsync(AccessToken, RefreshToken);
-        return Ok(res);
-    }
 
     /// <summary>
     /// Logs out the current user and blacklists the access token.
     /// </summary>
     [HttpGet("logout")]
-    public async Task<IActionResult> DemoLogoutWithRedis()
+    public async Task<IActionResult> Logout()
     {
         await _authService.LogoutAsync(AccessToken);
         return Ok("Logout successful.");

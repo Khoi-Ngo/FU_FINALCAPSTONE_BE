@@ -15,14 +15,6 @@ public interface IRedisRepository
     Task<bool> KeyExistsAsync(string key);
     Task<bool> ValueExistsAsync(string value);
     Task<string> GetValueAsync(string key);
-    Task<bool> IsAccessTokenExisted(string accessToken);
-    Task<bool> IsUsernameExisted(string username);
-    Task<string> GetRefreshTokenAsync(string username);
-    Task BlacklistAccessTokenAsync(string accessToken, TimeSpan expiry);
-    Task StoreRefreshTokenAsync(string username, string refreshToken, TimeSpan timeSpan);
-    Task SaveVerifyResetCodeAsync(string email, string verificationCode, TimeSpan expiry);
-    Task<bool> IsValidVerifyResetCodeAsync(string email, string verificationCode);
-    Task RemoveVerifyResetCodeAsync(string email);
 }
 
 public class AppRedisRepository : IRedisRepository
@@ -30,12 +22,10 @@ public class AppRedisRepository : IRedisRepository
 
 
     private readonly IDatabase _database;
-    private readonly RedisSettings _redisSettings;
 
-    public AppRedisRepository(IDatabase database, RedisSettings redisSettings)
+    public AppRedisRepository(IDatabase database)
     {
         _database = database;
-        _redisSettings = redisSettings;
     }
 
     // Add or update a key-value pair
@@ -75,53 +65,4 @@ public class AppRedisRepository : IRedisRepository
         return value.ToString();
     }
 
-    public async Task<bool> IsAccessTokenExisted(string accessToken)
-    {
-        var key = $"{_redisSettings.KeyPrefExpireAccessToken}:{accessToken}";
-        return await _database.KeyExistsAsync(key);
-    }
-    public async Task<bool> IsUsernameExisted(string username)
-    {
-        var key = $"{_redisSettings.KeyPrefRefreshToken}:{username}";
-        return await _database.KeyExistsAsync(key);
-    }
-    public async Task<string> GetRefreshTokenAsync(string username)
-    {
-        var key = $"{_redisSettings.KeyPrefRefreshToken}:{username}";
-        return (await _database.StringGetAsync(key)).ToString();
-    }
-
-    public Task BlacklistAccessTokenAsync(string accessToken, TimeSpan expiry)
-    {
-        var key = $"{_redisSettings.KeyPrefExpireAccessToken}:{accessToken}";
-        return _database.StringSetAsync(key, _redisSettings.FormatValueExpireToken, expiry);
-    }
-
-    public async Task StoreRefreshTokenAsync(string username, string refreshToken, TimeSpan timeSpan)
-    {
-        var key = $"{_redisSettings.KeyPrefRefreshToken}:{username}";
-        await _database.StringSetAsync(key, refreshToken, timeSpan);
-    }
-
-    public Task SaveVerifyResetCodeAsync(string email, string verificationCode, TimeSpan expiry)
-    {
-        var key = $"{_redisSettings.KeyPrefVerificationResetPassCode}:{email}";
-        return _database.StringSetAsync(key, verificationCode, expiry);
-    }
-
-    public Task<bool> IsValidVerifyResetCodeAsync(string email, string verificationCode)
-    {
-        var key = $"{_redisSettings.KeyPrefVerificationResetPassCode}:{email}";
-        return _database.StringGetAsync(key).ContinueWith(task =>
-        {
-            var value = task.Result.ToString();
-            return value == verificationCode;
-        });
-    }
-
-    public Task RemoveVerifyResetCodeAsync(string email)
-    {
-        var key = $"{_redisSettings.KeyPrefVerificationResetPassCode}:{email}";
-        return _database.KeyDeleteAsync(key);
-    }
 }

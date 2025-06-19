@@ -52,7 +52,7 @@ namespace AISEA.ApiService.BAL.Services.User
             var users = await _userRepository.GetActiveUsersAsync();
             return _mapper.Map<List<GetUserListResponse>>(users);
         }
-        public async Task<GetUserDetailResponse> GetUserByIdAsync(int id)
+        public async Task<GetUserDetailResponse> GetUserByIdAsync(long id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user is null)
@@ -63,7 +63,7 @@ namespace AISEA.ApiService.BAL.Services.User
             return _mapper.Map<GetUserDetailResponse>(user);
         }
 
-        public async Task UpdateUserAsync(int id, UpdateUserRequest request)
+        public async Task UpdateUserAsync(long id, UpdateUserRequest request)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user is null)
@@ -75,7 +75,7 @@ namespace AISEA.ApiService.BAL.Services.User
             await _userRepository.UpdateAsync(user);
         }
 
-        public async Task DisableUserAsync(int id)
+        public async Task DisableUserAsync(long id)
         {
             var user = await _userRepository.GetByIdAsync(id);
 

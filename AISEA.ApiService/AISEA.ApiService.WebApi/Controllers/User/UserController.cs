@@ -64,13 +64,12 @@ public class UserController : BaseController
         var users = await _userService.GetAllActiveUsersAsync();
         return Ok(users);
     }
-
     //get user by id
     /// <summary>
     /// Retrieves a user by their ID.
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(int id)
+    public async Task<IActionResult> GetUserById(long id)
     {
         var user = await _userService.GetUserByIdAsync(id);
         return Ok(user);
@@ -81,7 +80,7 @@ public class UserController : BaseController
     /// Updates an existing user.
     /// </summary>
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
+    public async Task<IActionResult> UpdateUser(long id, [FromBody] UpdateUserRequest request)
     {
         await _userService.UpdateUserAsync(id, request);
         return Ok("Updated successfully");
@@ -92,7 +91,7 @@ public class UserController : BaseController
     /// Disables a user by their ID.
     /// </summary>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DisableUser(int id)
+    public async Task<IActionResult> DisableUser(long id)
     {
         await _userService.DisableUserAsync(id);
         return Ok("User disabled successfully");

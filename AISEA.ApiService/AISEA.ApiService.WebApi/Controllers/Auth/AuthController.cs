@@ -23,10 +23,9 @@ public class AuthController : BaseController
     [HttpGet("refresh-token")]
     [AllowAnonymous]
     public async Task<IActionResult> Refresh(
-        [FromHeader(Name = "AccessToken")] string accessToken,
         [FromHeader(Name = "RefreshToken")] string refreshToken)
     {
-        var res = await _authService.RefreshAsync(accessToken, refreshToken);
+        var res = await _authService.RefreshAsync(AccessToken, RefreshToken);
         return Ok(res);
     }
 

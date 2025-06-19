@@ -38,7 +38,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Role
         /// <param name="id">The ID of the role.</param>
         /// <returns>The role with the specified ID.</returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetRoleById(int id)
+        public async Task<IActionResult> GetRoleById(long id)
         {
             var res = await _roleService.GetRoleByIdAsync(id);
             return Ok(res);
@@ -63,7 +63,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Role
         /// <param name="role">The updated role information.</param>
         /// <returns>The updated role.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleRequest role)
+        public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
         {
             await _roleService.UpdateRoleAsync(id, role);
             return Ok("Updated successfully");

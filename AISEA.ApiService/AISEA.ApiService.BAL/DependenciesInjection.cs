@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.BAL.Services.Auth;
+using AISEA.ApiService.BAL.Services.Role;
 using AISEA.ApiService.BAL.Services.User;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -22,6 +23,7 @@ namespace AISEA.ApiService.BAL
             //adding business logic service for use-cases
             services.AddScoped<AuthService>();
             services.AddScoped<UserService>();
+            services.AddScoped<RoleService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

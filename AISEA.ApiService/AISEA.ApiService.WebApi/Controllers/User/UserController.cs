@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services.User;
+using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
@@ -95,6 +96,25 @@ public class UserController : BaseController
     {
         await _userService.DisableUserAsync(id);
         return Ok("User disabled successfully");
+    }
+    /// <summary>
+    /// Retrieves paginated users from the system.
+    /// </summary>
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetAllUsersPaged([FromQuery] PaginationRequest request)
+    {
+        var result = await _userService.GetAllUsersPagedAsync(request);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves paginated active users from the system.
+    /// </summary>
+    [HttpGet("active/paged")]
+    public async Task<IActionResult> GetAllActiveUsersPaged([FromQuery] PaginationRequest request)
+    {
+        var result = await _userService.GetAllActiveUsersPagedAsync(request);
+        return Ok(result);
     }
 
 }

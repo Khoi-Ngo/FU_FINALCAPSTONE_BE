@@ -40,6 +40,29 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Include(u => u.Role)
                 .ToListAsync();
         }
+        public async Task<(IEnumerable<User> Users, int TotalCount)> GetUsersPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users.Include(u => u.Role);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<(IEnumerable<User> Users, int TotalCount)> GetActiveUsersPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users
+                .Where(u => u.Status == EUserStatus.ACTIVE)
+                .Include(u => u.Role);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
 
     }
 }

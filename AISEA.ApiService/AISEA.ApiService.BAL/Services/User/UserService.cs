@@ -1,6 +1,8 @@
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
+using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.User;
 using AISEA.ApiService.SHARED.Exceptions;
 using AutoMapper;
@@ -91,6 +93,28 @@ namespace AISEA.ApiService.BAL.Services.User
             user.DeletedAt = DateTime.UtcNow;
             user.IsDeleted = true;
             await _userRepository.UpdateAsync(user);
+        }
+        public async Task<PagedResult<GetUserListResponse>> GetAllUsersPagedAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetUsersPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetUserListResponse>
+            {
+                Items = _mapper.Map<List<GetUserListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+        public async Task<PagedResult<GetUserListResponse>> GetAllActiveUsersPagedAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetActiveUsersPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetUserListResponse>
+            {
+                Items = _mapper.Map<List<GetUserListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
         }
     }
 }

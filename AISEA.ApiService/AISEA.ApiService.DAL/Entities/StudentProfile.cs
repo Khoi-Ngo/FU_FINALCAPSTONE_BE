@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.ApiService.DAL.Abstract;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
@@ -18,18 +19,13 @@ public partial class StudentProfile : BaseEntity
 
     public DateTimeOffset EnrolledAt { get; set; }
 
-    public bool DoGraduate { get; set; }
+    public bool DoGraduate { get; set; } = false;
 
-    [Column("GPA")]
-    public double Gpa { get; set; }
-
-    [StringLength(255)]
-    public string Status { get; set; } = null!;
+    public EStudentProfileStatus Status { get; set; } = EStudentProfileStatus.ACTIVE;
 
     [Column(TypeName = "text")]
-    public string CareerGoal { get; set; } = null!;
+    public string? CareerGoal { get; set; }
 
-    public long TotalCreditsEarnt { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("StudentProfile")]

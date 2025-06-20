@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.ApiService.DAL.Abstract;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
@@ -23,8 +24,7 @@ public partial class StaffProfile : BaseEntity
     [StringLength(255)]
     public string Position { get; set; } = null!;
 
-    [StringLength(255)]
-    public string Status { get; set; } = null!;
+    public EStaffProfileStatus Status { get; set; } = EStaffProfileStatus.ACTIVE;
 
     public DateTimeOffset? StartWorkAt { get; set; }
 

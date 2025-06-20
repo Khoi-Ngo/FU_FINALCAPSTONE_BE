@@ -25,6 +25,10 @@ public static class DependenciesInjection
         #region Repositories
         services.AddScoped<RoleRepository>();
         services.AddScoped<UserRepository>();
+        services.AddScoped<ChatSessionRepository>();
+        services.AddScoped<MessageRepository>();
+        services.AddScoped<NotificationRepository>();
+
         #endregion
 
         #region  Redis
@@ -57,6 +61,7 @@ public static class DependenciesInjection
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<IMailService, MailService>();
         services.AddScoped<IChatOpenAIService, ChatOpenAIService>();
+
 
         return services;
     }

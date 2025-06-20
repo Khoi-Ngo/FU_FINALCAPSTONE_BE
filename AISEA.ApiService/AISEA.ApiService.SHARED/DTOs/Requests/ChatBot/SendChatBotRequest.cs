@@ -11,5 +11,6 @@ namespace AISEA.ApiService.SHARED.DTOs.Requests.ChatBot
     {
         [Required(ErrorMessage = "Message is required.")]
         public string Message { get; set; }
+        public long ChatSessionId { get; set; }
     }
 }

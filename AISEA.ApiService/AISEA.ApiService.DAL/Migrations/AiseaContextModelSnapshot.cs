@@ -22,7 +22,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.ChatSession", b =>
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.AdvisorySession1to1", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,6 +57,9 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<long>("StudentId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -72,11 +75,13 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id")
-                        .HasName("chatsession_id_primary");
+                        .HasName("advisorysession1to1_id_primary");
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("ChatSession");
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("AdvisorySession1to1");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Message", b =>
@@ -88,7 +93,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("ChatSessionId")
+                    b.Property<long>("AdvisorySession1to1Id")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Content")
@@ -125,7 +130,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("message_id_primary");
 
-                    b.HasIndex("ChatSessionId");
+                    b.HasIndex("AdvisorySession1to1Id");
 
                     b.HasIndex("SenderId");
 
@@ -164,7 +169,6 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Link")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Note")
@@ -274,7 +278,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTimeOffset>("EndWorkAt")
+                    b.Property<DateTimeOffset?>("EndWorkAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<bool>("IsDeleted")
@@ -288,7 +292,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTimeOffset>("StartWorkAt")
+                    b.Property<DateTimeOffset?>("StartWorkAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Status")
@@ -389,7 +393,8 @@ namespace AISEA.ApiService.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -463,32 +468,44 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.ChatSession", b =>
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.AdvisorySession1to1", b =>
                 {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.User", "Staff")
-                        .WithMany("ChatSessions")
+                    b.HasOne("AISEA.ApiService.DAL.Entities.StaffProfile", "Staff")
+                        .WithMany("AdvisorySessions1to1")
                         .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("chatsession_staffid_foreign");
+                        .HasConstraintName("advisorysession1to1_staffid_foreign");
+
+                    b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "Student")
+                        .WithMany("AdvisorySessions1to1")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("advisorysession1to1_studentid_foreign");
 
                     b.Navigation("Staff");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Message", b =>
                 {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.ChatSession", "ChatSession")
+                    b.HasOne("AISEA.ApiService.DAL.Entities.AdvisorySession1to1", "AdvisorySession1to1")
                         .WithMany("Messages")
-                        .HasForeignKey("ChatSessionId")
+                        .HasForeignKey("AdvisorySession1to1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("message_chatsessionid_foreign");
+                        .HasConstraintName("message_advisorysession1to1id_foreign");
 
                     b.HasOne("AISEA.ApiService.DAL.Entities.User", "Sender")
                         .WithMany("Messages")
                         .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("message_senderid_foreign");
 
-                    b.Navigation("ChatSession");
+                    b.Navigation("AdvisorySession1to1");
 
                     b.Navigation("Sender");
                 });
@@ -498,6 +515,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("notification_userid_foreign");
 
@@ -509,6 +527,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.User", "User")
                         .WithMany("StaffProfiles")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("staffprofile_userid_foreign");
 
@@ -520,6 +539,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.User", "User")
                         .WithMany("StudentProfiles")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("studentprofile_userid_foreign");
 
@@ -531,13 +551,14 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("user_roleid_foreign");
 
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.ChatSession", b =>
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.AdvisorySession1to1", b =>
                 {
                     b.Navigation("Messages");
                 });
@@ -547,10 +568,18 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StaffProfile", b =>
+                {
+                    b.Navigation("AdvisorySessions1to1");
+                });
+
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudentProfile", b =>
+                {
+                    b.Navigation("AdvisorySessions1to1");
+                });
+
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.User", b =>
                 {
-                    b.Navigation("ChatSessions");
-
                     b.Navigation("Messages");
 
                     b.Navigation("Notifications");

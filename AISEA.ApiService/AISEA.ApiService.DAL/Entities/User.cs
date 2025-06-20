@@ -33,12 +33,11 @@ public partial class User : BaseEntity
     public string LastName { get; set; } = null!;
 
     public DateTimeOffset? DateOfBirth { get; set; }
+
+    [StringLength(255)]
     public string? AvatarUrl { get; set; }
     public EUserStatus Status { get; set; } = EUserStatus.ACTIVE;
     public long RoleId { get; set; }
-
-    [InverseProperty("Staff")]
-    public virtual ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
 
     [InverseProperty("Sender")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();

@@ -25,7 +25,7 @@ public static class DependenciesInjection
         #region Repositories
         services.AddScoped<RoleRepository>();
         services.AddScoped<UserRepository>();
-        services.AddScoped<ChatSessionRepository>();
+        services.AddScoped<AdvisorySession1to1Repository>();
         services.AddScoped<MessageRepository>();
         services.AddScoped<NotificationRepository>();
 

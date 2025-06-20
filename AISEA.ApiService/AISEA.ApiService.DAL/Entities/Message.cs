@@ -20,11 +20,11 @@ public partial class Message : BaseEntity
 
     public long SenderId { get; set; }
 
-    public long ChatSessionId { get; set; }
+    public long AdvisorySession1to1Id { get; set; }
 
-    [ForeignKey("ChatSessionId")]
+    [ForeignKey("AdvisorySession1to1Id")]
     [InverseProperty("Messages")]
-    public virtual ChatSession ChatSession { get; set; } = null!;
+    public virtual AdvisorySession1to1 AdvisorySession1to1 { get; set; } = null!;
 
     [ForeignKey("SenderId")]
     [InverseProperty("Messages")]

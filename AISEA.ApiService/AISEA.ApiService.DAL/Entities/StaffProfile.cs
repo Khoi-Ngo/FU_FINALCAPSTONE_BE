@@ -26,13 +26,16 @@ public partial class StaffProfile : BaseEntity
     [StringLength(255)]
     public string Status { get; set; } = null!;
 
-    public DateTimeOffset StartWorkAt { get; set; }
+    public DateTimeOffset? StartWorkAt { get; set; }
 
-    public DateTimeOffset EndWorkAt { get; set; }
+    public DateTimeOffset? EndWorkAt { get; set; }
 
     public long UserId { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("StaffProfiles")]
     public virtual User User { get; set; } = null!;
+
+    [InverseProperty("Staff")]
+    public virtual ICollection<AdvisorySession1to1> AdvisorySessions1to1 { get; set; } = new List<AdvisorySession1to1>();
 }

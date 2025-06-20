@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
 
-[Table("ChatSession")]
-public partial class ChatSession : BaseEntity
+[Table("AdvisorySession1to1")]
+public partial class AdvisorySession1to1 : BaseEntity
 {
     [Key]
     [Column("id")]
@@ -24,10 +24,16 @@ public partial class ChatSession : BaseEntity
 
     public long Type { get; set; }
 
-    [InverseProperty("ChatSession")]
+    public long StudentId { get; set; }
+
+    [InverseProperty("AdvisorySession1to1")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 
     [ForeignKey("StaffId")]
-    [InverseProperty("ChatSessions")]
-    public virtual User Staff { get; set; } = null!;
+    [InverseProperty("AdvisorySessions1to1")]
+    public virtual StaffProfile Staff { get; set; } = null!;
+
+    [ForeignKey("StudentId")]
+    [InverseProperty("AdvisorySessions1to1")]
+    public virtual StudentProfile Student { get; set; } = null!;
 }

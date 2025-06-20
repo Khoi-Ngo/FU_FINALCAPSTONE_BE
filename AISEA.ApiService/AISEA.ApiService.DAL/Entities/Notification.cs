@@ -21,7 +21,7 @@ public partial class Notification : BaseEntity
     public string Content { get; set; } = null!;
 
     [Column(TypeName = "text")]
-    public string Link { get; set; } = null!;
+    public string? Link { get; set; }
 
     public bool IsRead { get; set; }
 

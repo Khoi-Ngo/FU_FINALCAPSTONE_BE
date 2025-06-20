@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,23 +17,29 @@ public partial class User : BaseEntity
     [Column("id")]
     public long Id { get; set; }
 
-    [StringLength(255)]
+    [StringLength(50)]
     public string Username { get; set; } = null!;
 
     [StringLength(255)]
     public string Password { get; set; } = null!;
 
-    [StringLength(255)]
+    [StringLength(100)]
     public string Email { get; set; } = null!;
 
     [StringLength(255)]
+    public string? AvatarUrl { get; set; }
+
+    [StringLength(100)]
     public string FirstName { get; set; } = null!;
 
-    [StringLength(255)]
+    [StringLength(100)]
     public string LastName { get; set; } = null!;
 
     public DateTimeOffset? DateOfBirth { get; set; }
-    public string? AvatarUrl { get; set; }
+
+    [StringLength(255)]
+    public string? Address { get; set; }
+
     public EUserStatus Status { get; set; } = EUserStatus.ACTIVE;
     public long RoleId { get; set; }
 
@@ -55,4 +61,23 @@ public partial class User : BaseEntity
 
     [InverseProperty("User")]
     public virtual ICollection<StudentProfile> StudentProfiles { get; set; } = new List<StudentProfile>();
+
+    // New navigation properties
+    [InverseProperty("User")]
+    public virtual ICollection<AdvisorProfile> AdvisorProfiles { get; set; } = new List<AdvisorProfile>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<AcademicStaffProfile> AcademicStaffProfiles { get; set; } = new List<AcademicStaffProfile>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; } = new List<ConversationParticipant>();
+
+    [InverseProperty("Advisor")]
+    public virtual ICollection<AdvisorAvailabilitySlot> AdvisorAvailabilitySlots { get; set; } = new List<AdvisorAvailabilitySlot>();
+
+    [InverseProperty("Student")]
+    public virtual ICollection<Meeting> StudentMeetings { get; set; } = new List<Meeting>();
 }

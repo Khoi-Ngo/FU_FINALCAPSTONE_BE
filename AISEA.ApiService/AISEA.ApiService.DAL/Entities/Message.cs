@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
 
+
 [Table("Message")]
 public partial class Message : BaseEntity
 {
@@ -14,18 +15,16 @@ public partial class Message : BaseEntity
     [Column("id")]
     public long Id { get; set; }
 
-    public long ConversationId { get; set; }
-
-    public long SenderId { get; set; }
-
     [Column(TypeName = "text")]
     public string Content { get; set; } = null!;
 
-    public DateTimeOffset SendAt { get; set; }
+    public long SenderId { get; set; }
 
-    [ForeignKey("ConversationId")]
+    public long ChatSessionId { get; set; }
+
+    [ForeignKey("ChatSessionId")]
     [InverseProperty("Messages")]
-    public virtual Conversation Conversation { get; set; } = null!;
+    public virtual ChatSession ChatSession { get; set; } = null!;
 
     [ForeignKey("SenderId")]
     [InverseProperty("Messages")]

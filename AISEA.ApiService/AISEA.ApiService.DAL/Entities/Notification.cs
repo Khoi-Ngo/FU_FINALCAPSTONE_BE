@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,15 +14,18 @@ public partial class Notification : BaseEntity
     [Column("id")]
     public long Id { get; set; }
 
-    public long UserId { get; set; }
+    [StringLength(255)]
+    public string Title { get; set; } = null!;
 
-    [StringLength(500)]
+    [Column(TypeName = "text")]
     public string Content { get; set; } = null!;
 
-    public bool IsRead { get; set; } = false;
+    [Column(TypeName = "text")]
+    public string Link { get; set; } = null!;
 
-    [StringLength(255)]
-    public string? LinkUrl { get; set; }
+    public bool IsRead { get; set; }
+
+    public long UserId { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Notifications")]

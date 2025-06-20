@@ -9,6 +9,6 @@ namespace AISEA.ApiService.SHARED.Interfaces
 {
     public interface IChatOpenAIService
     {
-        Task<ChatBotResponse> SendMsgAsync(string message);
+        Task<ChatBotResponse> SendMsgAsync(string prompt);
     }
 }

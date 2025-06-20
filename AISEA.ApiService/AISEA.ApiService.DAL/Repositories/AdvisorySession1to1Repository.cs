@@ -8,9 +8,9 @@ using AISEA.ApiService.DAL.Persistence;
 
 namespace AISEA.ApiService.DAL.Repositories
 {
-    public class NotificationRepository : GenericRepository<Notification>
+    public class AdvisorySession1to1Repository : GenericRepository<AdvisorySession1to1>
     {
-        public NotificationRepository(AiseaContext context) : base(context)
+        public AdvisorySession1to1Repository(AiseaContext context) : base(context)
         {
         }
     }

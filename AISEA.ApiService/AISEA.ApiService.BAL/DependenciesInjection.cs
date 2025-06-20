@@ -7,6 +7,7 @@ using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.BAL.Services.Role;
+using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.BAL.Services.User;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -26,6 +27,8 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<UserService>();
             services.AddScoped<RoleService>();
             services.AddScoped<ChatBotService>();
+            services.AddScoped<StudentProfileService>();
+            services.AddScoped<StaffProfileService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

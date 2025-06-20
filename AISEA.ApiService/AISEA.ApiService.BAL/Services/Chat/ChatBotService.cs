@@ -47,7 +47,6 @@ public class ChatBotService
             var student = await ValidateAndGetStudentAsync(accessToken);
             var session1To1 = await GetOrCreateSessionAsync(request, student);
             
-            // Save student's message
             var studentMessage = CreateMessage(request.Message, student.Id, session1To1.Id);
             await _messageRepository.CreateAsync(studentMessage);
 
@@ -60,7 +59,6 @@ public class ChatBotService
             );
             var aiResponse = await _chatOpenAIService.SendMsgAsync(prompt);
 
-            // Save bot's response
             var botMessage = CreateMessage(aiResponse.Message, _chatBotSettings.SystemUser.Id, session1To1.Id);
             await _messageRepository.CreateAsync(botMessage);
 

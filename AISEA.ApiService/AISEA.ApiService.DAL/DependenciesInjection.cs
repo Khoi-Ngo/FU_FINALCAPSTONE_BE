@@ -23,11 +23,14 @@ public static class DependenciesInjection
         #endregion
 
         #region Repositories
+        
         services.AddScoped<RoleRepository>();
         services.AddScoped<UserRepository>();
         services.AddScoped<AdvisorySession1to1Repository>();
         services.AddScoped<MessageRepository>();
         services.AddScoped<NotificationRepository>();
+        services.AddScoped<StaffProfileRepository>();
+        services.AddScoped<StudentProfileRepository>();
 
         #endregion
 

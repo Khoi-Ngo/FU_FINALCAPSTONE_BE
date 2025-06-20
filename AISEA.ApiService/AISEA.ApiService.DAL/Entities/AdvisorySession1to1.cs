@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.ApiService.DAL.Abstract;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
@@ -20,9 +21,9 @@ public partial class AdvisorySession1to1 : BaseEntity
     public long StaffId { get; set; }
 
     [StringLength(255)]
-    public string Status { get; set; } = null!;
+    public EAdvisorySessionStatus Status { get; set; } = EAdvisorySessionStatus.ACTIVE;
 
-    public long Type { get; set; }
+    public EAdvisorySessionType Type { get; set; }
 
     public long StudentId { get; set; }
 

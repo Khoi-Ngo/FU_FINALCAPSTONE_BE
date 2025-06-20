@@ -38,4 +38,8 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidAccessTokenException(string message) : base(message) { }
     }
+    public class InvalidAccessSession : Exception
+    {
+        public InvalidAccessSession(string message) : base(message) { }
+    }
 }

@@ -32,8 +32,9 @@ public partial class StudentProfile : BaseEntity
     public long TotalCreditsEarnt { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("StudentProfiles")]
+    [InverseProperty("StudentProfile")]
     public virtual User User { get; set; } = null!;
+
 
     [InverseProperty("Student")]
     public virtual ICollection<AdvisorySession1to1> AdvisorySessions1to1 { get; set; } = new List<AdvisorySession1to1>();

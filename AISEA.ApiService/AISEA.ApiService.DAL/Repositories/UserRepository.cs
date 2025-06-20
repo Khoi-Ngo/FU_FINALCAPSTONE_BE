@@ -18,15 +18,15 @@ namespace AISEA.ApiService.DAL.Repositories
         //get user by email
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<User> GetUserByEmailOrUsernameAsync(string email, string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
@@ -36,7 +36,7 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<IEnumerable<User>> GetActiveUsersAsync()
         {
             return await _context.Users
-                .Where(u => u.Status == EUserStatus.ACTIVE)
+                .Where(u => u.Status == EUserStatus.ACTIVE && u.IsDeleted == false)
                 .Include(u => u.Role)
                 .ToListAsync();
         }
@@ -54,7 +54,7 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<(IEnumerable<User> Users, int TotalCount)> GetActiveUsersPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
-                .Where(u => u.Status == EUserStatus.ACTIVE)
+                .Where(u => u.Status == EUserStatus.ACTIVE && u.IsDeleted == false)
                 .Include(u => u.Role);
             var totalCount = await query.CountAsync();
             var users = await query
@@ -64,5 +64,9 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
+        public async Task<User> GetUserByUsernameWStudentProfileAsync(string studentName)
+        {
+            return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentName && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+        }
     }
 }

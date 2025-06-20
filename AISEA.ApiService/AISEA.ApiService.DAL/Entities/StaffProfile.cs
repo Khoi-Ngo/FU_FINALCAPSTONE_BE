@@ -33,8 +33,9 @@ public partial class StaffProfile : BaseEntity
     public long UserId { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("StaffProfiles")]
+    [InverseProperty("StaffProfile")]
     public virtual User User { get; set; } = null!;
+
 
     [InverseProperty("Staff")]
     public virtual ICollection<AdvisorySession1to1> AdvisorySessions1to1 { get; set; } = new List<AdvisorySession1to1>();

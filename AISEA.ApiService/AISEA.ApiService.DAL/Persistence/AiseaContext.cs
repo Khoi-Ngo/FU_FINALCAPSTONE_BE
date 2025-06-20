@@ -94,8 +94,8 @@ public partial class AiseaContext : DbContext
             entity.HasKey(e => e.Id).HasName("staffprofile_id_primary");
 
             entity.HasOne(d => d.User)
-                .WithMany(p => p.StaffProfiles)
-                .HasForeignKey(d => d.UserId)
+                .WithOne(p => p.StaffProfile)
+                .HasForeignKey<StaffProfile>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("staffprofile_userid_foreign");
         });
@@ -105,8 +105,8 @@ public partial class AiseaContext : DbContext
             entity.HasKey(e => e.Id).HasName("studentprofile_id_primary");
 
             entity.HasOne(d => d.User)
-                .WithMany(p => p.StudentProfiles)
-                .HasForeignKey(d => d.UserId)
+                .WithOne(p => p.StudentProfile)
+                .HasForeignKey<StudentProfile>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("studentprofile_userid_foreign");
         });

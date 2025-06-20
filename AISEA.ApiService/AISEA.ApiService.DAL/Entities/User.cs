@@ -49,9 +49,9 @@ public partial class User : BaseEntity
     [InverseProperty("Users")]
     public virtual Role Role { get; set; } = null!;
 
-    [InverseProperty("User")]
-    public virtual ICollection<StaffProfile> StaffProfiles { get; set; } = new List<StaffProfile>();
+   [InverseProperty("User")]
+    public virtual StaffProfile? StaffProfile { get; set; }
 
     [InverseProperty("User")]
-    public virtual ICollection<StudentProfile> StudentProfiles { get; set; } = new List<StudentProfile>();
+    public virtual StudentProfile? StudentProfile { get; set; }
 }

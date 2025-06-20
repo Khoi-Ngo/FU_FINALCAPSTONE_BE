@@ -19,7 +19,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
             _httpClient = new HttpClient();
         }
 
-        public async Task<ChatBotResponse> SendMsgAsync(string message)
+        public async Task<ChatBotResponse> SendMsgAsync(string prompt)
         {
             var _apiKey = _chatBotSettings.ApiKey;
             var _apiUrl = _chatBotSettings.ApiUrl;
@@ -32,7 +32,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
                 model = _model,
                 messages = new[]
                 {
-                    new { role = "user", content = message }
+                    new { role = "user", content = prompt }
                 }
             };
 

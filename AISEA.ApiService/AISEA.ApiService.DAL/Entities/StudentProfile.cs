@@ -21,7 +21,6 @@ public partial class StudentProfile : BaseEntity
 
     public bool DoGraduate { get; set; } = false;
 
-    public EStudentProfileStatus Status { get; set; } = EStudentProfileStatus.ACTIVE;
 
     [Column(TypeName = "text")]
     public string? CareerGoal { get; set; }

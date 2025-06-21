@@ -24,7 +24,6 @@ public partial class StaffProfile : BaseEntity
     [StringLength(255)]
     public string Position { get; set; } = null!;
 
-    public EStaffProfileStatus Status { get; set; } = EStaffProfileStatus.ACTIVE;
 
     public DateTimeOffset? StartWorkAt { get; set; }
 

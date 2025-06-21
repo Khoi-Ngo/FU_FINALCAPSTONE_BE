@@ -26,7 +26,7 @@ namespace AISEA.ApiService.DAL.Repositories
         }
         public async Task<User> GetUserByEmailOrUsernameAsync(string email, string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email || u.Username == username);
         }
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
@@ -66,7 +66,45 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task<User> GetUserByUsernameWStudentProfileAsync(string studentName)
         {
-            return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentName && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+            return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentName && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT);
+        }
+
+        public async Task<(object users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users
+                .Where(u => u.RoleId == (int)EUserRole.STUDENT)
+                .Include(u => u.Role)
+                .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<(object users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users
+                .Where(u => u.RoleId != (int)EUserRole.STUDENT)
+                .Include(u => u.Role)
+                .Include(u => u.StaffProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<User> GetStudentByIdAsync(long id)
+        {
+            return await _context.Users.Include(u => u.Role).Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Id == id && u.RoleId == (int)EUserRole.STUDENT);
+        }
+        public async Task<User> GetStaffByIdAsync(long id)
+        {
+            return await _context.Users.Include(u => u.Role).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Id == id && u.RoleId != (int)EUserRole.STUDENT);
+
         }
     }
 }

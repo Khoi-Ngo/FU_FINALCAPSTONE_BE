@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AISEA.ApiService.DAL.Infrastructure;
 using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.DAL.Repositories;
@@ -23,7 +25,7 @@ public static class DependenciesInjection
         #endregion
 
         #region Repositories
-        
+
         services.AddScoped<RoleRepository>();
         services.AddScoped<UserRepository>();
         services.AddScoped<AdvisorySession1to1Repository>();
@@ -66,6 +68,12 @@ public static class DependenciesInjection
         services.AddScoped<IChatOpenAIService, ChatOpenAIService>();
 
 
+
+        services.Configure<JsonSerializerOptions>(options =>
+        {
+            options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            // options.WriteIndented = false;
+        });
         return services;
     }
 }

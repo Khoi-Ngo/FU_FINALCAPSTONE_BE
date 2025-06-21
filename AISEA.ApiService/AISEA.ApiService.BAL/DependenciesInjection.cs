@@ -33,6 +33,7 @@ namespace AISEA.ApiService.BAL
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+            // Add BotMessageQueueService
 
             //adding business logic validators
             services.AddValidatorsFromAssembly(

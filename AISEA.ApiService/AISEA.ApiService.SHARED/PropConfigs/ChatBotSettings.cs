@@ -12,15 +12,18 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public string ApiUrl { get; set; }
         public string Model { get; set; }
         public string DefaultErrorResponse { get; set; }
-        public SystemUserConfig SystemUser { get; set; }
+        public SystemUserConfig SystemBotUser { get; set; }
+        public string StudentCachePrefix { get; set; }
+        public int StudentCacheExpiryHrs { get; set; }
+        public string SessionCachePrefix { get; set; }
+        public int SessionCacheExpiryDays { get; set; }
 
-        public class SystemUserConfig
-        {
-            public int Id { get; set; }
-            public string UserName { get; set; }
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public int StaffId { get; set; }
-        }
+    }
+    public class SystemUserConfig
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int StaffId { get; set; }
     }
 }

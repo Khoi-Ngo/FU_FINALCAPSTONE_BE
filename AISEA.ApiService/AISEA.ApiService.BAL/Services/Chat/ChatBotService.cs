@@ -95,14 +95,12 @@ public class ChatBotService
             return cachedUser;
         }
 
-        // Fetch from database
         var student = await _userRepository.GetUserByUsernameWStudentProfileAsync(studentName);
         if (student?.StudentProfile == null)
         {
             throw new InvalidAccessSession("Invalid student profile");
         }
 
-        // Cache user for 1 hour
         await _redisRepository.SetValueAsync(cacheKey, student, TimeSpan.FromHours(_chatBotSettings.StudentCacheExpiryHrs));
         return student;
     }

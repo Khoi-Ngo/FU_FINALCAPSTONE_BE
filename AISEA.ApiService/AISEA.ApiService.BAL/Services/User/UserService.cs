@@ -1,3 +1,4 @@
+using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
@@ -13,12 +14,16 @@ namespace AISEA.ApiService.BAL.Services.User
     public class UserService
     {
         private readonly UserRepository _userRepository;
+        private readonly StudentProfileRepository _studentProfileRepository;
+        private readonly StaffProfileRepository _staffProfileRepository;
         private readonly IMapper _mapper;
 
-        public UserService(UserRepository userRepository, IMapper mapper)
+        public UserService(UserRepository userRepository, IMapper mapper, StudentProfileRepository studentProfileRepository, StaffProfileRepository staffProfileRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _staffProfileRepository = staffProfileRepository;
+            _studentProfileRepository = studentProfileRepository;
         }
 
         public async Task CreateUserAsync(CreateUserRequest request)
@@ -54,27 +59,49 @@ namespace AISEA.ApiService.BAL.Services.User
             var users = await _userRepository.GetActiveUsersAsync();
             return _mapper.Map<List<GetUserListResponse>>(users);
         }
-        public async Task<GetUserDetailResponse> GetUserByIdAsync(long id)
+        public async Task<GetStudentDetailResponse> GetStudentByIdAsync(long id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-            if (user is null)
+            var student = await _userRepository.GetStudentByIdAsync(id);
+            if (student is null)
             {
-                throw new NotFoundException("User not found.");
+                throw new NotFoundException("Student not found.");
             }
 
-            return _mapper.Map<GetUserDetailResponse>(user);
+            return _mapper.Map<GetStudentDetailResponse>(student);
         }
 
-        public async Task UpdateUserAsync(long id, UpdateUserRequest request)
+        public async Task UpdateUserAsync(long id, UpdateStudentRequest request)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-            if (user is null)
+            var student = await _userRepository.GetStudentByIdAsync(id);
+            if (student is null)
             {
-                throw new NotFoundException("User not found.");
+                throw new NotFoundException("Student not found.");
             }
 
-            _mapper.Map(request, user);
-            await _userRepository.UpdateAsync(user);
+            _mapper.Map(request, student);
+            if (request.StudentDataUpdateRequest is not null)
+            {
+                var updateProfile = _mapper.Map(request.StudentDataUpdateRequest, student.StudentProfile);
+                await _studentProfileRepository.UpdateAsync(updateProfile);
+
+            }
+            await _userRepository.UpdateAsync(student);
+        }
+        public async Task UpdateUserAsync(long id, UpdateStaffRequest request)
+        {
+            var staff = await _userRepository.GetStaffByIdAsync(id);
+            if (staff is null)
+            {
+                throw new NotFoundException("Staff not found.");
+            }
+
+            _mapper.Map(request, staff);
+            if (request.StaffDataUpdateRequest is not null)
+            {
+                var updateProfile = _mapper.Map(request.StaffDataUpdateRequest, staff.StaffProfile);
+                await _staffProfileRepository.UpdateAsync(updateProfile);
+            }
+            await _userRepository.UpdateAsync(staff);
         }
 
         public async Task DisableUserAsync(long id)
@@ -115,6 +142,41 @@ namespace AISEA.ApiService.BAL.Services.User
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize
             };
+        }
+
+        public async Task<PagedResult<GetStudentListResponse>> GetAllStudentsPagedAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetStudentsPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
+        public async Task<PagedResult<GetStaffListResponse>> GetAllStaffsPagedAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetStaffsPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetStaffListResponse>
+            {
+                Items = _mapper.Map<List<GetStaffListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
+        public async Task<GetStaffDetailResponse> GetStaffByIdAsync(long id)
+        {
+            var staff = await _userRepository.GetStaffByIdAsync(id);
+            if (staff is null)
+            {
+                throw new NotFoundException("Staff not found.");
+            }
+
+            return _mapper.Map<GetStaffDetailResponse>(staff);
         }
     }
 }

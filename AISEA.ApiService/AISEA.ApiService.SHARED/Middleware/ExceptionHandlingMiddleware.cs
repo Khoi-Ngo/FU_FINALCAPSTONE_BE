@@ -85,6 +85,10 @@ public class ExceptionHandlingMiddleware
                 statusCode = (int)HttpStatusCode.NotFound;
                 message = exception.Message;
                 break;
+            case NotFoundException:
+                statusCode = (int)HttpStatusCode.NotFound;
+                message = exception.Message;
+                break;
             default:
                 logger.LogError(exception, "Unhandled exception");
                 statusCode = (int)HttpStatusCode.InternalServerError;

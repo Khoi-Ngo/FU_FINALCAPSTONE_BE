@@ -14,6 +14,7 @@ namespace AISEA.ApiService.BAL.Services.Chat;
 
 public class ChatBotService
 {
+    #region Init
     private readonly ILogger<ChatBotService> _logger;
     private readonly IChatOpenAIService _chatOpenAIService;
     private readonly ChatBotSettings _chatBotSettings;
@@ -39,6 +40,7 @@ public class ChatBotService
         _advisorySession1To1Repository = advisorySession1To1Repository;
         _messageRepository = messageRepository;
     }
+    #endregion
 
     public async Task<ChatBotResponse> SendMsgAsync(SendChatBotRequest request, string accessToken)
     {
@@ -46,7 +48,7 @@ public class ChatBotService
         {
             var student = await ValidateAndGetStudentAsync(accessToken);
             var session1To1 = await GetOrCreateSessionAsync(request, student);
-            
+
             var studentMessage = CreateMessage(request.Message, student.Id, session1To1.Id);
             await _messageRepository.CreateAsync(studentMessage);
 
@@ -78,12 +80,12 @@ public class ChatBotService
     {
         var studentName = _jWTService.GetUsernameFromToken(accessToken);
         var student = await _userRepository.GetUserByUsernameWStudentProfileAsync(studentName);
-        
+
         if (student?.StudentProfile == null)
         {
             throw new InvalidAccessSession("Invalid student profile");
         }
-        
+
         return student;
     }
 
@@ -104,10 +106,10 @@ public class ChatBotService
         {
             Title = title,
             StaffId = _chatBotSettings.SystemUser.StaffId,
-            Type = EAdvisorySessionType.BOT,
+            Type = EAdvisorySession1to1Type.BOT,
             StudentId = student.StudentProfile.Id
         };
-        
+
         await _advisorySession1To1Repository.CreateAsync(newSession);
         return newSession;
     }

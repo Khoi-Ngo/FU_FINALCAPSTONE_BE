@@ -22,9 +22,8 @@ public class UserController : BaseController
         _userService = userService;
     }
 
-    //create single user
     /// <summary>
-    /// Creates a new user with the provided information. Duplicate usernames or emails will result in bad request errors.
+    /// Creates a new user with the provided information. Duplicate usernames or emails will result in bad request errors. There are 3 cases : No profile, Student Profile only and Staff Profile only
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
@@ -33,7 +32,6 @@ public class UserController : BaseController
         return Ok(new { Message = "User created successfully." });
     }
 
-    //create multiple users
     /// <summary>
     /// Creates multiple users with the provided information. Duplicate usernames or emails will result in bad request errors.
     /// </summary>
@@ -44,7 +42,6 @@ public class UserController : BaseController
         return Ok(new { Message = "Users created successfully." });
     }
 
-    //get all users
     /// <summary>
     /// Retrieves all users from the system.
     /// </summary>
@@ -55,7 +52,6 @@ public class UserController : BaseController
         return Ok(users);
     }
 
-    //get all active users
     /// <summary>
     /// Retrieves all active users from the system.
     /// </summary>
@@ -65,29 +61,47 @@ public class UserController : BaseController
         var users = await _userService.GetAllActiveUsersAsync();
         return Ok(users);
     }
-    //get user by id
     /// <summary>
-    /// Retrieves a user by their ID.
+    /// Retrieves a student by ID.
     /// </summary>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(long id)
+    [HttpGet("student/{id}")]
+    public async Task<IActionResult> GetStudentById(long id)
     {
-        var user = await _userService.GetUserByIdAsync(id);
-        return Ok(user);
+        var student = await _userService.GetStudentByIdAsync(id);
+        return Ok(student);
     }
 
-    //update user
     /// <summary>
-    /// Updates an existing user.
+    /// Retrieves a student by ID.
     /// </summary>
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(long id, [FromBody] UpdateUserRequest request)
+    [HttpGet("staff/{id}")]
+    public async Task<IActionResult> GetStaffById(long id)
+    {
+        var staff = await _userService.GetStaffByIdAsync(id);
+        return Ok(staff);
+    }
+
+    /// <summary>
+    /// Updates an existing student.
+    /// </summary>
+    [HttpPut("student/{id}")]
+    public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
         await _userService.UpdateUserAsync(id, request);
         return Ok("Updated successfully");
     }
 
-    //disable user by id
+    /// <summary>
+    /// Updates an existing staff.
+    /// </summary>
+    [HttpPut("staff/{id}")]
+    public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
+    {
+        await _userService.UpdateUserAsync(id, request);
+        return Ok("Updated successfully");
+    }
+
+
     /// <summary>
     /// Disables a user by their ID.
     /// </summary>
@@ -116,5 +130,28 @@ public class UserController : BaseController
         var result = await _userService.GetAllActiveUsersPagedAsync(request);
         return Ok(result);
     }
+
+
+    /// <summary>
+    /// Retrieves paginated  STUDENT users from the system.
+    /// </summary>
+    [HttpGet("student/paged")]
+    public async Task<IActionResult> GetAllStudentsPaged([FromQuery] PaginationRequest request)
+    {
+        var result = await _userService.GetAllStudentsPagedAsync(request);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves paginated  STAFF users from the system.
+    /// </summary>
+    [HttpGet("staff/paged")]
+    public async Task<IActionResult> GetAllStaffsPaged([FromQuery] PaginationRequest request)
+    {
+        var result = await _userService.GetAllStaffsPagedAsync(request);
+        return Ok(result);
+    }
+
+
 
 }

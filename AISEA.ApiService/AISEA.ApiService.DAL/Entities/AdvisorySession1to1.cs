@@ -20,10 +20,7 @@ public partial class AdvisorySession1to1 : BaseEntity
 
     public long StaffId { get; set; }
 
-    [StringLength(255)]
-    public EAdvisorySessionStatus Status { get; set; } = EAdvisorySessionStatus.ACTIVE;
-
-    public EAdvisorySessionType Type { get; set; }
+    public EAdvisorySession1to1Type Type { get; set; }
 
     public long StudentId { get; set; }
 

@@ -13,11 +13,11 @@ namespace AISEA.ApiService.WebApi.Controllers.UserProfile
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserProfileControler : BaseController
+    public class ProfileController : BaseController
     {
         private readonly StudentProfileService _studentProfileService;
         private readonly StaffProfileService _staffProfileService;
-        public UserProfileControler(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService) : base(endpointSettings)
+        public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService) : base(endpointSettings)
         {
             _staffProfileService = staffProfileService;
             _studentProfileService = studentProfileService;
@@ -35,10 +35,7 @@ namespace AISEA.ApiService.WebApi.Controllers.UserProfile
             return Ok("Created Successfully");
         }
 
-
-
         #endregion
-
 
         #region Staff Profile
 
@@ -51,6 +48,8 @@ namespace AISEA.ApiService.WebApi.Controllers.UserProfile
             await _staffProfileService.CreateAsync(request);
             return Ok("Created Successfully");
         }
+
+
         #endregion
     }
 }

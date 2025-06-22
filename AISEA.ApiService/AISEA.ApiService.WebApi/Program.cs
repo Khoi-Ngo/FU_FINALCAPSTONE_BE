@@ -4,7 +4,6 @@ using AISEA.ApiService.DAL;
 using AISEA.ApiService.SHARED;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.SHARED.Middleware;
-using AISEA.ApiService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -49,8 +48,6 @@ var app = builder.Build();
     });
     var corsPolicyName = app.Configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
 
-    //TODO: Replace the hardcoded value of hub later
-    app.MapHub<NotificationHub>("/notificationHub");
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();

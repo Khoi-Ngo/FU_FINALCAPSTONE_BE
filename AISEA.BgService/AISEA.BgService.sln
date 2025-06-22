@@ -5,8 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AISEA.BgService.Worker", "AISEA.BgService.Worker\AISEA.BgService.Worker.csproj", "{24BC24A2-3239-47CB-8B4A-5C5F8A52ADCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AISEA.BgService.SHARED", "AISEA.BgService.SHARED\AISEA.BgService.SHARED.csproj", "{7A21801B-0B6A-405B-9459-996656F13DA3}"
-EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

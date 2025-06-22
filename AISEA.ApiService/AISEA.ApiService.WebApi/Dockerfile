@@ -2,7 +2,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 5000
 
-# Set environment to Development for hot-reloading
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV DOTNET_WATCH_SUPPRESS_LAUNCH=true
 

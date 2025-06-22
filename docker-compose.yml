@@ -22,3 +22,5 @@ services:
       - ./AISEA.BgService:/src
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - SqlSettings__ConnectionString=${SQL_CONNECTION_STRING}
+

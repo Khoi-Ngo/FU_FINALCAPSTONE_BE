@@ -34,6 +34,7 @@ public class UserController : BaseController
 
     /// <summary>
     /// Creates multiple users with the provided information. Duplicate usernames or emails will result in bad request errors.
+    /// Admin and Manager no need to have profile
     /// </summary>
     [HttpPost("bulk")]
     public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)

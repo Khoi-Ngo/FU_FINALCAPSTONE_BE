@@ -1,7 +1,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-# Set environment to Development for hot-reloading
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV DOTNET_WATCH_SUPPRESS_LAUNCH=true
 
@@ -9,7 +8,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 # Copy the solution and project files
 COPY ["AISEA.BgService.Worker/AISEA.BgService.Worker.csproj", "AISEA.BgService.Worker/"]
-COPY ["AISEA.BgService.SHARED/AISEA.BgService.SHARED.csproj", "AISEA.BgService.SHARED/"]
 COPY ["AISEA.BgService.sln", "./"]
 
 # Restore dependencies

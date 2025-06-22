@@ -39,7 +39,7 @@ namespace AISEA.ApiService.BAL.Validators.User
             RuleFor(x => x.DateOfBirth)
                 .NotNull().WithMessage("Date of birth is required.")
                 .LessThan(DateTimeOffset.Now).WithMessage("Date of birth must be in the past.")
-                .Must(dob => dob == null || dob.Value.AddYears(16) <= DateTimeOffset.Now)
+                .Must(dob => dob is null || dob.Value.AddYears(16) <= DateTimeOffset.Now)
                 .WithMessage("User must be at least 16 years old.");
 
 
@@ -49,13 +49,13 @@ namespace AISEA.ApiService.BAL.Validators.User
 
             RuleFor(x => new { x.StudentProfileData, x.StaffProfileData })
                     .Must(x =>
-                        (x.StudentProfileData == null && x.StaffProfileData == null) ||
-                        (x.StudentProfileData != null && x.StaffProfileData == null) ||
-                        (x.StudentProfileData == null && x.StaffProfileData != null)
+                        (x.StudentProfileData is null && x.StaffProfileData is null) ||
+                        (x.StudentProfileData is not null && x.StaffProfileData is null) ||
+                        (x.StudentProfileData is null && x.StaffProfileData is not null)
                     )
                     .WithMessage("You must provide either no profile, only StudentProfileData, or only StaffProfileData.");
 
-            When(x => x.StudentProfileData != null, () =>
+            When(x => x.StudentProfileData is not null, () =>
         {
             RuleFor(x => x.StudentProfileData.EnrolledAt)
                 .NotEmpty().WithMessage("EnrolledAt is required for student profile.");
@@ -65,7 +65,7 @@ namespace AISEA.ApiService.BAL.Validators.User
                 .When(x => !string.IsNullOrWhiteSpace(x.StudentProfileData.CareerGoal));
         });
 
-            When(x => x.StaffProfileData != null, () =>
+            When(x => x.StaffProfileData is not null, () =>
             {
                 RuleFor(x => x.StaffProfileData.Campus)
                     .NotEmpty().WithMessage("Campus is required for staff profile.")

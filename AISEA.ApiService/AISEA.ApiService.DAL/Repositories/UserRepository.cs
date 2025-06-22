@@ -69,6 +69,35 @@ namespace AISEA.ApiService.DAL.Repositories
             return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentName && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT);
         }
 
+        public async Task<long> GetStudentProfileIdByUsernameAsync(string username)
+        {
+            var studentProfileId = await _context.Users
+                .Where(u =>
+                    u.Username == username &&
+                    !u.IsDeleted &&
+                    u.Status == EUserStatus.ACTIVE &&
+                    u.RoleId == (int)EUserRole.STUDENT)
+                .Select(u => u.StudentProfile.Id)
+                .FirstOrDefaultAsync();
+
+            return studentProfileId;
+        }
+
+        public async Task<long> GetStaffProfileIdByUsernameAsync(string username)
+        {
+            var staffProfileId = await _context.Users
+                .Where(u =>
+                    u.Username == username &&
+                    !u.IsDeleted &&
+                    u.Status == EUserStatus.ACTIVE &&
+                    u.RoleId != (int)EUserRole.STUDENT)
+                .Select(u => u.StaffProfile.Id)
+                .FirstOrDefaultAsync();
+
+            return staffProfileId;
+        }
+
+
         public async Task<(object users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users

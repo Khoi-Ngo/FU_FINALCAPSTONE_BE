@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using AISEA.ApiService.DAL.Entities;
-using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.BgService.Worker.Entities;
+using AISEA.BgService.Worker.PropConfig;
 using Microsoft.EntityFrameworkCore;
 
-namespace AISEA.ApiService.DAL.Persistence;
+namespace AISEA.BgService.Worker.Persistence;
 //? Whether need empty constructor or not?
 
 
@@ -12,7 +12,9 @@ public partial class AiseaContext : DbContext
 {
     #region initialization
     private readonly SqlSettings _sqlSettings;
-    public AiseaContext(DbContextOptions<AiseaContext> options, SqlSettings sqlSettings)
+    public AiseaContext(DbContextOptions<AiseaContext> options
+    , SqlSettings sqlSettings
+    )
         : base(options)
     {
         _sqlSettings = sqlSettings;
@@ -23,7 +25,7 @@ public partial class AiseaContext : DbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-  => optionsBuilder.UseSqlServer("Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;");
+  => optionsBuilder.UseSqlServer(_sqlSettings.ConnectionString);
     #endregion
 
 

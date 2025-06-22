@@ -8,7 +8,7 @@ using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AISEA.ApiService.WebApi.Controllers.ChatBot;
+namespace AISEA.ApiService.WebApi.Controllers.Chat;
 
 [ApiController]
 [Route("api/[controller]")]

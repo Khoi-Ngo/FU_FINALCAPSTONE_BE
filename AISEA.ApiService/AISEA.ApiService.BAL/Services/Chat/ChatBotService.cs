@@ -10,6 +10,7 @@ using AISEA.ApiService.SHARED.DTOs.Responses.ChatBot;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.SHARED.Util;
 using Microsoft.Extensions.Logging;
 
 namespace AISEA.ApiService.BAL.Services.Chat;
@@ -45,44 +46,33 @@ public class ChatBotService
         _messageRepository = messageRepository;
     }
 
-    public async Task<ChatBotResponse> SendMsgAsync(SendChatBotRequest request, string accessToken)
+    public async Task<GetChatBotResponse> SendMsgAsync(SendChatBotRequest request, string accessToken)
     {
-        try
+        var student = await ValidateAndGetStudentAsync(accessToken);
+        var session1To1 = await GetOrCreateSessionAsync(request, student);
+
+        var studentMessage = CreateMessage(request.Message, student.Id, session1To1.Id);
+        await _messageRepository.CreateAsync(studentMessage);
+
+
+        // Get AI response
+        var prompt = ConstructPrompt(
+            $"{student.FirstName} {student.LastName}",
+            null, // Replace with actual studentAcademicPerformanceJsonData
+            null, // Replace with actual FPTUAcademicResourceJsonData
+            request.Message
+        );
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(prompt);
+
+        var botMessage = CreateMessage(aiResponse, _chatBotSettings.SystemBotUser.Id, session1To1.Id);
+        await _messageRepository.CreateAsync(botMessage);
+
+
+        return new GetChatBotResponse
         {
-            var student = await ValidateAndGetStudentAsync(accessToken);
-            var session1To1 = await GetOrCreateSessionAsync(request, student);
-
-            var studentMessage = CreateMessage(request.Message, student.Id, session1To1.Id);
-            await _messageRepository.CreateAsync(studentMessage);
-
-
-            // Get AI response
-            var prompt = ConstructPrompt(
-                $"{student.FirstName} {student.LastName}",
-                null, // Replace with actual studentAcademicPerformanceJsonData
-                null, // Replace with actual FPTUAcademicResourceJsonData
-                request.Message
-            );
-            var aiResponse = await _chatOpenAIService.SendMsgAsync(prompt);
-
-            var botMessage = CreateMessage(aiResponse, _chatBotSettings.SystemBotUser.Id, session1To1.Id);
-            await _messageRepository.CreateAsync(botMessage);
-
-
-            return new ChatBotResponse
-            {
-                Message = aiResponse,
-                SessionId = session1To1.Id
-            };
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error processing chat message");
-            return new ChatBotResponse
-            {
-                Message = _chatBotSettings.DefaultErrorResponse
-            };
-        }
+            Message = aiResponse,
+            SessionId = session1To1.Id
+        };
     }
 
 
@@ -94,13 +84,13 @@ public class ChatBotService
 
         // Try to get from Redis
         var cachedUser = await _redisRepository.GetValueAsync<DAL.Entities.User>(cacheKey);
-        if (cachedUser != null && cachedUser.StudentProfile != null)
+        if (cachedUser is not null && cachedUser.StudentProfile is not null)
         {
             return cachedUser;
         }
 
         var student = await _userRepository.GetUserByUsernameWStudentProfileAsync(studentName);
-        if (student?.StudentProfile == null)
+        if (student?.StudentProfile is null)
         {
             throw new InvalidAccessSession("Invalid student profile");
         }
@@ -116,13 +106,13 @@ public class ChatBotService
             var cacheKey = $"{_chatBotSettings.SessionCachePrefix}{request.ChatSessionId}";
             var cachedSession = await _redisRepository.GetValueAsync<AdvisorySession1to1>(cacheKey);
 
-            if (cachedSession != null && cachedSession.StudentId == student.StudentProfile.Id)
+            if (cachedSession is not null && cachedSession.StudentId == student.StudentProfile.Id)
             {
                 return cachedSession;
             }
 
             var session = await _advisorySession1To1Repository.GetByIdAsync(request.ChatSessionId);
-            if (session == null || session.StudentId != student.StudentProfile.Id)
+            if (session is null || session.StudentId != student.StudentProfile.Id)
             {
                 throw new InvalidAccessSession("The chat session id is invalid");
             }
@@ -131,7 +121,7 @@ public class ChatBotService
             return session;
         }
 
-        var title = GenerateSessionTitle(request.Message);
+        var title = Advisory1to1Util.GenerateSessionTitle(request.Message, _chatBotSettings.SystemBotUser.FirstName, _chatBotSettings.SystemBotUser.LastName);
         var newSession = new AdvisorySession1to1
         {
             Title = title,
@@ -145,23 +135,6 @@ public class ChatBotService
         // Cache new session
         await _redisRepository.SetValueAsync($"{_chatBotSettings.SessionCachePrefix}{newSession.Id}", newSession, TimeSpan.FromDays(_chatBotSettings.SessionCacheExpiryDays));
         return newSession;
-    }
-
-
-
-    private string GenerateSessionTitle(string? message)
-    {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            var staff = _chatBotSettings.SystemBotUser;
-            return $"{staff.FirstName} {staff.LastName} at {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC";
-        }
-
-        var trimmed = message.Trim();
-        int endIdx = trimmed.IndexOfAny(new[] { '.', '!', '?' });
-        return endIdx > 0 && endIdx < 40
-            ? trimmed.Substring(0, endIdx + 1)
-            : trimmed.Length > 40 ? trimmed.Substring(0, 40) + "..." : trimmed;
     }
 
     private Message CreateMessage(string content, long senderId, long sessionId)
@@ -180,10 +153,10 @@ public class ChatBotService
         object? fPTUAcademicResourceJsonData = null,
         string? message = null)
     {
-        var studentJson = studentJsonData != null
+        var studentJson = studentJsonData is not null
             ? JsonSerializer.Serialize(studentJsonData)
             : "{}";
-        var resourceJson = fPTUAcademicResourceJsonData != null
+        var resourceJson = fPTUAcademicResourceJsonData is not null
             ? JsonSerializer.Serialize(fPTUAcademicResourceJsonData)
             : "{}";
         var msg = message ?? "";

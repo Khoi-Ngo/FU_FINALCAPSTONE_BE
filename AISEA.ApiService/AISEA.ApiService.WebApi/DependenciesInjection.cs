@@ -128,8 +128,11 @@ namespace AISEA.ApiService.WebApi
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();//Context helper
 
+            #region SignalR
             //adding signalR
             services.AddSignalR();
+
+            #endregion
 
             return services;
         }

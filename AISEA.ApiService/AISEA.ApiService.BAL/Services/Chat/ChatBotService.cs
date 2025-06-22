@@ -65,11 +65,15 @@ public class ChatBotService
             );
             var aiResponse = await _chatOpenAIService.SendMsgAsync(prompt);
 
-            var botMessage = CreateMessage(aiResponse.Message, _chatBotSettings.SystemBotUser.Id, session1To1.Id);
+            var botMessage = CreateMessage(aiResponse, _chatBotSettings.SystemBotUser.Id, session1To1.Id);
             await _messageRepository.CreateAsync(botMessage);
 
 
-            return aiResponse;
+            return new ChatBotResponse
+            {
+                Message = aiResponse,
+                SessionId = session1To1.Id
+            };
         }
         catch (Exception e)
         {

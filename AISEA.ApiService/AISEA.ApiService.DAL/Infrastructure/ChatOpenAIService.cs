@@ -19,7 +19,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
             _httpClient = new HttpClient();
         }
 
-        public async Task<ChatBotResponse> SendMsgAsync(string prompt)
+        public async Task<string> SendMsgAsync(string prompt)
         {
             var _apiKey = _chatBotSettings.ApiKey;
             var _apiUrl = _chatBotSettings.ApiUrl;
@@ -42,8 +42,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
 
             var resContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<dynamic>(resContent);
-            var responseText = data?.choices?[0]?.message?.content?.ToString()?.Trim() ?? "No response received.";
-            return new ChatBotResponse { Message = responseText };
+            return data?.choices?[0]?.message?.content?.ToString()?.Trim() ?? "No response received.";
 
         }
     }

@@ -19,6 +19,9 @@ public class ChatBotController : BaseController
     {
         _chatBotService = chatBotService;
     }
+    /// <summary>
+    /// Note: ChatSessionId input > 0 (case: existed chat session) - else not existed yet
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> SendMsgAsync([FromBody] SendChatBotRequest request)
     {

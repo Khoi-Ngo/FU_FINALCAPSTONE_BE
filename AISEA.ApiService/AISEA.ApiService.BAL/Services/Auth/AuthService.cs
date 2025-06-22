@@ -2,6 +2,7 @@ using System.Formats.Asn1;
 using System.Security.Authentication;
 using System.Text.Json;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.DTOs.Responses.Auth;
 using AISEA.ApiService.SHARED.Exceptions;
@@ -101,7 +102,7 @@ public class AuthService
             throw new InvalidCredentialException("User not found with this email.");
 
         // Generate tokens
-        var accessToken = _jwtService.GenerateAccessToken(user.Username);
+        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         //saving the refresh token to Redis
@@ -123,7 +124,7 @@ public class AuthService
         }
 
         // Generate tokens
-        var accessToken = _jwtService.GenerateAccessToken(user.Username);
+        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         //saving the refresh token to Redis
@@ -146,6 +147,7 @@ public class AuthService
         //get the user info from expired access token
         var principal = _jwtService.GetPrincipalFromExpiredToken(accessToken);
         string username = _jwtService.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
+        string roleId = _jwtService.GetValueFromPrincipal(principal, _endpointSettings.RoleClaimName).ToString();
 
         // Check if refresh token exists in Redis + refresh token belong to the username
         var isValid = await _tokenService.IsValidRefreshTokenAsync(username, refreshToken);
@@ -156,7 +158,7 @@ public class AuthService
 
         // Generate new tokens
         string newRefreshToken = _tokenService.GenerateRefreshToken();
-        string newAccessToken = _jwtService.GenerateAccessToken(username);
+        string newAccessToken = _jwtService.GenerateAccessToken(username, roleId);
 
         // Update Redis: Adding the new refresh token to overwrite in Redis
         await _tokenService.StoreRefreshTokenAsync(username, newRefreshToken);

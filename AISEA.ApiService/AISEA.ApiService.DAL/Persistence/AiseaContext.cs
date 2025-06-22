@@ -63,13 +63,13 @@ public partial class AiseaContext : DbContext
             entity.HasOne(d => d.AdvisorySession1to1)
                 .WithMany(p => p.Messages)
                 .HasForeignKey(d => d.AdvisorySession1to1Id)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("message_advisorysession1to1id_foreign");
 
             entity.HasOne(d => d.Sender)
                 .WithMany(p => p.Messages)
                 .HasForeignKey(d => d.SenderId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("message_senderid_foreign");
         });
 

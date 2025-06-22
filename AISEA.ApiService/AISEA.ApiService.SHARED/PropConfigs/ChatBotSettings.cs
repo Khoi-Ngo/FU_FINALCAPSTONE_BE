@@ -11,7 +11,6 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public string ApiKey { get; set; }
         public string ApiUrl { get; set; }
         public string Model { get; set; }
-        public string DefaultErrorResponse { get; set; }
         public SystemUserConfig SystemBotUser { get; set; }
         public string StudentCachePrefix { get; set; }
         public int StudentCacheExpiryHrs { get; set; }

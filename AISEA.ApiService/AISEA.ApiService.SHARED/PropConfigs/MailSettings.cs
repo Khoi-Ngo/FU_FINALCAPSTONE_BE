@@ -7,6 +7,7 @@ namespace AISEA.ApiService.SHARED.PropConfigs
 {
     public class MailSettings
     {
+        //trigger
         public const string Section = "MailSettings";
 
         public string DisplayName { get; set; } = null!;      

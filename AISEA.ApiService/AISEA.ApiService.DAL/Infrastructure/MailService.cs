@@ -1,28 +1,41 @@
-using System.Net.Mail;
-using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using AISEA.ApiService.SHARED.Interfaces;
-using AISEA.ApiService.SHARED.PropConfigs;
 
 namespace AISEA.ApiService.DAL.Infrastructure
 {
     public class MailService : IMailService, IDisposable
     {
-        private readonly SmtpClient _smtpClient;
-        private readonly MailSettings _mailSettings;
+        private readonly SendGridClient _sendGridClient;
+        private readonly SHARED.PropConfigs.MailSettings _mailSettings;
         private bool _disposed;
 
-        public MailService(MailSettings mailSettings)
+        public MailService(SHARED.PropConfigs.MailSettings mailSettings)
         {
             _mailSettings = mailSettings;
-            _smtpClient = CreateSmtpClient();
+            _sendGridClient = new SendGridClient(_mailSettings.Password);
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {
             if (string.IsNullOrEmpty(to)) throw new ArgumentNullException(nameof(to));
 
-            using var mailMessage = CreateMailMessage(to, subject, body);
-            await _smtpClient.SendMailAsync(mailMessage);
+            var from = new EmailAddress(_mailSettings.From, _mailSettings.DisplayName);
+            var toAddress = new EmailAddress(to);
+            var msg = MailHelper.CreateSingleEmail(
+                from,
+                toAddress,
+                subject,
+                body, // Plain text content
+                body  // HTML content (same as body for simplicity; can be customized)
+            );
+
+            var response = await _sendGridClient.SendEmailAsync(msg);
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new Exception($"Failed to send email: {response.StatusCode}");
+            }
         }
 
         public async Task SendEmailWithAttachmentAsync(string to, string subject, string body, string attachmentPath)
@@ -31,51 +44,41 @@ namespace AISEA.ApiService.DAL.Infrastructure
             if (string.IsNullOrEmpty(attachmentPath) || !File.Exists(attachmentPath))
                 throw new ArgumentException("Invalid attachment path", nameof(attachmentPath));
 
-            using var mailMessage = CreateMailMessage(to, subject, body);
+            var from = new EmailAddress(_mailSettings.From, _mailSettings.DisplayName);
+            var toAddress = new EmailAddress(to);
+            var msg = MailHelper.CreateSingleEmail(
+                from,
+                toAddress,
+                subject,
+                body,
+                body
+            );
 
-            string mimeType = GetMimeType(attachmentPath);
-            using var attachment = new Attachment(attachmentPath, mimeType)
+            // Add attachment
+            var fileBytes = File.ReadAllBytes(attachmentPath);
+            var fileBase64 = Convert.ToBase64String(fileBytes);
+            var fileName = Path.GetFileName(attachmentPath);
+            var mimeType = GetMimeType(attachmentPath);
+
+            msg.AddAttachment(new Attachment
             {
-                ContentDisposition =
-                {
-                    FileName = Path.GetFileName(attachmentPath),
-                    Size = new FileInfo(attachmentPath).Length
-                }
-            };
+                Content = fileBase64,
+                Filename = fileName,
+                Type = mimeType,
+                Disposition = "attachment"
+            });
 
-            mailMessage.Attachments.Add(attachment);
-            await _smtpClient.SendMailAsync(mailMessage);
-        }
-
-        private MailMessage CreateMailMessage(string to, string subject, string body)
-        {
-            return new MailMessage
+            var response = await _sendGridClient.SendEmailAsync(msg);
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                From = new MailAddress(_mailSettings.From, _mailSettings.DisplayName),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true,
-                To = { to }
-            };
+                throw new Exception($"Failed to send email with attachment: {response.StatusCode}");
+            }
         }
-
-        private SmtpClient CreateSmtpClient()
-        {
-            return new SmtpClient
-            {
-                Host = _mailSettings.SmtpHost,
-                Port = _mailSettings.SmtpPort,
-                Credentials = new System.Net.NetworkCredential(_mailSettings.UserName, _mailSettings.Password),
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                Timeout = 20000,
-            };
-        }
-
 
         private static string GetMimeType(string filePath)
         {
-            // Simplified MIME type lookup for common file types
+            // Same MIME type lookup as original
             return Path.GetExtension(filePath).ToLowerInvariant() switch
             {
                 ".pdf" => "application/pdf",
@@ -91,25 +94,14 @@ namespace AISEA.ApiService.DAL.Infrastructure
         public void Dispose()
         {
             if (_disposed) return;
-
-            _smtpClient?.Dispose();
             _disposed = true;
         }
 
         public async ValueTask DisposeAsync()
         {
             if (_disposed) return;
-
-            if (_smtpClient is IAsyncDisposable asyncDisposable)
-            {
-                await asyncDisposable.DisposeAsync();
-            }
-            else
-            {
-                _smtpClient?.Dispose();
-            }
-
             _disposed = true;
+            await Task.CompletedTask;
         }
     }
 }

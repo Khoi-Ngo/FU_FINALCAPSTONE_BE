@@ -28,6 +28,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task<(IEnumerable<AdvisorySession1to1> AdvisorySession1To1s, int TotalCount)> GetAllOpenPagedAsync(int pageNumber, int pageSize)
         {
+            //TODO: recheck when modify field datatype
             var query = _context.AdvisorySessions1to1.Where(s => s.StaffId <= 0);
             var totalCount = await query.CountAsync();
             var sessions = await query

@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL;
 using AISEA.ApiService.SHARED;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.SHARED.Middleware;
+using AISEA.ApiService.WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -48,13 +49,13 @@ var app = builder.Build();
     });
     var corsPolicyName = app.Configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
 
-    app.UseHttpsRedirection();
+    // app.UseHttpsRedirection();
+    app.UseCors(corsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
-
-    app.UseCors(corsPolicyName);
-
+    app.MapHub<AdvisoryChat1to1Hub>("/advisoryChat1to1Hub").RequireAuthorization();
     app.MapControllers();
-
     app.Run();
 }
+
+//TODO: Recheck hardcode value

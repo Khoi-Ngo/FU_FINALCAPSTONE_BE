@@ -17,7 +17,6 @@ namespace AISEA.ApiService.BAL.Services.Chat;
 
 public class ChatBotService
 {
-    private readonly ILogger<ChatBotService> _logger;
     private readonly IChatOpenAIService _chatOpenAIService;
     private readonly ChatBotSettings _chatBotSettings;
     private readonly IJWTService _jWTService;
@@ -27,7 +26,6 @@ public class ChatBotService
     private readonly MessageRepository _messageRepository;
 
     public ChatBotService(
-        ILogger<ChatBotService> logger,
         IChatOpenAIService chatOpenAIService,
         ChatBotSettings chatBotSettings,
         IJWTService jWTService,
@@ -36,7 +34,6 @@ public class ChatBotService
         IRedisRepository redisRepository,
         MessageRepository messageRepository)
     {
-        _logger = logger;
         _chatOpenAIService = chatOpenAIService;
         _chatBotSettings = chatBotSettings;
         _jWTService = jWTService;

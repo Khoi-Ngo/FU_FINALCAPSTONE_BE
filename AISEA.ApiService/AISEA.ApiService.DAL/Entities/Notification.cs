@@ -24,6 +24,7 @@ public partial class Notification : BaseEntity
     public string? Link { get; set; }
 
     public bool IsRead { get; set; }
+    public bool IsDelivered { get; set; } = false;
 
     public long UserId { get; set; }
 

@@ -18,7 +18,9 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public required string GoogleAuthTokenPropName { get; set; }
         public required string RefreshTokenEndpointName { get; set; }
         public required string RoleClaimName { get; set; }
-        
+        public required string AdvisoryHubEndpoint { get; set; }
+        public required string ProdClientOrigin { get; set; }
+        public required string DevClientOrigin { get; set; }
 
     }
 }

@@ -8,8 +8,6 @@ using AISEA.ApiService.WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    //Adding file json to the configuration if needed
-
     builder.Services
     .AddWebApiConfig(builder.Configuration)
     .AddBALConfig(builder.Configuration)
@@ -48,14 +46,13 @@ var app = builder.Build();
         //more type status below ...
     });
     var corsPolicyName = app.Configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
+    var AdvisoryHubEndpoint = app.Configuration.GetSection(EndpointSettings.Section)["AdvisoryHubEndpoint"];
 
     // app.UseHttpsRedirection();
     app.UseCors(corsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
-    app.MapHub<AdvisoryChat1to1Hub>("/advisoryChat1to1Hub").RequireAuthorization();
+    app.MapHub<AdvisoryChat1to1Hub>(AdvisoryHubEndpoint).RequireAuthorization();
     app.MapControllers();
     app.Run();
 }
-
-//TODO: Recheck hardcode value

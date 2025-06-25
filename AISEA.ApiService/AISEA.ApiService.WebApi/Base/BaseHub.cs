@@ -1,10 +1,10 @@
-using System;
-using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.PropConfigs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AISEA.ApiService.WebApi.Base
 {
+    [Authorize]
     public class BaseHub : Hub
     {
         private readonly EndpointSettings _endpointSettings;
@@ -21,7 +21,6 @@ namespace AISEA.ApiService.WebApi.Base
                 var httpContext = Context.GetHttpContext();
                 if (httpContext != null)
                 {
-                    // Check headers first
                     if (httpContext.Request.Headers.TryGetValue(_endpointSettings.AccessTokenPropName, out var accessToken))
                     {
                         return accessToken.ToString().Replace("Bearer ", "");
@@ -61,13 +60,13 @@ namespace AISEA.ApiService.WebApi.Base
 
         public override async Task OnConnectedAsync()
         {
-            // Optionally handle connection logic
+            // Optionally handle connection logic here
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            // Optionally handle disconnection logic
+            // Optionally handle disconnection logic here
             await base.OnDisconnectedAsync(exception);
         }
     }

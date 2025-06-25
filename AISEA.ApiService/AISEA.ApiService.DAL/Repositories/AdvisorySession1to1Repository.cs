@@ -5,19 +5,22 @@ using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
 {
     public class AdvisorySession1to1Repository : GenericRepository<AdvisorySession1to1>
     {
-        public AdvisorySession1to1Repository(AiseaContext context) : base(context)
+        private readonly StaffUserSettings _staffUserSettings;
+        public AdvisorySession1to1Repository(AiseaContext context, StaffUserSettings staffUserSettings) : base(context)
         {
+            _staffUserSettings = staffUserSettings;
         }
 
         public async Task<(IEnumerable<AdvisorySession1to1> AdvisorySession1To1s, int TotalCount)> GetAllByStaffSelfPagedAsync(int pageNumber, int pageSize, long staffProfileId)
         {
-            var query = _context.AdvisorySessions1to1.Where(s => s.StaffId == staffProfileId);
+            var query = _context.AdvisorySessions1to1.Where(s => s.StaffId == staffProfileId && s.StaffId != (long)_staffUserSettings.EmptyStaffProfileId);
             var totalCount = await query.CountAsync();
             var sessions = await query
             .Skip((pageNumber - 1) * pageSize)
@@ -28,8 +31,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task<(IEnumerable<AdvisorySession1to1> AdvisorySession1To1s, int TotalCount)> GetAllOpenPagedAsync(int pageNumber, int pageSize)
         {
-            //TODO: recheck when modify field datatype
-            var query = _context.AdvisorySessions1to1.Where(s => s.StaffId <= 0);
+            var query = _context.AdvisorySessions1to1.Where(s => s.StaffId == (long)_staffUserSettings.EmptyStaffProfileId);
             var totalCount = await query.CountAsync();
             var sessions = await query
             .Skip((pageNumber - 1) * pageSize)
@@ -49,13 +51,13 @@ namespace AISEA.ApiService.DAL.Repositories
             return (sessions, totalCount);
         }
 
-        public async Task<AdvisorySession1to1> GetWMessagesByIdAsync(long id, long profileId)
+        public async Task<AdvisorySession1to1> GetWMessagesByIdAsync(long id, long studentProfileId)
         {
             return await _context.AdvisorySessions1to1
                 .Include(s => s.Messages)
                     .ThenInclude(m => m.Sender)
                 .FirstOrDefaultAsync(s => s.Id == id &&
-                (s.StaffId == profileId || s.StudentId == profileId)
+                 s.StudentId == studentProfileId
                 );
         }
 
@@ -65,5 +67,12 @@ namespace AISEA.ApiService.DAL.Repositories
                     .FirstOrDefaultAsync(s => s.Id == id &&
                     (s.StaffId == profileId || s.StudentId == profileId));
         }
+        public async Task<AdvisorySession1to1> GetUnknownStatByIdAsync(long id, long profileId)
+        {
+            return await _context.AdvisorySessions1to1
+                    .FirstOrDefaultAsync(s => s.Id == id &&
+                    (s.StaffId == profileId || s.StudentId == profileId || s.StaffId == (long)_staffUserSettings.EmptyStaffProfileId));
+        }
+
     }
 }

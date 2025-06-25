@@ -5,34 +5,37 @@ using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.SHARED.Util;
 using AISEA.ApiService.WebApi.Base;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AISEA.ApiService.WebApi.Hubs
 {
-    //TODO: Recheck hardcode value
-    [Authorize]
     public class AdvisoryChat1to1Hub : BaseHub
     {
+
+        #region Init
         private readonly ChatService _chatService;
         private readonly UserRepository _userRepository;
         private readonly AdvisorySession1to1Repository _sessionRepository;
         private readonly IJWTService _jwtService;
+        private readonly StaffUserSettings _staffUserSettings;
 
         public AdvisoryChat1to1Hub(EndpointSettings endpointSettings,
               ChatService chatService,
             UserRepository userRepository,
             AdvisorySession1to1Repository sessionRepository,
-            IJWTService jwtService
+            IJWTService jwtService,
+            StaffUserSettings staffUserSettings
         ) : base(endpointSettings)
         {
             _chatService = chatService;
             _userRepository = userRepository;
             _sessionRepository = sessionRepository;
             _jwtService = jwtService;
+            _staffUserSettings = staffUserSettings;
         }
-
+        #endregion
 
 
         /// <summary>
@@ -66,9 +69,9 @@ namespace AISEA.ApiService.WebApi.Hubs
 
                 session = new AdvisorySession1to1
                 {
-                    Title = $"Advisory Session for {username}",
+                    Title = Advisory1to1Util.GenerateHumanSessionTitle(_staffUserSettings.EmptyStaffName),
                     StudentId = studentProfile.StudentProfile.Id,
-                    StaffId = 1, // No staff assigned yet
+                    StaffId = (long)_staffUserSettings.EmptyStaffProfileId,
                     Type = EAdvisorySession1to1Type.HUMAN,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -108,7 +111,7 @@ namespace AISEA.ApiService.WebApi.Hubs
 
         /// <summary>
         /// Staff or Student joins an AdvisoryChatSession1to1.
-        /// If a staff member joins an open session (StaffId <= 0), they are assigned to it.
+        /// If a staff member joins an open session (StaffId == StaffEmptyId), they are assigned to it.
         /// The user is added to the session's SignalR group for real-time updates.
         /// </summary>
         [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.MANAGER, (int)EUserRole.STUDENT)]
@@ -125,19 +128,16 @@ namespace AISEA.ApiService.WebApi.Hubs
                 ? await _userRepository.GetStudentProfileIdByUsernameAsync(username)
                 : await _userRepository.GetStaffProfileIdByUsernameAsync(username);
 
-            var session = await _sessionRepository.GetByIdAsync(sessionId, profileId);
+            var session = await _sessionRepository.GetUnknownStatByIdAsync(sessionId, profileId);
             if (session is null)
             {
-                throw new HubException("Session not found or access denied.");
+                throw new HubException("Access Denied or Not Found");
+
             }
 
             // If the session is open and the user is a staff member, assign them to the session
-            if (session.StaffId <= 0 && user.RoleId != (int)EUserRole.STUDENT)
+            if ((session.StaffId == (long)_staffUserSettings.EmptyStaffProfileId) && user.RoleId != (int)EUserRole.STUDENT)
             {
-                session.StaffId = profileId;
-                session.UpdatedAt = DateTime.UtcNow;
-                await _sessionRepository.UpdateAsync(session);
-
                 // Notify the student that a staff member has joined
                 await Clients.Group($"Session_{session.Id}")
                     .SendAsync("StaffJoined", new
@@ -145,6 +145,14 @@ namespace AISEA.ApiService.WebApi.Hubs
                         SessionId = session.Id,
                         StaffUsername = username
                     });
+
+                session.StaffId = profileId;
+                session.UpdatedAt = DateTime.UtcNow;
+                session.Title = Advisory1to1Util.GenerateHumanSessionTitle(username);
+
+                await _sessionRepository.UpdateAsync(session);
+
+
             }
 
             // Add the user to the SignalR group for this session

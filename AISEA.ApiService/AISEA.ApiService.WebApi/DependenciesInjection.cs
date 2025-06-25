@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
 using FluentValidation.AspNetCore;
+using System.Collections.Immutable;
 
 namespace AISEA.ApiService.WebApi
 {
@@ -101,11 +102,14 @@ namespace AISEA.ApiService.WebApi
 
             // CORS
             var corsPolicyName = configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
+            var prodClientOrigin = configuration.GetSection(EndpointSettings.Section)["ProdClientOrigin"];
+            var devClientOrigin = configuration.GetSection(EndpointSettings.Section)["DevClientOrigin"];
+
             services.AddCors(options =>
             {
                 options.AddPolicy(corsPolicyName, builder =>
                 {
-                    builder.WithOrigins("http://localhost:5173")
+                    builder.WithOrigins(prodClientOrigin, devClientOrigin)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -117,7 +121,6 @@ namespace AISEA.ApiService.WebApi
 
             services.AddScoped<BlacklistedTokenFilter>();
 
-            // MVC Controllers with filters
             services.AddControllers(opt =>
             {
                 var policy = new AuthorizationPolicyBuilder()
@@ -144,4 +147,3 @@ namespace AISEA.ApiService.WebApi
         }
     }
 }
-//TODO: Recheck hardcode value

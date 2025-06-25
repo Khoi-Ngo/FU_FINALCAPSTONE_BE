@@ -20,12 +20,32 @@ public class ChatBotController : BaseController
         _chatBotService = chatBotService;
     }
     /// <summary>
-    /// Note: ChatSessionId input > 0 (case: existed chat session) - else not existed yet
+    /// This is for sending message to Chat Bot only with Existed Session
     /// </summary>
-    [HttpPost]
+    [HttpPost("send")]
     public async Task<IActionResult> SendMsgAsync([FromBody] SendChatBotRequest request)
     {
         var res = await _chatBotService.SendMsgAsync(request, AccessToken);
+        return Ok(res);
+    }
+
+    /// <summary>
+    /// This is for initializing new session with AI ChatBot
+    /// </summary>
+    [HttpPost("init")]
+    public async Task<IActionResult> InitMsgAsync([FromBody] InitChatBotRequest request)
+    {
+        var res = await _chatBotService.InitMsgAsync(request, AccessToken);
+        return Ok(res);
+    }
+
+    /// <summary>
+    /// Get AI CHATBOTSession By Id
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetAIChatBotSessionByIdAsync(long id)
+    {
+        var res = await _chatBotService.GetAIChatBotSessionByIdAsync(id, AccessToken);
         return Ok(res);
     }
 

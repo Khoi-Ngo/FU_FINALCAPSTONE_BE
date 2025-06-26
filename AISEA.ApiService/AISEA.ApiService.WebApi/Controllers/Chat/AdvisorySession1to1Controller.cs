@@ -18,9 +18,10 @@ namespace AISEA.ApiService.WebApi.Controllers.Chat
         private readonly AdvisorySession1to1Service _advisorySession1To1Service;
         private readonly ChatService _chatService;
 
-        public AdvisorySession1to1Controller(EndpointSettings endpointSettings, AdvisorySession1to1Service advisorySession1To1Service) : base(endpointSettings)
+        public AdvisorySession1to1Controller(EndpointSettings endpointSettings, AdvisorySession1to1Service advisorySession1To1Service, ChatService chatService) : base(endpointSettings)
         {
             _advisorySession1To1Service = advisorySession1To1Service;
+            _chatService = chatService;
         }
 
         /// <summary>

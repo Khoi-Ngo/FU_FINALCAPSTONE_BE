@@ -64,9 +64,9 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<User> GetUserByUsernameWStudentProfileAsync(string studentName)
+        public async Task<User> GetUserByUsernameWStudentProfileAsync(string studentUsername)
         {
-            return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentName && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT);
+            return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentUsername && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT);
         }
 
         public async Task<long> GetStudentProfileIdByUsernameAsync(string username)

@@ -51,7 +51,7 @@ namespace AISEA.ApiService.DAL.Repositories
             return (sessions, totalCount);
         }
 
-        public async Task<AdvisorySession1to1> GetWMessagesByIdAsync(long id, long studentProfileId)
+        public async Task<AdvisorySession1to1> GetWMessagesByStudentProfileIdAsync(long id, long studentProfileId)
         {
             return await _context.AdvisorySessions1to1
                 .Include(s => s.Messages)

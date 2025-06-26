@@ -20,13 +20,15 @@ namespace AISEA.ApiService.WebApi.Hubs
         private readonly AdvisorySession1to1Repository _sessionRepository;
         private readonly IJWTService _jwtService;
         private readonly StaffUserSettings _staffUserSettings;
+        private readonly MessageRepository _messageRepository;
 
         public AdvisoryChat1to1Hub(EndpointSettings endpointSettings,
               ChatService chatService,
             UserRepository userRepository,
             AdvisorySession1to1Repository sessionRepository,
             IJWTService jwtService,
-            StaffUserSettings staffUserSettings
+            StaffUserSettings staffUserSettings,
+            MessageRepository messageRepository
         ) : base(endpointSettings)
         {
             _chatService = chatService;
@@ -34,6 +36,7 @@ namespace AISEA.ApiService.WebApi.Hubs
             _sessionRepository = sessionRepository;
             _jwtService = jwtService;
             _staffUserSettings = staffUserSettings;
+            _messageRepository = messageRepository;
         }
         #endregion
 
@@ -159,13 +162,13 @@ namespace AISEA.ApiService.WebApi.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, $"Session_{session.Id}");
 
             // Send session details to the joining user
-            var messages = await _sessionRepository.GetWMessagesByIdAsync(sessionId, profileId);
+            var messages = await _messageRepository.GetMessagesAsync(sessionId);
             await Clients.Caller.SendAsync("SessionJoined", new
             {
                 SessionId = session.Id,
                 Title = session.Title,
                 Type = session.Type,
-                Messages = messages?.Messages.Select(m => new
+                Messages = messages.Select(m => new
                 {
                     MessageId = m.Id,
                     SenderUsername = m.Sender.Username,

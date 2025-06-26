@@ -104,7 +104,7 @@ public class ChatBotService
     {
         var username = _jWTService.GetUsernameFromToken(accessToken);
         long studentProfileId = await _userRepository.GetStudentProfileIdByUsernameAsync(username);
-        var session1to1 = await _advisorySession1To1Repository.GetWMessagesByIdAsync(id, studentProfileId);
+        var session1to1 = await _advisorySession1To1Repository.GetWMessagesByStudentProfileIdAsync(id, studentProfileId);
         if (session1to1 is null)
         {
             throw new NotFoundException("No permission to access or not found");

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AISEA.ApiService.SHARED.DTOs.Requests.Chat
 {
-    public class InitHumanChatSessioRequest
+    public class InitHumanChatSessionRequest
     {
         [Required(ErrorMessage = "Message is required.")]
         public string Message { get; set; }

@@ -20,6 +20,8 @@ namespace AISEA.ApiService.SHARED
             services.Configure<VerifyResetPassCodeSettings>(configuration.GetSection(VerifyResetPassCodeSettings.Section));
             services.Configure<ChatBotSettings>(configuration.GetSection(ChatBotSettings.Section));
             services.Configure<StaffUserSettings>(configuration.GetSection(StaffUserSettings.Section));
+            services.Configure<ChatSessionSettings>(configuration.GetSection(ChatSessionSettings.Section));
+
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
@@ -31,6 +33,7 @@ namespace AISEA.ApiService.SHARED
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<VerifyResetPassCodeSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatBotSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<StaffUserSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatSessionSettings>>().Value);
 
 
             return services;

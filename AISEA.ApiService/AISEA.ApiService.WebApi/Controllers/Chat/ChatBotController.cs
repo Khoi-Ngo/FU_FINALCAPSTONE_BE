@@ -40,14 +40,4 @@ public class ChatBotController : BaseController
         return Ok(res);
     }
 
-    /// <summary>
-    /// Get AI CHATBOTSession By Id
-    /// </summary>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetAIChatBotSessionByIdAsync(long id)
-    {
-        var res = await _chatBotService.GetAIChatBotSessionByIdAsync(id, AccessToken);
-        return Ok(res);
-    }
-
 }

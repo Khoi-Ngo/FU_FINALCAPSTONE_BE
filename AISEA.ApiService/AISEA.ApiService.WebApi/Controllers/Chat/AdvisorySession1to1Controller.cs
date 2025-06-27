@@ -38,28 +38,21 @@ namespace AISEA.ApiService.WebApi.Controllers.Chat
         /// Initialize the chat session with Staffs User
         /// </summary>
         [HttpPost("human")]
-        public async Task<IActionResult> InitHumanChatSessionAsync([FromBody] InitHumanChatSessioRequest request)
+        public async Task<IActionResult> InitHumanChatSessionAsync([FromBody] InitHumanChatSessionRequest request)
         {
             var res = await _chatService.InitHumanChatSessionAsync(request, AccessToken);
             return Ok(res);
         }
 
+        /// <summary>
+        /// Get AI CHATBOTSession By Id
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetByIdAsync(long id)
+        {
+            var res = await _advisorySession1To1Service.GetByIdAsync(id, AccessToken);
+            return Ok(res);
+        }
+
     }
 }
-
-
-
-#region Ignore
-
-
-// /// <summary>
-// /// Get All ChatSessions
-// /// </summary>
-
-// [HttpGet]
-// public async Task<IActionResult> GetAllByStudentSelfAsync([FromQuery] PaginationRequest request)
-// {
-//     var res = await _advisorySession1To1Service.GetAllByStudentSelfAsync(request, AccessToken);
-//     return Ok(res);
-// }
-#endregion

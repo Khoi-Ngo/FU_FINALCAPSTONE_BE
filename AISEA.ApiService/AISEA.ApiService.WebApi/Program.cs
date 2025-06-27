@@ -52,6 +52,7 @@ var app = builder.Build();
     app.UseCors(corsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
+    //mapping signalR hubs
     app.MapHub<AdvisoryChat1to1Hub>(AdvisoryHubEndpoint).RequireAuthorization();
     app.MapControllers();
     app.Run();

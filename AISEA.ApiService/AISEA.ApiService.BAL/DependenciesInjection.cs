@@ -31,7 +31,9 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<StaffProfileService>();
             services.AddScoped<AdvisorySession1to1Service>();
             services.AddScoped<ChatService>();
+            services.AddScoped<MessageService>();
 
+            
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

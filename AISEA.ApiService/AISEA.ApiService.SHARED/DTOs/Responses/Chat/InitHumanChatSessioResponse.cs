@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Chat
 {
-    public class InitHumanChatSessioResponse
+    public class InitHumanChatSessionResponse
     {
         public long ChatSessionId { get; set; }
     }

@@ -7,11 +7,9 @@ namespace AISEA.ApiService.DAL.Entities;
 [Table("ComboSubject")]
 public partial class ComboSubject : BaseEntity
 {
-    [Key]
     [Column("combo_id")]
     public long ComboId { get; set; }
     
-    [Key]
     [Column("subject_id")]
     public long SubjectId { get; set; }
     

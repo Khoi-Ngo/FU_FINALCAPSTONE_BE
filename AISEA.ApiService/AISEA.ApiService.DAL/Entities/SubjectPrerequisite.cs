@@ -7,11 +7,9 @@ namespace AISEA.ApiService.DAL.Entities;
 [Table("SubjectPrerequisite")]
 public partial class SubjectPrerequisite : BaseEntity
 {
-    [Key]
     [Column("subject_id")]
     public long SubjectId { get; set; }
     
-    [Key]
     [Column("prerequisite_subject_id")]
     public long PrerequisiteSubjectId { get; set; }
     
@@ -20,5 +18,4 @@ public partial class SubjectPrerequisite : BaseEntity
     
     [ForeignKey("PrerequisiteSubjectId")]
     public virtual Subject PrerequisiteSubject { get; set; } = null!;
-    
 }

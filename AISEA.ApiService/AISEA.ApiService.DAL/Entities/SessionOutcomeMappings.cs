@@ -7,9 +7,11 @@ namespace AISEA.ApiService.DAL.Entities;
 [Table("SessionOutcomeMapping")]
 public partial class SessionOutcomeMapping : BaseEntity
 {
+    [Key]
     [Column("session_id")]
     public long SessionId { get; set; }
     
+    [Key]
     [Column("outcome_id")]
     public long OutcomeId { get; set; }
     
@@ -20,4 +22,5 @@ public partial class SessionOutcomeMapping : BaseEntity
     [ForeignKey("OutcomeId")]
     [InverseProperty("SessionOutcomeMappings")]
     public virtual SyllabusLearningOutcome Outcome { get; set; } = null!;
+    
 }

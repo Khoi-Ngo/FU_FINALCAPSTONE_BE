@@ -7,9 +7,11 @@ namespace AISEA.ApiService.DAL.Entities;
 [Table("CurriculumSubject")]
 public partial class CurriculumSubject : BaseEntity
 {
+    [Key]
     [Column("curriculum_id")]
     public long CurriculumId { get; set; }
     
+    [Key]
     [Column("subject_id")]
     public long SubjectId { get; set; }
     
@@ -24,4 +26,5 @@ public partial class CurriculumSubject : BaseEntity
     [ForeignKey("SubjectId")]
     [InverseProperty("CurriculumSubjects")]
     public virtual Subject Subject { get; set; } = null!;
+
 }

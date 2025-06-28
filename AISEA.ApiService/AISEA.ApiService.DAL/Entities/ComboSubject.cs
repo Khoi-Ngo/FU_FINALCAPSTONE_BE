@@ -16,10 +16,8 @@ public partial class ComboSubject : BaseEntity
     public long SubjectId { get; set; }
     
     [ForeignKey("ComboId")]
-    [InverseProperty("ComboSubjects")]
     public virtual Combo Combo { get; set; } = null!;
     
     [ForeignKey("SubjectId")]
-    [InverseProperty("ComboSubjects")]
     public virtual Subject Subject { get; set; } = null!;
 }

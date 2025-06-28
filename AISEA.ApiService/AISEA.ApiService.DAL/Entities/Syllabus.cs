@@ -20,15 +20,11 @@ public partial class Syllabus : BaseEntity
     [InverseProperty("Syllabi")]
     public virtual Subject Subject { get; set; } = null!;
     
-    [InverseProperty("Syllabus")]
     public virtual ICollection<SyllabusAssessment> SyllabusAssessments { get; set; } = new List<SyllabusAssessment>();  
     
-    [InverseProperty("Syllabus")]
     public virtual ICollection<SyllabusLearningMaterial> SyllabusLearningMaterials {get; set; } = new List<SyllabusLearningMaterial>();
     
-    [InverseProperty("Syllabus")]
     public virtual ICollection<SyllabusLearningOutcome> SyllabusLearningOutcomes { get; set; } = new List<SyllabusLearningOutcome>();
     
-    [InverseProperty("Syllabus")]
     public virtual ICollection<SyllabusSession> SyllabusSessions { get; set; } = new List<SyllabusSession>();
 }

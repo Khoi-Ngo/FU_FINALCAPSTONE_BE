@@ -20,9 +20,7 @@ public partial class SyllabusLearningOutcome : BaseEntity
     public string Description { get; set; } = null!;
     
     [ForeignKey("SyllabusId")]
-    [InverseProperty("SyllabusLearningOutcome")]
     public virtual Syllabus Syllabus { get; set; } = null!;
     
-    [InverseProperty("Outcome")]
     public virtual ICollection<SessionOutcomeMapping> SessionOutcomeMappings { get; set; } = new List<SessionOutcomeMapping>(); 
 }

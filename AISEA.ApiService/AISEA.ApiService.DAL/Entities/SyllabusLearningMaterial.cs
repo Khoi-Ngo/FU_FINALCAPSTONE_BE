@@ -28,7 +28,6 @@ public partial class SyllabusLearningMaterial : BaseEntity
     public string? FilepathOrUrl  { get; set; }
     
     [ForeignKey("SyllabusId")]
-    [InverseProperty("SyllabusLearningMaterial")]
     public virtual Syllabus Syllabus { get; set; } = null!;
     
     

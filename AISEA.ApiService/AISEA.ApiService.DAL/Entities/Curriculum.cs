@@ -24,9 +24,7 @@ public partial class Curriculum : BaseEntity
     public DateTimeOffset EffectiveDate { get; set; }
 
     [ForeignKey("ProgramId")]
-    [InverseProperty("Curricula")]
     public virtual Program Program { get; set; } = null;
     
-    [InverseProperty("Curriculum")]
     public virtual ICollection<CurriculumSubject> CurriculumSubjects  { get; set; } = new List<CurriculumSubject>();
 }

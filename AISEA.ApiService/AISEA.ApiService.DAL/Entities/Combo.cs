@@ -17,6 +17,5 @@ public partial class Combo : BaseEntity
     [Column(TypeName = "text")]
     public string? ComboDescription { get; set; }
     
-    [InverseProperty("Combo")]
     public virtual ICollection<ComboSubject> ComboSubjects { get; set; } = new List<ComboSubject>();
 }

@@ -201,18 +201,26 @@ public partial class AiseaContext : DbContext
 
         modelBuilder.Entity<SubjectPrerequisite>(entity =>
         {
+            // Định nghĩa khóa chính phức hợp
             entity.HasKey(e => new { e.SubjectId, e.PrerequisiteSubjectId }).HasName("subjectprerequisite_composite_primary");
-            entity.HasOne(d => d.Subject).WithMany(p => p.Prerequisites)
+
+            // Định nghĩa mối quan hệ: SubjectPrerequisite -> Subject (Môn học chính)
+            // Một môn học (Subject) có thể là điều kiện tiên quyết của nhiều môn học khác (DependentSubjects)
+            entity.HasOne(d => d.Subject)
+                .WithMany(p => p.DependentSubjects) // Liên kết với collection DependentSubjects trong Subject
                 .HasForeignKey(d => d.SubjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("subjectprerequisite_subjectid_foreign");
-            entity.HasOne(d => d.PrerequisiteSubject).WithMany(p => p.DependentSubjects)
+
+            // Định nghĩa mối quan hệ: SubjectPrerequisite -> PrerequisiteSubject (Môn học tiên quyết)
+            // Một môn học (Subject) có thể có nhiều môn học tiên quyết (Prerequisites)
+            entity.HasOne(d => d.PrerequisiteSubject)
+                .WithMany(p => p.Prerequisites) // Liên kết với collection Prerequisites trong Subject
                 .HasForeignKey(d => d.PrerequisiteSubjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("subjectprerequisite_prerequisitesubjectid_foreign");
         });
 
-        
         modelBuilder.Entity<SyllabusAssessment>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("syllabusassessment_id_primary");

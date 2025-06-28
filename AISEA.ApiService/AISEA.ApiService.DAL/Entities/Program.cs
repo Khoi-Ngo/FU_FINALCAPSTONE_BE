@@ -18,6 +18,5 @@ public partial  class Program : BaseEntity
     [StringLength(50)]
     public string ProgramCode { get; set; } = null;
     
-    [InverseProperty("Program")]
     public virtual ICollection<Curriculum> Curricula { get; set; } = new List<Curriculum>();
 }

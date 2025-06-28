@@ -22,22 +22,16 @@ public partial class Subject : BaseEntity
     [Column(TypeName = "text")]
     public string? Description { get; set; }
     
-    [InverseProperty("Subject")]
     public virtual ICollection<Syllabus> Syllabi { get; set; } = new List<Syllabus>();
     
-    [InverseProperty("Subject")]
     public virtual ICollection<CurriculumSubject> CurriculumSubjects { get; set; } = new List<CurriculumSubject>();
     
-    [InverseProperty("Subject")]
     public virtual ICollection<ComboSubject> ComboSubjects { get; set; } = new List<ComboSubject>();
     
-    // [InverseProperty("Subject")]
     // public virtual ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
     
-    [InverseProperty("Subject")]
     public virtual ICollection<SubjectPrerequisite> Prerequisites { get; set; } = new List<SubjectPrerequisite>();
     
-    [InverseProperty("Subject")]
     public virtual ICollection<SubjectPrerequisite> DependentSubjects { get; set; } = new List<SubjectPrerequisite>();
     
     

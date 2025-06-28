@@ -16,11 +16,9 @@ public partial class SubjectPrerequisite : BaseEntity
     public long PrerequisiteSubjectId { get; set; }
     
     [ForeignKey("SubjectId")]
-    [InverseProperty("Prerequisites")]
     public virtual Subject Subject { get; set; } = null!;
     
     [ForeignKey("PrerequisiteSubjectId")]
-    [InverseProperty("DependentSubjects")]
     public virtual Subject PrerequisiteSubject { get; set; } = null!;
     
 }

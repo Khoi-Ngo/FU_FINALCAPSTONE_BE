@@ -1,11 +1,6 @@
-﻿using AISEA.ApiService.DAL.Entities;
+using AISEA.ApiService.DAL.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AISEA.ApiService.DAL.EntityConfigurations
 {
@@ -25,7 +20,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasColumnType("decimal(5, 2)");
 
             builder.Property(e => e.CompletionCriteria)
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)"); // Updated from "text" to "nvarchar(max)"
 
             builder.Property(e => e.QuestionType)
                 .HasMaxLength(255);

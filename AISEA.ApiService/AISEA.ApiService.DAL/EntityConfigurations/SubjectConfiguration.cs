@@ -1,11 +1,6 @@
-﻿using AISEA.ApiService.DAL.Entities;
+using AISEA.ApiService.DAL.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AISEA.ApiService.DAL.EntityConfigurations
 {
@@ -26,7 +21,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasMaxLength(255);
 
             builder.Property(e => e.Description)
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)"); // Updated from "text" to "nvarchar(max)"
         }
     }
 }

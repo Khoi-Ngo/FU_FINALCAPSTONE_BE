@@ -20,10 +20,10 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
 
             builder.Property(e => e.Content)
                 .IsRequired()
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)"); // Updated from "text" to "nvarchar(max)"
 
             builder.Property(e => e.Link)
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)"); // Updated from "text" to "nvarchar(max)"
 
             builder.HasOne(d => d.User)
                 .WithMany(p => p.Notifications)

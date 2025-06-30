@@ -42,20 +42,5 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Where(s => subjectIds.Contains(s.Id) && !s.IsDeleted)
                 .ToListAsync();
         }
-
-        public async Task<List<Subject>> GetPrerequisitesAsync(long subjectId)
-        {
-            return await _context.SubjectPrerequisites
-                .Where(sp => sp.SubjectId == subjectId)
-                .Include(sp => sp.PrerequisiteSubject)
-                .Select(sp => sp.PrerequisiteSubject)
-                .ToListAsync();
-        }
-
-        public async Task<bool> HasPrerequisiteAsync(long subjectId, long prerequisiteSubjectId)
-        {
-            return await _context.SubjectPrerequisites
-                .AnyAsync(sp => sp.SubjectId == subjectId && sp.PrerequisiteSubjectId == prerequisiteSubjectId);
-        }
     }
 }

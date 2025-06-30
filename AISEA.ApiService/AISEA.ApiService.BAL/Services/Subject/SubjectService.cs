@@ -11,11 +11,13 @@ namespace AISEA.ApiService.BAL.Services.Subject
     public class SubjectService
     {
         private readonly SubjectRepository _subjectRepository;
+        private readonly SubjectPrerequisiteRepository _prerequisiteRepository;
         private readonly IMapper _mapper;
 
-        public SubjectService(SubjectRepository subjectRepository, IMapper mapper)
+        public SubjectService(SubjectRepository subjectRepository, SubjectPrerequisiteRepository prerequisiteRepository, IMapper mapper)
         {
             _subjectRepository = subjectRepository;
+            _prerequisiteRepository = prerequisiteRepository;
             _mapper = mapper;
         }
 
@@ -114,7 +116,7 @@ namespace AISEA.ApiService.BAL.Services.Subject
                 throw new InvalidUserCreatedException("A subject cannot be a prerequisite of itself.");
             }
 
-            var hasPrerequisite = await _subjectRepository.HasPrerequisiteAsync(subjectId, prerequisiteSubjectId);
+            var hasPrerequisite = await _prerequisiteRepository.ExistsAsync(subjectId, prerequisiteSubjectId);
             if (hasPrerequisite)
             {
                 throw new InvalidUserCreatedException("This prerequisite relationship already exists.");
@@ -127,8 +129,7 @@ namespace AISEA.ApiService.BAL.Services.Subject
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _subjectRepository.PrepareCreate(prerequisite);
-            await _subjectRepository.SaveAsync();
+            await _prerequisiteRepository.CreateAsync(prerequisite);
         }
 
         public async Task<List<GetSubjectResponse>> GetPrerequisitesAsync(long subjectId)
@@ -139,8 +140,19 @@ namespace AISEA.ApiService.BAL.Services.Subject
                 throw new NotFoundException("Subject not found.");
             }
 
-            var prerequisites = await _subjectRepository.GetPrerequisitesAsync(subjectId);
+            var prerequisites = await _prerequisiteRepository.GetPrerequisitesBySubjectIdAsync(subjectId);
             return _mapper.Map<List<GetSubjectResponse>>(prerequisites);
+        }
+
+        public async Task RemovePrerequisiteAsync(long subjectId, long prerequisiteSubjectId)
+        {
+            var subject = await _subjectRepository.GetByIdAsync(subjectId);
+            if (subject == null || subject.IsDeleted)
+            {
+                throw new NotFoundException("Subject not found.");
+            }
+
+            await _prerequisiteRepository.RemovePrerequisiteAsync(subjectId, prerequisiteSubjectId);
         }
     }
 }

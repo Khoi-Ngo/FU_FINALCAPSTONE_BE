@@ -92,5 +92,16 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
             var result = await _subjectService.GetPrerequisitesAsync(id);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Removes a prerequisite from a subject (Academic Staff only)
+        /// </summary>
+        [HttpDelete("{id}/prerequisites/{prerequisiteId}")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> RemovePrerequisite(long id, long prerequisiteId)
+        {
+            await _subjectService.RemovePrerequisiteAsync(id, prerequisiteId);
+            return Ok(new { Message = "Prerequisite removed successfully." });
+        }
     }
 }

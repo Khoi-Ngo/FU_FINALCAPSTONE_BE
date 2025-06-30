@@ -7,6 +7,8 @@ using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.BAL.Services.Role;
+using AISEA.ApiService.BAL.Services.Subject;
+using AISEA.ApiService.BAL.Services.Syllabus;
 using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.BAL.Services.User;
 using FluentValidation;
@@ -30,6 +32,8 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<StudentProfileService>();
             services.AddScoped<StaffProfileService>();
             services.AddScoped<AdvisorySession1to1Service>();
+            services.AddScoped<SubjectService>();
+            services.AddScoped<SyllabusService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

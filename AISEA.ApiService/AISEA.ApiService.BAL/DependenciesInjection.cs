@@ -11,6 +11,8 @@ using AISEA.ApiService.BAL.Services.Subject;
 using AISEA.ApiService.BAL.Services.Syllabus;
 using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.BAL.Services.User;
+using AISEA.ApiService.BAL.Services.Curriculum;
+using AISEA.ApiService.BAL.Services.Combo;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
@@ -34,6 +36,8 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<AdvisorySession1to1Service>();
             services.AddScoped<SubjectService>();
             services.AddScoped<SyllabusService>();
+            services.AddScoped<CurriculumService>();
+            services.AddScoped<ComboService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

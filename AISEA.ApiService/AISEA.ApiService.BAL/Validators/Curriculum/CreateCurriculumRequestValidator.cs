@@ -13,7 +13,7 @@ namespace AISEA.ApiService.BAL.Validators.Curriculum
             RuleFor(x => x.CurriculumCode)
                 .NotEmpty().WithMessage("Curriculum code is required.")
                 .MaximumLength(50).WithMessage("Curriculum code must be less than 50 characters.")
-                .Matches(@"^[A-Z0-9]+$").WithMessage("Curriculum code must contain only uppercase letters and numbers.");
+                .Matches(@"^[A-Z0-9_]+$").WithMessage("Curriculum code must contain only uppercase letters, numbers, and underscores.");
 
             RuleFor(x => x.CurriculumName)
                 .NotEmpty().WithMessage("Curriculum name is required.")

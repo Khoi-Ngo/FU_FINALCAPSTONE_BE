@@ -14,7 +14,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
 
             builder.Property(e => e.Content)
                 .IsRequired()
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)");
 
             builder.HasOne(d => d.Subject)
                 .WithMany(p => p.Syllabi)

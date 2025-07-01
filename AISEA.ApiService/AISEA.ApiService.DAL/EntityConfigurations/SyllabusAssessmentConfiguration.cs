@@ -25,7 +25,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasColumnType("decimal(5, 2)");
 
             builder.Property(e => e.CompletionCriteria)
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)");
 
             builder.Property(e => e.QuestionType)
                 .HasMaxLength(255);

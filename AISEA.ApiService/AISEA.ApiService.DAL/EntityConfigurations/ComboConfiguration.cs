@@ -20,7 +20,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasMaxLength(255);
 
             builder.Property(e => e.ComboDescription)
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)");
         }
     }
 }

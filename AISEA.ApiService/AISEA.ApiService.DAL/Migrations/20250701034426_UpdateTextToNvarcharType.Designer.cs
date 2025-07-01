@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250701034426_UpdateTextToNvarcharType")]
+    partial class UpdateTextToNvarcharType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,7 +97,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("ComboDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ComboName")
                         .IsRequired()
@@ -719,7 +722,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -810,7 +813,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -863,7 +866,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("CompletionCriteria")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -940,7 +943,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("FilepathOrUrl")
                         .HasMaxLength(500)
@@ -1001,7 +1004,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1057,7 +1060,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Mission")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");

@@ -41,6 +41,12 @@ public static class DependenciesInjection
         services.AddScoped<SyllabusLearningOutcomeRepository>();
         services.AddScoped<SyllabusSessionRepository>();
         services.AddScoped<SessionOutcomeMappingRepository>();
+        services.AddScoped<CurriculumRepository>();
+        services.AddScoped<CurriculumVersionRepository>();
+        services.AddScoped<CurriculumSubjectRepository>();
+        services.AddScoped<ComboRepository>();
+        services.AddScoped<ComboPrerequisiteRepository>();
+        services.AddScoped<StudentComboEnrollmentRepository>();
 
         #endregion
 

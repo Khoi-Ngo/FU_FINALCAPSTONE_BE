@@ -10,7 +10,7 @@ namespace AISEA.ApiService.BAL.Validators.Subject
             RuleFor(x => x.SubjectCode)
                 .NotEmpty().WithMessage("Subject code is required.")
                 .MaximumLength(50).WithMessage("Subject code must be less than 50 characters.")
-                .Matches(@"^[A-Z0-9]+$").WithMessage("Subject code must contain only uppercase letters and numbers.");
+                .Matches(@"^[A-Za-z0-9]+$").WithMessage("Subject code must contain only letters (uppercase or lowercase) and numbers.");
 
             RuleFor(x => x.SubjectName)
                 .NotEmpty().WithMessage("Subject name is required.")

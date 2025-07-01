@@ -17,7 +17,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasMaxLength(50);
 
             builder.Property(e => e.Mission)
-                .HasColumnType("nvarchar(max)"); // Updated from "text" to "nvarchar(max)"
+                .HasColumnType("text");
 
             builder.HasOne(d => d.Syllabus)
                 .WithMany(p => p.SyllabusSessions)

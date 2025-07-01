@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250628110452_AddNewAcademicTables")]
+    partial class AddNewAcademicTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,14 +75,9 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("advisorysession1to1_id_primary");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("IX_AdvisorySession1to1_CreatedAt");
+                    b.HasIndex("StaffId");
 
-                    b.HasIndex("StaffId")
-                        .HasDatabaseName("IX_AdvisorySession1to1_StaffId");
-
-                    b.HasIndex("StudentId")
-                        .HasDatabaseName("IX_AdvisorySession1to1_StudentId");
+                    b.HasIndex("StudentId");
 
                     b.ToTable("AdvisorySession1to1");
                 });
@@ -94,7 +92,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("ComboDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ComboName")
                         .IsRequired()
@@ -168,11 +166,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("ComboId", "SubjectId")
                         .HasName("combosubject_composite_primary");
 
-                    b.HasIndex("ComboId")
-                        .HasDatabaseName("IX_ComboSubject_ComboId");
-
-                    b.HasIndex("SubjectId")
-                        .HasDatabaseName("IX_ComboSubject_SubjectId");
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("ComboSubject");
                 });
@@ -229,12 +223,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("curriculum_id_primary");
 
-                    b.HasIndex("CurriculumCode")
-                        .IsUnique()
-                        .HasDatabaseName("curriculum_code_unique");
-
-                    b.HasIndex("ProgramId")
-                        .HasDatabaseName("IX_Curriculum_ProgramId");
+                    b.HasIndex("ProgramId");
 
                     b.HasIndex(new[] { "CurriculumCode" }, "curriculum_code_unique")
                         .IsUnique();
@@ -285,11 +274,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("CurriculumId", "SubjectId")
                         .HasName("curriculumsubject_composite_primary");
 
-                    b.HasIndex("CurriculumId")
-                        .HasDatabaseName("IX_CurriculumSubject_CurriculumId");
-
-                    b.HasIndex("SubjectId")
-                        .HasDatabaseName("IX_CurriculumSubject_SubjectId");
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("CurriculumSubject");
                 });
@@ -308,7 +293,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -340,14 +325,9 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("message_id_primary");
 
-                    b.HasIndex("AdvisorySession1to1Id")
-                        .HasDatabaseName("IX_Message_AdvisorySession1to1Id");
+                    b.HasIndex("AdvisorySession1to1Id");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("IX_Message_CreatedAt");
-
-                    b.HasIndex("SenderId")
-                        .HasDatabaseName("IX_Message_SenderId");
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Message");
                 });
@@ -363,7 +343,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -384,7 +364,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Link")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
@@ -406,14 +386,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("notification_id_primary");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("IX_Notification_CreatedAt");
-
-                    b.HasIndex("IsRead")
-                        .HasDatabaseName("IX_Notification_IsRead");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Notification_UserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notification");
                 });
@@ -464,10 +437,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("program_id_primary");
 
-                    b.HasIndex("ProgramCode")
-                        .IsUnique()
-                        .HasDatabaseName("program_code_unique");
-
                     b.ToTable("Program");
                 });
 
@@ -494,7 +463,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -515,10 +484,6 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.HasKey("Id")
                         .HasName("role_id_primary");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("role_name_unique");
 
                     b.HasIndex(new[] { "Name" }, "role_name_unique")
                         .IsUnique();
@@ -563,11 +528,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("SessionId", "OutcomeId")
                         .HasName("sessionoutcomemapping_composite_primary");
 
-                    b.HasIndex("OutcomeId")
-                        .HasDatabaseName("IX_SessionOutcomeMapping_OutcomeId");
-
-                    b.HasIndex("SessionId")
-                        .HasDatabaseName("IX_SessionOutcomeMapping_SessionId");
+                    b.HasIndex("OutcomeId");
 
                     b.ToTable("SessionOutcomeMapping");
                 });
@@ -633,8 +594,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasName("staffprofile_id_primary");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_StaffProfile_UserId");
+                        .IsUnique();
 
                     b.ToTable("StaffProfile");
                 });
@@ -649,7 +609,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("CareerGoal")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -688,8 +648,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasName("studentprofile_id_primary");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_StudentProfile_UserId");
+                        .IsUnique();
 
                     b.ToTable("StudentProfile");
                 });
@@ -719,7 +678,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -745,10 +704,6 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.HasKey("Id")
                         .HasName("subject_id_primary");
-
-                    b.HasIndex("SubjectCode")
-                        .IsUnique()
-                        .HasDatabaseName("subject_code_unique");
 
                     b.ToTable("Subject");
                 });
@@ -790,11 +745,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("SubjectId", "PrerequisiteSubjectId")
                         .HasName("subjectprerequisite_composite_primary");
 
-                    b.HasIndex("PrerequisiteSubjectId")
-                        .HasDatabaseName("IX_SubjectPrerequisite_PrerequisiteSubjectId");
-
-                    b.HasIndex("SubjectId")
-                        .HasDatabaseName("IX_SubjectPrerequisite_SubjectId");
+                    b.HasIndex("PrerequisiteSubjectId");
 
                     b.ToTable("SubjectPrerequisite");
                 });
@@ -810,7 +761,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -842,8 +793,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("syllabus_id_primary");
 
-                    b.HasIndex("SubjectId")
-                        .HasDatabaseName("IX_Syllabus_SubjectId");
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("Syllabus");
                 });
@@ -863,7 +813,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("CompletionCriteria")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -908,8 +858,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("syllabusassessment_id_primary");
 
-                    b.HasIndex("SyllabusId")
-                        .HasDatabaseName("IX_SyllabusAssessment_SyllabusId");
+                    b.HasIndex("SyllabusId");
 
                     b.ToTable("SyllabusAssessment");
                 });
@@ -940,7 +889,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("FilepathOrUrl")
                         .HasMaxLength(500)
@@ -972,8 +921,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("syllabuslearningmaterial_id_primary");
 
-                    b.HasIndex("SyllabusId")
-                        .HasDatabaseName("IX_SyllabusLearningMaterial_SyllabusId");
+                    b.HasIndex("SyllabusId");
 
                     b.ToTable("SyllabusLearningMaterial");
                 });
@@ -1001,7 +949,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1026,8 +974,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("syllabuslearningoutcome_id_primary");
 
-                    b.HasIndex("SyllabusId")
-                        .HasDatabaseName("IX_SyllabusLearningOutcome_SyllabusId");
+                    b.HasIndex("SyllabusId");
 
                     b.ToTable("SyllabusLearningOutcome");
                 });
@@ -1057,7 +1004,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Mission")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
@@ -1082,8 +1029,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("syllabussession_id_primary");
 
-                    b.HasIndex("SyllabusId")
-                        .HasDatabaseName("IX_SyllabusSession_SyllabusId");
+                    b.HasIndex("SyllabusId");
 
                     b.ToTable("SyllabusSession");
                 });
@@ -1162,16 +1108,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("user_id_primary");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("user_email_unique");
-
-                    b.HasIndex("RoleId")
-                        .HasDatabaseName("IX_User_RoleId");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasDatabaseName("user_username_unique");
+                    b.HasIndex("RoleId");
 
                     b.HasIndex(new[] { "Email" }, "user_email_unique")
                         .IsUnique();

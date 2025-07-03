@@ -21,6 +21,7 @@ public static class DependenciesInjection
         services.AddDbContext<AiseaContext>(options =>
         {
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            options.EnableSensitiveDataLogging(true);
         });
         #endregion
 

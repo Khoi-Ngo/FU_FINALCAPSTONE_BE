@@ -8,8 +8,6 @@ namespace AISEA.ApiService.SHARED.PropConfigs
     public class ChatSessionSettings
     {
         public const string Section = "ChatSessionSettings";
-        public string SenderCachePrefix { get; set; }
-        public int SenderCacheExpiryHrs { get; set; }
         public string SessionCachePrefix { get; set; }
         public int SessionCacheExpiryDays { get; set; }
         public string SendADVSSMethod { get; set; }
@@ -20,5 +18,8 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public string MulDataSessionsPrefixStaff { get; set; }
         public string MulDataSessionsPrefixStudent { get; set; }
         public string LoadMoreMessagesMethod { get; set; }
+        public string SessionDeletedMethod { get; set; }
+        public string AddSessionAsAssigned { get; set; }
+        public string RemoveSessionFromUnassigned { get; set; }
     }
 }

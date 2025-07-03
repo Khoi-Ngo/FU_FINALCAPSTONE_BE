@@ -38,7 +38,19 @@ public class AdvisorySession1to1Controller : BaseController
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
+        var session = await _advisorySession1To1Service.GetByIdAsync(id); // Fetch session for StaffId and StudentId
         await _advisorySession1To1Service.DeleteAsync(id, AccessToken);
+
+        // Notify student, staff, and session groups
+        await Task.WhenAll(
+            _advSessionHubContext.Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStaff}{session.StaffId}")
+                .SendAsync(_chatSessionSettings.SessionDeletedMethod, id),
+            _advSessionHubContext.Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStudent}{session.StudentId}")
+                .SendAsync(_chatSessionSettings.SessionDeletedMethod, id),
+            _advSessionHubContext.Clients.Group($"{_chatSessionSettings.GroupChatADVssPrefix}{id}")
+                .SendAsync(_chatSessionSettings.SessionDeletedMethod, id)
+        );
+
         return Ok("Delete successfully");
     }
 

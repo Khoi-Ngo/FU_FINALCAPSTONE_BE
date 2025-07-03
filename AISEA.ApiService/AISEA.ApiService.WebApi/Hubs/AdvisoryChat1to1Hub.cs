@@ -73,9 +73,21 @@ public class AdvisoryChat1to1Hub : BaseHub
     [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task JoinSession(long sessionId)
     {
-        await _advisorySession1To1Service.JoinSessionAsync(sessionId, AccessToken);
+        var session = await _advisorySession1To1Service.JoinSessionAsync(sessionId, AccessToken);
         await Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.GroupChatADVssPrefix}{sessionId}");
-        await Clients.Caller.SendAsync(_chatSessionSettings.JoinSSMethod, await _advisorySession1To1Service.GetMessagesAsync(new PaginationRequest { }, sessionId));
+        if (session.StaffId != _staffUserSettings.EmptyStaffProfileId)
+        {
+            await Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStaff}{_staffUserSettings.EmptyStaffProfileId}")
+                .SendAsync(_chatSessionSettings.RemoveSessionFromUnassigned, session);
+
+            await Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStaff}{session.StaffId}")
+                .SendAsync(_chatSessionSettings.AddSessionAsAssigned, session);
+        }
+
+        await Clients.Caller.SendAsync(
+            _chatSessionSettings.JoinSSMethod,
+            await _advisorySession1To1Service.GetMessagesAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, sessionId)
+        );
     }
 
     /// <summary>

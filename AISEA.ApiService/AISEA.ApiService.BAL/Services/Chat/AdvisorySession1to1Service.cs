@@ -182,7 +182,7 @@ public class AdvisorySession1to1Service
         return _mapper.Map<MessageItemResponse>(message);
     }
 
-    public async Task JoinSessionAsync(long sessionId, string accessToken)
+    public async Task<GetAdvisorySession1to1ItemsResponse> JoinSessionAsync(long sessionId, string accessToken)
     {
         var userData = _jWTService.GetAllClaimsFromToken(accessToken);
         var profileId = long.Parse(userData.GetValueOrDefault(_jwtSettings.ProfileId));
@@ -212,6 +212,7 @@ public class AdvisorySession1to1Service
         }
 
         await UpdateSessionAsync(chatSession);
+        return _mapper.Map<GetAdvisorySession1to1ItemsResponse>(chatSession);
     }
 
     private async Task<Message> CreateMessageAsync(string content, long senderId, long sessionId)

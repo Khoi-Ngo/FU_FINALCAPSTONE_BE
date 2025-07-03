@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250701042304_UpdateTextToNvarcharType1")]
+    partial class UpdateTextToNvarcharType1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,14 +55,8 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<long>("StaffId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime?>("StaffJoinAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<long>("StudentId")
                         .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("StudentJoinAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -384,9 +381,6 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDelivered")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsRead")

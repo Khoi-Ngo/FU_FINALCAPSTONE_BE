@@ -16,7 +16,6 @@ namespace AISEA.ApiService.WebApi
     {
         public static IServiceCollection AddWebApiConfig(this IServiceCollection services, IConfiguration configuration)
         {
-            // Integrate JWT into HttpContext User
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

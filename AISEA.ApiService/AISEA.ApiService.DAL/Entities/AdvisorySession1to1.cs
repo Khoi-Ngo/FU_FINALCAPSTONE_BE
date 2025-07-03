@@ -19,9 +19,9 @@ public partial class AdvisorySession1to1 : BaseEntity
     public string Title { get; set; } = null!;
 
     public long StaffId { get; set; }
-
+    public DateTime? StaffJoinAt { get; set; }
+    public DateTime? StudentJoinAt { get; set; }
     public EAdvisorySession1to1Type Type { get; set; }
-
     public long StudentId { get; set; }
 
     [InverseProperty("AdvisorySession1to1")]

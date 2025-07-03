@@ -1,0 +1,168 @@
+using AISEA.ApiService.BAL.Services.Chat;
+using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
+using AISEA.ApiService.SHARED.DTOs.Responses.AdvisorySession1to1;
+using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.Interfaces;
+using AISEA.ApiService.SHARED.PropConfigs;
+using AISEA.ApiService.WebApi.Base;
+using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
+
+namespace AISEA.ApiService.WebApi.Hubs;
+
+public class AdvisoryChat1to1Hub : BaseHub
+{
+
+    #region Init
+    private readonly AdvisorySession1to1Service _advisorySession1To1Service;
+    private readonly StaffUserSettings _staffUserSettings;
+    private readonly ChatSessionSettings _chatSessionSettings;
+    private readonly JwtSettings _jwtSettings;
+    private readonly IJWTService _jWTService;
+    private readonly IMapper _mapper;
+
+    public AdvisoryChat1to1Hub(EndpointSettings endpointSettings,
+    AdvisorySession1to1Service advisorySession1To1Service,
+    StaffUserSettings staffUserSettings,
+    ChatSessionSettings chatSessionSettings,
+    IJWTService jWTService,
+    JwtSettings jwtSettings,
+    IMapper mapper) : base(endpointSettings)
+    {
+        _advisorySession1To1Service = advisorySession1To1Service;
+        _staffUserSettings = staffUserSettings;
+        _chatSessionSettings = chatSessionSettings;
+        _jwtSettings = jwtSettings;
+        _jWTService = jWTService;
+        _mapper = mapper;
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Staff or Student sends a message in an AdvisoryChatSession1to1.
+    /// The session have to be initialized in advanced.
+    /// The message is saved to the database and broadcast to the session group.
+    /// </summary>
+    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
+    public async Task SendMessage(long sessionId, string content)
+    {
+        var message = await _advisorySession1To1Service.SendMessageAsync(sessionId, content, AccessToken);
+        var session = await _advisorySession1To1Service.GetByIdAsync(sessionId);
+        session.UpdatedAt = DateTime.UtcNow;
+
+        var sessionGroup = $"{_chatSessionSettings.GroupChatADVssPrefix}{sessionId}";
+        var broadcastSession = _mapper.Map<GetAdvisorySession1to1ItemsResponse>(session);
+
+        await Task.WhenAll(
+            Clients.Group(sessionGroup).SendAsync(_chatSessionSettings.SendADVSSMethod, message),
+            Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStaff}{session.StaffId}")
+                .SendAsync(_chatSessionSettings.GetSessionsHUBMethod, broadcastSession),
+            Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStudent}{session.StudentId}")
+                .SendAsync(_chatSessionSettings.GetSessionsHUBMethod, broadcastSession)
+        );
+
+        await _advisorySession1To1Service.UpdateSessionAsync(session);
+    }
+
+    /// <summary>
+    ///Advisor or Student join the Advisory Chat Session
+    ///This includes verification before joining
+    /// </summary>
+    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
+    public async Task JoinSession(long sessionId)
+    {
+        await _advisorySession1To1Service.JoinSessionAsync(sessionId, AccessToken);
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.GroupChatADVssPrefix}{sessionId}");
+        await Clients.Caller.SendAsync(_chatSessionSettings.JoinSSMethod, await _advisorySession1To1Service.GetMessagesAsync(new PaginationRequest { }, sessionId));
+    }
+
+    /// <summary>
+    /// Student Get the mul data of chat sessions related to them
+    /// </summary>
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task ListAllSessionByStudent()
+    {
+        var studentData = _jWTService.GetAllClaimsFromToken(AccessToken);
+        var studentProfileId = long.Parse(studentData.GetValueOrDefault(_jwtSettings.ProfileId));
+
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStudentAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, studentProfileId);
+        await Task.WhenAll(
+            Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
+            Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStudent}{studentProfileId}")
+        );
+    }
+
+    /// <summary>
+    /// Staff Get the mul data of chat sessions related to them
+    /// </summary>
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task ListAllSessionByStaff()
+    {
+        var staffData = _jWTService.GetAllClaimsFromToken(AccessToken);
+        var staffProfileId = long.Parse(staffData.GetValueOrDefault(_jwtSettings.ProfileId));
+
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, staffProfileId);
+        await Task.WhenAll(
+            Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
+            Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{staffProfileId}")
+        );
+    }
+
+    /// <summary>
+    ///Staff can access this chanel to view real time unassigned sessions
+    /// </summary>
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task ListOpenedSession()
+    {
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, _staffUserSettings.EmptyStaffProfileId);
+        await Task.WhenAll(
+            Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
+            Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{_staffUserSettings.EmptyStaffProfileId}")
+        );
+    }
+
+    /// <summary>
+    /// Load more messages for a session when scrolling
+    /// </summary>
+    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
+    public async Task LoadMoreMessages(long sessionId, PaginationRequest pagination)
+    {
+        var messages = await _advisorySession1To1Service.GetMessagesAsync(pagination, sessionId);
+        await Clients.Caller.SendAsync(_chatSessionSettings.LoadMoreMessagesMethod, messages);
+    }
+
+
+
+    /// <summary>
+    /// Loads additional chat sessions for a user when scrolling, supporting infinite scroll pagination.
+    /// </summary>
+    /// <param name="pagination">Pagination parameters (page number and size).</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
+    public async Task LoadMoreSessions(PaginationRequest pagination)
+    {
+        // Extract user data from token
+        var userData = _jWTService.GetAllClaimsFromToken(AccessToken);
+        var profileId = long.Parse(userData.GetValueOrDefault(_jwtSettings.ProfileId));
+        var roleId = int.Parse(userData.GetValueOrDefault(_jwtSettings.AuthProp));
+
+        // Determine group name based on user role
+        string groupName = roleId switch
+        {
+            (int)EUserRole.STUDENT => $"{_chatSessionSettings.MulDataSessionsPrefixStudent}{profileId}",
+            (int)EUserRole.ADVISOR => $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{profileId}",
+            _ => throw new HubException("Invalid role for session access")
+        };
+
+        // Fetch sessions and add to group concurrently
+        var sessions = await _advisorySession1To1Service.GetSessionsAsync(pagination, AccessToken);
+        await Task.WhenAll(
+            Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessions),
+            Groups.AddToGroupAsync(Context.ConnectionId, groupName)
+        );
+    }
+
+
+}

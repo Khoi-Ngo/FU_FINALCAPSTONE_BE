@@ -4,12 +4,10 @@ using AISEA.ApiService.DAL;
 using AISEA.ApiService.SHARED;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.SHARED.Middleware;
-using AISEA.ApiService.Services;
+using AISEA.ApiService.WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    //Adding file json to the configuration if needed
-
     builder.Services
     .AddWebApiConfig(builder.Configuration)
     .AddBALConfig(builder.Configuration)
@@ -48,16 +46,14 @@ var app = builder.Build();
         //more type status below ...
     });
     var corsPolicyName = app.Configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
+    var AdvisoryHubEndpoint = app.Configuration.GetSection(EndpointSettings.Section)["AdvisoryHubEndpoint"];
 
-    //TODO: Replace the hardcoded value of hub later
-    app.MapHub<NotificationHub>("/notificationHub");
-    app.UseHttpsRedirection();
+    // app.UseHttpsRedirection();
+    app.UseCors(corsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
-
-    app.UseCors(corsPolicyName);
-
+    //mapping signalR hubs
+    app.MapHub<AdvisoryChat1to1Hub>(AdvisoryHubEndpoint).RequireAuthorization();
     app.MapControllers();
-
     app.Run();
 }

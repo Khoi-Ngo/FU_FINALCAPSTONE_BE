@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services.Chat;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.ChatBot;
+using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using Microsoft.AspNetCore.Mvc;
@@ -14,18 +12,33 @@ namespace AISEA.ApiService.WebApi.Controllers.Chat;
 [Route("api/[controller]")]
 public class ChatBotController : BaseController
 {
-    private readonly ChatBotService _chatBotService;
-    public ChatBotController(EndpointSettings endpointSettings, ChatBotService chatBotService) : base(endpointSettings)
+    private readonly AdvisorySession1to1Service _advisorySession1To1Service;
+
+    public ChatBotController(EndpointSettings endpointSettings,
+    AdvisorySession1to1Service advisorySession1To1Service) : base(endpointSettings)
     {
-        _chatBotService = chatBotService;
+        _advisorySession1To1Service = advisorySession1To1Service;
     }
+
     /// <summary>
-    /// Note: ChatSessionId input > 0 (case: existed chat session) - else not existed yet
+    /// This is for sending message to Chat Bot only with Existed Session
     /// </summary>
-    [HttpPost]
+    [HttpPost("send")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> SendMsgAsync([FromBody] SendChatBotRequest request)
     {
-        var res = await _chatBotService.SendMsgAsync(request, AccessToken);
+        var res = await _advisorySession1To1Service.SendMsgAsync(request, AccessToken);
+        return Ok(res);
+    }
+
+    /// <summary>
+    /// This is for initializing new session with AI ChatBot
+    /// </summary>
+    [HttpPost("init")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> InitMsgAsync([FromBody] InitChatBotRequest request)
+    {
+        var res = await _advisorySession1To1Service.InitMsgAsync(request, AccessToken);
         return Ok(res);
     }
 

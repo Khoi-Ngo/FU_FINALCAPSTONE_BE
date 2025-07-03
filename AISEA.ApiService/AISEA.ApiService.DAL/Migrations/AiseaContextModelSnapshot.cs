@@ -52,8 +52,14 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<long>("StaffId")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime?>("StaffJoinAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<long>("StudentId")
                         .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("StudentJoinAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -378,6 +384,9 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDelivered")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsRead")

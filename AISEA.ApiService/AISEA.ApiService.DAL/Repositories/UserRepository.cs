@@ -18,11 +18,11 @@ namespace AISEA.ApiService.DAL.Repositories
         //get user by email
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+            return await _context.Users.Include(u => u.Role).Include(u => u.StudentProfile).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Email == email && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+            return await _context.Users.Include(u => u.Role).Include(u => u.StudentProfile).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<User> GetUserByEmailOrUsernameAsync(string email, string username)
         {
@@ -64,9 +64,10 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<User> GetUserByUsernameWStudentProfileAsync(string studentName)
+        public async Task<User> GetUserWProfileAsync(string username)
         {
-            return await _context.Users.Include(u => u.StudentProfile).FirstOrDefaultAsync(u => u.Username == studentName && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT);
+            return await _context.Users.Include(u => u.StaffProfile).Include(u => u.StudentProfile)
+            .FirstOrDefaultAsync(u => u.IsDeleted == false && u.Username == username && u.Status == EUserStatus.ACTIVE);
         }
 
         public async Task<long> GetStudentProfileIdByUsernameAsync(string username)

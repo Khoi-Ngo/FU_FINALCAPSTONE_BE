@@ -42,4 +42,8 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidAccessSession(string message) : base(message) { }
     }
+    public class InvalidDataInput : Exception
+    {
+        public InvalidDataInput(string message) : base(message) { }
+    }
 }

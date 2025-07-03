@@ -18,10 +18,10 @@ public class PermissionAuthorizeAttribute : AuthorizeAttribute, IAuthorizationFi
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        var endpointSettings = context.HttpContext.RequestServices
-            .GetRequiredService<IOptions<EndpointSettings>>().Value;
+        var jwtSettings = context.HttpContext.RequestServices
+            .GetRequiredService<IOptions<JwtSettings>>().Value;
 
-        var strRole =  context.HttpContext.User.FindFirst(endpointSettings.AuthorPropName)?.Value;
+        var strRole =  context.HttpContext.User.FindFirst(jwtSettings.AuthProp)?.Value;
         if (String.IsNullOrEmpty(strRole) || !_roles.Contains(Int32.Parse(strRole)))
         {
             context.Result = new ForbidResult();

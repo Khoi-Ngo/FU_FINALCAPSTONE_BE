@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using AISEA.ApiService.BAL.Services;
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.BAL.Services.Role;
@@ -30,7 +25,6 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<AuthService>();
             services.AddScoped<UserService>();
             services.AddScoped<RoleService>();
-            services.AddScoped<ChatBotService>();
             services.AddScoped<StudentProfileService>();
             services.AddScoped<StaffProfileService>();
             services.AddScoped<AdvisorySession1to1Service>();
@@ -39,6 +33,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<CurriculumService>();
             services.AddScoped<ComboService>();
 
+            
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

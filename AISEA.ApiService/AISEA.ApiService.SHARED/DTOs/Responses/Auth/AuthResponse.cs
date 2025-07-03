@@ -7,6 +7,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Auth
 {
     public class AuthResponse
     {
+        public long UserId { get; set; }
         public string Username { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string FirstName { get; set; } = null!;

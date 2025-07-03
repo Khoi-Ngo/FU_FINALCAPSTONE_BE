@@ -11,7 +11,8 @@ namespace AISEA.ApiService.BAL.Mappings.User
         public UserProfile()
         {
             //Auth
-            CreateMap<DAL.Entities.User, AuthResponse>();
+            CreateMap<DAL.Entities.User, AuthResponse>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
 
             //Create User
             CreateMap<CreateUserRequest, DAL.Entities.User>()
@@ -62,7 +63,7 @@ namespace AISEA.ApiService.BAL.Mappings.User
             #endregion
 
             #region UPDATE: user with profile
-            
+
             // Update Student with Profile
             CreateMap<UpdateStudentRequest, DAL.Entities.User>();
             CreateMap<StudentDataUpdateRequest, StudentProfile>();

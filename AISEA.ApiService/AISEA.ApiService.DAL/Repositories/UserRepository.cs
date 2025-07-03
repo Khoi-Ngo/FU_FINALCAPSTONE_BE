@@ -18,11 +18,11 @@ namespace AISEA.ApiService.DAL.Repositories
         //get user by email
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+            return await _context.Users.Include(u => u.Role).Include(u => u.StudentProfile).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Email == email && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
+            return await _context.Users.Include(u => u.Role).Include(u => u.StudentProfile).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Username == username && u.IsDeleted == false && u.Status == EUserStatus.ACTIVE);
         }
         public async Task<User> GetUserByEmailOrUsernameAsync(string email, string username)
         {

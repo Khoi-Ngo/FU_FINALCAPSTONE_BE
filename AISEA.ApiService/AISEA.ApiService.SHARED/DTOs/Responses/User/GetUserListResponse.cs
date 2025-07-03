@@ -8,6 +8,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.User
 {
     public class GetUserListResponse
     {
+        public long Id { get; set; }
         public string Username { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string FirstName { get; set; } = null!;

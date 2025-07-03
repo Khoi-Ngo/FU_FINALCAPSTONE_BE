@@ -1,4 +1,3 @@
-using System.Formats.Asn1;
 using System.Security.Authentication;
 using System.Text.Json;
 using AISEA.ApiService.DAL.Repositories;
@@ -21,12 +20,12 @@ public class AuthService
     private readonly IJWTService _jwtService;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
-    private readonly EndpointSettings _endpointSettings;
     private readonly IMailService _mailService;
     private readonly IRedisRepository _redisRepository;
     private readonly VerifyResetPassCodeSettings _verifyResetPassCodeSettings;
+    private readonly JwtSettings _jwtSettings;
 
-    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, EndpointSettings endpointSettings, IMailService mailService, IRedisRepository redisRepository, VerifyResetPassCodeSettings verifyResetPassCodeSettings)
+    public AuthService(GoogleAuthSettings googleAuthSettings, IHttpClientFactory httpClientFactory, UserRepository userRepository, IJWTService jwtService, ITokenService tokenService, IMapper mapper, JwtSettings jwtSettings, IMailService mailService, IRedisRepository redisRepository, VerifyResetPassCodeSettings verifyResetPassCodeSettings)
     {
         _googleAuthSettings = googleAuthSettings;
         _httpClient = httpClientFactory.CreateClient();
@@ -34,10 +33,10 @@ public class AuthService
         _jwtService = jwtService;
         _tokenService = tokenService;
         _mapper = mapper;
-        _endpointSettings = endpointSettings;
         _mailService = mailService;
         _redisRepository = redisRepository;
         _verifyResetPassCodeSettings = verifyResetPassCodeSettings;
+        _jwtSettings = jwtSettings;
     }
     private async Task<bool> IsValidVerifyResetCodeAsync(string email, string verificationCode)
     {
@@ -102,7 +101,8 @@ public class AuthService
             throw new InvalidCredentialException("User not found with this email.");
 
         // Generate tokens
-        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId);
+        var profileId = user.RoleId == (long)EUserRole.STUDENT ? user.StudentProfile.Id : user.StaffProfile.Id;
+        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         //saving the refresh token to Redis
@@ -124,7 +124,8 @@ public class AuthService
         }
 
         // Generate tokens
-        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId);
+        var profileId = user.RoleId == (long)EUserRole.STUDENT ? user.StudentProfile.Id : user.StaffProfile.Id;
+        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         //saving the refresh token to Redis
@@ -146,8 +147,7 @@ public class AuthService
     {
         //get the user info from expired access token
         var principal = _jwtService.GetPrincipalFromExpiredToken(accessToken);
-        string username = _jwtService.GetValueFromPrincipal(principal, _endpointSettings.UserNameClaimName).ToString();
-        string roleId = _jwtService.GetValueFromPrincipal(principal, _endpointSettings.RoleClaimName).ToString();
+        string username = _jwtService.GetValueFromPrincipal(principal, _jwtSettings.UserName).ToString();
 
         // Check if refresh token exists in Redis + refresh token belong to the username
         var isValid = await _tokenService.IsValidRefreshTokenAsync(username, refreshToken);
@@ -158,7 +158,7 @@ public class AuthService
 
         // Generate new tokens
         string newRefreshToken = _tokenService.GenerateRefreshToken();
-        string newAccessToken = _jwtService.GenerateAccessToken(username, roleId);
+        string newAccessToken = _jwtService.GenerateAccessToken(principal);
 
         // Update Redis: Adding the new refresh token to overwrite in Redis
         await _tokenService.StoreRefreshTokenAsync(username, newRefreshToken);
@@ -174,7 +174,10 @@ public class AuthService
     public async Task ResetPasswordAsync(ResetPasswordFEIDRequest request, string accessToken)
     {
         // Get username from access token
-        var username = _jwtService.GetUsernameFromToken(accessToken);
+
+        var userData = _jwtService.GetAllClaimsFromToken(accessToken);
+        var username = userData.GetValueOrDefault(_jwtSettings.UserName);
+
         // Get user from DB
         var user = await _userRepository.GetUserByUsernameAsync(username);
         if (user is null)

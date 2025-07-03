@@ -72,7 +72,10 @@ public class ExceptionHandlingMiddleware
                 statusCode = (int)HttpStatusCode.BadRequest;
                 message = exception.Message;
                 break;
-
+            case InvalidDataInput:
+                statusCode = (int)HttpStatusCode.BadRequest;
+                message = exception.Message;
+                break;
             case InvalidAccessTokenException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
                 message = exception.Message;

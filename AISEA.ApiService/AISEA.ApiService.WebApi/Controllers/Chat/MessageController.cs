@@ -10,19 +10,20 @@ namespace AISEA.ApiService.WebApi.Controllers.Chat;
 [Route("api/[controller]")]
 public class MessageController : BaseController
 {
-    private readonly MessageService _messageService;
-    public MessageController(EndpointSettings endpointSettings, MessageService messageService) : base(endpointSettings)
+    private readonly AdvisorySession1to1Service _advisorySession1To1Service;
+    public MessageController(EndpointSettings endpointSettings,
+    AdvisorySession1to1Service advisorySession1To1Service) : base(endpointSettings)
     {
-        _messageService = messageService;
+        _advisorySession1To1Service = advisorySession1To1Service;
     }
 
     /// <summary>
     /// Retrieves paginated  messages
     /// </summary>
     [HttpGet("{chatSessionId}")]
-    public async Task<IActionResult> GetAllStaffsPaged([FromQuery] PaginationRequest request, long chatSessionId)
+    public async Task<IActionResult> Get([FromQuery] PaginationRequest request, long chatSessionId)
     {
-        var result = await _messageService.GetMessagesAsync(chatSessionId);
+        var result = await _advisorySession1To1Service.GetChatBotMessagesAsync(request,chatSessionId);
         return Ok(result);
     }
 }

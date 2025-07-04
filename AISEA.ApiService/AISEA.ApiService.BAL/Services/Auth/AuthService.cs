@@ -101,7 +101,13 @@ public class AuthService
             throw new InvalidCredentialException("User not found with this email.");
 
         // Generate tokens
-        var profileId = user.RoleId == (long)EUserRole.STUDENT ? user.StudentProfile.Id : user.StaffProfile.Id;
+        // Determine profile ID based on user role
+        var profileId = user.RoleId switch
+        {
+            (long)EUserRole.STUDENT when user.StudentProfile is not null => user.StudentProfile.Id,
+            _ when user.StaffProfile is not null => user.StaffProfile.Id,
+            _ => -1
+        };
         var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
@@ -117,25 +123,36 @@ public class AuthService
     public async Task<AuthResponse> LoginAsync(AuthFEIDRequest request)
     {
         // Validate user credentials
-        var user = await _userRepository.GetUserByUsernameAsync(request.Username);
-        if (user is null || !BC.EnhancedVerify(request.Password, user.Password))
+        var user = await _userRepository.GetUserByUsernameAsync(request.Username)
+            ?? throw new InvalidCredentialException("Invalid username or password.");
+
+        if (!BC.EnhancedVerify(request.Password, user.Password))
         {
             throw new InvalidCredentialException("Invalid username or password.");
         }
 
+        // Determine profile ID based on user role
+        var profileId = user.RoleId switch
+        {
+            (long)EUserRole.STUDENT when user.StudentProfile is not null => user.StudentProfile.Id,
+            _ when user.StaffProfile is not null => user.StaffProfile.Id,
+            _ => -1
+        };
+
         // Generate tokens
-        var profileId = user.RoleId == (long)EUserRole.STUDENT ? user.StudentProfile.Id : user.StaffProfile.Id;
         var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
-        //saving the refresh token to Redis
+        // Save the refresh token to Redis
         await _tokenService.StoreRefreshTokenAsync(user.Username, refreshToken);
 
+        // Map and return result
         var result = _mapper.Map<AuthResponse>(user);
         result.AccessToken = accessToken;
         result.RefreshToken = refreshToken;
         return result;
     }
+
 
     public async Task LogoutAsync(string accessToken)
     {

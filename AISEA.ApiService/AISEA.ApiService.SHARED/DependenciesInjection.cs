@@ -21,6 +21,7 @@ namespace AISEA.ApiService.SHARED
             services.Configure<ChatBotSettings>(configuration.GetSection(ChatBotSettings.Section));
             services.Configure<StaffUserSettings>(configuration.GetSection(StaffUserSettings.Section));
             services.Configure<ChatSessionSettings>(configuration.GetSection(ChatSessionSettings.Section));
+            services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.Section));
 
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
@@ -34,7 +35,7 @@ namespace AISEA.ApiService.SHARED
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatBotSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<StaffUserSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatSessionSettings>>().Value);
-
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<NotificationSettings>>().Value);
 
             return services;
         }

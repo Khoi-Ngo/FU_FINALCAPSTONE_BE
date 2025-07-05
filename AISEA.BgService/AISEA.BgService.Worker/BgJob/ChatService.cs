@@ -1,3 +1,6 @@
+using AISEA.BgService.Worker.PropConfig;
+using AISEA.BgService.Worker.Repositories;
+
 namespace AISEA.BgService.Worker.BgJob;
 
 public class ChatService : BackgroundService

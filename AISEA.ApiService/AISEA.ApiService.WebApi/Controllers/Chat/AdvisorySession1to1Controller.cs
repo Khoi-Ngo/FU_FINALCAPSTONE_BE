@@ -6,6 +6,7 @@ using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.Hubs;
+using AISEA.ApiService.WebApi.HubUtil;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -16,20 +17,14 @@ namespace AISEA.ApiService.WebApi.Controllers.Chat;
 public class AdvisorySession1to1Controller : BaseController
 {
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
-    private readonly IHubContext<AdvisoryChat1to1Hub> _advSessionHubContext;
-    private readonly ChatSessionSettings _chatSessionSettings;
-    private readonly StaffUserSettings _staffUserSettings;
+    private readonly AdvisorySessionHubNotifier _advisorySessionHubNotifier;
 
     public AdvisorySession1to1Controller(EndpointSettings endpointSettings,
     AdvisorySession1to1Service advisorySession1To1Service,
-    IHubContext<AdvisoryChat1to1Hub> advSessionHubContext,
-    ChatSessionSettings chatSessionSettings,
-    StaffUserSettings staffUserSettings) : base(endpointSettings)
+    AdvisorySessionHubNotifier advisorySessionHubNotifier) : base(endpointSettings)
     {
         _advisorySession1To1Service = advisorySession1To1Service;
-        _advSessionHubContext = advSessionHubContext;
-        _chatSessionSettings = chatSessionSettings;
-        _staffUserSettings = staffUserSettings;
+        _advisorySessionHubNotifier = advisorySessionHubNotifier;
     }
 
     /// <summary>
@@ -42,15 +37,7 @@ public class AdvisorySession1to1Controller : BaseController
         await _advisorySession1To1Service.DeleteAsync(id, AccessToken);
 
         // Notify student, staff, and session groups
-        await Task.WhenAll(
-            _advSessionHubContext.Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStaff}{session.StaffId}")
-                .SendAsync(_chatSessionSettings.SessionDeletedMethod, id),
-            _advSessionHubContext.Clients.Group($"{_chatSessionSettings.MulDataSessionsPrefixStudent}{session.StudentId}")
-                .SendAsync(_chatSessionSettings.SessionDeletedMethod, id),
-            _advSessionHubContext.Clients.Group($"{_chatSessionSettings.GroupChatADVssPrefix}{id}")
-                .SendAsync(_chatSessionSettings.SessionDeletedMethod, id)
-        );
-
+        await _advisorySessionHubNotifier.NotifySessionDeletedAsync(session.Id, session.StaffId, session.StudentId);
         return Ok("Delete successfully");
     }
 
@@ -63,10 +50,7 @@ public class AdvisorySession1to1Controller : BaseController
     {
         var (res, hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
         //call hub context -> push
-        await _advSessionHubContext.Clients.Group($"_chatSessionSettings.MulDataSessionsPrefixStaff{_staffUserSettings.EmptyStaffProfileId}")
-                .SendAsync(_chatSessionSettings.SessionCreatedMethod, hubRes);
-        await _advSessionHubContext.Clients.Group($"_chatSessionSettings.MulDataSessionsPrefixStudent{studentProfileId}")
-        .SendAsync(_chatSessionSettings.SessionCreatedMethod, hubRes);
+        await _advisorySessionHubNotifier.NotifySessionCreatedAsync(studentProfileId, hubRes);
         return Ok(res);
     }
 

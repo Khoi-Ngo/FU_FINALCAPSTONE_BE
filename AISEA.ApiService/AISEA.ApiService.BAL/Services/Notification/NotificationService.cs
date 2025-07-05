@@ -7,8 +7,11 @@ namespace AISEA.ApiService.BAL.Services.Notification;
 
 public class NotificationService
 {
-    //create notification
+    //TODO: create notification with broadcast
 
 
-    //mark notification as read
+    //TODO mark notification as read with broadcast
+
+
+    //TODO delete the notification with broadcast
 }

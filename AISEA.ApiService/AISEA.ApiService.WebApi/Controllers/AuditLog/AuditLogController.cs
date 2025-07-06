@@ -6,6 +6,7 @@ using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using Microsoft.AspNetCore.Mvc;
 
+//TODO: Replace all EF Core insert audit logs by Database Triggers
 namespace AISEA.ApiService.WebApi.Controllers.AuditLog
 {
     [ApiController]

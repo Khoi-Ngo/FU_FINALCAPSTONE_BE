@@ -36,7 +36,7 @@ public class ChatBgService : BackgroundService
 
                 if (removedSessionIds.Any())
                 {
-                    _logger.LogInformation("Removed expired advisory sessions with IDs: {SessionIds}", string.Join(", ", removedSessionIds));
+                    _logger.LogInformation("Removed expired chat sessions with IDs: {SessionIds}", string.Join(", ", removedSessionIds));
 
                     var auditLogs = removedSessionIds.Select(id => new DAL.Entities.AuditLog
                     {

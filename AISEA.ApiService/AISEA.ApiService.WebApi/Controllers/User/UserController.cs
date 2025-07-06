@@ -114,7 +114,7 @@ public class UserController : BaseController
         return Ok("User disabled successfully");
     }
     /// <summary>
-    /// Retrieves paginated users
+    /// Retrieves paginated users from the system.
     /// </summary>
     [HttpGet("paged")]
     public async Task<IActionResult> GetAllUsersPaged([FromQuery] PaginationRequest request)

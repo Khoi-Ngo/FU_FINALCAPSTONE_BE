@@ -12,6 +12,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AISEA.ApiService.BAL.Services.Notification;
+using AISEA.ApiService.BAL.Services.AuditLog;
 
 namespace AISEA.ApiService.BAL
 {
@@ -32,8 +34,9 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<SyllabusService>();
             services.AddScoped<CurriculumService>();
             services.AddScoped<ComboService>();
+            services.AddScoped<NotificationService>();
+            services.AddScoped<AuditLogService>();
 
-            
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

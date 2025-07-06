@@ -1,4 +1,4 @@
-using AISEA.BgService.Worker;
+using AISEA.BgService.DAL.Repositories;
 using AISEA.BgService.Worker.BgJob;
 using AISEA.BgService.Worker.Persistence;
 using AISEA.BgService.Worker.PropConfig;
@@ -16,6 +16,10 @@ builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<SqlSettings>>
 builder.Services.Configure<ChatSettings>(builder.Configuration.GetSection(ChatSettings.Section));
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatSettings>>().Value);
 
+
+builder.Services.Configure<NotiSettings>(builder.Configuration.GetSection(NotiSettings.Section));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<NotiSettings>>().Value);
+
 #endregion
 
 #region DAL
@@ -25,14 +29,12 @@ builder.Services.AddDbContext<AiseaContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
+
 //Repositories
-builder.Services.AddScoped<RoleRepository>();
-builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<AdvisorySession1to1Repository>();
-builder.Services.AddScoped<MessageRepository>();
 builder.Services.AddScoped<NotificationRepository>();
-builder.Services.AddScoped<StaffProfileRepository>();
-builder.Services.AddScoped<StudentProfileRepository>();
+builder.Services.AddScoped<AuditLogRepository>();
 #endregion
 
 

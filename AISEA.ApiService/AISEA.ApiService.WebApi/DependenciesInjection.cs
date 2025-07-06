@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.WebApi.HubUtil;
+using AISEA.ApiService.DAL.Entities;
 
 namespace AISEA.ApiService.WebApi
 {
@@ -139,6 +141,10 @@ namespace AISEA.ApiService.WebApi
 
             // SignalR
             services.AddSignalR();
+
+            //other services
+            services.AddScoped<AdvisorySessionHubNotifier>();
+            services.AddScoped<NotificationHubNotifier>();
 
             return services;
         }

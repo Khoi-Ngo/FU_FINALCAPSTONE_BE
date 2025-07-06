@@ -47,6 +47,8 @@ var app = builder.Build();
     });
     var corsPolicyName = app.Configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
     var AdvisoryHubEndpoint = app.Configuration.GetSection(EndpointSettings.Section)["AdvisoryHubEndpoint"];
+    var NotificationHubEndpoint = app.Configuration.GetSection(EndpointSettings.Section)["NotificationHubEndpoint"];
+
 
     // app.UseHttpsRedirection();
     app.UseCors(corsPolicyName);
@@ -54,6 +56,7 @@ var app = builder.Build();
     app.UseAuthorization();
     //mapping signalR hubs
     app.MapHub<AdvisoryChat1to1Hub>(AdvisoryHubEndpoint).RequireAuthorization();
+    app.MapHub<NotificationHub>(NotificationHubEndpoint).RequireAuthorization();
     app.MapControllers();
     app.Run();
 }

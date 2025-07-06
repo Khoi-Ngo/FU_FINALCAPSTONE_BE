@@ -22,7 +22,7 @@ public class PermissionAuthorizeAttribute : AuthorizeAttribute, IAuthorizationFi
             .GetRequiredService<IOptions<JwtSettings>>().Value;
 
         var strRole =  context.HttpContext.User.FindFirst(jwtSettings.AuthProp)?.Value;
-        if (String.IsNullOrEmpty(strRole) || !_roles.Contains(Int32.Parse(strRole)))
+        if (String.IsNullOrEmpty(strRole) || !_roles.Contains(int.Parse(strRole)))
         {
             context.Result = new ForbidResult();
         }

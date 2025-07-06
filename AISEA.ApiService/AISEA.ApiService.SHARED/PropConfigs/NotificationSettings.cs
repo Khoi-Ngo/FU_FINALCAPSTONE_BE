@@ -12,5 +12,7 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public string NotificationCreatedMethod { get; set; }
         public string NotificationReadMethod { get; set; }
         public string NotificationReceivedMethod { get; set; }
+        public int ExpiredDays { get; set; }
+        public int IntervalMillis { get; set; }
     }
 }

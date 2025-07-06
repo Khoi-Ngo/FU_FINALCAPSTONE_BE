@@ -50,5 +50,3 @@ jobs:
 
             echo "Connecting back-end-aisea-api-1 to aisea-network"
             docker network connect aisea-network back-end-aisea-api-1 || true
-            echo "Connecting back-end-aisea-worker-1 to aisea-network"
-            docker network connect aisea-network back-end-aisea-worker-1 || true

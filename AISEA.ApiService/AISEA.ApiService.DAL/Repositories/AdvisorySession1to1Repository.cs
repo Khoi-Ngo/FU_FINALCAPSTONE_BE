@@ -13,8 +13,8 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
         public async Task<(List<AdvisorySession1to1> sessions, int totalCount)> GetSessionsByProfileId(
-    int pageNumber, int pageSize, bool isStudentQuery,
-    EAdvisorySession1to1Type sessionType, long profileId)
+                        int pageNumber, int pageSize, bool isStudentQuery,
+                        EAdvisorySession1to1Type sessionType, long profileId)
         {
             var query = _context.AdvisorySessions1to1
                 .Where(s => s.Type == sessionType &&
@@ -30,6 +30,23 @@ namespace AISEA.ApiService.DAL.Repositories
                 .ToListAsync();
 
             return (sessions, totalCount);
+        }
+
+        public async Task<List<long>> RemoveAllExistedOverDaysAsync(int sessionExpiryDays)
+        {
+            var thresholdDate = DateTime.UtcNow.AddDays(-sessionExpiryDays);
+
+            var sessionsToRemove = await _context.AdvisorySessions1to1
+                .Where(s => s.CreatedAt < thresholdDate)
+                .ToListAsync();
+
+            var sessionIds = sessionsToRemove.Select(s => s.Id).ToList();
+
+            _context.AdvisorySessions1to1.RemoveRange(sessionsToRemove);
+
+            await _context.SaveChangesAsync();
+
+            return sessionIds;
         }
 
 

@@ -21,5 +21,7 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public string SessionDeletedMethod { get; set; }
         public string AddSessionAsAssigned { get; set; }
         public string RemoveSessionFromUnassigned { get; set; }
+        public int SessionExpiryDays { get; set; }
+        public int IntervalMillis { get; set; }
     }
 }

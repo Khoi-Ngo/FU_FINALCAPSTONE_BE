@@ -70,4 +70,10 @@ public class AuditLogRepository : GenericRepository<AuditLog>
 
         return dict;
     }
+
+    public async Task AddRangeAsync(IEnumerable<AuditLog> logs)
+    {
+        await _context.AuditLogs.AddRangeAsync(logs);
+        await _context.SaveChangesAsync();
+    }
 }

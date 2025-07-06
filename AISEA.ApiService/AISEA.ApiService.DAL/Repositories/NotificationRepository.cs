@@ -51,4 +51,18 @@ public class NotificationRepository : GenericRepository<Notification>
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<List<long>> RemoveAllExistedOverDaysAsync(int expiredDays)
+    {
+        var thresholdDate = DateTime.UtcNow.AddDays(-expiredDays);
+
+        var expiredNotifications = await _context.Notifications
+            .Where(n => n.CreatedAt < thresholdDate)
+            .ToListAsync();
+
+        _context.Notifications.RemoveRange(expiredNotifications);
+        await _context.SaveChangesAsync();
+
+        return expiredNotifications.Select(n => n.Id).ToList();
+    }
 }

@@ -47,6 +47,7 @@ public static class DependenciesInjection
         services.AddScoped<ComboRepository>();
         services.AddScoped<ComboSubjectRepository>();
         services.AddScoped<ProgramRepository>();
+        services.AddScoped<AuditLogRepository>();
 
         #endregion
 

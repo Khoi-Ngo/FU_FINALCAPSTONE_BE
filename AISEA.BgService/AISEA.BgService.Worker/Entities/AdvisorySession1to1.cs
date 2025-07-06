@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.BgService.Worker.Abstract;
 using AISEA.BgService.Worker.Enums;
 
 namespace AISEA.BgService.Worker.Entities;
-
 [Table("AdvisorySession1to1")]
 public partial class AdvisorySession1to1 : BaseEntity
 {
@@ -18,9 +15,9 @@ public partial class AdvisorySession1to1 : BaseEntity
     public string Title { get; set; } = null!;
 
     public long StaffId { get; set; }
-
+    public DateTime? StaffJoinAt { get; set; }
+    public DateTime? StudentJoinAt { get; set; }
     public EAdvisorySession1to1Type Type { get; set; }
-
     public long StudentId { get; set; }
 
     [InverseProperty("AdvisorySession1to1")]

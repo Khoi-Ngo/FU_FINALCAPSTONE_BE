@@ -1,4 +1,6 @@
+using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Auth;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
@@ -12,10 +14,12 @@ namespace AISEA.ApiService.WebApi.Controllers.Auth;
 public class AuthController : BaseController
 {
     private readonly AuthService _authService;
+    private readonly AuditLogService _auditLogService;
 
-    public AuthController(EndpointSettings endpointSettings, AuthService authService) : base(endpointSettings)
+    public AuthController(EndpointSettings endpointSettings, AuthService authService, AuditLogService auditLogService) : base(endpointSettings)
     {
         _authService = authService;
+        _auditLogService = auditLogService;
     }
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
@@ -39,6 +43,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> LoginWithGoogle()
     {
         var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
+        await _auditLogService.CreateAsync(EAuditLogTag.GOOGLE_LOGIN);
         return Ok(res);
     }
 
@@ -51,6 +56,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login([FromBody] AuthFEIDRequest request)
     {
         var res = await _authService.LoginAsync(request);
+        await _auditLogService.CreateAsync(EAuditLogTag.FEID_LOGIN);
         return Ok(res);
     }
 
@@ -63,6 +69,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
     {
         await _authService.ForgetPasswordAsync(request);
+        await _auditLogService.CreateAsync(EAuditLogTag.FORGET_PASSWORD);
         return Ok("Password reset successful.");
     }
 
@@ -86,6 +93,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
+        await _auditLogService.CreateAsync(EAuditLogTag.RESET_PASSWORD);
         return Ok("Password reset successful.");
     }
 

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.BgService.Worker.Abstract;
 
@@ -22,8 +20,7 @@ public partial class Notification : BaseEntity
     [Column(TypeName = "text")]
     public string? Link { get; set; }
 
-    public bool IsRead { get; set; }
-
+    public bool IsRead { get; set; } = false;
     public long UserId { get; set; }
 
     [ForeignKey("UserId")]

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.EntityConfigurations;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -46,6 +44,8 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<SyllabusLearningOutcome> SyllabusLearningOutcomes { get; set; }
     public virtual DbSet<SyllabusSession> SyllabusSessions { get; set; }
     public virtual DbSet<SessionOutcomeMapping> SessionOutcomeMappings { get; set; }
+    public virtual DbSet<AuditLog> AuditLogs { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,7 +71,7 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new SyllabusLearningOutcomeConfiguration());
         modelBuilder.ApplyConfiguration(new SyllabusSessionConfiguration());
         modelBuilder.ApplyConfiguration(new SessionOutcomeMappingConfiguration());
-
+        modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
         OnModelCreatingPartial(modelBuilder);
     }
 

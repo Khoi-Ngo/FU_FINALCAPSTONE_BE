@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.User;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.User;
@@ -17,9 +14,11 @@ namespace AISEA.ApiService.WebApi.Controllers.User;
 public class UserController : BaseController
 {
     private readonly UserService _userService;
-    public UserController(EndpointSettings endpointSettings, UserService userService) : base(endpointSettings)
+    private readonly AuditLogService _auditLogService;
+    public UserController(EndpointSettings endpointSettings, UserService userService, AuditLogService auditLogService) : base(endpointSettings)
     {
         _userService = userService;
+        _auditLogService = auditLogService;
     }
 
     /// <summary>
@@ -29,6 +28,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
         await _userService.CreateUserAsync(request);
+        await _auditLogService.CreateAsync(EAuditLogTag.CREATE_USER);
         return Ok(new { Message = "User created successfully." });
     }
 
@@ -110,6 +110,7 @@ public class UserController : BaseController
     public async Task<IActionResult> DisableUser(long id)
     {
         await _userService.DisableUserAsync(id);
+        await _auditLogService.CreateAsync(EAuditLogTag.DELETE_USER);
         return Ok("User disabled successfully");
     }
     /// <summary>

@@ -13,7 +13,7 @@ public class BookingAvailabilityConfiguration : IEntityTypeConfiguration<Booking
         builder.HasOne(d => d.StaffProfile)
             .WithMany(p => p.BookingAvailabilities)
             .HasForeignKey(d => d.StaffProfileId)
-            .OnDelete(DeleteBehavior.Restrict)
+            .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("bookingavailability_staffprofileid_foreign");
     }
 }

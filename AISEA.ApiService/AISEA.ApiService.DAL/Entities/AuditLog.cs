@@ -15,6 +15,6 @@ public class AuditLog
     public EAuditLogTag Tag { get; set; }
 
     [StringLength(20000)]
-    public string? Description { get; set; } 
+    public string? Description { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

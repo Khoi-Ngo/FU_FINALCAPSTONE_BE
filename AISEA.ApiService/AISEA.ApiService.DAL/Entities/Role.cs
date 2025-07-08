@@ -7,7 +7,7 @@ namespace AISEA.ApiService.DAL.Entities;
 
 [Table("Role")]
 [Index("Name", Name = "role_name_unique", IsUnique = true)]
-public partial class Role :BaseEntity
+public partial class Role
 {
     [Key]
     [Column("id")]
@@ -21,4 +21,5 @@ public partial class Role :BaseEntity
 
     [InverseProperty("Role")]
     public virtual ICollection<User> Users { get; set; } = new List<User>();
+    public DateTime? UpdatedAt { get; set; }
 }

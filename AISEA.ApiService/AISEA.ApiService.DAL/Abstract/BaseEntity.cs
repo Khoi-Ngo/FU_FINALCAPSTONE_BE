@@ -1,3 +1,8 @@
+/*
+
+
+
+
 using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.DAL.Abstract
@@ -10,3 +15,10 @@ namespace AISEA.ApiService.DAL.Abstract
         public bool IsDeleted { get; set; } = false;
     }
 }
+
+
+
+
+
+
+*/

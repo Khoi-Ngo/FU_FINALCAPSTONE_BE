@@ -5,16 +5,16 @@ using AISEA.ApiService.DAL.Abstract;
 namespace AISEA.ApiService.DAL.Entities;
 
 [Table("SessionOutcomeMapping")]
-public partial class SessionOutcomeMapping : BaseEntity
+public partial class SessionOutcomeMapping
 {
     [Key]
     [Column("session_id")]
     public long SessionId { get; set; }
-    
+
     [Key]
     [Column("outcome_id")]
     public long OutcomeId { get; set; }
-    
+
     [ForeignKey("SessionId")]
     [InverseProperty("SessionOutcomeMappings")]
     public virtual SyllabusSession Session { get; set; } = null!;
@@ -22,5 +22,8 @@ public partial class SessionOutcomeMapping : BaseEntity
     [ForeignKey("OutcomeId")]
     [InverseProperty("SessionOutcomeMappings")]
     public virtual SyllabusLearningOutcome Outcome { get; set; } = null!;
-    
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
 }

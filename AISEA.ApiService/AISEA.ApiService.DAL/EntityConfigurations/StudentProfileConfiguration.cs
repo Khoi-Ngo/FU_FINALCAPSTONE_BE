@@ -12,9 +12,6 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
 
             builder.HasIndex(e => e.UserId).IsUnique().HasDatabaseName("IX_StudentProfile_UserId");
 
-            builder.Property(e => e.CareerGoal)
-                .HasColumnType("nvarchar(max)"); // Updated from "text" to "nvarchar(max)"
-
             builder.HasOne(d => d.User)
                 .WithOne(p => p.StudentProfile)
                 .HasForeignKey<StudentProfile>(d => d.UserId)

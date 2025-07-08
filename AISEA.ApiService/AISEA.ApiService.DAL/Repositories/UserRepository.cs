@@ -132,5 +132,19 @@ namespace AISEA.ApiService.DAL.Repositories
             return await _context.Users.Include(u => u.Role).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Id == id && u.RoleId != (int)EUserRole.STUDENT);
 
         }
+
+        public async Task<(object users, int totalCount)> GetAdvisorsPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users
+                .Where(u => u.RoleId == (int)EUserRole.ADVISOR)
+                .Include(u => u.Role)
+                .Include(u => u.StaffProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
     }
 }

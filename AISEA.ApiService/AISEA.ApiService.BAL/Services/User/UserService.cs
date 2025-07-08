@@ -166,6 +166,17 @@ namespace AISEA.ApiService.BAL.Services.User
                 PageSize = request.PageSize
             };
         }
+        public async Task<PagedResult<GetStaffListResponse>> GetAllAdvisorsAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetAdvisorsPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetStaffListResponse>
+            {
+                Items = _mapper.Map<List<GetStaffListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
 
         public async Task<GetStaffDetailResponse> GetStaffByIdAsync(long id)
         {

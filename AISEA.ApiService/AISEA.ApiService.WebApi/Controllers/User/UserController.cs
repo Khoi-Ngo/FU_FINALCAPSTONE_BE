@@ -154,6 +154,16 @@ public class UserController : BaseController
         return Ok(result);
     }
 
+    /// <summary>
+    /// Retrieves all active Advisors from the system.
+    /// </summary>
+    [HttpGet("advisor")]
+    public async Task<IActionResult> GetAllAdvisors([FromQuery] PaginationRequest request)
+    {
+        var advisors = await _userService.GetAllAdvisorsAsync(request);
+        return Ok(advisors);
+    }
+
 
 
 }

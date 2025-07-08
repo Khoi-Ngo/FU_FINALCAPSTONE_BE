@@ -7,24 +7,28 @@ namespace AISEA.ApiService.DAL.Entities;
 
 [Table("Curriculum")]
 [Index("CurriculumCode", Name = "curriculum_code_unique", IsUnique = true)]
-public partial class Curriculum : BaseEntity
+public partial class Curriculum
 {
     [Key]
-    [Column("id")]  
+    [Column("id")]
     public long Id { get; set; }
-    
+
     public long ProgramId { get; set; }
-    
+
     [StringLength(50)]
     public string CurriculumCode { get; set; } = null;
-    
+
     [StringLength(255)]
     public string CurriculumName { get; set; } = null;
-    
+
     public DateTimeOffset EffectiveDate { get; set; }
 
     [ForeignKey("ProgramId")]
     public virtual Program Program { get; set; } = null;
-    
-    public virtual ICollection<CurriculumSubject> CurriculumSubjects  { get; set; } = new List<CurriculumSubject>();
+
+    public virtual ICollection<CurriculumSubject> CurriculumSubjects { get; set; } = new List<CurriculumSubject>();
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
 }

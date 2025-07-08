@@ -11,7 +11,7 @@ namespace AISEA.ApiService.DAL.Entities;
 [Table("User")]
 [Index("Email", Name = "user_email_unique", IsUnique = true)]
 [Index("Username", Name = "user_username_unique", IsUnique = true)]
-public partial class User : BaseEntity
+public partial class User
 {
     [Key]
     [Column("id")]
@@ -49,9 +49,12 @@ public partial class User : BaseEntity
     [InverseProperty("Users")]
     public virtual Role Role { get; set; } = null!;
 
-   [InverseProperty("User")]
+    [InverseProperty("User")]
     public virtual StaffProfile? StaffProfile { get; set; }
 
     [InverseProperty("User")]
     public virtual StudentProfile? StudentProfile { get; set; }
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? DeletedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
 }

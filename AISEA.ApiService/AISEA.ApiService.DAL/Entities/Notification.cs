@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AISEA.ApiService.DAL.Entities;
 
 [Table("Notification")]
-public partial class Notification : BaseEntity
+public partial class Notification
 {
     [Key]
     [Column("id")]
@@ -29,4 +29,5 @@ public partial class Notification : BaseEntity
     [ForeignKey("UserId")]
     [InverseProperty("Notifications")]
     public virtual User User { get; set; } = null!;
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 }

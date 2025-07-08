@@ -12,18 +12,6 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
   
               builder.HasIndex(e => e.UserId).IsUnique().HasDatabaseName("IX_StaffProfile_UserId");
   
-              builder.Property(e => e.Campus)
-                  .IsRequired()
-                  .HasMaxLength(255);
-  
-              builder.Property(e => e.Department)
-                  .IsRequired()
-                  .HasMaxLength(255);
-  
-              builder.Property(e => e.Position)
-                  .IsRequired()
-                  .HasMaxLength(255);
-  
               builder.HasOne(d => d.User)
                   .WithOne(p => p.StaffProfile)
                   .HasForeignKey<StaffProfile>(d => d.UserId)

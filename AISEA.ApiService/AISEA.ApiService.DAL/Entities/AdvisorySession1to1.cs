@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.SHARED.Const.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
 
 [Table("AdvisorySession1to1")]
-public partial class AdvisorySession1to1 : BaseEntity
+public partial class AdvisorySession1to1
 {
     [Key]
     [Column("id")]
@@ -17,7 +13,6 @@ public partial class AdvisorySession1to1 : BaseEntity
 
     [StringLength(255)]
     public string Title { get; set; } = null!;
-
     public long StaffId { get; set; }
     public DateTime? StaffJoinAt { get; set; }
     public DateTime? StudentJoinAt { get; set; }
@@ -34,4 +29,6 @@ public partial class AdvisorySession1to1 : BaseEntity
     [ForeignKey("StudentId")]
     [InverseProperty("AdvisorySessions1to1")]
     public virtual StudentProfile Student { get; set; } = null!;
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 }

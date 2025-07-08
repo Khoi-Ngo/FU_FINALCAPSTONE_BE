@@ -45,6 +45,9 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<SyllabusSession> SyllabusSessions { get; set; }
     public virtual DbSet<SessionOutcomeMapping> SessionOutcomeMappings { get; set; }
     public virtual DbSet<AuditLog> AuditLogs { get; set; }
+    public virtual DbSet<BookedMeeting> BookedMeetings { get; set; }
+    public virtual DbSet<BookingAvailability> BookingAvailabilities { get; set; }
+    public virtual DbSet<LeaveSchedule> LeaveSchedules { get; set; }
 
     #endregion
 
@@ -72,6 +75,9 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new SyllabusSessionConfiguration());
         modelBuilder.ApplyConfiguration(new SessionOutcomeMappingConfiguration());
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+        modelBuilder.ApplyConfiguration(new BookedMeetingConfiguration());
+        modelBuilder.ApplyConfiguration(new BookingAvailabilityConfiguration());
+        modelBuilder.ApplyConfiguration(new LeaveScheduleConfiguration());
         OnModelCreatingPartial(modelBuilder);
     }
 

@@ -9,7 +9,7 @@ namespace AISEA.ApiService.DAL.Entities;
 
 
 [Table("Message")]
-public partial class Message : BaseEntity
+public partial class Message
 {
     [Key]
     [Column("id")]
@@ -29,4 +29,5 @@ public partial class Message : BaseEntity
     [ForeignKey("SenderId")]
     [InverseProperty("Messages")]
     public virtual User Sender { get; set; } = null!;
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 }

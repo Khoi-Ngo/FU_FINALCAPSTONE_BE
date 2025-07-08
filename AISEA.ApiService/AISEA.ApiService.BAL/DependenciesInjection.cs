@@ -40,6 +40,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<AuditLogService>();
             services.AddScoped<BookingAvailabilityService>();
             services.AddScoped<LeaveScheduleService>();
+            services.AddScoped<BookedMeetingService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

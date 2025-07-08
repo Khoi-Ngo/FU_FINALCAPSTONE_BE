@@ -50,6 +50,7 @@ public static class DependenciesInjection
         services.AddScoped<AuditLogRepository>();
         services.AddScoped<BookingAvailabilityRepository>();
         services.AddScoped<LeaveScheduleRepository>();
+        services.AddScoped<BookedMeetingRepository>();
 
         #endregion
 

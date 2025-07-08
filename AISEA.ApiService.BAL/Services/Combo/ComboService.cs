@@ -214,5 +214,31 @@ namespace AISEA.ApiService.BAL.Services.Combo
             }
             return true;
         }
+        
+        public async Task<bool> CreateCombosAsync(List<CreateComboRequest> requests)
+        {
+            foreach (var request in requests)
+            {
+                // Check if combo name is unique
+                var isNameUnique = await _comboRepository.IsNameUniqueAsync(request.ComboName);
+                if (!isNameUnique)
+                {
+                    throw new InvalidUserCreatedException($"Combo with name '{request.ComboName}' already exists.");
+                }
+
+                // Validate all subjects exist
+                var subjects = await _subjectRepository.GetByIdsAsync(request.SubjectIds);
+                if (subjects.Count != request.SubjectIds.Count)
+                {
+                    throw new NotFoundException("One or more subjects not found.");
+                }
+
+                var combo = _mapper.Map<DAL.Entities.Combo>(request);
+                combo.CreatedAt = DateTime.UtcNow;
+                
+                await _comboRepository.CreateAsync(combo);
+            }
+            return true;
+        }
     }
 }

@@ -213,5 +213,32 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
             
             return true;
         }
+        
+        public async Task<bool> CreateCurriculaAsync(List<CreateCurriculumRequest> requests)
+        {
+            foreach (var request in requests)
+            {
+                // Validate program exists
+                var program = await _programRepository.GetByIdAsync(request.ProgramId);
+                if (program == null || program.IsDeleted)
+                {
+                    throw new NotFoundException($"Program with ID {request.ProgramId} not found.");
+                }
+
+                // Check if curriculum code is unique
+                var isCodeUnique = await _curriculumRepository.IsCodeUniqueAsync(request.CurriculumCode);
+                if (!isCodeUnique)
+                {
+                    throw new InvalidUserCreatedException($"Curriculum with code '{request.CurriculumCode}' already exists.");
+                }
+
+                var curriculum = _mapper.Map<DAL.Entities.Curriculum>(request);
+                curriculum.CreatedAt = DateTime.UtcNow;
+                
+                await _curriculumRepository.CreateAsync(curriculum);
+            }
+            
+            return true;
+        }
     }
 }

@@ -153,7 +153,7 @@ namespace AISEA.ApiService.BAL.Services.Subject
             return _mapper.Map<List<GetSubjectResponse>>(prerequisites);
         }
 
-        public async Task<bool> RemovePrerequisiteAsync(long subjectId, long prerequisiteSubjectId)
+        public async Task RemovePrerequisiteAsync(long subjectId, long prerequisiteSubjectId)
         {
             var subject = await _subjectRepository.GetByIdAsync(subjectId);
             if (subject == null || subject.IsDeleted)
@@ -162,7 +162,6 @@ namespace AISEA.ApiService.BAL.Services.Subject
             }
 
             await _prerequisiteRepository.RemovePrerequisiteAsync(subjectId, prerequisiteSubjectId);
-            return true;
         }
         
         public async Task<bool> CreateSubjectsAsync(List<CreateSubjectRequest> requests)

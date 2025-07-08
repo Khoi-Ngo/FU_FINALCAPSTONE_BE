@@ -35,6 +35,17 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Creates multiple combos in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateCombos([FromBody] List<CreateComboRequest> requests)
+        {
+            await _comboService.CreateCombosAsync(requests);
+            return Ok(new { Message = "Combos created successfully." });
+        }
+        
+        /// <summary>
+        /// Creates multiple combos in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("bulk")]
         [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> CreateCombos([FromBody] List<CreateComboRequest> requests)
         {

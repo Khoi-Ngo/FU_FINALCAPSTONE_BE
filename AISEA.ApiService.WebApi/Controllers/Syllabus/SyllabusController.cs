@@ -68,6 +68,18 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates multiple assessments for syllabi in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("assessments/bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateAssessments([FromBody] List<CreateSyllabusAssessmentRequest> requests)
+        {
+            await _syllabusService.CreateSyllabusAssessmentsAsync(requests);
+            return Ok(new { Message = "Assessments created successfully." });
+        }
+        
+
+        /// <summary>
+        /// Creates multiple assessments for syllabi in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("assessments/bulk")]
         [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> CreateAssessments([FromBody] List<CreateSyllabusAssessmentRequest> requests)
         {
@@ -85,6 +97,18 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
             var materialId = await _syllabusService.CreateLearningMaterialAsync(request);
             return Ok(new { Message = "Learning material created successfully.", MaterialId = materialId });
         }
+
+        /// <summary>
+        /// Creates multiple learning materials for syllabi in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("materials/bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateLearningMaterials([FromBody] List<CreateSyllabusLearningMaterialRequest> requests)
+        {
+            await _syllabusService.CreateSyllabusLearningMaterialsAsync(requests);
+            return Ok(new { Message = "Learning materials created successfully." });
+        }
+        
 
         /// <summary>
         /// Creates multiple learning materials for syllabi in bulk (Academic Staff only)
@@ -112,6 +136,18 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates multiple learning outcomes for syllabi in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("outcomes/bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateLearningOutcomes([FromBody] List<CreateSyllabusLearningOutcomeRequest> requests)
+        {
+            await _syllabusService.CreateSyllabusLearningOutcomesAsync(requests);
+            return Ok(new { Message = "Learning outcomes created successfully." });
+        }
+        
+
+        /// <summary>
+        /// Creates multiple learning outcomes for syllabi in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("outcomes/bulk")]
         [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> CreateLearningOutcomes([FromBody] List<CreateSyllabusLearningOutcomeRequest> requests)
         {
@@ -129,6 +165,18 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
             var sessionId = await _syllabusService.CreateSessionAsync(request);
             return Ok(new { Message = "Session created successfully.", SessionId = sessionId });
         }
+
+        /// <summary>
+        /// Creates multiple sessions for syllabi in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("sessions/bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateSessions([FromBody] List<CreateSyllabusSessionRequest> requests)
+        {
+            await _syllabusService.CreateSyllabusSessionsAsync(requests);
+            return Ok(new { Message = "Sessions created successfully." });
+        }
+
 
         /// <summary>
         /// Creates multiple sessions for syllabi in bulk (Academic Staff only)

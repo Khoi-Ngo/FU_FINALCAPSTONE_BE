@@ -35,6 +35,17 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         /// Creates multiple subjects in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateSubjects([FromBody] List<CreateSubjectRequest> requests)
+        {
+            await _subjectService.CreateSubjectsAsync(requests);
+            return Ok(new { Message = "Subjects created successfully." });
+        }
+        
+        /// <summary>
+        /// Creates multiple subjects in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("bulk")]
         [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> CreateSubjects([FromBody] List<CreateSubjectRequest> requests)
         {

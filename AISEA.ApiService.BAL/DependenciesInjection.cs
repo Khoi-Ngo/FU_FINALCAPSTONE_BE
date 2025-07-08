@@ -37,6 +37,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<CurriculumService>();
             services.AddScoped<ComboService>();
             services.AddScoped<ProgramService>();
+            services.AddScoped<ProgramService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<AuditLogService>();
 

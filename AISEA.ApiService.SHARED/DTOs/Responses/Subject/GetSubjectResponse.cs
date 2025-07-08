@@ -10,5 +10,6 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Subject
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<GetSubjectResponse>? Prerequisites { get; set; }
+        public List<GetSubjectResponse>? Prerequisites { get; set; }
     }
 }

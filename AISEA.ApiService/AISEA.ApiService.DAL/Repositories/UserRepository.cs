@@ -95,7 +95,7 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
 
-        public async Task<(object users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
                 .Where(u => u.RoleId == (int)EUserRole.STUDENT)
@@ -109,7 +109,7 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<(object users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
                 .Where(u => u.RoleId != (int)EUserRole.STUDENT)
@@ -133,7 +133,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
         }
 
-        public async Task<(object users, int totalCount)> GetAdvisorsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetAdvisorsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
                 .Where(u => u.RoleId == (int)EUserRole.ADVISOR)

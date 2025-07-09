@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.SHARED.Interfaces;
-using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.DAL.Infrastructure;
 
@@ -57,25 +56,7 @@ public class JWTService : IJWTService
         return jwt;
     }
 
-    public string GetUsernameFromToken(string token)
-    {
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = _jwtSettings.Issuer,
-            ValidAudience = _jwtSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
-            ValidateLifetime = true // Only valid (non-expired) tokens
-        };
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out _);
-        var usernameClaim = principal.Claims.FirstOrDefault(c => c.Type == _jwtSettings.UserName);
-        return usernameClaim.Value;
-
-    }
     /// <summary>
     /// Get all claims from a valid token efficiently.
     /// </summary>
@@ -169,6 +150,78 @@ public class JWTService : IJWTService
 
         // Generate token with existing method
         return GenerateAccessToken(username, roleId, firstName, lastName, profileId, userId);
+    }
+
+    /// <summary>
+    /// Get username from active token.
+    /// </summary>
+    public string GetUsernameFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        return claims.TryGetValue(_jwtSettings.UserName, out var username)
+            ? username
+            : throw new Exception("Username claim not found");
+    }
+
+    /// <summary>
+    /// Get roleId from active token.
+    /// </summary>
+    public long GetRoleIdFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        if (claims.TryGetValue(_jwtSettings.AuthProp, out var roleIdStr) && long.TryParse(roleIdStr, out var roleId))
+        {
+            return roleId;
+        }
+        throw new Exception("RoleId claim not found or invalid");
+    }
+
+    /// <summary>
+    /// Get first name from active token.
+    /// </summary>
+    public string GetFirstNameFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        return claims.TryGetValue(_jwtSettings.FirstName, out var firstName)
+            ? firstName
+            : throw new Exception("FirstName claim not found");
+    }
+
+    /// <summary>
+    /// Get last name from active token.
+    /// </summary>
+    public string GetLastNameFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        return claims.TryGetValue(_jwtSettings.LastName, out var lastName)
+            ? lastName
+            : throw new Exception("LastName claim not found");
+    }
+
+    /// <summary>
+    /// Get profileId from active token.
+    /// </summary>
+    public long GetProfileIdFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        if (claims.TryGetValue(_jwtSettings.ProfileId, out var profileIdStr) && long.TryParse(profileIdStr, out var profileId))
+        {
+            return profileId;
+        }
+        throw new Exception("ProfileId claim not found or invalid");
+    }
+
+    /// <summary>
+    /// Get userId from active token.
+    /// </summary>
+    public long GetUserIdFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        if (claims.TryGetValue(_jwtSettings.UserId, out var userIdStr) && long.TryParse(userIdStr, out var userId))
+        {
+            return userId;
+        }
+        throw new Exception("UserId claim not found or invalid");
     }
 
 }

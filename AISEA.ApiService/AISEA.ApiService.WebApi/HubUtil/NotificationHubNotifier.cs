@@ -1,38 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
-namespace AISEA.ApiService.WebApi.HubUtil
+namespace AISEA.ApiService.WebApi.HubUtil;
+
+public class NotificationHubNotifier
 {
-    public class NotificationHubNotifier
+    private readonly IHubContext<NotificationHub> _hubContext;
+    private readonly NotificationService _notificationService;
+    private readonly NotificationSettings _notificationSettings;
+
+    public NotificationHubNotifier(
+        IHubContext<NotificationHub> hubContext,
+        NotificationService notificationService,
+        NotificationSettings notificationSettings)
     {
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly NotificationService _notificationService;
-        private readonly NotificationSettings _notificationSettings;
-
-        public NotificationHubNotifier(
-            IHubContext<NotificationHub> hubContext,
-            NotificationService notificationService,
-            NotificationSettings notificationSettings)
-        {
-            _hubContext = hubContext;
-            _notificationService = notificationService;
-            _notificationSettings = notificationSettings;
-        }
-
-        public async Task NotifyUser(string accessToken, string title, string content, string link = null)
-        {
-            var (notification, userId) = await _notificationService.CreateAsync(accessToken, title, content, link);
-            var groupName = GetGroupName(userId);
-            await _hubContext.Clients.Group(groupName)
-                .SendAsync(_notificationSettings.NotificationCreatedMethod, notification);
-        }
-
-        private string GetGroupName(long userId) => $"{_notificationSettings.IndividualUserGroupPrefix}{userId}";
+        _hubContext = hubContext;
+        _notificationService = notificationService;
+        _notificationSettings = notificationSettings;
     }
+
+    public async Task NotifyUser(string accessToken, string title, string content, string link = null)
+    {
+        var (notification, userId) = await _notificationService.CreateAsync(accessToken, title, content, link);
+        var groupName = GetGroupName(userId);
+        await _hubContext.Clients.Group(groupName)
+            .SendAsync(_notificationSettings.NotificationCreatedMethod, notification);
+    }
+
+
+    private string GetGroupName(long userId) => $"{_notificationSettings.IndividualUserGroupPrefix}{userId}";
 }

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.Interfaces;
 
@@ -10,4 +9,10 @@ public interface IJWTService
     Dictionary<string, string> GetAllClaimsFromToken(string token);
     string GetValueFromPrincipal(ClaimsPrincipal principal, string name);
     ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+    string GetUsernameFromToken(string token);
+    long GetRoleIdFromToken(string token);
+    string GetFirstNameFromToken(string token);
+    string GetLastNameFromToken(string token);
+    long GetProfileIdFromToken(string token);
+    long GetUserIdFromToken(string token);
 }

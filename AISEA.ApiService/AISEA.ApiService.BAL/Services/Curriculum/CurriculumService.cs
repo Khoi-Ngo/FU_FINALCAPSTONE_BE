@@ -53,6 +53,30 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
             return curriculum.Id;
         }
 
+        public async Task<bool> CreateCurriculaAsync(List<CreateCurriculumRequest> requests)
+        {
+            foreach(var request in requests)
+            {
+                //Validate program exists
+                var program = await _programRepository.GetByIdAsync(request.ProgramId);
+                if (program == null || program.IsDeleted)
+                {
+                    throw new NotFoundException($"Program with ID {request.ProgramId} not found.");
+                }
+                //Check if curriculum code is unique
+                var isUniqueCode = await _curriculumRepository.IsCodeUniqueAsync(request.CurriculumCode);
+                if (!isUniqueCode)
+                {
+                       throw new InvalidUserCreatedException($"Curriculum with code '{request.CurriculumCode}' already exists.");
+                }
+                var curriculum = _mapper.Map<DAL.Entities.Curriculum>(request);
+                curriculum.CreatedAt = DateTime.UtcNow;
+
+                await _curriculumRepository.CreateAsync(curriculum);
+            }
+            return true;
+        }
+
         public async Task<PagedResult<GetCurriculumResponse>> GetCurriculaPagedAsync(PaginationRequest request, string? search = null, long? programId = null)
         {
             var (curricula, totalCount) = await _curriculumRepository.GetPagedAsync(request.PageNumber, request.PageSize, search, programId);

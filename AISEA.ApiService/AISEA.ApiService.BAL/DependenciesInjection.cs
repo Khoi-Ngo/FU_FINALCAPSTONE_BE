@@ -8,6 +8,7 @@ using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.BAL.Services.User;
 using AISEA.ApiService.BAL.Services.Curriculum;
 using AISEA.ApiService.BAL.Services.Combo;
+using AISEA.ApiService.BAL.Services.Program;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<SyllabusService>();
             services.AddScoped<CurriculumService>();
             services.AddScoped<ComboService>();
+            services.AddScoped<ProgramService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<AuditLogService>();
 

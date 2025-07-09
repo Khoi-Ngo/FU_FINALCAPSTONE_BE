@@ -31,6 +31,17 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         }
 
         /// <summary>
+        /// Creates multiple curicula in bulk (Academic Staff only)
+        /// </summary>
+        [HttpPost("bulk")]
+        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateCurricula([FromBody] List<CreateCurriculumRequest> requests)
+        {
+            await _curriculumService.CreateCurriculaAsync(requests);
+            return Ok(new { Message = "Curricula created successfully." });
+        }
+
+        /// <summary>
         /// Gets paginated list of curricula with optional search and program filter
         /// </summary>
         [HttpGet]

@@ -1,3 +1,4 @@
+using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.DTOs.Requests.Combo;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
@@ -51,7 +52,7 @@ namespace AISEA.ApiService.BAL.Services.Combo
             // Add subjects to combo
             foreach (var subjectId in request.SubjectIds)
             {
-                var comboSubject = new DAL.Entities.ComboSubject
+                var comboSubject = new ComboSubject
                 {
                     ComboId = combo.Id,
                     SubjectId = subjectId,
@@ -149,7 +150,7 @@ namespace AISEA.ApiService.BAL.Services.Combo
                 throw new InvalidUserCreatedException("Subject is already in this combo.");
             }
 
-            var comboSubject = new DAL.Entities.ComboSubject
+            var comboSubject = new ComboSubject
             {
                 ComboId = comboId,
                 SubjectId = subjectId,
@@ -186,6 +187,32 @@ namespace AISEA.ApiService.BAL.Services.Combo
             }
 
             await _comboSubjectRepository.RemoveSubjectFromComboAsync(comboId, subjectId);
+        }
+
+        public async Task<bool> CreateCombosAsync(List<CreateComboRequest> requests)
+        {
+            foreach (var request in requests)
+            {
+                // Check if combo name is unique
+                var isNameUnique = await _comboRepository.IsNameUniqueAsync(request.ComboName);
+                if (!isNameUnique)
+                {
+                    throw new InvalidUserCreatedException($"Combo with name '{request.ComboName}' already exists.");
+                }
+
+                // Validate all subjects exist
+                var subjects = await _subjectRepository.GetByIdsAsync(request.SubjectIds);
+                if (subjects.Count != request.SubjectIds.Count)
+                {
+                    throw new NotFoundException("One or more subjects not found.");
+                }
+
+                var combo = _mapper.Map<DAL.Entities.Combo>(request);
+                combo.CreatedAt = DateTime.UtcNow;
+
+                await _comboRepository.CreateAsync(combo);
+            }
+            return true;
         }
     }
 }

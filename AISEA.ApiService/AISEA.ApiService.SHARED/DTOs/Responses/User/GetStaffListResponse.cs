@@ -17,11 +17,12 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.User
         public string? AvatarUrl { get; set; }
         public string RoleName { get; set; }
         public EUserStatus Status { get; set; }
-        public StaffDataDetailResponse StaffDataDetailResponse { get; set; }
+        public StaffDataListResponse StaffDataDetailResponse { get; set; }
 
     }
     public class StaffDataListResponse
     {
+        public long Id { get; set; }
         public string Campus { get; set; }
         public string Position { get; set; }
         public string Department { get; set; }

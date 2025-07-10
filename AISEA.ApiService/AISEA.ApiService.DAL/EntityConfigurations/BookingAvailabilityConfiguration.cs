@@ -10,10 +10,18 @@ public class BookingAvailabilityConfiguration : IEntityTypeConfiguration<Booking
     {
         builder.HasKey(e => e.Id).HasName("bookingavailability_id_primary");
 
+        // Unique constraint on StaffProfileId, DayInWeek, StartTime, EndTime
+        builder.HasIndex(e => new { e.StaffProfileId, e.DayInWeek, e.StartTime, e.EndTime })
+               .IsUnique()
+               .HasDatabaseName("IX_BookingAvailability_UniqueTimeSlot");
+
         builder.HasOne(d => d.StaffProfile)
             .WithMany(p => p.BookingAvailabilities)
             .HasForeignKey(d => d.StaffProfileId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("bookingavailability_staffprofileid_foreign");
+
+        // Database check constraint for EndTime > StartTime
+        builder.ToTable(t => t.HasCheckConstraint("CK_BookingAvailability_EndTime", "[EndTime] > [StartTime]"));
     }
 }

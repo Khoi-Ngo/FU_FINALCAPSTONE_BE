@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
@@ -9,6 +8,10 @@ using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Authentication;
+using System.Threading.Tasks;
 
 namespace AISEA.ApiService.BAL.Services.Booking;
 
@@ -20,7 +23,12 @@ public class BookingAvailabilityService
     private readonly IRedisRepository _redisRepository;
     private readonly BookingSettings _bookingSettings;
 
-    public BookingAvailabilityService(BookingAvailabilityRepository bookingAvailabilityRepository, IJWTService jwtService, IMapper mapper, IRedisRepository redisRepository, BookingSettings bookingSettings)
+    public BookingAvailabilityService(
+        BookingAvailabilityRepository bookingAvailabilityRepository,
+        IJWTService jwtService,
+        IMapper mapper,
+        IRedisRepository redisRepository,
+        BookingSettings bookingSettings)
     {
         _bookingAvailabilityRepository = bookingAvailabilityRepository;
         _jwtService = jwtService;
@@ -29,61 +37,63 @@ public class BookingAvailabilityService
         _bookingSettings = bookingSettings;
     }
 
-
-    //bulk create booking availability for a staff
+    // Bulk create booking availability for a staff
     public async Task<List<BookingAvailability>> BulkCreateBookingAvailabilityAsync(List<CreateBookingAvailabilityRequest> request, string accessToken)
     {
-        //get profile id from access token
         var staffProfileId = _jwtService.GetProfileIdFromToken(accessToken);
-
         if (staffProfileId == 0) throw new InvalidCredentialException("Staff profile ID is required.");
 
-        //create booking availability entities
         var bookingAvailabilities = _mapper.Map<List<BookingAvailability>>(request);
         foreach (var availability in bookingAvailabilities)
         {
             availability.StaffProfileId = staffProfileId;
         }
 
-        await _bookingAvailabilityRepository.BulkCreateAsync(bookingAvailabilities);
-        // Cache each booking availability
-        await CacheBookingAvailabilitiesAsync(bookingAvailabilities);
-        return bookingAvailabilities;
+        try
+        {
+            await _bookingAvailabilityRepository.BulkCreateAsync(bookingAvailabilities);
+            await CacheBookingAvailabilitiesAsync(bookingAvailabilities);
+            return bookingAvailabilities;
+        }
+        catch (SqlException ex)
+        {
+            HandleSqlException(ex);
+            throw; // Re-throw if not handled
+        }
     }
 
-
-    //create booking availability for a staff
+    // Create booking availability for a staff
     public async Task<BookingAvailability> CreateBookingAvailabilityAsync(CreateBookingAvailabilityRequest request, string accessToken)
     {
-        //get profile id from access token
         var staffProfileId = _jwtService.GetProfileIdFromToken(accessToken);
-
         if (staffProfileId == 0) throw new InvalidCredentialException("Staff profile ID is required.");
 
-        //create booking availability entity
         var bookingAvailability = _mapper.Map<BookingAvailability>(request);
         bookingAvailability.StaffProfileId = staffProfileId;
 
-        await _bookingAvailabilityRepository.CreateAsync(bookingAvailability);
-
-        await CacheBookingAvailabilityAsync(bookingAvailability);
-
-        return bookingAvailability;
+        try
+        {
+            await _bookingAvailabilityRepository.CreateAsync(bookingAvailability);
+            await CacheBookingAvailabilityAsync(bookingAvailability);
+            return bookingAvailability;
+        }
+        catch (SqlException ex)
+        {
+            HandleSqlException(ex);
+            throw;
+        }
     }
 
-
-    //get all booking availability for a staff
+    // Get all booking availability for a staff
     public async Task<HashSet<BookingAvailability>> GetBookingAvailabilitiesAsync(long staffProfileId)
     {
         return await _bookingAvailabilityRepository.GetAllByStaffProfileIdAsync(staffProfileId);
     }
 
-    //get all booking availability pagination
+    // Get all booking availability with pagination
     public async Task<PagedResult<BookingAvailabilityListItemResponse>> GetAllPagedAsync(PaginationRequest request)
     {
-        //get all booking availabilities from database
         var (bookingAvailabilities, totalCount) = await _bookingAvailabilityRepository.GetAllPagedAsync(request);
-
         return new PagedResult<BookingAvailabilityListItemResponse>
         {
             Items = _mapper.Map<List<BookingAvailabilityListItemResponse>>(bookingAvailabilities),
@@ -93,39 +103,53 @@ public class BookingAvailabilityService
         };
     }
 
-    //edit booking availability
+    // Edit booking availability
     public async Task<BookingAvailability> UpdateAsync(long id, UpdateBookingAvailabilityRequest request, string accessToken)
     {
-        //get the booking availability
         var bookingAvailability = await GetBookingAvailabilityAsync(id);
+        if (!IsValidAccess(bookingAvailability, accessToken))
+            throw new InvalidAccessBookingAvailability("Cannot access the booking availability");
 
-        if (!IsValidAccess(bookingAvailability, accessToken)) throw new InvalidAccessBookingAvailability("Cannot access the booking availability");
+        // Map updated fields, preserving Id and StaffProfileId
+        _mapper.Map(request, bookingAvailability);
 
-        bookingAvailability = _mapper.Map<BookingAvailability>(request);
-        //save DB
-        await _bookingAvailabilityRepository.UpdateAsync(bookingAvailability);
-        //caching
-        await CacheBookingAvailabilityAsync(bookingAvailability);
-
-        return bookingAvailability;
+        try
+        {
+            await _bookingAvailabilityRepository.UpdateAsync(bookingAvailability);
+            await CacheBookingAvailabilityAsync(bookingAvailability);
+            return bookingAvailability;
+        }
+        catch (SqlException ex)
+        {
+            HandleSqlException(ex);
+            throw;
+        }
     }
 
-    //delete booking availability
+    // Delete booking availability
     public async Task DeleteAsync(long id, string accessToken)
     {
         var bookingAvailability = await GetBookingAvailabilityAsync(id);
-        if (!IsValidAccess(bookingAvailability, accessToken)) throw new InvalidAccessBookingAvailability("No authorize to delete");
+        if (!IsValidAccess(bookingAvailability, accessToken))
+            throw new InvalidAccessBookingAvailability("No authorization to delete");
+
         await _bookingAvailabilityRepository.RemoveAsync(bookingAvailability);
+        // Optionally, remove from cache
+        var cachedKey = $"{_bookingSettings.BookingAvaiPrefix}{id}";
+        await _redisRepository.RemoveByKeyAsync(cachedKey);
     }
 
+    #region Private Methods
 
-    #region caching with redis database
     private async Task CacheBookingAvailabilityAsync(BookingAvailability bookingAvailability)
     {
-        //try to get the cached booking availability by staffProfileId
         var cachedKey = $"{_bookingSettings.BookingAvaiPrefix}{bookingAvailability.Id}";
-        await _redisRepository.SetValueAsync<BookingAvailability>(cachedKey, bookingAvailability, TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
+        await _redisRepository.SetValueAsync<BookingAvailability>(
+            cachedKey,
+            bookingAvailability,
+            TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
     }
+
     private async Task<BookingAvailability> GetBookingAvailabilityAsync(long bookingAvailabilityId)
     {
         var cachedKey = $"{_bookingSettings.BookingAvaiPrefix}{bookingAvailabilityId}";
@@ -133,14 +157,16 @@ public class BookingAvailabilityService
 
         if (bookingAvailability is null)
         {
-            //query from database
             bookingAvailability = await _bookingAvailabilityRepository.GetByIdAsync(bookingAvailabilityId);
+            if (bookingAvailability is null)
+                throw new NotFoundException("There is no booking availability with the specified ID");
 
-            //caching into the redis
-            await _redisRepository.SetValueAsync<BookingAvailability>(cachedKey, bookingAvailability, TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
+            await _redisRepository.SetValueAsync<BookingAvailability>(
+                cachedKey,
+                bookingAvailability,
+                TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
         }
 
-        if (bookingAvailability is null) throw new NotFoundException("There is no booking availability id");
         return bookingAvailability;
     }
 
@@ -149,12 +175,13 @@ public class BookingAvailabilityService
         var cacheTasks = bookingAvailabilities.Select(availability =>
         {
             var cachedKey = $"{_bookingSettings.BookingAvaiPrefix}{availability.Id}";
-            return _redisRepository.SetValueAsync<BookingAvailability>(cachedKey, availability, TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
+            return _redisRepository.SetValueAsync<BookingAvailability>(
+                cachedKey,
+                availability,
+                TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
         });
         await Task.WhenAll(cacheTasks);
     }
-    #endregion
-
 
     private bool IsValidAccess(BookingAvailability bookingAvailability, string accessToken)
     {
@@ -162,6 +189,13 @@ public class BookingAvailabilityService
         return bookingAvailability.StaffProfileId == profileId;
     }
 
+    private void HandleSqlException(SqlException ex)
+    {
+        if (ex.Number == 50001) // Trigger error for overlap
+            throw new ValidationException("The time slot overlaps with an existing slot for the same staff and day.");
+        if (ex.Number == 2601 || ex.Number == 2627) // Unique constraint violation
+            throw new ValidationException("A time slot with the same start time, end time, day, and staff already exists.");
+    }
 
-
+    #endregion
 }

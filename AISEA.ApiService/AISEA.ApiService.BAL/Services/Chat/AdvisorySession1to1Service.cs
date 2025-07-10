@@ -260,6 +260,7 @@ public class AdvisorySession1to1Service
         var userId = GetUserIdFromToken(accessToken);
         await CreateMessageAsync(request.Message, userId, request.ChatSessionId);
         var aiResponse = await _chatOpenAIService.SendMsgAsync(request.Message);
+        aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, request.ChatSessionId);
         return new GetChatBotResponse { Message = aiResponse };
     }
@@ -275,10 +276,11 @@ public class AdvisorySession1to1Service
             profileId,
             EAdvisorySession1to1Type.BOT,
             _staffUserSettings.SystemBotUser.StaffId,
-            Advisory1to1Util.GenerateChatBotSessionTitle(request.Message));
+            System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(Advisory1to1Util.GenerateChatBotSessionTitle(request.Message))));
 
         await CreateMessageAsync(request.Message, userId, chatSession.Id);
         var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPromptInit(studentName, null, null, request.Message));
+        aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, chatSession.Id);
         return new InitChatBotResponse { Message = aiResponse, ChatSessionId = chatSession.Id };
     }
@@ -308,7 +310,7 @@ public class AdvisorySession1to1Service
 
         var (sessions, totalCount) = await _advisorySession1To1Repository.GetSessionsByProfileId(
             request.PageNumber, request.PageSize, isStudent, sessionType, profileId);
-        
+
         return new PagedResult<GetAdvisorySession1to1ItemsResponse>
         {
             Items = _mapper.Map<List<GetAdvisorySession1to1ItemsResponse>>(sessions),

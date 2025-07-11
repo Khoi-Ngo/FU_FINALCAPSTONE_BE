@@ -29,6 +29,7 @@ var app = builder.Build();
         });
     }
 
+    app.UseWebSockets();
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 
     app.UseStatusCodePages(async context =>

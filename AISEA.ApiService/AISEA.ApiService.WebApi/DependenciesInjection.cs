@@ -36,21 +36,28 @@ namespace AISEA.ApiService.WebApi
                         Encoding.UTF8.GetBytes(configuration.GetSection(JwtSettings.Section)["SecretKey"]))
                 };
 
-                // Support SignalR token from query string
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
                         var token = context.Request.Query["access_token"];
                         if (!string.IsNullOrEmpty(token) &&
-                            context.HttpContext.Request.Path.StartsWithSegments("/advisoryChat1to1Hub"))
+                            (context.HttpContext.Request.Path.StartsWithSegments("/advisoryChat1to1Hub") ||
+                             context.HttpContext.Request.Path.StartsWithSegments("/notificationHub")))
                         {
+                            context.Token = token;
+                        }
+                        else
+                        {
+                            token = context.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
                             context.Token = token;
                         }
                         return Task.CompletedTask;
                     }
                 };
             });
+
+
 
             // Swagger setup
             services.AddSwaggerGen(options =>

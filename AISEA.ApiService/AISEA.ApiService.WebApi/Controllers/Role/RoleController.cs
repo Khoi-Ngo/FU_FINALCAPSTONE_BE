@@ -1,5 +1,7 @@
 using AISEA.ApiService.BAL.Services.Role;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Role;
+using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -9,6 +11,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Role;
 
 [ApiController]
 [Route("api/[controller]")]
+[PermissionAuthorize((int)EUserRole.ADMIN)]
 public class RoleController : BaseController
 {
 
@@ -52,7 +55,9 @@ public class RoleController : BaseController
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest role)
     {
         await _roleService.CreateRoleAsync(role);
-        return Ok("Created successfully");
+        //notify that the role created successfully
+        _notifier.NotifyUser(AccessToken, "Successfully", "New role is created successfully");
+        return NoContent();
     }
 
     /// <summary>
@@ -65,8 +70,7 @@ public class RoleController : BaseController
     public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
     {
         await _roleService.UpdateRoleAsync(id, role);
-        //TODO: Test only remove later
-        await _notifier.NotifyUser(AccessToken, "Test notification", "Test notification content");
-        return Ok("Updated successfully");
+        _notifier.NotifyUser(AccessToken, "Successfully", "The role is updated successfully");
+        return NoContent();
     }
 }

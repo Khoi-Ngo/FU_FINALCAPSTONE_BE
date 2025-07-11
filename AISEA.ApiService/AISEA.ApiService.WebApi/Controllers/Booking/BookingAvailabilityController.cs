@@ -1,4 +1,3 @@
-using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
@@ -16,12 +15,10 @@ namespace AISEA.ApiService.WebApi.Controllers.Booking;
 public class BookingAvailabilityController : BaseController
 {
     private readonly BookingAvailabilityService _bookingAvailabilityService;
-    private readonly AuditLogService _auditLogService;
     private readonly NotificationHubNotifier _notifier;
-    public BookingAvailabilityController(BookingAvailabilityService bookingAvailabilityService, AuditLogService auditLogService, NotificationHubNotifier notifier, EndpointSettings endpointSettings) : base(endpointSettings)
+    public BookingAvailabilityController(BookingAvailabilityService bookingAvailabilityService, NotificationHubNotifier notifier, EndpointSettings endpointSettings) : base(endpointSettings)
     {
         _bookingAvailabilityService = bookingAvailabilityService;
-        _auditLogService = auditLogService;
         _notifier = notifier;
     }
 
@@ -32,12 +29,8 @@ public class BookingAvailabilityController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> CreateBookingAvailability([FromBody] CreateBookingAvailabilityRequest request)
     {
-        var bookingAvailability = await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
-
-        _auditLogService.CreateAsync(EAuditLogTag.CREATE_BOOKING_AVAILABILITY, "The booking availability has been created successfully." + bookingAvailability.Id);
-
-        await _notifier.NotifyUser(AccessToken, "Create Successfully", "Booking availability has been created successfully.");
-
+        await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
+        await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availability has been created successfully.");
         return NoContent();
     }
 
@@ -48,13 +41,9 @@ public class BookingAvailabilityController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
-        var bookingAvailabilities = await _bookingAvailabilityService.
-        BulkCreateBookingAvailabilityAsync(request, AccessToken);
-
-        _auditLogService.CreateBulkAsync(EAuditLogTag.CREATE_BOOKING_AVAILABILITY, "The booking availabilities have been created successfully.", bookingAvailabilities.Select(x => x.Id).ToList());
-
-        await _notifier.NotifyUser(AccessToken, "Bulk Create Successfully", "Booking availabilities have been created successfully.");
-
+        await _bookingAvailabilityService.
+       BulkCreateBookingAvailabilityAsync(request, AccessToken);
+        await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availabilities have been bulk created successfully.");
         return NoContent();
     }
 
@@ -85,12 +74,8 @@ public class BookingAvailabilityController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
-        var bookingAvailability = await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
-
-        _auditLogService.CreateAsync(EAuditLogTag.UPDATE_BOOKING_AVAILABILITY, $"The booking availability {bookingAvailability.Id} has been updated successfully.");
-
-        await _notifier.NotifyUser(AccessToken, "Update Ok", "Booking availabilities have been updated successfully.");
-
+        await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
+        await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availabilities have been updated successfully.");
         return NoContent();
     }
 
@@ -102,11 +87,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> DeleteBookingAvailability(long id)
     {
         await _bookingAvailabilityService.DeleteAsync(id, AccessToken);
-
-        await _auditLogService.CreateAsync(EAuditLogTag.DELETE_BOOKING_AVAILABILITY);
-
-        await _notifier.NotifyUser(AccessToken, "Delete Ok", "Booking availability has been deleted.");
-
+        await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availability has been deleted.");
         return NoContent();
     }
 

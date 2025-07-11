@@ -51,4 +51,9 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidAccessBookingAvailability(string message) : base(message) { }
     }
+    public class InvalidAccessUserException : Exception
+    {
+        public InvalidAccessUserException(string message) : base(message) { }
+    }
+
 }

@@ -38,7 +38,7 @@ public class BookingAvailabilityService
     }
 
     // Bulk create booking availability for a staff
-    public async Task<List<BookingAvailability>> BulkCreateBookingAvailabilityAsync(List<CreateBookingAvailabilityRequest> request, string accessToken)
+    public async Task BulkCreateBookingAvailabilityAsync(List<CreateBookingAvailabilityRequest> request, string accessToken)
     {
         var staffProfileId = _jwtService.GetProfileIdFromToken(accessToken);
         if (staffProfileId == 0) throw new InvalidCredentialException("Staff profile ID is required.");
@@ -53,7 +53,6 @@ public class BookingAvailabilityService
         {
             await _bookingAvailabilityRepository.BulkCreateAsync(bookingAvailabilities);
             await CacheBookingAvailabilitiesAsync(bookingAvailabilities);
-            return bookingAvailabilities;
         }
         catch (SqlException ex)
         {
@@ -63,7 +62,7 @@ public class BookingAvailabilityService
     }
 
     // Create booking availability for a staff
-    public async Task<BookingAvailability> CreateBookingAvailabilityAsync(CreateBookingAvailabilityRequest request, string accessToken)
+    public async Task CreateBookingAvailabilityAsync(CreateBookingAvailabilityRequest request, string accessToken)
     {
         var staffProfileId = _jwtService.GetProfileIdFromToken(accessToken);
         if (staffProfileId == 0) throw new InvalidCredentialException("Staff profile ID is required.");
@@ -75,7 +74,6 @@ public class BookingAvailabilityService
         {
             await _bookingAvailabilityRepository.CreateAsync(bookingAvailability);
             await CacheBookingAvailabilityAsync(bookingAvailability);
-            return bookingAvailability;
         }
         catch (SqlException ex)
         {
@@ -104,7 +102,7 @@ public class BookingAvailabilityService
     }
 
     // Edit booking availability
-    public async Task<BookingAvailability> UpdateAsync(long id, UpdateBookingAvailabilityRequest request, string accessToken)
+    public async Task UpdateAsync(long id, UpdateBookingAvailabilityRequest request, string accessToken)
     {
         var bookingAvailability = await GetBookingAvailabilityAsync(id);
         if (!IsValidAccess(bookingAvailability, accessToken))
@@ -117,7 +115,6 @@ public class BookingAvailabilityService
         {
             await _bookingAvailabilityRepository.UpdateAsync(bookingAvailability);
             await CacheBookingAvailabilityAsync(bookingAvailability);
-            return bookingAvailability;
         }
         catch (SqlException ex)
         {

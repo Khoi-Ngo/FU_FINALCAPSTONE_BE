@@ -7,7 +7,6 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Chat;
 using AISEA.ApiService.SHARED.DTOs.Requests.ChatBot;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.AdvisorySession1to1;
-using AISEA.ApiService.SHARED.DTOs.Responses.Chat;
 using AISEA.ApiService.SHARED.DTOs.Responses.ChatBot;
 using AISEA.ApiService.SHARED.DTOs.Responses.Message;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
@@ -54,11 +53,12 @@ public class AdvisorySession1to1Service
         _chatOpenAIService = chatOpenAIService;
     }
 
-    public async Task DeleteAsync(long chatSessionId, string accessToken)
+    public async Task<AdvisorySession1to1> DeleteAsync(long chatSessionId, string accessToken)
     {
         var profileId = GetProfileIdFromToken(accessToken);
         var session = await GetByIdAsync(chatSessionId, profileId);
         await _advisorySession1To1Repository.RemoveAsync(session);
+        return session;
     }
 
     public async Task<AdvisorySession1to1> GetByIdAsync(long chatSessionId, long profileId)
@@ -285,7 +285,7 @@ public class AdvisorySession1to1Service
         return new InitChatBotResponse { Message = aiResponse, ChatSessionId = chatSession.Id };
     }
 
-    public async Task<(InitHumanChatSessionResponse response, GetAdvisorySession1to1ItemsResponse hubResponse, long studentProfileId)> InitHumanChatSessionAsync(InitHumanChatSessionRequest request, string accessToken)
+    public async Task<(GetAdvisorySession1to1ItemsResponse hubResponse, long studentProfileId)> InitHumanChatSessionAsync(InitHumanChatSessionRequest request, string accessToken)
     {
         var userData = _jWTService.GetAllClaimsFromToken(accessToken);
         var profileId = long.Parse(userData.GetValueOrDefault(_jwtSettings.ProfileId));
@@ -296,7 +296,6 @@ public class AdvisorySession1to1Service
         await CreateMessageAsync(request.Message, userId, newSession.Id);
 
         return (
-            new InitHumanChatSessionResponse { ChatSessionId = newSession.Id },
             _mapper.Map<GetAdvisorySession1to1ItemsResponse>(newSession),
             profileId);
     }

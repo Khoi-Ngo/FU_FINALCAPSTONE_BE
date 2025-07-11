@@ -148,8 +148,6 @@ public class AdvisoryChat1to1Hub : BaseHub
         await Clients.Caller.SendAsync(_chatSessionSettings.LoadMoreMessagesMethod, messages);
     }
 
-
-
     /// <summary>
     /// Loads additional chat sessions for a user when scrolling, supporting infinite scroll pagination.
     /// </summary>

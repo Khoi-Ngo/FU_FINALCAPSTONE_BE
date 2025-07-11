@@ -1,5 +1,4 @@
 using AISEA.ApiService.DAL.Repositories;
-using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.AuditLog;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
@@ -13,39 +12,6 @@ namespace AISEA.ApiService.BAL.Services.AuditLog
         {
             _auditLogRepository = auditLogRepository;
         }
-
-
-        /// <summary>
-        /// Adds a new audit log entry.
-        /// </summary>
-        public async Task CreateAsync(EAuditLogTag tag, string description = null)
-        {
-            var auditLog = new DAL.Entities.AuditLog
-            {
-                Tag = tag,
-                Description = description
-            };
-            await _auditLogRepository.CreateAsync(auditLog);
-        }
-
-        /// <summary>
-        /// Adds bulk audit log entries.
-        /// </summary>
-        public async Task CreateBulkAsync(EAuditLogTag tag, string prefixDesc = null, List<long> ids = null)
-        {
-            ids ??= new List<long>(); // ensure ids is not null
-
-            foreach (var id in ids)
-            {
-                var auditLog = new DAL.Entities.AuditLog
-                {
-                    Tag = tag,
-                    Description = $"{prefixDesc} {id}"
-                };
-                await _auditLogRepository.CreateAsync(auditLog);
-            }
-        }
-
 
         /// <summary>
         /// Retrieves all audit log entries.

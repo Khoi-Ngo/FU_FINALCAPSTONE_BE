@@ -16,7 +16,7 @@ public class StaffProfileService
         _staffProfileRepository = staffProfileRepository;
     }
 
-    public async Task CreateAsync(CreateStaffProfileRequest request)
+    public async Task CreateAsync(CreateStaffProfileRequest request, string accessToken)
     {
         var staffProfile = _mapper.Map<StaffProfile>(request);
         await _staffProfileRepository.CreateAsync(staffProfile);

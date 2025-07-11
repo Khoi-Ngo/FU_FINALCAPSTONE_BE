@@ -1,4 +1,3 @@
-using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.PropConfigs;

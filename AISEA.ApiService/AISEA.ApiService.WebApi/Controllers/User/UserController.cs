@@ -49,7 +49,7 @@ public class UserController : BaseController
     {
         await _userService.CreateUsersAsync(requests);
         //notify that created successfully
-        _notifier.NotifyUser(AccessToken, "Successfully", "New users is bulk created successfully");
+        _notifier.NotifyUser(AccessToken, "Successfully", "New users are bulk created successfully");
 
         return NoContent();
     }
@@ -181,6 +181,7 @@ public class UserController : BaseController
     /// Retrieves all active Advisors from the system.
     /// </summary>
     [HttpGet("advisor")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetAllAdvisors([FromQuery] PaginationRequest request)
     {
         var advisors = await _userService.GetAllAdvisorsAsync(request);

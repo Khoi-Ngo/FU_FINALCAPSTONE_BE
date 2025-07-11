@@ -2,72 +2,71 @@ using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace AISEA.ApiService.WebApi.Base
+namespace AISEA.ApiService.WebApi.Base;
+
+[Authorize]
+public class BaseHub : Hub
 {
-    [Authorize]
-    public class BaseHub : Hub
+    private readonly EndpointSettings _endpointSettings;
+
+    public BaseHub(EndpointSettings endpointSettings)
     {
-        private readonly EndpointSettings _endpointSettings;
+        _endpointSettings = endpointSettings;
+    }
 
-        public BaseHub(EndpointSettings endpointSettings)
+    protected string AccessToken
+    {
+        get
         {
-            _endpointSettings = endpointSettings;
-        }
-
-        protected string AccessToken
-        {
-            get
+            var httpContext = Context.GetHttpContext();
+            if (httpContext != null)
             {
-                var httpContext = Context.GetHttpContext();
-                if (httpContext != null)
+                if (httpContext.Request.Headers.TryGetValue(_endpointSettings.AccessTokenPropName, out var accessToken))
                 {
-                    if (httpContext.Request.Headers.TryGetValue(_endpointSettings.AccessTokenPropName, out var accessToken))
-                    {
-                        return accessToken.ToString().Replace("Bearer ", "");
-                    }
+                    return accessToken.ToString().Replace("Bearer ", "");
                 }
-                return string.Empty;
             }
+            return string.Empty;
         }
+    }
 
-        protected string RefreshToken
+    protected string RefreshToken
+    {
+        get
         {
-            get
+            var httpContext = Context.GetHttpContext();
+            if (httpContext != null &&
+                httpContext.Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
             {
-                var httpContext = Context.GetHttpContext();
-                if (httpContext != null &&
-                    httpContext.Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
-                {
-                    return refreshToken.ToString();
-                }
-                return string.Empty;
+                return refreshToken.ToString();
             }
+            return string.Empty;
         }
+    }
 
-        protected string AuthorizationTokenGoogle
+    protected string AuthorizationTokenGoogle
+    {
+        get
         {
-            get
+            var httpContext = Context.GetHttpContext();
+            if (httpContext != null &&
+                httpContext.Request.Headers.TryGetValue(_endpointSettings.GoogleAuthTokenPropName, out var authHeader))
             {
-                var httpContext = Context.GetHttpContext();
-                if (httpContext != null &&
-                    httpContext.Request.Headers.TryGetValue(_endpointSettings.GoogleAuthTokenPropName, out var authHeader))
-                {
-                    return authHeader.ToString().Replace("Bearer ", "");
-                }
-                return string.Empty;
+                return authHeader.ToString().Replace("Bearer ", "");
             }
+            return string.Empty;
         }
+    }
 
-        public override async Task OnConnectedAsync()
-        {
-            // Optionally handle connection logic here
-            await base.OnConnectedAsync();
-        }
+    public override async Task OnConnectedAsync()
+    {
+        // Optionally handle connection logic here
+        await base.OnConnectedAsync();
+    }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
-        {
-            // Optionally handle disconnection logic here
-            await base.OnDisconnectedAsync(exception);
-        }
+    public override async Task OnDisconnectedAsync(Exception exception)
+    {
+        // Optionally handle disconnection logic here
+        await base.OnDisconnectedAsync(exception);
     }
 }

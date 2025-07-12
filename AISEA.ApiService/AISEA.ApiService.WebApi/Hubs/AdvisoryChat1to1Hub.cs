@@ -48,6 +48,9 @@ public class AdvisoryChat1to1Hub : BaseHub
     [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task SendMessage(long sessionId, string content)
     {
+        //allowing utf 8
+        content = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(content));
+
         var message = await _advisorySession1To1Service.SendMessageAsync(sessionId, content, AccessToken);
         var session = await _advisorySession1To1Service.GetByIdAsync(sessionId);
         session.UpdatedAt = DateTime.UtcNow;
@@ -144,8 +147,6 @@ public class AdvisoryChat1to1Hub : BaseHub
         var messages = await _advisorySession1To1Service.GetMessagesAsync(pagination, sessionId);
         await Clients.Caller.SendAsync(_chatSessionSettings.LoadMoreMessagesMethod, messages);
     }
-
-
 
     /// <summary>
     /// Loads additional chat sessions for a user when scrolling, supporting infinite scroll pagination.

@@ -21,13 +21,13 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
             builder.HasOne(d => d.Staff)
                 .WithMany(p => p.AdvisorySessions1to1)
                 .HasForeignKey(d => d.StaffId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("advisorysession1to1_staffid_foreign");
 
             builder.HasOne(d => d.Student)
                 .WithMany(p => p.AdvisorySessions1to1)
                 .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("advisorysession1to1_studentid_foreign");
         }
     }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
@@ -99,7 +95,7 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
 
-        public async Task<(object users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
                 .Where(u => u.RoleId == (int)EUserRole.STUDENT)
@@ -113,7 +109,7 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<(object users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
                 .Where(u => u.RoleId != (int)EUserRole.STUDENT)
@@ -135,6 +131,20 @@ namespace AISEA.ApiService.DAL.Repositories
         {
             return await _context.Users.Include(u => u.Role).Include(u => u.StaffProfile).FirstOrDefaultAsync(u => u.Id == id && u.RoleId != (int)EUserRole.STUDENT);
 
+        }
+
+        public async Task<(List<User> users, int totalCount)> GetAdvisorsPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users
+                .Where(u => u.RoleId == (int)EUserRole.ADVISOR)
+                .Include(u => u.Role)
+                .Include(u => u.StaffProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
         }
     }
 }

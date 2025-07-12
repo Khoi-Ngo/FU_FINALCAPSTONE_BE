@@ -5,15 +5,14 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
-using AISEA.ApiService.WebApi.Hubs;
 using AISEA.ApiService.WebApi.HubUtil;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace AISEA.ApiService.WebApi.Controllers.Chat;
 
 [ApiController]
 [Route("api/[controller]")]
+[PermissionAuthorize((int)EUserRole.STUDENT)]
 public class AdvisorySession1to1Controller : BaseController
 {
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
@@ -33,25 +32,23 @@ public class AdvisorySession1to1Controller : BaseController
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
-        var session = await _advisorySession1To1Service.GetByIdAsync(id); // Fetch session for StaffId and StudentId
-        await _advisorySession1To1Service.DeleteAsync(id, AccessToken);
+        var sessionDeleted = await _advisorySession1To1Service.DeleteAsync(id, AccessToken);
 
         // Notify student, staff, and session groups
-        await _advisorySessionHubNotifier.NotifySessionDeletedAsync(session.Id, session.StaffId, session.StudentId);
-        return Ok("Delete successfully");
+        await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
+        return NoContent();
     }
 
     /// <summary>
     /// Initialize the chat session with Staffs User
     /// </summary>
     [HttpPost("human")]
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> InitHumanChatSessionAsync([FromBody] InitHumanChatSessionRequest request)
     {
-        var (res, hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
+        var (hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
         //call hub context -> push
         await _advisorySessionHubNotifier.NotifySessionCreatedAsync(studentProfileId, hubRes);
-        return Ok(res);
+        return NoContent();
     }
 
     /// <summary>

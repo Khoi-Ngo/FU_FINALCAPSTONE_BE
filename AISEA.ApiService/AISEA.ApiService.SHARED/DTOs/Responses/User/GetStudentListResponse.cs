@@ -23,6 +23,7 @@ public class GetStudentListResponse
 
 public class StudentDataListResponse
 {
+    public long Id { get; set; }
     public DateTimeOffset EnrolledAt { get; set; }
     public bool DoGraduate { get; set; }
     public string? CareerGoal { get; set; }

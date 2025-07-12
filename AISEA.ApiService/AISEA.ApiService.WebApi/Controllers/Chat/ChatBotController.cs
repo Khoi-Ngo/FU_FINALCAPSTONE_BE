@@ -10,6 +10,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Chat;
 
 [ApiController]
 [Route("api/[controller]")]
+[PermissionAuthorize((int)EUserRole.STUDENT)]
 public class ChatBotController : BaseController
 {
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
@@ -24,7 +25,6 @@ public class ChatBotController : BaseController
     /// This is for sending message to Chat Bot only with Existed Session
     /// </summary>
     [HttpPost("send")]
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> SendMsgAsync([FromBody] SendChatBotRequest request)
     {
         var res = await _advisorySession1To1Service.SendMsgAsync(request, AccessToken);
@@ -35,7 +35,6 @@ public class ChatBotController : BaseController
     /// This is for initializing new session with AI ChatBot
     /// </summary>
     [HttpPost("init")]
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> InitMsgAsync([FromBody] InitChatBotRequest request)
     {
         var res = await _advisorySession1To1Service.InitMsgAsync(request, AccessToken);

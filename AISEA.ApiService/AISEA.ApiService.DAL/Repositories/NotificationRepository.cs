@@ -57,7 +57,7 @@ public class NotificationRepository : GenericRepository<Notification>
         var thresholdDate = DateTime.UtcNow.AddDays(-expiredDays);
 
         var expiredNotifications = await _context.Notifications
-            .Where(n => n.CreatedAt < thresholdDate)
+            .Where(n => n.CreatedAt < thresholdDate && n.IsRead == true)
             .ToListAsync();
 
         _context.Notifications.RemoveRange(expiredNotifications);

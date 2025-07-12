@@ -1,9 +1,8 @@
-using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Auth;
-using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
+using AISEA.ApiService.WebApi.HubUtil;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,21 +13,22 @@ namespace AISEA.ApiService.WebApi.Controllers.Auth;
 public class AuthController : BaseController
 {
     private readonly AuthService _authService;
-    private readonly AuditLogService _auditLogService;
+    private readonly NotificationHubNotifier _notifier;
 
-    public AuthController(EndpointSettings endpointSettings, AuthService authService, AuditLogService auditLogService) : base(endpointSettings)
+    public AuthController(EndpointSettings endpointSettings, AuthService authService, NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
     {
         _authService = authService;
-        _auditLogService = auditLogService;
+        _notifier = notificationHubNotifier;
     }
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
     /// </summary>
-    [HttpGet("refresh-token")]
+    [HttpPost("refresh-token")]
     [AllowAnonymous]
     public async Task<IActionResult> Refresh(
         [FromHeader(Name = "RefreshToken")] string refreshToken)
     {
+        //? The param never used due to this is just for swagger ui gen (API testing only)
         var res = await _authService.RefreshAsync(AccessToken, RefreshToken);
         return Ok(res);
     }
@@ -38,12 +38,11 @@ public class AuthController : BaseController
     /// </summary>
     /// <returns>Returns authentication result using Access Token of GG SSO.</returns>
     // Login with google
-    [HttpGet("google")]
+    [HttpPost("google")]
     [AllowAnonymous]
     public async Task<IActionResult> LoginWithGoogle()
     {
         var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
-        await _auditLogService.CreateAsync(EAuditLogTag.GOOGLE_LOGIN);
         return Ok(res);
     }
 
@@ -56,7 +55,6 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login([FromBody] AuthFEIDRequest request)
     {
         var res = await _authService.LoginAsync(request);
-        await _auditLogService.CreateAsync(EAuditLogTag.FEID_LOGIN);
         return Ok(res);
     }
 
@@ -69,8 +67,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
     {
         await _authService.ForgetPasswordAsync(request);
-        await _auditLogService.CreateAsync(EAuditLogTag.FORGET_PASSWORD);
-        return Ok("Password reset successful.");
+        return NoContent();
     }
 
     // Get Verification Code To Reset Password
@@ -82,7 +79,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> SendResetCode([FromBody] GetVerificationCodeRequest request)
     {
         await _authService.SendResetCodeAsync(request);
-        return Ok("Verification code sent successfully.");
+        return NoContent();
     }
 
     // Reset password
@@ -93,18 +90,19 @@ public class AuthController : BaseController
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
-        await _auditLogService.CreateAsync(EAuditLogTag.RESET_PASSWORD);
-        return Ok("Password reset successful.");
+        //notify that user reset password ok
+        _notifier.NotifyUser(AccessToken, "Successfully", "Reset password ok!");
+        return NoContent();
     }
 
 
     /// <summary>
     /// Logs out the current user and blacklists the access token.
     /// </summary>
-    [HttpGet("logout")]
+    [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         await _authService.LogoutAsync(AccessToken);
-        return Ok("Logout successful.");
+        return NoContent();
     }
 }

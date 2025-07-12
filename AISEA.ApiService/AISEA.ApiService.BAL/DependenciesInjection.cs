@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.BgJob;
+using AISEA.ApiService.BAL.Services.Booking;
 
 namespace AISEA.ApiService.BAL
 {
@@ -39,6 +40,9 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<ProgramService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<AuditLogService>();
+            services.AddScoped<BookingAvailabilityService>();
+            services.AddScoped<LeaveScheduleService>();
+            services.AddScoped<BookedMeetingService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

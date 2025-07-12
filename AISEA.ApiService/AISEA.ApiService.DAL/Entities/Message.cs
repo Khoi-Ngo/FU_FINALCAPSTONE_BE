@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using AISEA.ApiService.DAL.Abstract;
-using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
 

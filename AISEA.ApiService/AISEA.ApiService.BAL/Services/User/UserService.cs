@@ -5,6 +5,8 @@ using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.User;
 using AISEA.ApiService.SHARED.Exceptions;
+using AISEA.ApiService.SHARED.Interfaces;
+using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using BC = BCrypt.Net.BCrypt;
 
@@ -16,13 +18,15 @@ namespace AISEA.ApiService.BAL.Services.User
         private readonly StudentProfileRepository _studentProfileRepository;
         private readonly StaffProfileRepository _staffProfileRepository;
         private readonly IMapper _mapper;
+        private readonly IJWTService _jWTService;
 
-        public UserService(UserRepository userRepository, IMapper mapper, StudentProfileRepository studentProfileRepository, StaffProfileRepository staffProfileRepository)
+        public UserService(UserRepository userRepository, IMapper mapper, StudentProfileRepository studentProfileRepository, StaffProfileRepository staffProfileRepository, IJWTService jWTService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _staffProfileRepository = staffProfileRepository;
             _studentProfileRepository = studentProfileRepository;
+            _jWTService = jWTService;
         }
 
         public async Task CreateUserAsync(CreateUserRequest request)
@@ -69,13 +73,14 @@ namespace AISEA.ApiService.BAL.Services.User
             return _mapper.Map<GetStudentDetailResponse>(student);
         }
 
-        public async Task UpdateUserAsync(long id, UpdateStudentRequest request)
+        public async Task UpdateUserAsync(long id, UpdateStudentRequest request, string accessToken)
         {
             var student = await _userRepository.GetStudentByIdAsync(id);
             if (student is null)
             {
                 throw new NotFoundException("Student not found.");
             }
+            if (!IsValidAccessUpdate(accessToken, student)) throw new InvalidAccessUserException("No permission to edit this user");
 
             _mapper.Map(request, student);
             if (request.StudentDataUpdateRequest is not null)
@@ -86,13 +91,21 @@ namespace AISEA.ApiService.BAL.Services.User
             }
             await _userRepository.UpdateAsync(student);
         }
-        public async Task UpdateUserAsync(long id, UpdateStaffRequest request)
+
+        private bool IsValidAccessUpdate(string accessToken, DAL.Entities.User updatedUser)
+        {
+            if (_jWTService.GetRoleIdFromToken(accessToken) == (long)EUserRole.ADMIN) return true;
+            return updatedUser.Id == _jWTService.GetUserIdFromToken(accessToken);
+        }
+
+        public async Task UpdateUserAsync(long id, UpdateStaffRequest request, string accessToken)
         {
             var staff = await _userRepository.GetStaffByIdAsync(id);
             if (staff is null)
             {
                 throw new NotFoundException("Staff not found.");
             }
+            if (!IsValidAccessUpdate(accessToken, staff)) throw new InvalidAccessUserException("No permission to edit this user");
 
             _mapper.Map(request, staff);
             if (request.StaffDataUpdateRequest is not null)
@@ -158,6 +171,17 @@ namespace AISEA.ApiService.BAL.Services.User
         public async Task<PagedResult<GetStaffListResponse>> GetAllStaffsPagedAsync(PaginationRequest request)
         {
             var (users, totalCount) = await _userRepository.GetStaffsPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetStaffListResponse>
+            {
+                Items = _mapper.Map<List<GetStaffListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+        public async Task<PagedResult<GetStaffListResponse>> GetAllAdvisorsAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetAdvisorsPagedAsync(request.PageNumber, request.PageSize);
             return new PagedResult<GetStaffListResponse>
             {
                 Items = _mapper.Map<List<GetStaffListResponse>>(users),

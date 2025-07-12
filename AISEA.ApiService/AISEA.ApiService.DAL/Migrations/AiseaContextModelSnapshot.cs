@@ -165,9 +165,14 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("bookingavailability_id_primary");
 
-                    b.HasIndex("StaffProfileId");
+                    b.HasIndex("StaffProfileId", "DayInWeek", "StartTime", "EndTime")
+                        .IsUnique()
+                        .HasDatabaseName("IX_BookingAvailability_UniqueTimeSlot");
 
-                    b.ToTable("BookingAvailability");
+                    b.ToTable("BookingAvailability", t =>
+                        {
+                            t.HasCheckConstraint("CK_BookingAvailability_EndTime", "[EndTime] > [StartTime]");
+                        });
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Combo", b =>
@@ -422,8 +427,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -431,14 +435,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("notification_id_primary");
 
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("IX_Notification_CreatedAt");
-
-                    b.HasIndex("IsRead")
-                        .HasDatabaseName("IX_Notification_IsRead");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Notification_UserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notification");
                 });
@@ -622,9 +619,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("DoGraduate")
                         .HasColumnType("bit");
 
@@ -633,9 +627,6 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -1044,14 +1035,14 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.StaffProfile", "Staff")
                         .WithMany("AdvisorySessions1to1")
                         .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("advisorysession1to1_staffid_foreign");
 
                     b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "Student")
                         .WithMany("AdvisorySessions1to1")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("advisorysession1to1_studentid_foreign");
 
@@ -1086,7 +1077,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.StaffProfile", "StaffProfile")
                         .WithMany("BookingAvailabilities")
                         .HasForeignKey("StaffProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("bookingavailability_staffprofileid_foreign");
 

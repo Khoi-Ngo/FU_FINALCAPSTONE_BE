@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.DTOs.Requests.User

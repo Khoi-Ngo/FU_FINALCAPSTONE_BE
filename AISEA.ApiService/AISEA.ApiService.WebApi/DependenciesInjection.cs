@@ -8,134 +8,132 @@ using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.WebApi.HubUtil;
-using AISEA.ApiService.DAL.Entities;
 
-namespace AISEA.ApiService.WebApi
+namespace AISEA.ApiService.WebApi;
+
+public static class DependenciesInjection
 {
-    public static class DependenciesInjection
+    public static IServiceCollection AddWebApiConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddWebApiConfig(this IServiceCollection services, IConfiguration configuration)
+        services.AddAuthentication(options =>
         {
-            services.AddAuthentication(options =>
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.SaveToken = true;
+            options.RequireHttpsMetadata = true;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = configuration.GetSection(JwtSettings.Section)["Issuer"],
+                ValidAudience = configuration.GetSection(JwtSettings.Section)["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(configuration.GetSection(JwtSettings.Section)["SecretKey"]))
+            };
+        //TODO: Support SignalR query token from header
+          
+        });
+
+
+
+        // Swagger setup
+        services.AddSwaggerGen(options =>
+        {
+            var swaggerSection = configuration.GetSection("Swagger");
+            var securitySchemeName = swaggerSection["SecuritySchemeName"];
+            var headerName = swaggerSection["HeaderName"];
+            var type = Enum.TryParse<SecuritySchemeType>(swaggerSection["Type"], out var parsedType)
+                ? parsedType
+                : SecuritySchemeType.ApiKey;
+            var scheme = swaggerSection["Scheme"];
+            var bearerFormat = swaggerSection["BearerFormat"];
+            var description = swaggerSection["Description"];
+
+            options.AddSecurityDefinition(securitySchemeName, new OpenApiSecurityScheme
             {
-                options.SaveToken = true;
-                options.RequireHttpsMetadata = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration.GetSection(JwtSettings.Section)["Issuer"],
-                    ValidAudience = configuration.GetSection(JwtSettings.Section)["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(configuration.GetSection(JwtSettings.Section)["SecretKey"]))
-                };
-            //TODO: Support SignalR query token from header request
-              
+                Name = headerName,
+                Type = type,
+                Scheme = scheme,
+                BearerFormat = bearerFormat,
+                In = ParameterLocation.Header,
+                Description = description
             });
 
-
-
-            // Swagger setup
-            services.AddSwaggerGen(options =>
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                var swaggerSection = configuration.GetSection("Swagger");
-                var securitySchemeName = swaggerSection["SecuritySchemeName"];
-                var headerName = swaggerSection["HeaderName"];
-                var type = Enum.TryParse<SecuritySchemeType>(swaggerSection["Type"], out var parsedType)
-                    ? parsedType
-                    : SecuritySchemeType.ApiKey;
-                var scheme = swaggerSection["Scheme"];
-                var bearerFormat = swaggerSection["BearerFormat"];
-                var description = swaggerSection["Description"];
-
-                options.AddSecurityDefinition(securitySchemeName, new OpenApiSecurityScheme
                 {
-                    Name = headerName,
-                    Type = type,
-                    Scheme = scheme,
-                    BearerFormat = bearerFormat,
-                    In = ParameterLocation.Header,
-                    Description = description
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
+                        Reference = new OpenApiReference
                         {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = securitySchemeName
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
-
-                // XML comments for Swagger
-                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
-                {
-                    options.IncludeXmlComments(xmlPath);
+                            Type = ReferenceType.SecurityScheme,
+                            Id = securitySchemeName
+                        }
+                    },
+                    Array.Empty<string>()
                 }
             });
 
-            // CORS
-            var corsPolicyName = configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
-            var prodClientOrigin = configuration.GetSection(EndpointSettings.Section)["ProdClientOrigin"];
-            var devClientOrigin = configuration.GetSection(EndpointSettings.Section)["DevClientOrigin"];
-
-            services.AddCors(options =>
+            // XML comments for Swagger
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
             {
-                options.AddPolicy(corsPolicyName, builder =>
-                {
-                    builder.WithOrigins(prodClientOrigin, devClientOrigin)
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                });
+                options.IncludeXmlComments(xmlPath);
+            }
+        });
+
+        // CORS
+        var corsPolicyName = configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
+        var prodClientOrigin = configuration.GetSection(EndpointSettings.Section)["ProdClientOrigin"];
+        var devClientOrigin = configuration.GetSection(EndpointSettings.Section)["DevClientOrigin"];
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy(corsPolicyName, builder =>
+            {
+                builder.WithOrigins(prodClientOrigin, devClientOrigin)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
+        });
 
-            services.AddEndpointsApiExplorer();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddEndpointsApiExplorer();
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            services.AddScoped<BlacklistedTokenFilter>();
+        services.AddScoped<BlacklistedTokenFilter>();
 
-            services.AddControllers(opt =>
-            {
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                opt.Filters.Add(new AuthorizeFilter(policy));
-                opt.Filters.Add<BlacklistedTokenFilter>();
-                opt.Filters.Add<ModelStateValidationFilter>();
-            })
-            .AddJsonOptions(opt =>
-            {
-                opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
-            })
-            .ConfigureApiBehaviorOptions(opt =>
-            {
-                opt.SuppressModelStateInvalidFilter = true;
-            });
+        services.AddControllers(opt =>
+        {
+            var policy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+            opt.Filters.Add(new AuthorizeFilter(policy));
+            opt.Filters.Add<BlacklistedTokenFilter>();
+            opt.Filters.Add<ModelStateValidationFilter>();
+        })
+        .AddJsonOptions(opt =>
+        {
+            opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+        })
+        .ConfigureApiBehaviorOptions(opt =>
+        {
+            opt.SuppressModelStateInvalidFilter = true;
+        });
 
-            // SignalR
-            services.AddSignalR();
+        // SignalR
+        services.AddSignalR();
 
-            //other services
-            services.AddScoped<AdvisorySessionHubNotifier>();
-            services.AddScoped<NotificationHubNotifier>();
+        //other services
+        services.AddScoped<AdvisorySessionHubNotifier>();
+        services.AddScoped<NotificationHubNotifier>();
 
-            return services;
-        }
+        return services;
     }
 }

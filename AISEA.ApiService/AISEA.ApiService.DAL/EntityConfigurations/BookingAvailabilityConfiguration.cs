@@ -22,6 +22,10 @@ public class BookingAvailabilityConfiguration : IEntityTypeConfiguration<Booking
             .HasConstraintName("bookingavailability_staffprofileid_foreign");
 
         // Database check constraint for EndTime > StartTime
-        builder.ToTable(t => t.HasCheckConstraint("CK_BookingAvailability_EndTime", "[EndTime] > [StartTime]"));
+        builder.ToTable(t =>
+          {
+              t.HasCheckConstraint("CK_BookingAvailability_EndTime", "[EndTime] > [StartTime]");
+              t.HasTrigger("TR_BookingAvailability_CheckOverlap"); // Inform EF Core of the trigger to avoid OUTPUT clause
+          });
     }
 }

@@ -35,26 +35,8 @@ namespace AISEA.ApiService.WebApi
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration.GetSection(JwtSettings.Section)["SecretKey"]))
                 };
-
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var token = context.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(token) &&
-                            (context.HttpContext.Request.Path.StartsWithSegments("/advisoryChat1to1Hub") ||
-                             context.HttpContext.Request.Path.StartsWithSegments("/notificationHub")))
-                        {
-                            context.Token = token;
-                        }
-                        else
-                        {
-                            token = context.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
-                            context.Token = token;
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
+            //TODO: Support SignalR query token from header request
+              
             });
 
 

@@ -21,7 +21,7 @@ public class NotificationHubNotifier
         _notificationSettings = notificationSettings;
     }
 
-    public async Task NotifyUser(string accessToken, string title, string content, string link = null)
+    public async Task NotifyUser(string accessToken, string title, string content, string link = "Undefined")
     {
         var (notification, userId) = await _notificationService.CreateAsync(accessToken, title, content, link);
         var groupName = GetGroupName(userId);

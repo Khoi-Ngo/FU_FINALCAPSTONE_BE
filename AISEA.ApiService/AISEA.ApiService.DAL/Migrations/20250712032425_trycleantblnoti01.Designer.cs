@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250712032425_trycleantblnoti01")]
+    partial class trycleantblnoti01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -414,7 +417,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -423,11 +426,12 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Link")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");

@@ -14,7 +14,6 @@ var builder = WebApplication.CreateBuilder(args);
     .AddDALConfig(builder.Configuration)
     .AddSharedConfig(builder.Configuration);
 
-    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
 }
 
 var app = builder.Build();

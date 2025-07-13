@@ -36,7 +36,6 @@ Back-end/
 ```
 
 - **AISEA.ApiService**: Contains the Web API (`AISEA.ApiService.WebApi`), business logic (BAL), data access (DAL), and shared code (SHARED).
-- **AISEA.BgService**: Contains the Worker Service (`AISEA.BgService.Worker`) and shared code (SHARED).
 
 ---
 
@@ -61,7 +60,6 @@ cd Back-end
 Ensure the directory structure matches the one described above. Key files:
 
 - `AISEA.ApiService\AISEA.ApiService.WebApi\Dockerfile`
-- `AISEA.BgService\AISEA.BgService.Worker\Dockerfile`
 - `docker-compose.yml`
 
 ---
@@ -88,9 +86,8 @@ Navigate to the `Back-end` directory and run:
 docker-compose up --build
 ```
 
-- This builds the Docker images for `AISEA.ApiService.WebApi` and `AISEA.BgService.Worker`.
+- This builds the Docker images for `AISEA.ApiService.WebApi` 
 - The Web API will be available at [http://localhost:5000](http://localhost:5000)
-- The Worker Service runs in the background and does not expose ports.
 
 **Stop Containers:**  
 To stop the services:
@@ -103,10 +100,7 @@ docker-compose down
 ## Access the API
 
 - Open a browser or use a tool like Postman to access [http://localhost:5000](http://localhost:5000) (e.g., [http://localhost:5000/swagger](http://localhost:5000/swagger) if Swagger is enabled).
-- Verify the Worker Service is running by checking logs:
-```sh
-docker-compose logs aisea-worker
-```
+
 ## Implementation Notes
 
 ### ApiService

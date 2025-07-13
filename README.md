@@ -30,11 +30,6 @@ Back-end/
 │   ├── AISEA.ApiService.DAL/           # Data access layer
 │   ├── AISEA.ApiService.SHARED/        # Shared utilities/models
 │   └── AISEA.ApiService.sln            # Solution file
-├── AISEA.BgService/
-│   ├── AISEA.BgService.Worker/         # Worker Service startup project
-│   │   └── Dockerfile                  # Dockerfile for Worker
-│   ├── AISEA.BgService.SHARED/         # Shared utilities/models
-│   └── AISEA.BgService.sln             # Solution file
 ├── docker-compose.yml                  # Docker Compose configuration
 ├── .gitignore                          # Git ignore file
 └── README.md                           # This file

@@ -52,7 +52,7 @@ var app = builder.Build();
     var NotificationHubEndpoint = app.Configuration.GetSection(EndpointSettings.Section)["NotificationHubEndpoint"];
 
 
-    // app.UseHttpsRedirection();
+    // app.UseHttpsRedirection(); //due to hosting by docker then no need this
     app.UseCors(corsPolicyName);
     app.UseAuthentication();
     app.UseAuthorization();

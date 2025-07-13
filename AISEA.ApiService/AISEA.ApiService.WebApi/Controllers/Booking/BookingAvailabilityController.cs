@@ -91,4 +91,15 @@ public class BookingAvailabilityController : BaseController
         return NoContent();
     }
 
+    /// <summary>
+    /// Get a booking
+    /// </summary>
+    [HttpGet("detail/{id}")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetByIdAsync(long id)
+    {
+        var res = await _bookingAvailabilityService.GetByIdAsync(id);
+        return Ok(res);
+    }
+
 }

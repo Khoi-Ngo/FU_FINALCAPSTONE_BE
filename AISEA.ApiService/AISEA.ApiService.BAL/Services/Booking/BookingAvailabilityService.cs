@@ -11,7 +11,6 @@ using AutoMapper;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
-using System.Threading.Tasks;
 
 namespace AISEA.ApiService.BAL.Services.Booking;
 
@@ -135,6 +134,14 @@ public class BookingAvailabilityService
         var cachedKey = $"{_bookingSettings.BookingAvaiPrefix}{id}";
         await _redisRepository.RemoveByKeyAsync(cachedKey);
     }
+
+    //get an item list response Booking Availability
+    public async Task<BookingAvailabilityListItemResponse> GetByIdAsync(long id)
+    {
+        var bookingAvailability = await GetBookingAvailabilityAsync(id);
+        return _mapper.Map<BookingAvailabilityListItemResponse>(bookingAvailability);
+    }
+
 
     #region Private Methods
 

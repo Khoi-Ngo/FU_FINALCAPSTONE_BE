@@ -10,6 +10,7 @@ public class EndpointSettings
     public required string GoogleAuthTokenPropName { get; set; }
     public required string RefreshTokenEndpointName { get; set; }
     public required string AdvisoryHubEndpoint { get; set; }
+    public required string NotificationHubEndpoint { get; set; }
     public required string ProdClientOrigin { get; set; }
     public required string DevClientOrigin { get; set; }
 

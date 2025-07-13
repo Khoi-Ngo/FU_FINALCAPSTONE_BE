@@ -15,6 +15,9 @@ public static class DependenciesInjection
 {
     public static IServiceCollection AddWebApiConfig(this IServiceCollection services, IConfiguration configuration)
     {
+
+        var endpointSettings = configuration.GetSection(EndpointSettings.Section).Get<EndpointSettings>();
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -42,8 +45,8 @@ public static class DependenciesInjection
 
                     var path = context.HttpContext.Request.Path;
                     if (!string.IsNullOrEmpty(accessToken) &&
-                        (path.StartsWithSegments("/notificationHub")
-                        || path.StartsWithSegments("/advisoryChat1to1Hub")))
+                        (path.StartsWithSegments(endpointSettings.AdvisoryHubEndpoint)
+                        || path.StartsWithSegments(endpointSettings.NotificationHubEndpoint)))
                     {
                         context.Token = accessToken;
                     }

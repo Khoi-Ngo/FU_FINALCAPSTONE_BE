@@ -55,5 +55,14 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidAccessUserException(string message) : base(message) { }
     }
+    public class BookingAvaiOverlapEx : Exception
+    {
+        public BookingAvaiOverlapEx(string message) : base(message) { }
+    }
+    public class BookingAvaiDuplicateEx : Exception
+    {
+        public BookingAvaiDuplicateEx(string message) : base(message) { }
+    }
+
 
 }

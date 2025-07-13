@@ -100,6 +100,11 @@ public class ExceptionHandlingMiddleware
                 statusCode = (int)HttpStatusCode.Unauthorized;
                 message = exception.Message;
                 break;
+            case BookingAvaiDuplicateEx:
+            case BookingAvaiOverlapEx:
+                statusCode = (int)HttpStatusCode.BadRequest;
+                message = exception.Message;
+                break;
             default:
                 logger.LogError(exception, "Unhandled exception");
                 statusCode = (int)HttpStatusCode.InternalServerError;

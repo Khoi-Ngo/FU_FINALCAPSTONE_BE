@@ -9,6 +9,7 @@ using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
 
@@ -53,12 +54,21 @@ public class BookingAvailabilityService
             await _bookingAvailabilityRepository.BulkCreateAsync(bookingAvailabilities);
             await CacheBookingAvailabilitiesAsync(bookingAvailabilities);
         }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException is SqlException sqlEx)
+            {
+                HandleSqlException(sqlEx);
+            }
+            throw; // Re-throw if not handled
+        }
         catch (SqlException ex)
         {
             HandleSqlException(ex);
             throw; // Re-throw if not handled
         }
     }
+
 
     // Create booking availability for a staff
     public async Task CreateBookingAvailabilityAsync(CreateBookingAvailabilityRequest request, string accessToken)
@@ -74,12 +84,21 @@ public class BookingAvailabilityService
             await _bookingAvailabilityRepository.CreateAsync(bookingAvailability);
             await CacheBookingAvailabilityAsync(bookingAvailability);
         }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException is SqlException sqlEx)
+            {
+                HandleSqlException(sqlEx);
+            }
+            throw;
+        }
         catch (SqlException ex)
         {
             HandleSqlException(ex);
             throw;
         }
     }
+
 
     // Get all booking availability for a staff
     public async Task<HashSet<BookingAvailability>> GetBookingAvailabilitiesAsync(long staffProfileId)
@@ -114,6 +133,14 @@ public class BookingAvailabilityService
         {
             await _bookingAvailabilityRepository.UpdateAsync(bookingAvailability);
             await CacheBookingAvailabilityAsync(bookingAvailability);
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException is SqlException sqlEx)
+            {
+                HandleSqlException(sqlEx);
+            }
+            throw;
         }
         catch (SqlException ex)
         {
@@ -196,9 +223,9 @@ public class BookingAvailabilityService
     private void HandleSqlException(SqlException ex)
     {
         if (ex.Number == 50001) // Trigger error for overlap
-            throw new ValidationException("The time slot overlaps with an existing slot for the same staff and day.");
+            throw new BookingAvaiOverlapEx("The time slot overlaps with an existing slot for the same staff and day.");
         if (ex.Number == 2601 || ex.Number == 2627) // Unique constraint violation
-            throw new ValidationException("A time slot with the same start time, end time, day, and staff already exists.");
+            throw new BookingAvaiDuplicateEx("A time slot with the same start time, end time, day, and staff already exists.");
     }
 
     #endregion

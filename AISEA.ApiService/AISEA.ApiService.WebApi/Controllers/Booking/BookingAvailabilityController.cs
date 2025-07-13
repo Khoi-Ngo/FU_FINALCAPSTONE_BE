@@ -92,7 +92,7 @@ public class BookingAvailabilityController : BaseController
     }
 
     /// <summary>
-    /// Get a booking
+    /// Get a single booking
     /// </summary>
     [HttpGet("detail/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]

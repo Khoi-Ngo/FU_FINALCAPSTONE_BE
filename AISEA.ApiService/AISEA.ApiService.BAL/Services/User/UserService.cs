@@ -29,6 +29,7 @@ namespace AISEA.ApiService.BAL.Services.User
             _jWTService = jWTService;
         }
 
+        #region Create user
         public async Task CreateUserAsync(CreateUserRequest request)
         {
             var existingUser = await _userRepository.GetUserByEmailOrUsernameAsync(request.Email, request.Username);
@@ -51,6 +52,24 @@ namespace AISEA.ApiService.BAL.Services.User
                 await CreateUserAsync(request);
             }
         }
+
+        public async Task CreateUsersAsync(List<BulkCreateStudentRequest> requests)
+        {
+            var newUsers = _mapper.Map<List<CreateUserRequest>>(requests);
+            newUsers.ForEach(u => u.RoleId = (long)EUserRole.STUDENT);
+            await CreateUsersAsync(newUsers);
+        }
+
+        public async Task CreateUsersAsync(List<BulkCreateStaffByRoleRequest> requests, EUserRole staffRole)
+        {
+            var newUsers = _mapper.Map<List<CreateUserRequest>>(requests);
+            newUsers.ForEach(u => u.RoleId = (long)staffRole);
+            await CreateUsersAsync(newUsers);
+        }
+
+        #endregion
+
+
         public async Task<List<GetUserListResponse>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllUsersAsync();

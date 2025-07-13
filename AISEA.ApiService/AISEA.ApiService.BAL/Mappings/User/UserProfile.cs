@@ -74,6 +74,11 @@ namespace AISEA.ApiService.BAL.Mappings.User
 
             #endregion
 
+            #region Bulk Create user by role
+            CreateMap<BulkCreateStudentRequest, CreateUserRequest>();
+            CreateMap<BulkCreateStaffByRoleRequest, CreateUserRequest>();
+            #endregion
+
 
         }
     }

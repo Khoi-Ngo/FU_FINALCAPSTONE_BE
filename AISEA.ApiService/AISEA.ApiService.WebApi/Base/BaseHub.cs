@@ -21,42 +21,16 @@ public class BaseHub : Hub
             var httpContext = Context.GetHttpContext();
             if (httpContext != null)
             {
-                if (httpContext.Request.Headers.TryGetValue(_endpointSettings.AccessTokenPropName, out var accessToken))
+                // For SignalR, token is usually passed via query string
+                if (httpContext.Request.Query.TryGetValue("access_token", out var queryToken))
                 {
-                    return accessToken.ToString().Replace("Bearer ", "");
+                    return queryToken.ToString();
                 }
             }
             return string.Empty;
         }
     }
 
-    protected string RefreshToken
-    {
-        get
-        {
-            var httpContext = Context.GetHttpContext();
-            if (httpContext != null &&
-                httpContext.Request.Headers.TryGetValue(_endpointSettings.RefreshTokenPropName, out var refreshToken))
-            {
-                return refreshToken.ToString();
-            }
-            return string.Empty;
-        }
-    }
-
-    protected string AuthorizationTokenGoogle
-    {
-        get
-        {
-            var httpContext = Context.GetHttpContext();
-            if (httpContext != null &&
-                httpContext.Request.Headers.TryGetValue(_endpointSettings.GoogleAuthTokenPropName, out var authHeader))
-            {
-                return authHeader.ToString().Replace("Bearer ", "");
-            }
-            return string.Empty;
-        }
-    }
 
     public override async Task OnConnectedAsync()
     {

@@ -2,7 +2,6 @@ using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.AdvisorySession1to1;
-using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
@@ -45,9 +44,9 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// The session have to be initialized in advanced.
     /// The message is saved to the database and broadcast to the session group.
     /// </summary>
-    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task SendMessage(long sessionId, string content)
     {
+
         //allowing utf 8
         content = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(content));
 
@@ -73,9 +72,11 @@ public class AdvisoryChat1to1Hub : BaseHub
     ///Advisor or Student join the Advisory Chat Session
     ///This includes verification before joining
     /// </summary>
-    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task JoinSession(long sessionId)
     {
+
+        EnsureUserHasRole(AccessToken, EUserRole.ADVISOR, EUserRole.STUDENT);
+
         var session = await _advisorySession1To1Service.JoinSessionAsync(sessionId, AccessToken);
         await Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.GroupChatADVssPrefix}{sessionId}");
         if (session.StaffId != _staffUserSettings.EmptyStaffProfileId)
@@ -89,20 +90,18 @@ public class AdvisoryChat1to1Hub : BaseHub
 
         await Clients.Caller.SendAsync(
             _chatSessionSettings.JoinSSMethod,
-            await _advisorySession1To1Service.GetMessagesAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, sessionId)
+            await _advisorySession1To1Service.GetMessagesAsync(new PaginationRequest(), sessionId)
         );
     }
 
     /// <summary>
     /// Student Get the mul data of chat sessions related to them
     /// </summary>
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task ListAllSessionByStudent()
     {
-        var studentData = _jWTService.GetAllClaimsFromToken(AccessToken);
-        var studentProfileId = long.Parse(studentData.GetValueOrDefault(_jwtSettings.ProfileId));
-
-        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStudentAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, studentProfileId);
+        EnsureUserHasRole(AccessToken, EUserRole.STUDENT);
+        var studentProfileId = _jWTService.GetProfileIdFromToken(AccessToken);
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStudentAsync(new PaginationRequest (), studentProfileId);
         await Task.WhenAll(
             Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
             Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStudent}{studentProfileId}")
@@ -112,13 +111,12 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// <summary>
     /// Staff Get the mul data of chat sessions related to them
     /// </summary>
-    [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task ListAllSessionByStaff()
     {
-        var staffData = _jWTService.GetAllClaimsFromToken(AccessToken);
-        var staffProfileId = long.Parse(staffData.GetValueOrDefault(_jwtSettings.ProfileId));
+        EnsureUserHasRole(AccessToken, EUserRole.ADVISOR);
+        var staffProfileId = _jWTService.GetProfileIdFromToken(AccessToken);
 
-        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, staffProfileId);
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest (), staffProfileId);
         await Task.WhenAll(
             Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
             Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{staffProfileId}")
@@ -128,10 +126,11 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// <summary>
     ///Staff can access this chanel to view real time unassigned sessions
     /// </summary>
-    [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task ListOpenedSession()
     {
-        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest { PageNumber = 1, PageSize = 10 }, _staffUserSettings.EmptyStaffProfileId);
+        EnsureUserHasRole(AccessToken, EUserRole.ADVISOR);
+        
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest (), _staffUserSettings.EmptyStaffProfileId);
         await Task.WhenAll(
             Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
             Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{_staffUserSettings.EmptyStaffProfileId}")
@@ -141,9 +140,9 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// <summary>
     /// Load more messages for a session when scrolling
     /// </summary>
-    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task LoadMoreMessages(long sessionId, PaginationRequest pagination)
     {
+        EnsureUserHasRole(AccessToken, EUserRole.ADVISOR, EUserRole.STUDENT);
         var messages = await _advisorySession1To1Service.GetMessagesAsync(pagination, sessionId);
         await Clients.Caller.SendAsync(_chatSessionSettings.LoadMoreMessagesMethod, messages);
     }
@@ -153,13 +152,11 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// </summary>
     /// <param name="pagination">Pagination parameters (page number and size).</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task LoadMoreSessions(PaginationRequest pagination)
     {
         // Extract user data from token
-        var userData = _jWTService.GetAllClaimsFromToken(AccessToken);
-        var profileId = long.Parse(userData.GetValueOrDefault(_jwtSettings.ProfileId));
-        var roleId = int.Parse(userData.GetValueOrDefault(_jwtSettings.AuthProp));
+        var profileId = _jWTService.GetProfileIdFromToken(AccessToken);
+        var roleId = _jWTService.GetRoleIdFromToken(AccessToken);
 
         // Determine group name based on user role
         string groupName = roleId switch
@@ -176,6 +173,19 @@ public class AdvisoryChat1to1Hub : BaseHub
             Groups.AddToGroupAsync(Context.ConnectionId, groupName)
         );
     }
+
+    private void EnsureUserHasRole(string token, params EUserRole[] allowedRoles)
+    {
+        var userData = _jWTService.GetAllClaimsFromToken(token);
+
+        if (!userData.TryGetValue(_jwtSettings.AuthProp, out var strRole) ||
+            !int.TryParse(strRole, out var roleId) ||
+            !allowedRoles.Select(r => (int)r).Contains(roleId))
+        {
+            throw new HubException("Forbidden: insufficient role permission");
+        }
+    }
+
 
 
 }

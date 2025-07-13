@@ -34,8 +34,23 @@ public static class DependenciesInjection
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(configuration.GetSection(JwtSettings.Section)["SecretKey"]))
             };
-        //TODO: Support SignalR query token from header
-          
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(accessToken) &&
+                        (path.StartsWithSegments("/notificationHub")
+                        || path.StartsWithSegments("/advisoryChat1to1Hub")))
+                    {
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
+
         });
 
 

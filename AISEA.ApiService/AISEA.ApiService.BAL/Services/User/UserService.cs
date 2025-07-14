@@ -187,9 +187,9 @@ namespace AISEA.ApiService.BAL.Services.User
             };
         }
 
-        public async Task<PagedResult<GetStaffListResponse>> GetAllStaffsPagedAsync(PaginationRequest request)
+        public async Task<PagedResult<GetStaffListResponse>> GetAllStaffsPagedAsync(PaginationRequest request, EUserRole staffRole)
         {
-            var (users, totalCount) = await _userRepository.GetStaffsPagedAsync(request.PageNumber, request.PageSize);
+            var (users, totalCount) = await _userRepository.GetStaffsPagedAsync(request.PageNumber, request.PageSize, staffRole);
             return new PagedResult<GetStaffListResponse>
             {
                 Items = _mapper.Map<List<GetStaffListResponse>>(users),
@@ -198,9 +198,9 @@ namespace AISEA.ApiService.BAL.Services.User
                 PageSize = request.PageSize
             };
         }
-        public async Task<PagedResult<GetStaffListResponse>> GetAllAdvisorsAsync(PaginationRequest request)
+        public async Task<PagedResult<GetStaffListResponse>> GetAllActiveAdvisorsAsync(PaginationRequest request)
         {
-            var (users, totalCount) = await _userRepository.GetAdvisorsPagedAsync(request.PageNumber, request.PageSize);
+            var (users, totalCount) = await _userRepository.GetActiveAdvisorsPagedAsync(request.PageNumber, request.PageSize);
             return new PagedResult<GetStaffListResponse>
             {
                 Items = _mapper.Map<List<GetStaffListResponse>>(users),

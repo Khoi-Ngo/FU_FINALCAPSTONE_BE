@@ -109,10 +109,10 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<(List<User> users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize, EUserRole staffRole)
         {
             var query = _context.Users
-                .Where(u => u.RoleId != (int)EUserRole.STUDENT)
+                .Where(u => u.RoleId == (int)staffRole)
                 .Include(u => u.Role)
                 .Include(u => u.StaffProfile);
             var totalCount = await query.CountAsync();
@@ -133,10 +133,10 @@ namespace AISEA.ApiService.DAL.Repositories
 
         }
 
-        public async Task<(List<User> users, int totalCount)> GetAdvisorsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetActiveAdvisorsPagedAsync(int pageNumber, int pageSize)
         {
             var query = _context.Users
-                .Where(u => u.RoleId == (int)EUserRole.ADVISOR)
+                .Where(u => u.RoleId == (int)EUserRole.ADVISOR && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE)
                 .Include(u => u.Role)
                 .Include(u => u.StaffProfile);
             var totalCount = await query.CountAsync();

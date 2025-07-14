@@ -56,7 +56,7 @@ public class UserController : BaseController
     }
 
     /// <summary>
-    /// Retrieves a student by ID.
+    /// Retrieves a staff by ID.
     /// </summary>
     [HttpGet("staff/{id}")]
     public async Task<IActionResult> GetStaffById(long id)

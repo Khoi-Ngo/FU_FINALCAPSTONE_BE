@@ -1,5 +1,4 @@
 using AISEA.ApiService.DAL.Repositories;
-using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,30 +26,21 @@ public class ChatBgService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var advisorySession1To1Repository = scope.ServiceProvider.GetRequiredService<AdvisorySession1to1Repository>();
-                var auditLogRepository = scope.ServiceProvider.GetRequiredService<AuditLogRepository>();
+                using var scope = _serviceProvider.CreateScope();
+                var repository = scope.ServiceProvider.GetRequiredService<AdvisorySession1to1Repository>();
 
-                var removedSessionIds = await advisorySession1To1Repository.RemoveAllExistedOverDaysAsync(_chatSessionSettings.SessionExpiryDays);
+                var removedSessionIds = await repository.RemoveAllExistedOverDaysAsync(_chatSessionSettings.SessionExpiryDays);
 
                 if (removedSessionIds.Any())
                 {
-                    _logger.LogInformation("Removed expired chat sessions with IDs: {SessionIds}", string.Join(", ", removedSessionIds));
-
-                    var auditLogs = removedSessionIds.Select(id => new DAL.Entities.AuditLog
-                    {
-                        Tag = EAuditLogTag.REMOVE_CHATSESSION,
-                        Description = $"Removed expired advisory session with ID: {id}",
-                        CreatedAt = DateTime.UtcNow
-                    }).ToList();
-
-                    await auditLogRepository.AddRangeAsync(auditLogs);
+                    _logger.LogInformation("Removed expired chat sessions: {SessionIds}", string.Join(", ", removedSessionIds));
                 }
-                else
-                {
-                    _logger.LogInformation("No expired advisory sessions found to remove.");
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while removing expired chat sessions.");
             }
 
             await Task.Delay(_chatSessionSettings.IntervalMillis, stoppingToken);

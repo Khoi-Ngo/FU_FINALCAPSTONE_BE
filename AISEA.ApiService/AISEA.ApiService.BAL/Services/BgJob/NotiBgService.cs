@@ -26,14 +26,21 @@ public class NotiBgService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            using (var scope = _serviceProvider.CreateScope())
+            try
             {
-                var notificationRepository = scope.ServiceProvider.GetRequiredService<NotificationRepository>();
+                using var scope = _serviceProvider.CreateScope();
+                var repository = scope.ServiceProvider.GetRequiredService<NotificationRepository>();
 
-                var removedNotis = await notificationRepository.RemoveAllExistedOverDaysAsync(_notificationSettings.ExpiredDays);
+                var removedNotiIds = await repository.RemoveAllExistedOverDaysAsync(_notificationSettings.ExpiredDays);
 
-                if (removedNotis.Any()) _logger.LogInformation("Removed expired notifications with IDs: {NotificationIds}", string.Join(", ", removedNotis));
-
+                if (removedNotiIds.Any())
+                {
+                    _logger.LogInformation("Removed expired notifications: {NotificationIds}", string.Join(", ", removedNotiIds));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while removing expired notifications.");
             }
 
             await Task.Delay(_notificationSettings.IntervalMillis, stoppingToken);

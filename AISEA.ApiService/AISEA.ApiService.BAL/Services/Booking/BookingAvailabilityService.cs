@@ -10,7 +10,6 @@ using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.Security.Authentication;
 
 namespace AISEA.ApiService.BAL.Services.Booking;
@@ -60,12 +59,10 @@ public class BookingAvailabilityService
             {
                 HandleSqlException(sqlEx);
             }
-            throw; // Re-throw if not handled
         }
         catch (SqlException ex)
         {
             HandleSqlException(ex);
-            throw; // Re-throw if not handled
         }
     }
 
@@ -90,12 +87,10 @@ public class BookingAvailabilityService
             {
                 HandleSqlException(sqlEx);
             }
-            throw;
         }
         catch (SqlException ex)
         {
             HandleSqlException(ex);
-            throw;
         }
     }
 
@@ -140,12 +135,10 @@ public class BookingAvailabilityService
             {
                 HandleSqlException(sqlEx);
             }
-            throw;
         }
         catch (SqlException ex)
         {
             HandleSqlException(ex);
-            throw;
         }
     }
 

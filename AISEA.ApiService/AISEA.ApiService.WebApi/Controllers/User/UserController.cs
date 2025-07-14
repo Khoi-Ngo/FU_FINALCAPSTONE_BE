@@ -181,7 +181,7 @@ public class UserController : BaseController
     }
 
     /// <summary>
-    /// Retrieves all active Advisors from the system.
+    /// Retrieves all active Advisors from the system. (Support Booking Feature ~ Student Access only)
     /// </summary>
     [HttpGet("advisors/active/paged")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]

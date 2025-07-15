@@ -35,7 +35,7 @@ namespace AISEA.ApiService.DAL.Repositories
             {
                 comboSubject.IsDeleted = true;
                 comboSubject.DeletedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await UpdateAsync(comboSubject);
             }
         }
 

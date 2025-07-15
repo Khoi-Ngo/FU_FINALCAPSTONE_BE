@@ -1,4 +1,5 @@
 using AISEA.ApiService.BAL.Services.Syllabus;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.Syllabus;
 using AISEA.ApiService.SHARED.Filters;
@@ -86,7 +87,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates an assessment for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("assessments")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
         public async Task<IActionResult> CreateAssessment([FromBody] CreateSyllabusAssessmentRequest request)
         {
             var assessmentId = await _syllabusService.CreateAssessmentAsync(request);
@@ -97,7 +98,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates a learning material for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("materials")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
         public async Task<IActionResult> CreateLearningMaterial([FromBody] CreateSyllabusLearningMaterialRequest request)
         {
             var materialId = await _syllabusService.CreateLearningMaterialAsync(request);
@@ -108,7 +109,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates a learning outcome for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("outcomes")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
         public async Task<IActionResult> CreateLearningOutcome([FromBody] CreateSyllabusLearningOutcomeRequest request)
         {
             var outcomeId = await _syllabusService.CreateLearningOutcomeAsync(request);
@@ -119,7 +120,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates a session for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("sessions")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF | (int)EUserRole.ADMIN)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSession([FromBody] CreateSyllabusSessionRequest request)
         {
             var sessionId = await _syllabusService.CreateSessionAsync(request);
@@ -130,11 +131,57 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Maps a session to a learning outcome (Academic Staff only)
         /// </summary>
         [HttpPost("sessions/{sessionId}/outcomes/{outcomeId}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
         public async Task<IActionResult> MapSessionToOutcome(long sessionId, long outcomeId)
         {
             await _syllabusService.MapSessionToOutcomeAsync(sessionId, outcomeId);
             return Ok(new { Message = "Session mapped to outcome successfully." });
         }
+
+        /// <summary>
+        /// Creates multiple assessments for a syllabus (Academic Staff only)
+        /// </summary>
+        [HttpPost("assessments/bulk")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateAssessments([FromBody] List<CreateSyllabusAssessmentRequest> requests)
+        {
+            var assessmentId = await _syllabusService.CreateSyllabusAssessmentsAsync(requests);
+            return Ok(new { Message = "Assessment created successfully.", AssessmentId = assessmentId });
+        }
+
+        /// <summary>
+        /// Creates multiple learning materials for a syllabus (Academic Staff only)
+        /// </summary>
+        [HttpPost("materials/bulk")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateLearningMaterials([FromBody] List<CreateSyllabusLearningMaterialRequest> requests)
+        {
+            var materialId = await _syllabusService.CreateSyllabusLearningMaterialsAsync(requests);
+            return Ok(new { Message = "Learning material created successfully.", MaterialId = materialId });
+        }
+
+        /// <summary>
+        /// Creates multiple learning outcomes for a syllabus (Academic Staff only)
+        /// </summary>
+        [HttpPost("outcomes/bulk")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateLearningOutcomes([FromBody] List<CreateSyllabusLearningOutcomeRequest> requests)
+        {
+            var outcomeId = await _syllabusService.CreateSyllabusLearningOutcomesAsync(requests);
+            return Ok(new { Message = "Learning outcome created successfully.", OutcomeId = outcomeId });
+        }
+
+        /// <summary>
+        /// Creates multiple sessions for a syllabus (Academic Staff only)
+        /// </summary>
+        [HttpPost("sessions/bulk")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF | (int)EUserRole.ADMIN)] // Admin, Academic Staff
+        public async Task<IActionResult> CreateSessions([FromBody] List<CreateSyllabusSessionRequest> requests)
+        {
+            var sessionId = await _syllabusService.CreateSyllabusSessionsAsync(requests);
+            return Ok(new { Message = "Session created successfully.", SessionId = sessionId });
+        }
+        
+
     }
 }

@@ -1,6 +1,8 @@
+using AISEA.ApiService.SHARED.DTOs.Responses.Booking;
+
 namespace AISEA.ApiService.SHARED.Interfaces;
 
 public interface IHolidayService
 {
-    public Task<bool> IsHoliday(DateTime date);
+    Task<List<HolidayResponse>> CheckHolidayAsync(DateOnly date);
 }

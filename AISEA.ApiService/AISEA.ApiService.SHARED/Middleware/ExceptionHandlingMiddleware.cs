@@ -40,86 +40,180 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
 
         int statusCode;
-        string message;
+        string result;
 
         switch (exception)
         {
             case InvalidCredentialException:
                 statusCode = (int)HttpStatusCode.BadRequest;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
 
             case UnauthorizedAccessException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
-                message = "Unauthorized access.";
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = "Unauthorized access."
+                });
                 break;
 
             case ValidationException validation:
                 statusCode = (int)HttpStatusCode.BadRequest;
-                message = validation.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = validation.Message
+                });
                 break;
 
             case InvalidRefreshToken:
                 statusCode = (int)HttpStatusCode.BadRequest;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case InvalidCGoogleTokenException:
             case EmptyTokenGoogleLoginException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case InvalidUserCreatedException:
                 statusCode = (int)HttpStatusCode.BadRequest;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case InvalidDataInput:
                 statusCode = (int)HttpStatusCode.BadRequest;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case InvalidAccessTokenException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case KeyNotFoundException keyNotFound:
                 statusCode = (int)HttpStatusCode.NotFound;
-                message = keyNotFound.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = keyNotFound.Message
+                });
                 break;
+
             case InvalidAccessSession:
                 statusCode = (int)HttpStatusCode.NotFound;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case NotFoundException:
                 statusCode = (int)HttpStatusCode.NotFound;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case InvalidAccessBookingAvailability:
                 statusCode = (int)HttpStatusCode.Unauthorized;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case InvalidAccessUserException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
             case BookingAvaiDuplicateEx:
             case BookingAvaiOverlapEx:
                 statusCode = (int)HttpStatusCode.BadRequest;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
+
+            case OnHolidayException holidayEx:
+                statusCode = (int)HttpStatusCode.BadRequest;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = holidayEx.Message,
+                    holidays = holidayEx.Holidays
+                });
+                break;
+            case InvalidAccessLeaveSche:
+                statusCode = (int)HttpStatusCode.BadRequest;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
+                break;
+            case InvalidOperationException:
+            case LeaveScheduleOverlapEx:
+            case NoMatchingBookingAvailabilityEx:
+            case LeaveScheduleConflictWithMeetingsEx:
+                statusCode = (int)HttpStatusCode.BadRequest;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
+                break;
+
             default:
                 logger.LogError(exception, "Unhandled exception");
                 statusCode = (int)HttpStatusCode.InternalServerError;
-                message = exception.Message;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
                 break;
         }
 
         context.Response.StatusCode = statusCode;
-
-        var result = JsonSerializer.Serialize(new
-        {
-            status = statusCode,
-            message
-        });
-
         await context.Response.WriteAsync(result);
     }
+
 }

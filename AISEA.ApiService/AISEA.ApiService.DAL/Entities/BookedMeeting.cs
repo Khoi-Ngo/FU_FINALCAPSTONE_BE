@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.SHARED.Const.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
 

@@ -16,7 +16,10 @@ public class BookingAvailabilityController : BaseController
 {
     private readonly BookingAvailabilityService _bookingAvailabilityService;
     private readonly NotificationHubNotifier _notifier;
-    public BookingAvailabilityController(BookingAvailabilityService bookingAvailabilityService, NotificationHubNotifier notifier, EndpointSettings endpointSettings) : base(endpointSettings)
+    public BookingAvailabilityController(
+        BookingAvailabilityService bookingAvailabilityService
+    , NotificationHubNotifier notifier
+    , EndpointSettings endpointSettings) : base(endpointSettings)
     {
         _bookingAvailabilityService = bookingAvailabilityService;
         _notifier = notifier;
@@ -92,13 +95,13 @@ public class BookingAvailabilityController : BaseController
     }
 
     /// <summary>
-    /// Get a single booking
+    /// Get a single booking availability
     /// </summary>
-    [HttpGet("detail/{id}")]
+    [HttpGet("simply-single/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> GetByIdAsync(long id)
     {
-        var res = await _bookingAvailabilityService.GetByIdAsync(id);
+        var res = await _bookingAvailabilityService.GetSimplyByIdAsync(id);
         return Ok(res);
     }
 

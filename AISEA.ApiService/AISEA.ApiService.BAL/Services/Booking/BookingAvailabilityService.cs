@@ -102,16 +102,10 @@ public class BookingAvailabilityService
     }
 
     // Get all booking availability with pagination
-    public async Task<PagedResult<BookingAvailabilityListItemResponse>> GetAllPagedAsync(PaginationRequest request)
+    public async Task<PagedResult<BookingAvailability>> GetAllPagedAsync(PaginationRequest request)
     {
-        var (bookingAvailabilities, totalCount) = await _bookingAvailabilityRepository.GetAllPagedAsync(request);
-        return new PagedResult<BookingAvailabilityListItemResponse>
-        {
-            Items = _mapper.Map<List<BookingAvailabilityListItemResponse>>(bookingAvailabilities),
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
+        var res = await _bookingAvailabilityRepository.GetAllPagedAsync(request);
+        return res;
     }
 
     // Edit booking availability
@@ -150,16 +144,15 @@ public class BookingAvailabilityService
             throw new InvalidAccessBookingAvailability("No authorization to delete");
 
         await _bookingAvailabilityRepository.RemoveAsync(bookingAvailability);
-        // Optionally, remove from cache
         var cachedKey = $"{_bookingSettings.BookingAvaiPrefix}{id}";
         await _redisRepository.RemoveByKeyAsync(cachedKey);
     }
 
     //get an item list response Booking Availability
-    public async Task<BookingAvailabilityListItemResponse> GetByIdAsync(long id)
+    public async Task<BookingAvailabilitySimplyResponse> GetSimplyByIdAsync(long id)
     {
         var bookingAvailability = await GetBookingAvailabilityAsync(id);
-        return _mapper.Map<BookingAvailabilityListItemResponse>(bookingAvailability);
+        return _mapper.Map<BookingAvailabilitySimplyResponse>(bookingAvailability);
     }
 
 
@@ -171,7 +164,7 @@ public class BookingAvailabilityService
         await _redisRepository.SetValueAsync<BookingAvailability>(
             cachedKey,
             bookingAvailability,
-            TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
+            TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDaysCached));
     }
 
     private async Task<BookingAvailability> GetBookingAvailabilityAsync(long bookingAvailabilityId)
@@ -188,7 +181,7 @@ public class BookingAvailabilityService
             await _redisRepository.SetValueAsync<BookingAvailability>(
                 cachedKey,
                 bookingAvailability,
-                TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
+                TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDaysCached));
         }
 
         return bookingAvailability;
@@ -202,7 +195,7 @@ public class BookingAvailabilityService
             return _redisRepository.SetValueAsync<BookingAvailability>(
                 cachedKey,
                 availability,
-                TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDays));
+                TimeSpan.FromDays(_bookingSettings.ExpiredBookingAvaiDaysCached));
         });
         await Task.WhenAll(cacheTasks);
     }

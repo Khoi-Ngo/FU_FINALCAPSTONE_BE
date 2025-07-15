@@ -1,6 +1,6 @@
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Booking
 {
-    public class BookingAvailabilityListItemResponse
+    public class BookingAvailabilitySimplyResponse
     {
         public long Id { get; set; }
 

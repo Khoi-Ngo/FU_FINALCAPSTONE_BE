@@ -2,6 +2,7 @@ using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
+using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories;
@@ -25,7 +26,7 @@ public class BookingAvailabilityRepository : GenericRepository<BookingAvailabili
             .ToListAsync());
     }
 
-    public async Task<(List<BookingAvailability> bookingAvailabilities, int totalCount)> GetAllPagedAsync(PaginationRequest request)
+    public async Task<PagedResult<BookingAvailability>> GetAllPagedAsync(PaginationRequest request)
     {
         var query = _context.BookingAvailabilities
             .Include(x => x.StaffProfile);
@@ -34,7 +35,13 @@ public class BookingAvailabilityRepository : GenericRepository<BookingAvailabili
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();
-        return (bookingAvailabilities, totalCount);
+        return new PagedResult<BookingAvailability>
+        {
+            Items = bookingAvailabilities,
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 
 }

@@ -12,6 +12,7 @@ public class LeaveSchedule
     public long StaffProfileId { get; set; }
     public DateTime StartDateTime { get; set; }
     public DateTime EndDateTime { get; set; }
+    public string? Note { get; set; }
 
     [ForeignKey("StaffProfileId")]
     [InverseProperty("LeaveSchedules")]

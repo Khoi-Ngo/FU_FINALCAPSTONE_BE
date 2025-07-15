@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250715104659_RemoveStartEndTimeCheckConstraint")]
+    partial class RemoveStartEndTimeCheckConstraint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -356,9 +359,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<DateTime>("EndDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("StaffProfileId")
                         .HasColumnType("bigint");
 
@@ -368,16 +368,9 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("leaveschedule_id_primary");
 
-                    b.HasIndex("StaffProfileId", "StartDateTime", "EndDateTime")
-                        .IsUnique()
-                        .HasDatabaseName("IX_LeaveSchedule_UniqueSchedule");
+                    b.HasIndex("StaffProfileId");
 
-                    b.ToTable("LeaveSchedule", t =>
-                        {
-                            t.HasTrigger("TR_LeaveSchedule_CheckConstraints");
-                        });
-
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToTable("LeaveSchedule");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Message", b =>

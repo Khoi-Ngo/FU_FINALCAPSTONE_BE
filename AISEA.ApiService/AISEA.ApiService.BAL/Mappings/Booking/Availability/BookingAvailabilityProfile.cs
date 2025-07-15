@@ -16,10 +16,10 @@ public class BookingAvailabilityProfile : Profile
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => RoundToMinute(src.StartTime)))
             .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => RoundToMinute(src.EndTime)));
 
-        CreateMap<DAL.Entities.BookingAvailability, BookingAvailabilityListItemResponse>();
+        CreateMap<DAL.Entities.BookingAvailability, BookingAvailabilitySimplyResponse>();
     }
 
-    private static TimeSpan RoundToMinute(TimeSpan time)
+    private TimeSpan RoundToMinute(TimeSpan time)
     {
         return new TimeSpan(time.Hours, time.Minutes, 0);
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AISEA.ApiService.SHARED.DTOs.Responses.Booking;
 
 namespace AISEA.ApiService.SHARED.Exceptions
 {
@@ -63,6 +64,37 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public BookingAvaiDuplicateEx(string message) : base(message) { }
     }
+    public class OnHolidayException : Exception
+    {
+        public List<HolidayResponse> Holidays { get; }
 
+        public OnHolidayException(string message, List<HolidayResponse> holidays) : base(message)
+        {
+            Holidays = holidays ?? new List<HolidayResponse>();
+        }
+    }
+    public class InvalidAccessLeaveSche : Exception
+    {
+        public InvalidAccessLeaveSche(string message) : base(message) { }
+    }
 
+    public class LeaveScheduleDuplicateEx : Exception
+    {
+        public LeaveScheduleDuplicateEx(string message) : base(message) { }
+    }
+
+    public class LeaveScheduleOverlapEx : Exception
+    {
+        public LeaveScheduleOverlapEx(string message) : base(message) { }
+    }
+
+    public class NoMatchingBookingAvailabilityEx : Exception
+    {
+        public NoMatchingBookingAvailabilityEx(string message) : base(message) { }
+    }
+
+    public class LeaveScheduleConflictWithMeetingsEx : Exception
+    {
+        public LeaveScheduleConflictWithMeetingsEx(string message) : base(message) { }
+    }
 }

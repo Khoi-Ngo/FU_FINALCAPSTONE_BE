@@ -84,6 +84,8 @@ public static class DependenciesInjection
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<IMailService, MailService>();
         services.AddScoped<IChatOpenAIService, ChatOpenAIService>();
+        services.AddScoped<IHolidayService, HolidayService>();
+        services.AddHttpClient<IHolidayService, HolidayService>();
 
 
 

@@ -17,6 +17,10 @@ public partial class StudentProfile
     [Column(TypeName = "text")]
     public string? CareerGoal { get; set; }
 
+    [ForeignKey("ProgramId")]
+    public long? ProgramId { get; set; }
+    public virtual Program Program { get; set; }
+
     [ForeignKey("UserId")]
     [InverseProperty("StudentProfile")]
     public virtual User User { get; set; } = null!;

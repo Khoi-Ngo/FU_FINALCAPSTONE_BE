@@ -17,7 +17,7 @@ public partial class Program
 
     [StringLength(50)]
     public string ProgramCode { get; set; } = null;
-
+    public virtual ICollection<StudentProfile> StudentProfiles { get; set; } = new List<StudentProfile>();
     public virtual ICollection<Curriculum> Curricula { get; set; } = new List<Curriculum>();
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }

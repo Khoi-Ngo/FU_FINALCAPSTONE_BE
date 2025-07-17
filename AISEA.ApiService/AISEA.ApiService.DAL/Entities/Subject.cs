@@ -33,6 +33,7 @@ public partial class Subject
     public virtual ICollection<SubjectPrerequisite> Prerequisites { get; set; } = new List<SubjectPrerequisite>();
 
     public virtual ICollection<SubjectPrerequisite> DependentSubjects { get; set; } = new List<SubjectPrerequisite>();
+    public virtual ICollection<SubjectClass> SubjectClasses { get; set; } = new List<SubjectClass>();
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

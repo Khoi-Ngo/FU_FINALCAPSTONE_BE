@@ -17,6 +17,12 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasForeignKey<StudentProfile>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("studentprofile_userid_foreign");
+
+            builder.HasOne(e => e.Program)
+                .WithMany(e => e.StudentProfiles)
+                .HasForeignKey(e => e.ProgramId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("studentprofile_programid_foreign");
         }
     }
 }

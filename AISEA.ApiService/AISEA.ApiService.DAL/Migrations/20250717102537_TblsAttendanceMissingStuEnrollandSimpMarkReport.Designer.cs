@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250717102537_TblsAttendanceMissingStuEnrollandSimpMarkReport")]
+    partial class TblsAttendanceMissingStuEnrollandSimpMarkReport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -761,16 +764,11 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<int>("NumberOfBan")
                         .HasColumnType("int");
 
-                    b.Property<long?>("ProgramId")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id")
                         .HasName("studentprofile_id_primary");
-
-                    b.HasIndex("ProgramId");
 
                     b.HasIndex("UserId")
                         .IsUnique()
@@ -1424,20 +1422,12 @@ namespace AISEA.ApiService.DAL.Migrations
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudentProfile", b =>
                 {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.Program", "Program")
-                        .WithMany("StudentProfiles")
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("studentprofile_programid_foreign");
-
                     b.HasOne("AISEA.ApiService.DAL.Entities.User", "User")
                         .WithOne("StudentProfile")
                         .HasForeignKey("AISEA.ApiService.DAL.Entities.StudentProfile", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("studentprofile_userid_foreign");
-
-                    b.Navigation("Program");
 
                     b.Navigation("User");
                 });
@@ -1557,8 +1547,6 @@ namespace AISEA.ApiService.DAL.Migrations
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Program", b =>
                 {
                     b.Navigation("Curricula");
-
-                    b.Navigation("StudentProfiles");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Role", b =>

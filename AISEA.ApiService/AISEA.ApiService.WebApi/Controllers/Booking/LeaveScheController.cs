@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
@@ -113,7 +114,7 @@ public class LeaveScheController : BaseController
     }
 
 
-    [HttpGet("check-datetime")]
+    [HttpGet("check-datetime-backend")]
     public IActionResult CheckDateTime()
     {
         return Ok(new
@@ -121,6 +122,13 @@ public class LeaveScheController : BaseController
             TheDateTime = DateTime.Now,
             TheDateTimeUtc = DateTime.UtcNow
         });
+    }
+
+    [HttpGet("check-datetime-database")]
+    public async Task<IActionResult> CheckDateTimeDB()
+    {
+        var res = await _leaveScheduleService.CheckDateTimeDBAsync();
+        return Ok(res);
     }
 
 }

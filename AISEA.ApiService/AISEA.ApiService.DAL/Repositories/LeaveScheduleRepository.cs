@@ -88,4 +88,15 @@ public class LeaveScheduleRepository : GenericRepository<LeaveSchedule>
             PageSize = request.PageSize
         };
     }
+
+    public async Task<DateTime> GetDatabaseUtcDateTimeAsync()
+    {
+        using var command = _context.Database.GetDbConnection().CreateCommand();
+        command.CommandText = "SELECT GETUTCDATE()";
+        _context.Database.OpenConnection();
+
+        var result = await command.ExecuteScalarAsync();
+        return (DateTime)result;
+    }
+
 }

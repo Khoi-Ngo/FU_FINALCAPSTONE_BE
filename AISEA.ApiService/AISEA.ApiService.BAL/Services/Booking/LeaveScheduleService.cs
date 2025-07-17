@@ -230,6 +230,11 @@ public class LeaveScheduleService
         return leaveSchedule.StaffProfileId == profileId;
     }
 
+    public async Task<DateTime> CheckDateTimeDBAsync()
+    {
+        return await _leaveScheduleRepository.GetDatabaseUtcDateTimeAsync();
+    }
+
     #endregion
 
 }

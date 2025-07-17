@@ -22,6 +22,14 @@ public class CreateBookingAvailabilityRequestValidator : AbstractValidator<Creat
         RuleFor(x => x.DayInWeek)
             .IsInEnum().WithMessage("DayInWeek must be a valid day of the week (Monday to Sunday).");
 
+        RuleFor(x => x)
+            .Must(x =>
+            {
+                var duration = RoundToMinute(x.EndTime) - RoundToMinute(x.StartTime);
+                return duration >= TimeSpan.FromMinutes(30) && duration <= TimeSpan.FromHours(2);
+            })
+            .WithMessage("The time range must be between 30 minutes and 2 hours.");
+
     }
 
     private bool BeValidTimeSpan(TimeSpan time)

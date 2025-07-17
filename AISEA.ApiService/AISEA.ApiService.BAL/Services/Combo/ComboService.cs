@@ -143,6 +143,18 @@ namespace AISEA.ApiService.BAL.Services.Combo
                 throw new NotFoundException("Subject not found.");
             }
 
+            // Check if the subject was previously soft-deleted for this combo
+            var softDeletedComboSubject = await _comboSubjectRepository.GetSoftDeletedAsync(comboId, subjectId);
+            if (softDeletedComboSubject != null)
+            {
+                // Reactivate the soft-deleted entry
+                softDeletedComboSubject.IsDeleted = false;
+                softDeletedComboSubject.DeletedAt = null; // Clear DeletedAt timestamp
+                softDeletedComboSubject.UpdatedAt = DateTime.UtcNow;
+                await _comboSubjectRepository.UpdateAsync(softDeletedComboSubject); // Use UpdateAsync from GenericRepository
+                return; // Subject re-added successfully
+            }
+
             // Check if subject is already in combo
             var exists = await _comboSubjectRepository.ExistsAsync(comboId, subjectId);
             if (exists)

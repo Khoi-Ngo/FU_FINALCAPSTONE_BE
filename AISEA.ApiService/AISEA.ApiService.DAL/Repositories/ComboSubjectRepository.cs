@@ -25,7 +25,10 @@ namespace AISEA.ApiService.DAL.Repositories
                 .OrderBy(cs => cs.Subject.SubjectCode)
                 .ToListAsync();
         }
-
+        public async Task<ComboSubject> GetSoftDeletedAsync(long comboId, long subjectId)
+        {
+            return await _context.ComboSubjects.FirstOrDefaultAsync(cs => cs.ComboId == comboId && cs.SubjectId == subjectId && cs.IsDeleted);
+        }
         public async Task RemoveSubjectFromComboAsync(long comboId, long subjectId)
         {
             var comboSubject = await _context.ComboSubjects

@@ -37,6 +37,20 @@ public class NotificationService
         return (notificationResponse, userId);
     }
 
+    public async Task<NotificationItemResponse> CreateAsync(long userToNotify, string title, string content, string link)
+    {
+        var notification = new DAL.Entities.Notification
+        {
+            UserId = userToNotify,
+            Title = title,
+            Content = content,
+            Link = link,
+        };
+        await _notificationRepository.CreateAsync(notification);
+        var notificationResponse = _mapper.Map<NotificationItemResponse>(notification);
+        return notificationResponse;
+    }
+
     public async Task<(PagedResult<NotificationItemResponse> notifications, long userId)> GetNotificationsAsync(string accessToken, PaginationRequest request)
     {
         var userId = GetUserIdFromToken(accessToken);

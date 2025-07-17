@@ -6,7 +6,6 @@ using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.User;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
-using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using BC = BCrypt.Net.BCrypt;
 
@@ -219,6 +218,13 @@ namespace AISEA.ApiService.BAL.Services.User
             }
 
             return _mapper.Map<GetStaffDetailResponse>(staff);
+        }
+
+        public async Task ResetNumberOfBanAsync(long studentProfileId)
+        {
+            var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+            studentProfile.NumberOfBan = 0;
+            await _studentProfileRepository.UpdateAsync(studentProfile);
         }
     }
 }

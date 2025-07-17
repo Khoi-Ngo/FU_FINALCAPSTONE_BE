@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.DAL.Entities;
 
@@ -14,7 +15,7 @@ public class BookingAvailability
 
     public TimeSpan EndTime { get; set; }
 
-    public DayOfWeek DayInWeek { get; set; }
+    public DayOfWeekAISEA DayInWeek { get; set; }
 
     public long StaffProfileId { get; set; }
 

@@ -275,6 +275,18 @@ public class UserController : BaseController
     #endregion
 
     /// <summary>
+    ///  Admin Reset NumberOfBan of student
+    /// </summary>
+    [HttpPut("reset-noOfBan/{studentProfileId}")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
+    public async Task<IActionResult> ResetNumberOfBan(long studentProfileId)
+    {
+        await _userService.ResetNumberOfBanAsync(studentProfileId);
+        return NotifyAndNoContent("The number of ban for the student profile id has been reset");
+    }
+
+
+    /// <summary>
     /// Helper to notify success and return NoContent
     /// </summary>
     private IActionResult NotifyAndNoContent(string message)
@@ -282,5 +294,6 @@ public class UserController : BaseController
         _notifier.NotifyUser(AccessToken, "Successfully", message);
         return NoContent();
     }
+
 
 }

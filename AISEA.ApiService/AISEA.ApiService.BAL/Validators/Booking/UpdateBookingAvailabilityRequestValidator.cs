@@ -20,8 +20,8 @@ public class UpdateBookingAvailabilityRequestValidator : AbstractValidator<Updat
             .WithMessage("EndTime must be after StartTime after rounding to the nearest minute.");
 
         RuleFor(x => x.DayInWeek)
-            .IsInEnum().WithMessage("DayInWeek must be a valid day of the week (Sunday to Saturday).")
-            .NotNull().WithMessage("DayInWeek is required.");
+            .IsInEnum().WithMessage("DayInWeek must be a valid day of the week (Monday to Sunday).");
+
     }
 
     private bool BeValidTimeSpan(TimeSpan time)

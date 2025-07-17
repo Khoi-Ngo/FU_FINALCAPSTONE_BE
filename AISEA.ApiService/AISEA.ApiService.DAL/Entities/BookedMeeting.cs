@@ -19,10 +19,11 @@ public class BookedMeeting
 
     public DateTime EndDateTime { get; set; }
 
-    public EBookingStatus Status { get; set; }
+    public EBookingStatus Status { get; set; } = EBookingStatus.PENDING;
 
     [StringLength(1000)]
     public string? Feedback { get; set; }
+    public string? Note { get; set; }
 
     [ForeignKey("StaffProfileId")]
     [InverseProperty("BookedMeetings")]

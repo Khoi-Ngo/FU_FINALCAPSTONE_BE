@@ -112,4 +112,15 @@ public class LeaveScheController : BaseController
         return Ok(res);
     }
 
+
+    [HttpGet("check-datetime")]
+    public IActionResult CheckDateTime()
+    {
+        return Ok(new
+        {
+            TheDateTime = DateTime.Now,
+            TheDateTimeUtc = DateTime.UtcNow
+        });
+    }
+
 }

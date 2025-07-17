@@ -29,6 +29,14 @@ public class NotificationHubNotifier
             .SendAsync(_notificationSettings.NotificationCreatedMethod, notification);
     }
 
+    public async Task NotifyUser(long userToNotify, string title, string content, string link = "Undefined")
+    {
+        var notification = await _notificationService.CreateAsync(userToNotify, title, content, link);
+        var groupName = GetGroupName(userToNotify);
+        await _hubContext.Clients.Group(groupName)
+            .SendAsync(_notificationSettings.NotificationCreatedMethod, notification);
+    }
+
 
     private string GetGroupName(long userId) => $"{_notificationSettings.IndividualUserGroupPrefix}{userId}";
 }

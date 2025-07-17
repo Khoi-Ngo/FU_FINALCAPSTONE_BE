@@ -6,8 +6,5 @@ public class BookedMeetingService
 {
     private readonly BookedMeetingRepository _bookedMeetingRepository;
 
-    public BookedMeetingService(BookedMeetingRepository bookedMeetingRepository)
-    {
-        _bookedMeetingRepository = bookedMeetingRepository;
-    }
+  
 }

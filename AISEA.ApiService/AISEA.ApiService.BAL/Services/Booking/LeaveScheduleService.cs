@@ -187,7 +187,7 @@ public class LeaveScheduleService
             case 50004: // No matching booking availability
                 throw new NoMatchingBookingAvailabilityEx("No matching booking availability found for the specified staff and time range.");
             case 50005: // Existing PENDING or CONFIRMED meetings
-                throw new LeaveScheduleConflictWithMeetingsEx("Cannot register leave due to existing PENDING or CONFIRMED meetings. Cancel those meetings first.");
+                throw new LeaveScheduleConflictWithMeetingsEx("Cannot register leave due to existing PENDING or CONFIRMED meetings. Cancel/Disapprove those meetings first.");
             case 547:
                 throw new InvalidOperationException("Invalid leave schedule data. Ensure staff profile exists.");
             default:

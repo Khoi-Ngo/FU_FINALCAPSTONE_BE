@@ -12,6 +12,7 @@ public partial class StudentProfile
     public long UserId { get; set; }
     public DateTimeOffset EnrolledAt { get; set; }
     public bool DoGraduate { get; set; } = false;
+    public int NumberOfBan { get; set; } = 0;
 
     [Column(TypeName = "text")]
     public string? CareerGoal { get; set; }

@@ -226,5 +226,13 @@ namespace AISEA.ApiService.BAL.Services.User
             studentProfile.NumberOfBan = 0;
             await _studentProfileRepository.UpdateAsync(studentProfile);
         }
+
+        public async Task UpdateAvatarAsync(string accessToken, UpdateAvatarRequest request)
+        {
+            var userId = _jWTService.GetUserIdFromToken(accessToken);
+            var user = await _userRepository.GetByIdAsync(userId);
+            user.AvatarUrl = request.URL;
+            await _userRepository.UpdateAsync(user);
+        }
     }
 }

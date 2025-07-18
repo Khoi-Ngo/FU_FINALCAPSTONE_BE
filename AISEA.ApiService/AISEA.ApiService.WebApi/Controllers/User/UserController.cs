@@ -287,6 +287,17 @@ public class UserController : BaseController
 
 
     /// <summary>
+    /// User can update the avatar the input is link firebase provided by front end
+    /// </summary>
+    [HttpPut("update-avatar")]
+    public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
+    {
+        await _userService.UpdateAvatarAsync(AccessToken, request);
+        await _notifier.NotifyUser(AccessToken, "Successfully", "The avatar has been updated successfully");
+        return Ok("Update ok");
+    }
+
+    /// <summary>
     /// Helper to notify success and return NoContent
     /// </summary>
     private IActionResult NotifyAndNoContent(string message)
@@ -294,6 +305,8 @@ public class UserController : BaseController
         _notifier.NotifyUser(AccessToken, "Successfully", message);
         return NoContent();
     }
+
+
 
 
 }

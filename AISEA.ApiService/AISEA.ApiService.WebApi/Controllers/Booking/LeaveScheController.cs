@@ -35,7 +35,7 @@ public class LeaveScheController : BaseController
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public class LeaveScheController : BaseController
     {
         await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class LeaveScheController : BaseController
     {
         await _leaveScheduleService.DeleteAsync(id, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Leave Schedule has been deleted.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>

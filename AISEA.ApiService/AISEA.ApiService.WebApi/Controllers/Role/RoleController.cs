@@ -57,7 +57,7 @@ public class RoleController : BaseController
         await _roleService.CreateRoleAsync(role);
         //notify that the role created successfully
         _notifier.NotifyUser(AccessToken, "Successfully", "New role is created successfully");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -71,6 +71,6 @@ public class RoleController : BaseController
     {
         await _roleService.UpdateRoleAsync(id, role);
         _notifier.NotifyUser(AccessToken, "Successfully", "The role is updated successfully");
-        return NoContent();
+        return Ok("Ok");
     }
 }

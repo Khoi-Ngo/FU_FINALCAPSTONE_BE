@@ -74,7 +74,7 @@ public class UserController : BaseController
         await _userService.UpdateUserAsync(id, request, AccessToken);
         _notifier.NotifyUser(AccessToken, "Successfully", "User is updated successfully");
 
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class UserController : BaseController
         await _userService.UpdateUserAsync(id, request, AccessToken);
         _notifier.NotifyUser(AccessToken, "Successfully", "User is updated successfully");
 
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -100,7 +100,7 @@ public class UserController : BaseController
         await _userService.DisableUserAsync(id);
         _notifier.NotifyUser(AccessToken, "Successfully", "User is disabled successfully");
 
-        return NoContent();
+        return Ok("Ok");
     }
     /// <summary>
     /// Retrieves paginated users from the system.
@@ -303,7 +303,7 @@ public class UserController : BaseController
     private IActionResult NotifyAndNoContent(string message)
     {
         _notifier.NotifyUser(AccessToken, "Successfully", message);
-        return NoContent();
+        return Ok("Ok");
     }
 
 

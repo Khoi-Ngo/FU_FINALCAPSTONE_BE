@@ -34,7 +34,7 @@ public class BookingAvailabilityController : BaseController
     {
         await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availability has been created successfully.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public class BookingAvailabilityController : BaseController
         await _bookingAvailabilityService.
        BulkCreateBookingAvailabilityAsync(request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availabilities have been bulk created successfully.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ public class BookingAvailabilityController : BaseController
     {
         await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availabilities have been updated successfully.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class BookingAvailabilityController : BaseController
     {
         await _bookingAvailabilityService.DeleteAsync(id, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availability has been deleted.");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>

@@ -67,7 +67,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
     {
         await _authService.ForgetPasswordAsync(request);
-        return NoContent();
+        return Ok("Ok");
     }
 
     // Get Verification Code To Reset Password
@@ -79,7 +79,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> SendResetCode([FromBody] GetVerificationCodeRequest request)
     {
         await _authService.SendResetCodeAsync(request);
-        return NoContent();
+        return Ok("Ok");
     }
 
     // Reset password
@@ -92,7 +92,7 @@ public class AuthController : BaseController
         await _authService.ResetPasswordAsync(request, AccessToken);
         //notify that user reset password ok
         _notifier.NotifyUser(AccessToken, "Successfully", "Reset password ok!");
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -103,6 +103,6 @@ public class AuthController : BaseController
     public async Task<IActionResult> Logout()
     {
         await _authService.LogoutAsync(AccessToken);
-        return NoContent();
+        return Ok("Ok");
     }
 }

@@ -36,7 +36,7 @@ public class AdvisorySession1to1Controller : BaseController
 
         // Notify student, staff, and session groups
         await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public class AdvisorySession1to1Controller : BaseController
         var (hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
         //call hub context -> push
         await _advisorySessionHubNotifier.NotifySessionCreatedAsync(studentProfileId, hubRes);
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>

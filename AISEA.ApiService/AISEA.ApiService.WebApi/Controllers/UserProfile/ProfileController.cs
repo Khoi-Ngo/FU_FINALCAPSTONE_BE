@@ -33,7 +33,7 @@ public class ProfileController : BaseController
     public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
     {
         await _studentProfileService.CreateAsync(request, AccessToken);
-        return NoContent();
+        return Ok("Ok");
     }
 
     #endregion
@@ -48,7 +48,7 @@ public class ProfileController : BaseController
     public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
     {
         await _staffProfileService.CreateAsync(request, AccessToken);
-        return NoContent();
+        return Ok("Ok");
     }
 
 

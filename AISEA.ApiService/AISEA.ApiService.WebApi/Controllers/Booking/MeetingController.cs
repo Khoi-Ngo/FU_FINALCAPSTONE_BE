@@ -9,7 +9,6 @@ using AISEA.ApiService.WebApi.HubUtil;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.Booking;
-//TODO
 
 [ApiController]
 [Route("api/[controller]")]
@@ -34,11 +33,11 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> CreateMeetingAsync([FromBody] CreateMeetingRequest request)
+    public async Task<IActionResult> CreateMeeting([FromBody] CreateMeetingRequest request)
     {
-        // await _bookedMeetingService.CreateMeetingAsync(request, AccessToken);
+        await _bookedMeetingService.CreateMeetingAsync(request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been created successfully.");
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -50,11 +49,11 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("cancel-the-pending/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> CancelPendingAsync([FromBody] NoteDTO request, long id)
+    public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {
-        // await _bookedMeetingService.CancelPendingAsync(id, request, AccessToken);
+        await _bookedMeetingService.CancelPendingAsync(id, request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled successfully");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -65,9 +64,9 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> DisapprovePendingMeetings([FromBody] DisApproveRequest request)
     {
-        // await _bookedMeetingService.DisapprovePendingMeetingsAsync(AccessToken, request);
+        await _bookedMeetingService.DisapprovePendingMeetingsAsync(AccessToken, request);
         await _notifier.NotifyUser(AccessToken, "Successful", "The meeting(s) have/has been disapproved already");
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -77,11 +76,11 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("confirm/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> ConfirmMeetingAsync(long id)
+    public async Task<IActionResult> ConfirmMeeting(long id)
     {
-        // await _bookedMeetingService.ConfirmMeetingAsync(id, AccessToken);
+        await _bookedMeetingService.ConfirmMeetingAsync(id, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been confirmed");
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -93,18 +92,18 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("stu-cancel-the-confirmed/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> StuCancelTheConfirmedAsync(long id, [FromBody] NoteDTO request)
+    public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        // var res = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
-        // if (res.numberOfBan > 0)
-        // {
-        //     await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled and you get " + (-res.numberOfBan) + " on booking point");
-        // }
-        // else
-        // {
-        //     await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
-        // }
-        return NoContent();
+        var numberOfBan = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
+        if (numberOfBan > 0)
+        {
+            await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled and you get " + (-numberOfBan) + " on booking point");
+        }
+        else
+        {
+            await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
+        }
+        return Ok("Ok");
     }
 
 
@@ -115,11 +114,11 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("advisor-cancel-the-confirmed/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> AdvCancelTheConfirmedAsync(long id, [FromBody] NoteDTO request)
+    public async Task<IActionResult> AdvCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        // await _bookedMeetingService.AdvCancelTheConfirmedAsync(id, request, AccessToken);
+        await _bookedMeetingService.AdvCancelTheConfirmedAsync(id, request, AccessToken);
         await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -129,11 +128,11 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("complete/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> CompleteAsync(long id, [FromBody] InputCheckinRequest request)
+    public async Task<IActionResult> Complete(long id, [FromBody] InputCheckinRequest request)
     {
-        // await _bookedMeetingService.CompleteAsync(AccessToken, id, request);
+        await _bookedMeetingService.CompleteAsync(AccessToken, id, request);
         await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been checked in successfully");
-        return NoContent();
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -142,11 +141,11 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPost("feedback")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> FeedbackAsync([FromBody] FeedbackRequest request)
+    public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request)
     {
-        // await _bookedMeetingService.FeedbackAsync(AccessToken, request);
+        await _bookedMeetingService.FeedbackAsync(AccessToken, request);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Give feedback ok!");
-        return NoContent();
+        return Ok("Ok");
     }
 
 
@@ -157,12 +156,12 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("mark-stu-missed/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> MarkStudentMissedAsync(long id)
+    public async Task<IActionResult> MarkStudentMissed(long id)
     {
-        // var studentUserIdToNotify = await _bookedMeetingService.MarkStudentMissedAsync(AccessToken, id);
+        var studentUserIdToNotify = await _bookedMeetingService.MarkStudentMissedAsync(AccessToken, id);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Mark student missing the meeting successfully");
-        // await _notifier.NotifyUser(studentUserIdToNotify, "Alert", "Existing meeting you missed please check");
-        return NoContent();
+        await _notifier.NotifyUser(studentUserIdToNotify, "Alert", "Existing meeting you missed please check");
+        return Ok("Ok");
     }
 
 
@@ -174,12 +173,12 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("mark-adv-missed/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> MarkAdvisorMissedAsync(long id, [FromBody] NoteDTO request)
+    public async Task<IActionResult> MarkAdvisorMissed(long id, [FromBody] NoteDTO request)
     {
-        // var advisorUserIdToNotify = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
+        var advisorUserIdToNotify = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Mark advisor missing the meeting successfully");
-        // await _notifier.NotifyUser(advisorUserIdToNotify, "Alert", "Existing meeting you missed please check");
-        return NoContent();
+        await _notifier.NotifyUser(advisorUserIdToNotify, "Alert", "Existing meeting you missed please check");
+        return Ok("Ok");
     }
 
     /// <summary>
@@ -190,10 +189,10 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> AddReasonForOverdue([FromBody] ReasonOverdueRequest request)
     {
-        // var studentUserIdToNotify = await _bookedMeetingService.AddReasonForOverdue(AccessToken, request);
+        var studentUserIdToNotify = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Give reason ok!");
-        // await _notifier.NotifyUser(studentUserIdToNotify, "Info", "An overdue meeting has been updated ");
-        return NoContent();
+        await _notifier.NotifyUser(studentUserIdToNotify, "Info", "An overdue meeting has been updated ");
+        return Ok("Ok");
     }
 
 
@@ -202,12 +201,12 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    public async Task<IActionResult> GetAllAsync([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
     {
+        //TODO
+        throw new NotImplementedException();
         // var res = await _bookedMeetingService.GetAllAsync(request);
         // return Ok(res);
-        throw new NotImplementedException();
-
     }
 
 
@@ -218,6 +217,7 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetAllByProfileAsync([FromQuery] PaginationRequest request)
     {
+        //TODO
         throw new NotImplementedException();
 
         // var res = await _bookedMeetingService.GetAllByProfileAsync(request, AccessToken);
@@ -231,6 +231,7 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ADVISOR, (int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetByIdAsync(long id)
     {
+        //TODO
         throw new NotImplementedException();
         // var res = await _bookedMeetingService.GetByIdAsync(id, AccessToken);
         // return Ok(res);
@@ -244,8 +245,8 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> DeleteAsync(long id)
     {
-        // await _bookedMeetingService.DeleteAsync(id);
-        return NoContent();
+        await _bookedMeetingService.DeleteAsync(id);
+        return Ok("Ok");
     }
 
 

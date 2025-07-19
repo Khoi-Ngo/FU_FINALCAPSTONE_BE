@@ -23,7 +23,12 @@ public class BookedMeeting
 
     [StringLength(1000)]
     public string? Feedback { get; set; }
+    public string? SuggestionFromAdvisor { get; set; }
     public string? Note { get; set; }
+    public string TitleStudentIssue { get; set; }
+    public string ContentIssue { get; set; }
+    public string CheckinCode { get; set; }
+    public string? ConfirmCheckinCode { get; set; }
 
     [ForeignKey("StaffProfileId")]
     [InverseProperty("BookedMeetings")]

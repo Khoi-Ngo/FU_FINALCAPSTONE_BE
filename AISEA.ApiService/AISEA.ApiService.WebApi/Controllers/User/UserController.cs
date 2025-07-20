@@ -296,6 +296,18 @@ public class UserController : BaseController
         await _notifier.NotifyUser(AccessToken, "Successfully", "The avatar has been updated successfully");
         return Ok("Update ok");
     }
+    /// <summary>
+    /// User can update the avatar the input is link firebase provided by front end
+    /// </summary>
+    [HttpPut("staff-update-avatar/{userId}")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
+    public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
+    {
+        await _userService.UpdateAvatarAsync(userId, request);
+        await _notifier.NotifyUser(AccessToken, "Successfully", "The avatar has been updated successfully");
+        return Ok("Update ok");
+    }
+
 
     /// <summary>
     /// Helper to notify success and return NoContent

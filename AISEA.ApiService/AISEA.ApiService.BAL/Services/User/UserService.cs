@@ -234,5 +234,12 @@ namespace AISEA.ApiService.BAL.Services.User
             user.AvatarUrl = request.URL;
             await _userRepository.UpdateAsync(user);
         }
+
+        public async Task UpdateAvatarAsync(long userId, UpdateAvatarRequest request)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            user.AvatarUrl = request.URL;
+            await _userRepository.UpdateAsync(user);
+        }
     }
 }

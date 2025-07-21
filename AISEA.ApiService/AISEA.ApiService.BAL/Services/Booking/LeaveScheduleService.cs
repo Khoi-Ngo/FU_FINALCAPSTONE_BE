@@ -115,27 +115,36 @@ public class LeaveScheduleService
         return res;
     }
 
-    //get all future pagination 
-    public async Task<PagedResult<LeaveSchedule>> GetUpcomingPagedResultAsync(PaginationRequest request)
-    {
-        var res = await _leaveScheduleRepository.GetUpcomingPagedAsync(request);
-        return res;
-    }
-
-
     //get all by the staff profile id pagination
     public async Task<PagedResult<LeaveSchedule>> GetPagedResultOfOneStaffAsync(PaginationRequest request, long staffProfileId)
     {
-        var res = await _leaveScheduleRepository.GetPagedAsync(request, staffProfileId);
+        var res = await _leaveScheduleRepository.GetPagedByStaffProfileIdAsync(request, staffProfileId);
         return res;
     }
 
 
-    //get all future by the staff profile id pagination
-    public async Task<PagedResult<LeaveSchedule>> GetUpcomingPagedResultOfOneStaffAsync(PaginationRequest request, long staffProfileId)
+    public async Task<PagedResult<LeaveScheListSimplyResponse>> GetAllSimplyAsync(PaginationRequest request)
     {
-        var res = await _leaveScheduleRepository.GetUpcomingPagedAsync(request, staffProfileId);
-        return res;
+        var (leaveSchedules, totalCount) = await _leaveScheduleRepository.GetAllAsync(request);
+        return new PagedResult<LeaveScheListSimplyResponse>
+        {
+            Items = _mapper.Map<List<LeaveScheListSimplyResponse>>(leaveSchedules),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<LeaveScheListSimplyResponse>> GetAllForAStaffSimplyAsync(PaginationRequest request, long staffProfileId)
+    {
+        var (leaveSchedules, totalCount) = await _leaveScheduleRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<LeaveScheListSimplyResponse>
+        {
+            Items = _mapper.Map<List<LeaveScheListSimplyResponse>>(leaveSchedules),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 
     //get single by id
@@ -234,6 +243,7 @@ public class LeaveScheduleService
     {
         return await _leaveScheduleRepository.GetDatabaseUtcDateTimeAsync();
     }
+
 
     #endregion
 

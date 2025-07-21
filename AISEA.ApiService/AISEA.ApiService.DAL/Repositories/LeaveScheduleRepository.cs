@@ -16,7 +16,9 @@ public class LeaveScheduleRepository : GenericRepository<LeaveSchedule>
     public async Task<PagedResult<LeaveSchedule>> GetPagedAsync(PaginationRequest request)
     {
         var query = _context.LeaveSchedules
-           .Include(x => x.StaffProfile);
+           .Include(x => x.StaffProfile)
+            .OrderByDescending(x => x.StartDateTime);
+
         var totalCount = await query.CountAsync();
         var leaveSchedules = await query
             .Skip((request.PageNumber - 1) * request.PageSize)
@@ -31,11 +33,36 @@ public class LeaveScheduleRepository : GenericRepository<LeaveSchedule>
         };
     }
 
-    public async Task<PagedResult<LeaveSchedule>> GetPagedAsync(PaginationRequest request, long staffProfileId)
+    public async Task<(IEnumerable<LeaveSchedule> leaveSchedules, int TotalCount)> GetAllAsync(PaginationRequest request)
+    {
+        var query = _context.LeaveSchedules.OrderByDescending(l => l.StartDateTime);
+        var totalCount = await query.CountAsync();
+        var leaveSchedules = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+        return (leaveSchedules, totalCount);
+    }
+
+    public async Task<(IEnumerable<LeaveSchedule> leaveSchedules, int TotalCount)> GetAllByStaffProfileIdAsync(PaginationRequest request, long staffProfileId)
+    {
+        var query = _context.LeaveSchedules.Where(l => l.StaffProfileId == staffProfileId).OrderByDescending(l => l.StartDateTime);
+        var totalCount = await query.CountAsync();
+        var leaveSchedules = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+        return (leaveSchedules, totalCount);
+    }
+
+
+
+    public async Task<PagedResult<LeaveSchedule>> GetPagedByStaffProfileIdAsync(PaginationRequest request, long staffProfileId)
     {
         var query = _context.LeaveSchedules
          .Include(x => x.StaffProfile)
-         .Where(x => x.StaffProfileId == staffProfileId);
+         .Where(x => x.StaffProfileId == staffProfileId)
+         .OrderByDescending(x => x.StartDateTime);
         var totalCount = await query.CountAsync();
         var leaveSchedules = await query
             .Skip((request.PageNumber - 1) * request.PageSize)

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
@@ -66,6 +65,7 @@ public class LeaveScheController : BaseController
     /// Retrieves all leave schedule with staff data pagination.
     /// </summary>
     [HttpGet]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> GetAllAsync([FromQuery] PaginationRequest request)
     {
         var result = await _leaveScheduleService.GetPagedResultAsync(request);
@@ -73,12 +73,13 @@ public class LeaveScheController : BaseController
     }
 
     /// <summary>
-    /// Retrieves all upcoming leave schedule with staff data pagination.
+    /// STUDENT Retrieves all leave schedule  pagination.
     /// </summary>
-    [HttpGet("upcoming")]
-    public async Task<IActionResult> GetAllUpComingAsync([FromQuery] PaginationRequest request)
+    [HttpGet]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllSimply([FromQuery] PaginationRequest request)
     {
-        var result = await _leaveScheduleService.GetUpcomingPagedResultAsync(request);
+        var result = await _leaveScheduleService.GetAllSimplyAsync(request);
         return Ok(result);
     }
 
@@ -86,6 +87,7 @@ public class LeaveScheController : BaseController
     /// Retrieves all leave schedule FOR ONE STAFF with staff data pagination.
     /// </summary>
     [HttpGet("{staffProfileId}")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.ADMIN)]
     public async Task<IActionResult> GetAllForAStaffAsync([FromQuery] PaginationRequest request, long staffProfileId)
     {
         var result = await _leaveScheduleService.GetPagedResultOfOneStaffAsync(request, staffProfileId);
@@ -93,17 +95,19 @@ public class LeaveScheController : BaseController
     }
 
     /// <summary>
-    /// Retrieves all upcoming leave schedule with staff data pagination.
+    /// Retrieves all leave schedule FOR ONE STAFF with staff data pagination.
     /// </summary>
-    [HttpGet("upcoming/{staffProfileId}")]
-    public async Task<IActionResult> GetAllUpComingForAStaffAsync([FromQuery] PaginationRequest request, long staffProfileId)
+    [HttpGet("{staffProfileId}")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllForAStaffSimply([FromQuery] PaginationRequest request, long staffProfileId)
     {
-        var result = await _leaveScheduleService.GetUpcomingPagedResultOfOneStaffAsync(request, staffProfileId);
+        var result = await _leaveScheduleService.GetAllForAStaffSimplyAsync(request, staffProfileId);
         return Ok(result);
     }
 
+
     /// <summary>
-    /// Get a single simple leave schedule
+    /// Get a single simple leave schedule (*NOTE: Support FE Purpose only)
     /// </summary>
     [HttpGet("simply-single/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]

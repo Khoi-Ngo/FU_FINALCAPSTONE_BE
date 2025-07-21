@@ -108,20 +108,6 @@ public class LeaveScheduleService
         await _redisRepository.RemoveByKeyAsync(cachedKey);
     }
 
-    //get all pagination
-    public async Task<PagedResult<LeaveSchedule>> GetPagedResultAsync(PaginationRequest request)
-    {
-        var res = await _leaveScheduleRepository.GetPagedAsync(request);
-        return res;
-    }
-
-    //get all by the staff profile id pagination
-    public async Task<PagedResult<LeaveSchedule>> GetPagedResultOfOneStaffAsync(PaginationRequest request, long staffProfileId)
-    {
-        var res = await _leaveScheduleRepository.GetPagedByStaffProfileIdAsync(request, staffProfileId);
-        return res;
-    }
-
 
     public async Task<PagedResult<LeaveScheListSimplyResponse>> GetAllSimplyAsync(PaginationRequest request)
     {
@@ -135,7 +121,7 @@ public class LeaveScheduleService
         };
     }
 
-    public async Task<PagedResult<LeaveScheListSimplyResponse>> GetAllForAStaffSimplyAsync(PaginationRequest request, long staffProfileId)
+    public async Task<PagedResult<LeaveScheListSimplyResponse>> GetAllSimplyAsync(PaginationRequest request, long staffProfileId)
     {
         var (leaveSchedules, totalCount) = await _leaveScheduleRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
         return new PagedResult<LeaveScheListSimplyResponse>
@@ -146,6 +132,9 @@ public class LeaveScheduleService
             PageSize = request.PageSize
         };
     }
+
+    public async Task<PagedResult<LeaveScheListSimplyResponse>> GetAllSimplyAsync(PaginationRequest request, string accessToken)
+    => await GetAllSimplyAsync(request, _jWTService.GetProfileIdFromToken(accessToken));
 
     //get single by id
     public async Task<LeaveScheListSimplyResponse> GetSimplyByIdAsync(long id)

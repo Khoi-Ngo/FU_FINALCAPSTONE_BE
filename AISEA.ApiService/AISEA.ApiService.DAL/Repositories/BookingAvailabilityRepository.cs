@@ -23,25 +23,23 @@ public class BookingAvailabilityRepository : GenericRepository<BookingAvailabili
     {
         return new HashSet<BookingAvailability>(await _context.BookingAvailabilities
             .Where(x => x.StaffProfileId == staffProfileId)
+            .OrderBy(x => x.DayInWeek)
+            .OrderBy(x => x.StartTime)
             .ToListAsync());
     }
 
-    public async Task<PagedResult<BookingAvailability>> GetAllPagedAsync(PaginationRequest request)
+    public async Task<(IEnumerable<BookingAvailability> bookingAvailabilities, int totalCount)> GetAllAsync(PaginationRequest request)
     {
         var query = _context.BookingAvailabilities
-            .Include(x => x.StaffProfile);
+            .OrderBy(x => x.DayInWeek)
+            .OrderBy(x => x.StartTime);
         var totalCount = await query.CountAsync();
         var bookingAvailabilities = await query
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync();
-        return new PagedResult<BookingAvailability>
-        {
-            Items = bookingAvailabilities,
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
+        return (bookingAvailabilities, totalCount);
+
     }
 
 }

@@ -25,6 +25,7 @@ public class LeaveScheController : BaseController
         _notifier = notifier;
     }
 
+    #region Command action
     /// <summary>
     /// Creates Leaving Schedule for a staff member.
     /// </summary>
@@ -60,23 +61,13 @@ public class LeaveScheController : BaseController
         await _notifier.NotifyUser(AccessToken, "Successfully", "Leave Schedule has been deleted.");
         return Ok("Ok");
     }
+    #endregion
 
     /// <summary>
-    /// Retrieves all leave schedule with staff data pagination.
+    /// STUDENT and ADMIN Retrieves all leave schedule pagination.
     /// </summary>
     [HttpGet]
-    [PermissionAuthorize((int)EUserRole.ADMIN)]
-    public async Task<IActionResult> GetAllAsync([FromQuery] PaginationRequest request)
-    {
-        var result = await _leaveScheduleService.GetPagedResultAsync(request);
-        return Ok(result);
-    }
-
-    /// <summary>
-    /// STUDENT Retrieves all leave schedule  pagination.
-    /// </summary>
-    [HttpGet]
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetAllSimply([FromQuery] PaginationRequest request)
     {
         var result = await _leaveScheduleService.GetAllSimplyAsync(request);
@@ -84,25 +75,25 @@ public class LeaveScheController : BaseController
     }
 
     /// <summary>
-    /// Retrieves all leave schedule FOR ONE STAFF with staff data pagination.
+    /// STUDENT and ADMIN Retrieves all leave schedule FOR ONE STAFF pagination
     /// </summary>
     [HttpGet("{staffProfileId}")]
-    [PermissionAuthorize((int)EUserRole.ADVISOR, (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetAllForAStaffAsync([FromQuery] PaginationRequest request, long staffProfileId)
     {
-        var result = await _leaveScheduleService.GetPagedResultOfOneStaffAsync(request, staffProfileId);
+        var result = await _leaveScheduleService.GetAllSimplyAsync(request, staffProfileId);
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves all leave schedule FOR ONE STAFF with staff data pagination.
+    /// ADVISOR self Retrieves all leave schedule 
     /// </summary>
-    [HttpGet("{staffProfileId}")]
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> GetAllForAStaffSimply([FromQuery] PaginationRequest request, long staffProfileId)
+    [HttpGet("self")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetAllForAStaffSimply([FromQuery] PaginationRequest request)
     {
-        var result = await _leaveScheduleService.GetAllForAStaffSimplyAsync(request, staffProfileId);
-        return Ok(result);
+        var res = await _leaveScheduleService.GetAllSimplyAsync(request, AccessToken);
+        return Ok(res);
     }
 
 
@@ -118,6 +109,7 @@ public class LeaveScheController : BaseController
     }
 
 
+    #region using for check time only
     [HttpGet("check-datetime-backend")]
     public IActionResult CheckDateTime()
     {
@@ -134,5 +126,6 @@ public class LeaveScheController : BaseController
         var res = await _leaveScheduleService.CheckDateTimeDBAsync();
         return Ok(res);
     }
+    #endregion
 
 }

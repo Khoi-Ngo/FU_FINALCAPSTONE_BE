@@ -51,22 +51,37 @@ public class BookingAvailabilityController : BaseController
     }
 
     /// <summary>
-    /// Retrieves all booking availabilities for a staff member.
+    /// ADMIN and STUDENT Retrieves all booking availabilities for a staff member.
     /// </summary>
     [HttpGet("{staffProfileId}")]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetBookingAvailabilities(long staffProfileId)
     {
         var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(staffProfileId);
         return Ok(result);
     }
 
+
     /// <summary>
-    /// Retrieves all booking availabilities with staff data pagination.
+    ///ADVISOR Self viewing their booking availabilities
+    /// </summary>
+    [HttpGet("self")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> SelfGetBookingAvailabilities()
+    {
+        var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(AccessToken);
+        return Ok(result);
+    }
+
+
+    /// <summary>
+    ///ADMIN and STUDENT Retrieves all booking availabilities with staff data pagination.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetAllBookingAvailability([FromQuery] PaginationRequest request)
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetBookingAvailabilities([FromQuery] PaginationRequest request)
     {
-        var result = await _bookingAvailabilityService.GetAllPagedAsync(request);
+        var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(request);
         return Ok(result);
     }
 
@@ -78,7 +93,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availabilities have been updated successfully.");
+        await _notifier.NotifyUser(AccessToken, "Successfully", "Booking availability has been updated successfully.");
         return Ok("Ok");
     }
 
@@ -95,7 +110,7 @@ public class BookingAvailabilityController : BaseController
     }
 
     /// <summary>
-    /// Get a single booking availability
+    /// Get a single booking availability (*NOTE: Support FE Purpose only)
     /// </summary>
     [HttpGet("simply-single/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]

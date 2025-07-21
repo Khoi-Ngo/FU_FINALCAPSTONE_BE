@@ -95,18 +95,35 @@ public class BookingAvailabilityService
     }
 
 
-    // Get all booking availability for a staff
-    public async Task<HashSet<BookingAvailability>> GetBookingAvailabilitiesAsync(long staffProfileId)
+    // Get all booking availability simply list response for a staff
+    public async Task<HashSet<BookingAvailabilitySimplyResponse>> GetBookingAvailabilitiesAsync(long staffProfileId)
     {
-        return await _bookingAvailabilityRepository.GetAllByStaffProfileIdAsync(staffProfileId);
+        var res = await _bookingAvailabilityRepository.GetAllByStaffProfileIdAsync(staffProfileId);
+        return _mapper.Map<HashSet<BookingAvailabilitySimplyResponse>>(res);
     }
 
-    // Get all booking availability with pagination
-    public async Task<PagedResult<BookingAvailability>> GetAllPagedAsync(PaginationRequest request)
+    //Get all booking availabilities simply list response
+    public async Task<PagedResult<BookingAvailabilitySimplyResponse>> GetBookingAvailabilitiesAsync(PaginationRequest request)
     {
-        var res = await _bookingAvailabilityRepository.GetAllPagedAsync(request);
-        return res;
+        var (bookingAvailabilities, totalCount) = await _bookingAvailabilityRepository.GetAllAsync(request);
+
+        return new PagedResult<BookingAvailabilitySimplyResponse>
+        {
+            Items = _mapper.Map<List<BookingAvailabilitySimplyResponse>>(bookingAvailabilities),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+
     }
+
+    //self get all booking availabilities simply list response of an advisor
+    public async Task<HashSet<BookingAvailabilitySimplyResponse>> GetBookingAvailabilitiesAsync(string accessToken)
+    {
+        var staffProfileId = _jwtService.GetProfileIdFromToken(accessToken);
+        return await GetBookingAvailabilitiesAsync(staffProfileId);
+    }
+
 
     // Edit booking availability
     public async Task UpdateAsync(long id, UpdateBookingAvailabilityRequest request, string accessToken)

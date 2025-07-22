@@ -17,6 +17,10 @@ public class UpdateLeaveScheRequestValidator : AbstractValidator<UpdateLeaveSche
         RuleFor(x => x)
             .Must(x => RoundToMinute(x.EndDateTime) > RoundToMinute(x.StartDateTime))
             .WithMessage("EndDateTime must be after StartDateTime after rounding to the nearest minute.");
+
+        RuleFor(x => x)
+   .Must(x => x.StartDateTime.Date == x.EndDateTime.Date)
+   .WithMessage("Leave schedule must be wrapped within a single day.");
     }
 
     private bool BeNotInPast(DateTime time)

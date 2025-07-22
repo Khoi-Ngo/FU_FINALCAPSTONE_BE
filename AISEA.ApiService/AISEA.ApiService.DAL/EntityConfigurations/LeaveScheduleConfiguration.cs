@@ -25,6 +25,13 @@ public class LeaveScheduleConfiguration : IEntityTypeConfiguration<LeaveSchedule
         builder.ToTable(t =>
         {
             t.HasTrigger("TR_LeaveSchedule_CheckConstraints");
+
+            // ✅ Check constraint for single-day leave
+            
+            t.HasCheckConstraint(
+                "CK_LeaveSchedule_WithinSingleDay",
+                "CAST([StartDateTime] AS date) = CAST([EndDateTime] AS date)"
+            );
         });
     }
 }

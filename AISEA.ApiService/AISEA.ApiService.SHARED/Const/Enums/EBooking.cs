@@ -2,7 +2,7 @@ namespace AISEA.ApiService.SHARED.Const.Enums
 {
     public enum EBookingStatus
     {
-        PENDING = 1, //VALID TIME TO DO: FUTURE (before 2 days to go), VALID CUR STAT: NONE
+        PENDING = 1, //VALID TIME TO DO: FUTURE (before 2 days to go), VALID CUR STAT: NONE (Only need valid meeting data like no duplicate, ...)
         CONFIRMED = 2,//VALID TIME TO DO: before the StartTime of the meeting timeSlot 1 day, VALID CUR STAT: PENDING
         ADV_CANCELED = 3,//VALID TIME TO DO: before the StartTime of the meeting timeSlot 12hours, VALID CUR STAT: CONFIRMED
         /// <summary>

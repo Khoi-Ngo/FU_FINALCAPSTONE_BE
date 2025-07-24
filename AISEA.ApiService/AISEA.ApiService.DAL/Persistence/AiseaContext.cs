@@ -55,6 +55,7 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<BookingAvailability> BookingAvailabilities { get; set; }
     public virtual DbSet<LeaveSchedule> LeaveSchedules { get; set; }
     public virtual DbSet<SubjectClass> SubjectClasses { get; set; }
+    public virtual DbSet<SubjectVersion> SubjectVersions { get; set; }
     public virtual DbSet<Schedule> Schedules { get; set; }
     public virtual DbSet<AttendanceChecklist> AttendanceChecklists { get; set; }
     public virtual DbSet<MarkReport> MarkReports { get; set; }
@@ -73,6 +74,7 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new ProgramConfiguration());
         modelBuilder.ApplyConfiguration(new CurriculumConfiguration());
         modelBuilder.ApplyConfiguration(new SubjectConfiguration());
+        modelBuilder.ApplyConfiguration(new SubjectVersionConfiguration());
         modelBuilder.ApplyConfiguration(new SyllabusConfiguration());
         modelBuilder.ApplyConfiguration(new ComboConfiguration());
         modelBuilder.ApplyConfiguration(new CurriculumSubjectConfiguration());

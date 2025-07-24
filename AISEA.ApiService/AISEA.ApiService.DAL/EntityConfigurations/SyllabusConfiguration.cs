@@ -10,17 +10,17 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
         {
             builder.HasKey(e => e.Id).HasName("syllabus_id_primary");
 
-            builder.HasIndex(e => e.SubjectId).HasDatabaseName("IX_Syllabus_SubjectId");
+            builder.HasIndex(e => e.SubjectVersionId).HasDatabaseName("IX_Syllabus_SubjectVersionId");
 
             builder.Property(e => e.Content)
                 .IsRequired()
                 .HasColumnType("nvarchar(max)");
 
-            builder.HasOne(d => d.Subject)
+            builder.HasOne(d => d.SubjectVersion)
                 .WithMany(p => p.Syllabi)
-                .HasForeignKey(d => d.SubjectId)
+                .HasForeignKey(d => d.SubjectVersionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("syllabus_subjectid_foreign");
+                .HasConstraintName("syllabus_subjectversionid_foreign");
         }
     }
 }

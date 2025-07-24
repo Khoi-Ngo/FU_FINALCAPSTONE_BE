@@ -12,8 +12,8 @@ public partial class CurriculumSubject
     public long CurriculumId { get; set; }
 
     [Key]
-    [Column("subject_id")]
-    public long SubjectId { get; set; }
+    [Column("subject_version_id")]
+    public long SubjectVersionId { get; set; }
 
     public int SemesterNumber { get; set; }
 
@@ -23,9 +23,9 @@ public partial class CurriculumSubject
     [InverseProperty("CurriculumSubjects")]
     public virtual Curriculum Curriculum { get; set; } = null!;
 
-    [ForeignKey("SubjectId")]
+    [ForeignKey("SubjectVersionId")]
     [InverseProperty("CurriculumSubjects")]
-    public virtual Subject Subject { get; set; } = null!;
+    public virtual SubjectVersion SubjectVersion { get; set; } = null!;
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

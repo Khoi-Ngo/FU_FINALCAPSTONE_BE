@@ -9,8 +9,8 @@ public class SubjectClassConfiguration : IEntityTypeConfiguration<SubjectClass>
     public void Configure(EntityTypeBuilder<SubjectClass> builder)
     {
         builder.HasKey(e => e.Id).HasName("subjectclass_id_primary");
-        builder.HasIndex(e => new { e.SubjectId, e.SemesterNumber, e.ClassCode }).IsUnique().HasDatabaseName("IX_SubjectClass_UniqueClass");
-        builder.HasOne(e => e.Subject).WithMany(e => e.SubjectClasses).HasForeignKey(e => e.SubjectId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(e => new { e.SubjectVersionId, e.SemesterNumber, e.ClassCode }).IsUnique().HasDatabaseName("IX_SubjectClass_UniqueClass");
+        builder.HasOne(e => e.SubjectVersion).WithMany(e => e.SubjectClasses).HasForeignKey(e => e.SubjectVersionId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 

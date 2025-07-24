@@ -12,6 +12,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
     {
         private readonly SyllabusRepository _syllabusRepository;
         private readonly SubjectRepository _subjectRepository;
+        private readonly SubjectVersionRepository _subjectVersionRepository;
         private readonly SyllabusAssessmentRepository _assessmentRepository;
         private readonly SyllabusLearningMaterialRepository _materialRepository;
         private readonly SyllabusLearningOutcomeRepository _outcomeRepository;
@@ -22,6 +23,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
         public SyllabusService(
             SyllabusRepository syllabusRepository,
             SubjectRepository subjectRepository,
+            SubjectVersionRepository subjectVersionRepository,
             SyllabusAssessmentRepository assessmentRepository,
             SyllabusLearningMaterialRepository materialRepository,
             SyllabusLearningOutcomeRepository outcomeRepository,
@@ -31,6 +33,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
         {
             _syllabusRepository = syllabusRepository;
             _subjectRepository = subjectRepository;
+            _subjectVersionRepository = subjectVersionRepository;
             _assessmentRepository = assessmentRepository;
             _materialRepository = materialRepository;
             _outcomeRepository = outcomeRepository;
@@ -41,16 +44,16 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
 
         public async Task<long> CreateSyllabusAsync(CreateSyllabusRequest request)
         {
-            var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
-            if (subject == null || subject.IsDeleted)
+            var subjectVersion = await _subjectVersionRepository.GetByIdAsync(request.SubjectVersionId);
+            if (subjectVersion == null || subjectVersion.IsDeleted)
             {
-                throw new NotFoundException("Subject not found.");
+                throw new NotFoundException("Subject version not found.");
             }
 
-            var existingSyllabus = await _syllabusRepository.GetBySubjectIdAsync(request.SubjectId);
+            var existingSyllabus = await _syllabusRepository.GetBySubjectVersionIdAsync(request.SubjectVersionId);
             if (existingSyllabus != null)
             {
-                throw new InvalidUserCreatedException("Syllabus for this subject already exists.");
+                throw new InvalidUserCreatedException("Syllabus for this subject version already exists.");
             }
 
             var syllabus = _mapper.Map<DAL.Entities.Syllabus>(request);

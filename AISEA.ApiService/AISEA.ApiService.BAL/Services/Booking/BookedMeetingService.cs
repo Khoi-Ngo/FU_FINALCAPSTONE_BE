@@ -76,7 +76,8 @@ public class BookedMeetingService
 
 
         if (!(completedMeeting.Status == EBookingStatus.CONFIRMED
-        && DateTime.Now > completedMeeting.StartDateTime
+        //TODO: Uncomment when using on prod
+        // && DateTime.Now > completedMeeting.StartDateTime
         && request.CheckInCode == completedMeeting.CheckInCode
         )) throw new InvalidOperationException("Too soon to complete this meeting or the status/ checkin code of this meeting not true");
 

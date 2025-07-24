@@ -63,7 +63,7 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> DisapprovePendingMeetings([FromBody] DisApproveRequest request)
     {
-        var meetingNotiForStudentResponses = await _bookedMeetingService.DisapprovePendingMeetingsAsync(AccessToken, request);
+        var res = await _bookedMeetingService.DisapprovePendingMeetingsAsync(AccessToken, request);
 
         //notify the advisor
 
@@ -208,9 +208,8 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
     {
-        throw new NotImplementedException();
-        // var res = await _bookedMeetingService.GetAllAsync(request);
-        // return Ok(res);
+        var res = await _bookedMeetingService.GetAllAsync(request);
+        return Ok(res);
     }
 
 
@@ -218,38 +217,57 @@ public class MeetingController : BaseController
     /// Support FrontEnd for Student View Role only
     /// Student view list all basic information of Advisor's Meetings by staffProfileId
     /// </summary>
+    [HttpGet("all-of-one-adv/paged/{staffProfileId}")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllByStaffProfileIdForStudentRole([FromQuery] PaginationRequest request, long staffProfileId)
+    {
+        var res = await _bookedMeetingService.GetAllByStaffProfileIdForStudentRoleAsync(request, staffProfileId);
+        return Ok(res);
+    }
 
 
 
     /// <summary>
     /// Student view list all of their own meeting by token
     /// </summary>
-
+    [HttpGet("all-stu-self/paged")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllByStudentSelf([FromQuery] PaginationRequest request)
+    {
+        var res = await _bookedMeetingService.GetAllByStudentSelfAsync(request, AccessToken);
+        return Ok(res);
+    }
 
 
 
     /// <summary>
     /// Advisor view list all of their own meeting by token
     /// </summary>
+    [HttpGet("all-adv-self/paged")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetAllByAdvSelf([FromQuery] PaginationRequest request)
+    {
+        var res = await _bookedMeetingService.GetAllByAdvSelfAsync(request, AccessToken);
+        return Ok(res);
+    }
 
 
 
 
-    /// <summary>
-    ///  Admin view detail of meeting
-    /// </summary>
-
-
-
-    /// <summary>
-    /// Student view detail of their involved meeting
-    /// </summary>
-
-
+    #region  View Detail Meeting
 
     /// <summary>
-    /// Advisor view detail of their involved meeting
+    ///  Admin || Involved Student Or Advisor view detail of meeting
     /// </summary>
+    [HttpGet("detail/{meetingId}")]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT, (int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetDetailMeeting(long meetingId)
+    {
+        var res = await _bookedMeetingService.GetDetailMeetingAsync(meetingId, AccessToken);
+        return Ok(res);
+    }
+
+    #endregion
 
 
     /// <summary>
@@ -264,12 +282,6 @@ public class MeetingController : BaseController
         return Ok("Ok");
     }
 
-
-
-    /// <summary>
-    ///  Get all the meeting by StaffProfileId 
-    /// (PENDING || CONFIRMED || STUDENT_CANCEL) query by time range (default will be all) => pagination
-    /// </summary>
 
 
 }

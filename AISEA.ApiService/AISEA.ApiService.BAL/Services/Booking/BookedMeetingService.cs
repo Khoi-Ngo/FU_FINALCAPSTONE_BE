@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Booking;
+using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -15,7 +16,6 @@ namespace AISEA.ApiService.BAL.Services.Booking;
 //TODO: Replace Task<long> with MeetingNotiForPartnerResponse
 public class BookedMeetingService
 {
-    //TODO: Temp reset the min day to confirm and min day to create = 2 for prod the cur = 0 for testing
     private readonly BookedMeetingRepository _bookedMeetingRepository;
     private readonly StaffProfileRepository _staffProfileRepository;
     private readonly StudentProfileRepository _studentProfileRepository;
@@ -36,6 +36,60 @@ public class BookedMeetingService
         _bookingSettings = bookingSettings;
         _mailService = mailService;
     }
+    #region GET MULTIPLE
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllAsync(PaginationRequest request)
+    {
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllAsync(request);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllByStudentSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStudentProfileIdAsync(request, studentProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllByAdvSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var staffProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllByStaffProfileIdForStudentRoleAsync(PaginationRequest request, long staffProfileId)
+    {
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    #endregion
+
 
     public async Task<long> AddReasonForOverdueAsync(string accessToken, ReasonOverdueRequest request)
     {
@@ -216,10 +270,6 @@ public class BookedMeetingService
         throw new NotImplementedException();
     }
 
-    public async Task GetAllAsync(PaginationRequest request)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<long> MarkAdvisorMissedAsync(string accessToken, long id, NoteDTO request)
     {
@@ -237,6 +287,7 @@ public class BookedMeetingService
     {
         throw new NotImplementedException();
     }
+
 
 
 
@@ -272,6 +323,17 @@ public class BookedMeetingService
 
     private TimeSpan GetTheTimeGap(DateTime time1, DateTime time2)
     => (time1 - time2).Duration();
+
+    public async Task<MeetingViewDetailResponse> GetDetailMeetingAsync(long meetingId, string accessToken)
+    {
+        var meeting = await _bookedMeetingRepository.GetDetailByIdAsync(meetingId);
+        if (!IsValidAccess(meeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessBookingAvailability("No permission to access this detail meeting");
+
+        return _mapper.Map<MeetingViewDetailResponse>(meeting);
+    }
+
+
 
     #endregion
 }

@@ -7,13 +7,13 @@ namespace AISEA.ApiService.SHARED.Const.Enums
         ADV_CANCELED = 3,//VALID TIME TO DO: before the StartTime of the meeting timeSlot 12hours, VALID CUR STAT: CONFIRMED
         /// <summary>
         /// VALID CUR STAT: CONFIRMED || PENDING
-        /// case: PENDING then no restriction VALID TIME: Before the EndTime of the meeting timeSlot
+        /// case: PENDING then no restriction just make sure current status is actual PENDING
         /// case: CONFIRMED: Before the StartTime of the meeting timeSlot < 12hours (!Not Allowed)
         /// case: CONFIRMED: Before the StartTime of the meeting timeSlot 3 days -> 12hours (!Having permission)
         /// case: CONFIRMED: Before the StartTime of the meeting timeSlot > 3days (NO having permission)
         /// </summary>
         STU_CANCELED = 9,
-        COMPLETED = 4,//VALID TIME TO DO: after the EndTime of the meeting TimeSlot, VALID CUR STAT: CONFIRMED, VALID CONFIRM CHECK IN CODE
+        COMPLETED = 4,//VALID TIME TO DO: after the StartTime of the meeting TimeSlot, VALID CUR STAT: CONFIRMED, VALID CONFIRM CHECK IN CODE
         /// <summary>
         /// VALID CUR STAT: CONFIRMED
         /// case: Advisor mark the student missing the meeting VALID TIME TO DO: >= EndTime of the meeting timeSlot
@@ -28,6 +28,9 @@ namespace AISEA.ApiService.SHARED.Const.Enums
 
         ///The student can only book when there is no existed meeting in that time slot or STU_CANCELED only (Handle By Trigger Database)
 
+
+        ///  LEAVE NOTE:
+        
         ///The advisor can only log leave when there is no meeting in that time slot or if already had then those should be only incase (NOT_APPROVE, ADV_CANCELED, STU_CANCEL)
 
         /// Other case need Advisor take action (Cancel them or do something similar like that ...) to be able to complete the logging leave (PENDING, CONFIRMED)

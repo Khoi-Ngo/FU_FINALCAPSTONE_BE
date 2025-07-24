@@ -21,5 +21,11 @@ public class BookedMeetingConfiguration : IEntityTypeConfiguration<BookedMeeting
             .HasForeignKey(d => d.StudentProfileId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("bookedmeeting_studentprofileid_foreign");
+            
+        builder.ToTable(t =>
+                {
+                    t.HasTrigger("TR_BookedMeeting_CheckExternalTables");
+                    t.HasTrigger("TR_BookedMeeting_CheckInternalData");
+                });
     }
 }

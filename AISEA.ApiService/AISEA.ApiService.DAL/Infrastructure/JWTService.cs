@@ -21,7 +21,7 @@ public class JWTService : IJWTService
     }
     #endregion
 
-    public string GenerateAccessToken(string username, long roleId, string firstName, string lastName, long profileId, long userId)
+    public string GenerateAccessToken(string username, long roleId, string firstName, string lastName, long profileId, long userId, string email)
     {
         // Claim attribute for the token
         List<Claim> claims = new List<Claim>
@@ -33,7 +33,8 @@ public class JWTService : IJWTService
             new Claim(_jwtSettings.FirstName, firstName),
             new Claim(_jwtSettings.LastName, lastName),
             new Claim(_jwtSettings.ProfileId, profileId + ""),
-            new Claim(_jwtSettings.UserId, userId + "")
+            new Claim(_jwtSettings.UserId, userId + ""),
+            new Claim(_jwtSettings.Email, email)
 
 
         };
@@ -137,6 +138,8 @@ public class JWTService : IJWTService
 
         string userIdStr = GetValueFromPrincipal(principal, _jwtSettings.UserId)
                            ?? throw new Exception("UserId claim is missing");
+        string email = GetValueFromPrincipal(principal, _jwtSettings.Email)
+                        ?? throw new Exception("Email claim is missing");
 
         // Parse numeric claims safely
         if (!long.TryParse(roleIdStr, out var roleId))
@@ -149,7 +152,7 @@ public class JWTService : IJWTService
             throw new Exception("Invalid UserId claim value");
 
         // Generate token with existing method
-        return GenerateAccessToken(username, roleId, firstName, lastName, profileId, userId);
+        return GenerateAccessToken(username, roleId, firstName, lastName, profileId, userId, email);
     }
 
     /// <summary>
@@ -223,5 +226,17 @@ public class JWTService : IJWTService
         }
         throw new Exception("UserId claim not found or invalid");
     }
+
+    /// <summary>
+    /// Get email from active token.
+    /// </summary>
+    public string GetEmailFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        return claims.TryGetValue(_jwtSettings.Email, out var email)
+            ? email
+            : throw new Exception("Email claim not found");
+    }
+
 
 }

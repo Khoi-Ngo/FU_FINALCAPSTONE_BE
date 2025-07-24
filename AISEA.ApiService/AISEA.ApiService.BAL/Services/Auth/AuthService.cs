@@ -108,7 +108,7 @@ public class AuthService
             _ when user.StaffProfile is not null => user.StaffProfile.Id,
             _ => -1
         };
-        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id);
+        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id, user.Email);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         //saving the refresh token to Redis
@@ -140,7 +140,7 @@ public class AuthService
         };
 
         // Generate tokens
-        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id);
+        var accessToken = _jwtService.GenerateAccessToken(user.Username, user.RoleId, user.FirstName, user.LastName, profileId, user.Id, user.Email);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         // Save the refresh token to Redis

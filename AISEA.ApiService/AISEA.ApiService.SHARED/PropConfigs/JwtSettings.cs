@@ -20,5 +20,6 @@ namespace AISEA.ApiService.SHARED.PropConfigs
         public required string UserName { get; set; }
         public required string AuthProp { get; set; }
         public required string UserId { get; set; }
+        public required string Email { get; set; }
     }
 }

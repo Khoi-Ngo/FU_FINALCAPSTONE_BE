@@ -27,8 +27,7 @@ public class BookedMeeting
     public string? Note { get; set; }
     public string TitleStudentIssue { get; set; }
     public string ContentIssue { get; set; }
-    public string CheckinCode { get; set; }
-    public string? ConfirmCheckinCode { get; set; }
+    public string CheckInCode { get; set; }
 
     [ForeignKey("StaffProfileId")]
     [InverseProperty("BookedMeetings")]

@@ -152,6 +152,14 @@ public class ExceptionHandlingMiddleware
                     message = exception.Message
                 });
                 break;
+            case InvalidAccessMeeting:
+                statusCode = (int)HttpStatusCode.Unauthorized;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
+                break;
 
             case InvalidAccessUserException:
                 statusCode = (int)HttpStatusCode.Unauthorized;
@@ -193,6 +201,7 @@ public class ExceptionHandlingMiddleware
             case LeaveScheduleOverlapEx:
             case NoMatchingBookingAvailabilityEx:
             case LeaveScheduleConflictWithMeetingsEx:
+            case InvalidCurMeetingStatException:
                 statusCode = (int)HttpStatusCode.BadRequest;
                 result = JsonSerializer.Serialize(new
                 {

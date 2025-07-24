@@ -4,7 +4,7 @@ namespace AISEA.ApiService.SHARED.Interfaces;
 
 public interface IJWTService
 {
-    string GenerateAccessToken(string username, long roleId, string firstName, string lastName, long profileId, long userId);
+    string GenerateAccessToken(string username, long roleId, string firstName, string lastName, long profileId, long userId, string email);
     string GenerateAccessToken(ClaimsPrincipal principal);
     Dictionary<string, string> GetAllClaimsFromToken(string token);
     string GetValueFromPrincipal(ClaimsPrincipal principal, string name);
@@ -15,4 +15,5 @@ public interface IJWTService
     string GetLastNameFromToken(string token);
     long GetProfileIdFromToken(string token);
     long GetUserIdFromToken(string token);
+    string GetEmailFromToken(string token);
 }

@@ -52,6 +52,10 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidAccessBookingAvailability(string message) : base(message) { }
     }
+    public class InvalidAccessMeeting : Exception
+    {
+        public InvalidAccessMeeting(string message) : base(message) { }
+    }
     public class InvalidAccessUserException : Exception
     {
         public InvalidAccessUserException(string message) : base(message) { }
@@ -76,6 +80,10 @@ namespace AISEA.ApiService.SHARED.Exceptions
     public class InvalidAccessLeaveSche : Exception
     {
         public InvalidAccessLeaveSche(string message) : base(message) { }
+    }
+    public class InvalidCurMeetingStatException : Exception
+    {
+        public InvalidCurMeetingStatException(string message) : base(message) { }
     }
 
     public class LeaveScheduleDuplicateEx : Exception

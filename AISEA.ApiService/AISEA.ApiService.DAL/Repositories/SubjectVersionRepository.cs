@@ -102,6 +102,15 @@ namespace AISEA.ApiService.DAL.Repositories
                 .AnyAsync(sv => sv.SubjectId == subjectId && sv.IsActive && !sv.IsDeleted);
         }
 
+        public async Task<bool> HasOtherActiveVersionsAsync(long subjectId, long excludeVersionId)
+        {
+            return await _context.SubjectVersions
+                .AnyAsync(sv => sv.SubjectId == subjectId && 
+                               sv.Id != excludeVersionId && 
+                               sv.IsActive && 
+                               !sv.IsDeleted);
+        }
+
         public async Task<bool> ExistsAsync(long subjectId, string versionCode, long? excludeId = null)
         {
             var query = _context.SubjectVersions

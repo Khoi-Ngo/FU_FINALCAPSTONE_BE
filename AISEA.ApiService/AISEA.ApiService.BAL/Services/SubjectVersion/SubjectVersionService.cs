@@ -165,8 +165,8 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                 throw new NotFoundException("Subject version not found.");
             }
 
-            // Check if this is the only version for the subject
-            var hasOtherActiveVersions = await _subjectVersionRepository.HasActiveVersionAsync(subjectVersion.SubjectId);
+            // Check if this is the only active version for the subject
+            var hasOtherActiveVersions = await _subjectVersionRepository.HasOtherActiveVersionsAsync(subjectVersion.SubjectId, id);
             if (!hasOtherActiveVersions && subjectVersion.IsActive)
             {
                 throw new InvalidOperationException(

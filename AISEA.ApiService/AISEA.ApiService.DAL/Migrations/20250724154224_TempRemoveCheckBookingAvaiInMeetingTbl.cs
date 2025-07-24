@@ -9,7 +9,7 @@ namespace AISEA.ApiService.DAL.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //TODO: Have to comeback to check booking avai later
+            //TODO: Have to comeback to check booking avai later || write worker service to compare then disable due to not fitting with the BookingAvai
             // Drop existing trigger if it exists
             migrationBuilder.Sql(@"
                 IF OBJECT_ID('TR_BookedMeeting_CheckExternalTables') IS NOT NULL

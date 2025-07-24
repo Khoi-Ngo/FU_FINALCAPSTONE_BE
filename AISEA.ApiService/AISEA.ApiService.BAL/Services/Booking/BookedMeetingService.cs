@@ -15,6 +15,7 @@ namespace AISEA.ApiService.BAL.Services.Booking;
 //TODO: Replace Task<long> with MeetingNotiForPartnerResponse
 public class BookedMeetingService
 {
+    //TODO: Temp reset the min day to confirm and min day to create = 2 for prod the cur = 0 for testing
     private readonly BookedMeetingRepository _bookedMeetingRepository;
     private readonly StaffProfileRepository _staffProfileRepository;
     private readonly StudentProfileRepository _studentProfileRepository;

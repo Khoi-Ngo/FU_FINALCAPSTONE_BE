@@ -21,6 +21,7 @@ namespace AISEA.ApiService.BAL.Validators.Booking
 
             RuleFor(x => x.DayInWeek)
                 .IsInEnum().WithMessage("DayInWeek must be a valid day of the week (Monday to Sunday).");
+            //TODO: Get From properties
 
             // Enforce time range to be exactly 30min or 1h
             RuleFor(x => x)

@@ -154,12 +154,12 @@ public class BookedMeetingService
 
 
             newMeeting.CheckInCode = checkinCode;
-            await _mailService.SendEmailAsync(_jWTService.GetEmailFromToken(accessToken), "CHECK IN CODE", $"The check in code for your meeting {request.StartDateTime} to {request.EndDateTime} is : {checkinCode}");
 
             //save into the database without caching
             await _bookedMeetingRepository.CreateAsync(newMeeting);
 
             var staffProfile = await _staffProfileRepository.GetByIdAsync(request.StaffProfileId);
+            await _mailService.SendEmailAsync(_jWTService.GetEmailFromToken(accessToken), "CHECK IN CODE", $"The check in code for your meeting {request.StartDateTime} to {request.EndDateTime} is : {checkinCode}");
             //return the notified advisor user id
             return new MeetingNotiForPartnerResponse
             {

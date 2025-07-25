@@ -99,7 +99,7 @@ public class BookedMeetingService
 
         if (pendingMeeting.Status != EBookingStatus.PENDING) throw new InvalidCurMeetingStatException("Cannot execute command on the meeting if the status of meeting is not current " + EBookingStatus.PENDING.ToString());
 
-        if (DateTime.Now < pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
+        if (DateTime.Now > pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
 
         if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
 

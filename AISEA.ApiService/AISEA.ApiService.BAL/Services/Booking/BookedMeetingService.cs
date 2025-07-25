@@ -13,7 +13,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.BAL.Services.Booking;
-//TODO: Replace Task<long> with MeetingNotiForPartnerResponse
+
 public class BookedMeetingService
 {
     private readonly BookedMeetingRepository _bookedMeetingRepository;
@@ -91,12 +91,6 @@ public class BookedMeetingService
     #endregion
 
 
-    public async Task<long> AddReasonForOverdueAsync(string accessToken, ReasonOverdueRequest request)
-    {
-        //return the studentUserIdToNotify
-
-        throw new NotImplementedException();
-    }
 
     public async Task StuCancelPendingAsync(long id, NoteDTO request, string accessToken)
     {
@@ -238,7 +232,6 @@ public class BookedMeetingService
         }
 
     }
-
     public async Task DeleteAsync(long id)
     {
         var removedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
@@ -278,20 +271,63 @@ public class BookedMeetingService
 
     }
 
-    public async Task FeedbackAsync(string accessToken, FeedbackRequest request)
+    public async Task FeedbackAsync(string accessToken, FeedbackRequest request, long meetingId)
     {
-        throw new NotImplementedException();
+        var meeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        //validate the access meeting
+        if (!IsValidAccess(meeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to give feedback for this meeting");
+
+        //validate the time + the status ACTIVE but END OF PHASE
+        if (DateTime.Now <= meeting.EndDateTime) throw new InvalidOperationException("You cannot give the feedback when the meeting is not over");
+
+        if (meeting.Status != EBookingStatus.COMPLETED && meeting.Status != EBookingStatus.STUDENT_MISSED && meeting.Status != EBookingStatus.ADVISOR_MISSED)
+            throw new InvalidOperationException("Cannot give the feedback when the stat of the meeting not comes to the end stat YET");
+
+        meeting.Feedback = request.Feedback;
+        meeting.SuggestionFromAdvisor = request.SuggestionFromAdvisor;
+
+        await _bookedMeetingRepository.UpdateAsync(meeting);
     }
 
 
-    public async Task<long> MarkAdvisorMissedAsync(string accessToken, long id, NoteDTO request)
+    public async Task<MeetingNotiForPartnerResponse> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
     {
-        //return the advisorUserIdToNotify
-        throw new NotImplementedException();
+        var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        //valid access the meeting
+        if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to report the Advisor missed this meeting");
+
+        //check the stat is CONFIRM
+        if (confirmedMeeting.Status != EBookingStatus.CONFIRMED)
+            throw new InvalidOperationException("Cannot report the Advisor missed this meeting when the stat of the meeting is NOT CONFIRMED");
+
+        //check the time after start = _bookingSettings.MinLateTimeMinOfAdv
+        if (!(DateTime.Now > confirmedMeeting.StartDateTime
+        && GetTheTimeGap(DateTime.Now, confirmedMeeting.StartDateTime).TotalMinutes >= _bookingSettings.MaxLateTimeForAdvToMeetingMins))
+            throw new InvalidOperationException($"Not appropriate time for reporting Advisor missing the meeting, make sure the current time a head of StartTime about ${_bookingSettings.MaxLateTimeForAdvToMeetingMins} minutes");
+
+        confirmedMeeting.Note = request.Note;
+        confirmedMeeting.Status = EBookingStatus.ADVISOR_MISSED;
+        await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
+        var advisorProfile = await _staffProfileRepository.GetByIdAsync(confirmedMeeting.StaffProfileId);
+        //get the MeetingNotiForPartnerResponse then notify
+        return new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = advisorProfile.UserId,
+            MeetingStartDateTime = confirmedMeeting.StartDateTime,
+            MeetingEndDateTime = confirmedMeeting.EndDateTime,
+            StatusChangedTo = confirmedMeeting.Status
+        };
     }
 
-    public async Task<int> StuCancelTheConfirmedAsync(long id, NoteDTO request, string accessToken)
+    public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
+        throw new NotImplementedException();
+    }
+    public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
+    {
+
         throw new NotImplementedException();
     }
 
@@ -331,6 +367,13 @@ public class BookedMeetingService
     private TimeSpan GetTheTimeGap(DateTime time1, DateTime time2)
     => (time1 - time2).Duration();
 
+
+
+
+
+    #endregion
+
+    //get detail meeting
     public async Task<MeetingViewDetailResponse> GetDetailMeetingAsync(long meetingId, string accessToken)
     {
         var meeting = await _bookedMeetingRepository.GetDetailByIdAsync(meetingId);
@@ -339,8 +382,4 @@ public class BookedMeetingService
 
         return _mapper.Map<MeetingViewDetailResponse>(meeting);
     }
-
-
-
-    #endregion
 }

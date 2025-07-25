@@ -22,6 +22,7 @@ public class BookingSettings
     public int MinTimeToGoStuCreateMeetingDays { get; set; }
     public int MaxNumberOfBan { get; set; }
     public int MaxStuCancelStatPerStuInMonth { get; set; }
+    public int MaxLateTimeForAdvToMeetingMins { get; set; }
 
     #endregion
 

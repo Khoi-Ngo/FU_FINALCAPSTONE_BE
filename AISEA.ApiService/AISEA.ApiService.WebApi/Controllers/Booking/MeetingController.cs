@@ -103,15 +103,8 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        var numberOfBan = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
-        if (numberOfBan > 0)
-        {
-            await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled and you get " + (-numberOfBan) + " on booking point");
-        }
-        else
-        {
-            await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
-        }
+        var (meetingNotiForPartnerResponse, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
+        //TODO: notify numberOfban to student and information to the staff
         return Ok("Ok");
     }
 
@@ -134,13 +127,14 @@ public class MeetingController : BaseController
 
     /// <summary>
     /// ACTIVE but End phase (COMPLETED, MISSED stats) -> Feedback (no change stat)
-    /// The student giving the feedback for the completed one
+    /// The student giving the feedback for the end of phase && active one
+    /// just check after the EndTime of the Meeting Time slot to do this action
     /// </summary>
-    [HttpPost("feedback")]
+    [HttpPost("feedback/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request)
+    public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request, long meetingId)
     {
-        await _bookedMeetingService.FeedbackAsync(AccessToken, request);
+        await _bookedMeetingService.FeedbackAsync(AccessToken, request, meetingId);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Give feedback ok!");
         return Ok("Ok");
     }
@@ -154,9 +148,11 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> MarkAdvisorMissed(long id, [FromBody] NoteDTO request)
     {
-        var advisorUserIdToNotify = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
+        var res = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Mark advisor missing the meeting successfully");
-        await _notifier.NotifyUser(advisorUserIdToNotify, "Alert", "Existing meeting you missed please check");
+
+        await _notifier.NotifyUser(res.PartnerUserId, res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
+
         return Ok("Ok");
     }
 
@@ -164,13 +160,13 @@ public class MeetingController : BaseController
     /// PENDING -> OVERDUE(No Behavior : This shift of stat will be handled in the background job)
     /// advisor create a note for OVERDUE
     /// </summary>
-    [HttpPost("reason-for-overdue")]
+    [HttpPost("reason-for-overdue/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> AddReasonForOverdue([FromBody] ReasonOverdueRequest request)
+    public async Task<IActionResult> AddReasonForOverdue([FromBody] NoteDTO request, long meetingId)
     {
-        var studentUserIdToNotify = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request);
+        var res = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request, meetingId);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Give reason ok!");
-        await _notifier.NotifyUser(studentUserIdToNotify, "Info", "An overdue meeting has been updated ");
+        await _notifier.NotifyUser(res.PartnerUserId, "Updated", $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been updated some note");
         return Ok("Ok");
     }
 

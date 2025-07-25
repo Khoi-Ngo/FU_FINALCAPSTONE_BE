@@ -21,6 +21,12 @@ public class BookingSettings
     public int MinTimeAdvConfirmPendingMeetingDays { get; set; }
     public int MinTimeToGoStuCreateMeetingDays { get; set; }
     public int MaxNumberOfBan { get; set; }
-    
+
+    #endregion
+
+    #region Booking Durations
+
+    public List<int> AllowedBookingDurationsMinutes { get; set; }
+
     #endregion
 }

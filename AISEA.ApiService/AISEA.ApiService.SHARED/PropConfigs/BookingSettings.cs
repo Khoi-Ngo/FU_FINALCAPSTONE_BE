@@ -18,9 +18,10 @@ public class BookingSettings
     #endregion
 
     #region Meeting Values
-    public int MinTimeAdvConfirmPendingMeetingDays { get; set; }
+    public int MinTimeAdvConfirmOrCancelMeetingDays { get; set; }
     public int MinTimeToGoStuCreateMeetingDays { get; set; }
     public int MaxNumberOfBan { get; set; }
+    public int MaxStuCancelStatPerStuInMonth { get; set; }
 
     #endregion
 

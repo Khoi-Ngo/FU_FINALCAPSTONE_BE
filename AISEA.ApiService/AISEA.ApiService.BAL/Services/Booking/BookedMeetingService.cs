@@ -98,11 +98,6 @@ public class BookedMeetingService
         throw new NotImplementedException();
     }
 
-    public async Task AdvCancelTheConfirmedAsync(long id, NoteDTO request, string accessToken)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task StuCancelPendingAsync(long id, NoteDTO request, string accessToken)
     {
         //simply shift the status to the STU_CANCELED without any BAN (The mechanism anti spam will be on the worker service)
@@ -161,7 +156,7 @@ public class BookedMeetingService
         var daysGap = GetTheTimeGap(confirmedMeeting.StartDateTime, DateTime.Now).TotalDays;
 
         if (!(confirmedMeeting.Status == EBookingStatus.PENDING
-        && daysGap >= _bookingSettings.MinTimeAdvConfirmPendingMeetingDays
+        && daysGap >= _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays
         )) throw new InvalidOperationException("Too late to confirm this meeting or the status of this meeting not true");
 
         confirmedMeeting.Status = EBookingStatus.CONFIRMED;
@@ -250,19 +245,36 @@ public class BookedMeetingService
         await _bookedMeetingRepository.RemoveAsync(removedMeeting);
     }
 
-    public async Task<MeetingNotiForPartnerResponse> DisapprovePendingMeetingsAsync(string accessToken, DisApproveRequest request)
+    public async Task<MeetingNotiForPartnerResponse> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
     {
-        throw new NotImplementedException();
-
+        var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //validate the access to meeting
+        if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to cancel this meeting");
 
-        //shift to the status NOT_APPROVED with the same reason
+        //check status
+        if (!(canceledMeeting.Status == EBookingStatus.CONFIRMED || canceledMeeting.Status == EBookingStatus.PENDING))
+            throw new InvalidOperationException("The status is not true for processing the action");
 
-        //have to check all whether before the start time and have status = PENDING ? (trigger)
+        //check the gap if too late then deny => overdue(FU admin internally observe then giving real-life penalties)
+        if (GetTheTimeGap(canceledMeeting.StartDateTime, DateTime.Now).TotalDays < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
+            throw new InvalidOperationException("Too late to cancel the meeting, this will be shifted to OVERDUE soon");
 
         //save to the database
+        canceledMeeting.Note = request.Note;
+        canceledMeeting.Status = EBookingStatus.ADV_CANCELED;
 
-        //notify for all student related to the meeting(s) by the MeetingNotiForStudentResponses taken from trigger while saving into database
+        await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
+
+        //Get the PartnerResponse
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(canceledMeeting.StudentProfileId);
+        return new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = studentProfile.UserId,
+            MeetingStartDateTime = canceledMeeting.StartDateTime,
+            MeetingEndDateTime = canceledMeeting.EndDateTime,
+            StatusChangedTo = canceledMeeting.Status
+        };
 
     }
 
@@ -275,12 +287,6 @@ public class BookedMeetingService
     public async Task<long> MarkAdvisorMissedAsync(string accessToken, long id, NoteDTO request)
     {
         //return the advisorUserIdToNotify
-        throw new NotImplementedException();
-    }
-
-    public async Task<long> MarkStudentMissedAsync(string accessToken, long id)
-    {
-        //return the studentUserIdToNotify
         throw new NotImplementedException();
     }
 

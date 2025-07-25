@@ -46,7 +46,7 @@ public class MeetingController : BaseController
     /// PENDING -> STU_CANCELED
     /// Student cancel a meeting
     /// </summary>
-    [HttpPut("stu-cancel-the-pending/{id}")]
+    [HttpPost("stu-cancel-the-pending/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {

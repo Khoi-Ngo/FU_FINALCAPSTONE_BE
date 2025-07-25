@@ -59,7 +59,7 @@ public class MeetingController : BaseController
     /// PENDING -> NOT_APPROVED
     /// Advisor disapprove bulk to create a leave
     /// </summary>
-    [HttpPost("disapprove")]
+    [HttpPut("disapprove")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> DisapprovePendingMeetings([FromBody] DisApproveRequest request)
     {

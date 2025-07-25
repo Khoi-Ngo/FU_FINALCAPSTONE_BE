@@ -8,7 +8,7 @@ namespace AISEA.ApiService.SHARED.Const.Enums
         ADV_CANCELED = 3,//VALID TIME TO DO: before the StartTime of the meeting timeSlot 12hours OR 1 day, VALID CUR STAT: CONFIRMED, VALID ACCESS TO THE MEETING
         /// <summary>
         /// VALID CUR STAT: CONFIRMED || PENDING
-        /// case: PENDING then no restriction just make sure current status is actual PENDING then Ban 1
+        /// case: PENDING then no restriction just make sure current status is actual PENDING (the mechanism for checking SPAM is on worker service)
         /// case: CONFIRMED: Before the StartTime of the meeting timeSlot < 1 day (!Not Allowed) => will lead to STUDENT_MISSED mostly then BAN 3
         /// case: CONFIRMED: Before the StartTime of the meeting timeSlot  >= 1 day (OK but ban 2)
         /// if no action occur then the worker will scan then mark the meeting as STUDENT_MISSED

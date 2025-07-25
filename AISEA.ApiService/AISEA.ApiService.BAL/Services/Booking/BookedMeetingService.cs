@@ -105,18 +105,19 @@ public class BookedMeetingService
 
     public async Task StuCancelPendingAsync(long id, NoteDTO request, string accessToken)
     {
-        throw new NotImplementedException();
-        // //simply shift the status to the STU_CANCELED
-        // var pendingMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
+        //simply shift the status to the STU_CANCELED without any BAN (The mechanism anti spam will be on the worker service)
+        var pendingMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
 
-        // if (pendingMeeting.Status != EBookingStatus.PENDING) throw new InvalidCurMeetingStatException("Cannot execute command on the meeting if the status of meeting is not current " + EBookingStatus.PENDING.ToString());//only this no need to check more about the time current w start time
+        if (pendingMeeting.Status != EBookingStatus.PENDING) throw new InvalidCurMeetingStatException("Cannot execute command on the meeting if the status of meeting is not current " + EBookingStatus.PENDING.ToString());
 
-        // if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
+        if (DateTime.Now < pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
 
-        // pendingMeeting.Note = request.Note;
-        // pendingMeeting.Status = EBookingStatus.STU_CANCELED;
+        if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
 
-        // await _bookedMeetingRepository.UpdateAsync(pendingMeeting);
+        pendingMeeting.Note = request.Note;
+        pendingMeeting.Status = EBookingStatus.STU_CANCELED;
+
+        await _bookedMeetingRepository.UpdateAsync(pendingMeeting);
 
     }
 

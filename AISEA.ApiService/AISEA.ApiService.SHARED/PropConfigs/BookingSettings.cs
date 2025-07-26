@@ -35,4 +35,11 @@ public class BookingSettings
     public List<int> AllowedBookingDurationsMinutes { get; set; }
 
     #endregion
+
+    #region Background service props
+    public long EstimateNumberOfBanIncreasedToAntiSpam { get; set; }
+    public long CheckStudentCancelPendingMeetingSpamIntervalMillis { get; set; }
+    public long GeneralPurposeIntervalMillis { get; set; }
+    public long CheckNotMatchBookingAvaiIntervalMillis { get; set; }
+    #endregion
 }

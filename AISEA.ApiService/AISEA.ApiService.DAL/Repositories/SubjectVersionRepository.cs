@@ -132,5 +132,121 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Include(sv => sv.Subject)
                 .FirstOrDefaultAsync(sv => sv.Id == id && !sv.IsDeleted);
         }
+
+        /// <summary>
+        /// Creates a new subject version and handles default version logic atomically
+        /// </summary>
+        public async Task CreateSubjectVersionWithDefaultHandlingAsync(SubjectVersion newVersion, bool isDefault, long subjectId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // If this is set as default, clear the current default first
+                if (isDefault)
+                {
+                    var currentDefault = await _context.SubjectVersions
+                        .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId && 
+                                                  sv.IsDefault && 
+                                                  sv.IsActive && 
+                                                  !sv.IsDeleted);
+                    if (currentDefault != null)
+                    {
+                        currentDefault.IsDefault = false;
+                        currentDefault.UpdatedAt = DateTime.UtcNow;
+                        _context.Update(currentDefault);
+                    }
+                }
+
+                // Create the new version
+                _context.Add(newVersion);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Updates a subject version and handles default version logic atomically
+        /// </summary>
+        public async Task UpdateSubjectVersionWithDefaultHandlingAsync(SubjectVersion versionToUpdate, bool setAsDefault)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // If this is being set as default, clear the current default first
+                if (setAsDefault && !versionToUpdate.IsDefault)
+                {
+                    var currentDefault = await _context.SubjectVersions
+                        .FirstOrDefaultAsync(sv => sv.SubjectId == versionToUpdate.SubjectId && 
+                                                  sv.IsDefault && 
+                                                  sv.IsActive && 
+                                                  !sv.IsDeleted);
+                    if (currentDefault != null)
+                    {
+                        currentDefault.IsDefault = false;
+                        currentDefault.UpdatedAt = DateTime.UtcNow;
+                        _context.Update(currentDefault);
+                    }
+                }
+
+                // Update the target version
+                _context.Update(versionToUpdate);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sets a version as default and handles clearing the previous default atomically
+        /// </summary>
+        public async Task SetDefaultVersionAsync(long versionId, long subjectId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Get the version to set as default
+                var versionToSetAsDefault = await _context.SubjectVersions
+                    .FirstOrDefaultAsync(sv => sv.Id == versionId && !sv.IsDeleted);
+                
+                if (versionToSetAsDefault == null)
+                    throw new InvalidOperationException("Subject version not found.");
+
+                // Clear current default
+                var currentDefault = await _context.SubjectVersions
+                    .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId && 
+                                              sv.IsDefault && 
+                                              sv.IsActive && 
+                                              !sv.IsDeleted);
+                
+                if (currentDefault != null && currentDefault.Id != versionId)
+                {
+                    currentDefault.IsDefault = false;
+                    currentDefault.UpdatedAt = DateTime.UtcNow;
+                    _context.Update(currentDefault);
+                }
+
+                // Set new default
+                versionToSetAsDefault.IsDefault = true;
+                versionToSetAsDefault.UpdatedAt = DateTime.UtcNow;
+                _context.Update(versionToSetAsDefault);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

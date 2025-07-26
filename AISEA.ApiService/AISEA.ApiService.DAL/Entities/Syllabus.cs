@@ -14,7 +14,6 @@ public partial class Syllabus
     [Column(TypeName = "text")]
     public string Content { get; set; } = null!;
     
-    [ForeignKey("SubjectVersionId")]
     public long SubjectVersionId { get; set; }
 
     public virtual ICollection<SyllabusAssessment> SyllabusAssessments { get; set; } = new List<SyllabusAssessment>();
@@ -25,7 +24,7 @@ public partial class Syllabus
 
     public virtual ICollection<SyllabusSession> SyllabusSessions { get; set; } = new List<SyllabusSession>();
     
-    [ForeignKey("SubjectVersionId")]
+    [ForeignKey(nameof(SubjectVersionId))]
     [InverseProperty("Syllabi")]
     public virtual SubjectVersion SubjectVersion { get; set; } = null!;
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;

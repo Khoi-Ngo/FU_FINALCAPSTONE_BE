@@ -1,10 +1,12 @@
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.SubjectVersion;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.SubjectVersion;
 using AISEA.ApiService.SHARED.Exceptions;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.BAL.Services.SubjectVersion
 {
@@ -42,22 +44,12 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                     $"Version '{request.VersionCode}' already exists for this subject.");
             }
 
-            // If this is set as default, ensure no other version is default for this subject
-            if (request.IsDefault)
-            {
-                var currentDefault = await _subjectVersionRepository.GetDefaultVersionAsync(request.SubjectId);
-                if (currentDefault != null)
-                {
-                    currentDefault.IsDefault = false;
-                    currentDefault.UpdatedAt = DateTime.UtcNow;
-                    await _subjectVersionRepository.UpdateAsync(currentDefault);
-                }
-            }
-
             var subjectVersion = _mapper.Map<DAL.Entities.SubjectVersion>(request);
             subjectVersion.CreatedAt = DateTime.UtcNow;
 
-            await _subjectVersionRepository.CreateAsync(subjectVersion);
+            // Use transaction-safe method that handles default version logic atomically
+            await _subjectVersionRepository.CreateSubjectVersionWithDefaultHandlingAsync(
+                subjectVersion, request.IsDefault, request.SubjectId);
         }
 
         public async Task<PagedResult<GetSubjectVersionResponse>> GetSubjectVersionsPagedAsync(
@@ -139,22 +131,13 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                 }
             }
 
-            // If this is being set as default, ensure no other version is default for this subject
-            if (request.IsDefault && !subjectVersion.IsDefault)
-            {
-                var currentDefault = await _subjectVersionRepository.GetDefaultVersionAsync(subjectVersion.SubjectId);
-                if (currentDefault != null)
-                {
-                    currentDefault.IsDefault = false;
-                    currentDefault.UpdatedAt = DateTime.UtcNow;
-                    await _subjectVersionRepository.UpdateAsync(currentDefault);
-                }
-            }
-
+            // Map the request to the entity
             _mapper.Map(request, subjectVersion);
             subjectVersion.UpdatedAt = DateTime.UtcNow;
 
-            await _subjectVersionRepository.UpdateAsync(subjectVersion);
+            // Use transaction-safe method that handles default version logic atomically
+            await _subjectVersionRepository.UpdateSubjectVersionWithDefaultHandlingAsync(
+                subjectVersion, request.IsDefault);
         }
 
         public async Task DeleteSubjectVersionAsync(long id)
@@ -192,19 +175,8 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                 throw new InvalidOperationException("Cannot set an inactive version as default.");
             }
 
-            // Remove default flag from current default version
-            var currentDefault = await _subjectVersionRepository.GetDefaultVersionAsync(subjectVersion.SubjectId);
-            if (currentDefault != null && currentDefault.Id != id)
-            {
-                currentDefault.IsDefault = false;
-                currentDefault.UpdatedAt = DateTime.UtcNow;
-                await _subjectVersionRepository.UpdateAsync(currentDefault);
-            }
-
-            // Set new default
-            subjectVersion.IsDefault = true;
-            subjectVersion.UpdatedAt = DateTime.UtcNow;
-            await _subjectVersionRepository.UpdateAsync(subjectVersion);
+            // Use transaction-safe method that handles default version logic atomically
+            await _subjectVersionRepository.SetDefaultVersionAsync(id, subjectVersion.SubjectId);
         }
 
         public async Task ToggleActiveStatusAsync(long id)

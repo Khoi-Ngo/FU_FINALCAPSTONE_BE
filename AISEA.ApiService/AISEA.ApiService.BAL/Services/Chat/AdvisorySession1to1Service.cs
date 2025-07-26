@@ -250,7 +250,8 @@ public class AdvisorySession1to1Service
         object? fPTUAcademicResourceJsonData = null,
         object? personalRoadMapData = null,
         object? detailedPersonalAcademicPerformance = null,
-        object? systemFeedbackMeetingData = null)
+        object? systemFeedbackMeetingData = null,
+        object? personelCourseTrackData = null)
     {
         //TODO: HAVE TO FILL ALL DATA VIA REDIS/RDB LATER
         var studentJson = studentJsonData != null ? JsonSerializer.Serialize(studentJsonData) : "{}";
@@ -259,6 +260,7 @@ public class AdvisorySession1to1Service
         var detailedPerformanceJson = detailedPersonalAcademicPerformance != null ? JsonSerializer.Serialize(detailedPersonalAcademicPerformance) : "{}";
         var systemFeedbackJson = systemFeedbackMeetingData != null ? JsonSerializer.Serialize(systemFeedbackMeetingData) : "{}";
         var msg = message ?? "";
+        var courseTrackJson = personelCourseTrackData != null ? JsonSerializer.Serialize(personelCourseTrackData) : "{}";
 
         return ChatBotConst.GeneralMessageStructFromStudent
             .Replace("{studentName}", studentName)
@@ -267,7 +269,9 @@ public class AdvisorySession1to1Service
             .Replace("{message}", msg)
             .Replace("{personalRoadMapData}", personalRoadMapJson)
             .Replace("{detailedPersonalAcademicPerformance}", detailedPerformanceJson)
-            .Replace("{systemFeedbackMeetingData}", systemFeedbackJson);
+            .Replace("{systemFeedbackMeetingData}", systemFeedbackJson)
+            .Replace("{personelCourseTrackData}", courseTrackJson);
+
     }
 
 

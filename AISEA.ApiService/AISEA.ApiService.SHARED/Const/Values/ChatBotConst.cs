@@ -3,7 +3,7 @@ namespace AISEA.ApiService.SHARED.Const.Values
     public static class ChatBotConst
     {
         public static string GeneralMessageStructFromStudent =
-         @"### Student Message:
+    @"### Student Message:
 {message}
 
 ### Instructions:
@@ -34,3 +34,5 @@ Focus on the student's interests, goals, and history. Respond in a friendly, sup
 
 ### Response:
 Address the student's question directly using only the provided data. Do not invent or assume any information that is not included.";
+    }
+}

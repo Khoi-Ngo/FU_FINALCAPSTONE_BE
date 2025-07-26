@@ -243,7 +243,6 @@ public class AdvisorySession1to1Service
     }
 
     private string ConstructPrompt(
-        long studentUserId,
         string studentName,
         string? message = null,
         object? studentJsonData = null,
@@ -281,7 +280,7 @@ public class AdvisorySession1to1Service
         var studentName = _jWTService.GetFirstNameFromToken(accessToken) + " " + _jWTService.GetLastNameFromToken(accessToken);
 
         await CreateMessageAsync(request.Message, userId, request.ChatSessionId);
-        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(userId, studentName, request.Message));
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(studentName, request.Message));
         aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, request.ChatSessionId);
         return new GetChatBotResponse { Message = aiResponse };
@@ -300,7 +299,7 @@ public class AdvisorySession1to1Service
             System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(Advisory1to1Util.GenerateChatBotSessionTitle(request.Message))));
 
         await CreateMessageAsync(request.Message, userId, chatSession.Id);
-        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(userId, studentName, request.Message));
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(studentName, request.Message));
         aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, chatSession.Id);
         return new InitChatBotResponse { Message = aiResponse, ChatSessionId = chatSession.Id };

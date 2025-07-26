@@ -104,8 +104,11 @@ public class MeetingController : BaseController
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
         var (meetingNotiForPartnerResponse, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
-        //TODO: notify numberOfban to student and information to the staff
-        return Ok("Ok");
+        await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled your NoOfBan increase by " + numberOfBan);
+        await _notifier.NotifyUser(meetingNotiForPartnerResponse.PartnerUserId
+       , meetingNotiForPartnerResponse.StatusChangedTo.ToString(), $"The meeting {meetingNotiForPartnerResponse.MeetingStartDateTime} to {meetingNotiForPartnerResponse.MeetingEndDateTime} has been {meetingNotiForPartnerResponse.StatusChangedTo.ToString()}");
+
+        return Ok(new { NumberOfBanIncrease = numberOfBan });
     }
 
 

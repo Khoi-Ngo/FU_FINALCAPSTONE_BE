@@ -20,6 +20,10 @@ public class BookingSettings
     #region Meeting Values
     public int MinTimeAdvConfirmOrCancelMeetingDays { get; set; }
     public int MinTimeToGoStuCreateMeetingDays { get; set; }
+    public int MinTimeStudentCancelTheConfirmMeetingDays { get; set; }
+    public int NumberOfBanWhenStuCancelTheConfirm { get; set; }
+    public int NumberOfBanWhenStuMissingTheMeeting { get; set; }
+
     public int MaxNumberOfBan { get; set; }
     public int MaxStuCancelStatPerStuInMonth { get; set; }
     public int MaxLateTimeForAdvToMeetingMins { get; set; }

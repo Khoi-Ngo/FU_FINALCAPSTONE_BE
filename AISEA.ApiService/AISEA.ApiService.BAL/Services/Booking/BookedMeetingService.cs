@@ -147,11 +147,18 @@ public class BookedMeetingService
 
         if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("You have no permission to confirm this meeting");
 
+        //check the status
+        if (confirmedMeeting.Status != EBookingStatus.PENDING)
+            throw new InvalidOperationException("The status of this meeting not true");
+
+
         var daysGap = GetTheTimeGap(confirmedMeeting.StartDateTime, DateTime.Now).TotalDays;
 
-        if (!(confirmedMeeting.Status == EBookingStatus.PENDING
-        && daysGap >= _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays
-        )) throw new InvalidOperationException("Too late to confirm this meeting or the status of this meeting not true");
+        if (DateTime.Now >= confirmedMeeting.StartDateTime
+        || daysGap < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
+            throw new InvalidOperationException("Too late to confirm this meeting");
+
+
 
         confirmedMeeting.Status = EBookingStatus.CONFIRMED;
         await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
@@ -250,7 +257,7 @@ public class BookedMeetingService
             throw new InvalidOperationException("The status is not true for processing the action");
 
         //check the gap if too late then deny => overdue(FU admin internally observe then giving real-life penalties)
-        if (GetTheTimeGap(canceledMeeting.StartDateTime, DateTime.Now).TotalDays < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
+        if (DateTime.Now >= canceledMeeting.StartDateTime || GetTheTimeGap(canceledMeeting.StartDateTime, DateTime.Now).TotalDays < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
             throw new InvalidOperationException("Too late to cancel the meeting, this will be shifted to OVERDUE soon");
 
         //save to the database
@@ -323,12 +330,60 @@ public class BookedMeetingService
 
     public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
-        throw new NotImplementedException();
+        var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        // -Validate the access
+        if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to cancel this meeting");
+        // -Validate the status
+        if (canceledMeeting.Status != EBookingStatus.CONFIRMED) throw new InvalidOperationException("Cannot process with NON-CONFIRMED meeting");
+
+        // -Validate the time, the time gap btw Current - StartTime must be >= Min TimeGap allowing to Cancel
+        var dayGaps = GetTheTimeGap(DateTime.Now, canceledMeeting.StartDateTime).TotalDays;
+
+        if (DateTime.Now >= canceledMeeting.StartDateTime || dayGaps < _bookingSettings.MinTimeStudentCancelTheConfirmMeetingDays)
+            throw new InvalidOperationException("Too late to cancel the confirm meeting");
+
+        /*
+                -If cancel -> Number of Ban + 2 if cannot due to too late to do then later the Meeting will be set as StudentMissed and Number of Ban + 3
+        
+                -Happy case: update the status, note of the meeting then return the number of ban = 2
+        */
+        canceledMeeting.Note = request.Note;
+        canceledMeeting.Status = EBookingStatus.STU_CANCELED;
+        await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
+
+        var advisorProfile = await _staffProfileRepository.GetByIdAsync(canceledMeeting.StaffProfileId);
+
+        return (new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = advisorProfile.UserId,
+            MeetingStartDateTime = canceledMeeting.StartDateTime,
+            MeetingEndDateTime = canceledMeeting.EndDateTime,
+            StatusChangedTo = canceledMeeting.Status
+            
+        }, _bookingSettings.NumberOfBanWhenStuCancelTheConfirm);
+
     }
     public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
     {
+        var overdueMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        //validate the access
+        if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to give the reason for this overdue meeting");
 
-        throw new NotImplementedException();
+        //validate the status is overdue or not
+        if (overdueMeeting.Status != EBookingStatus.OVERDUE) throw new InvalidOperationException("Cannot process with NON-OVERDUE meeting");
+
+        //giving the reason for overdue
+        overdueMeeting.Note = request.Note;
+        await _bookedMeetingRepository.UpdateAsync(overdueMeeting);
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(overdueMeeting.StudentProfileId);
+        return new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = studentProfile.UserId,
+            MeetingStartDateTime = overdueMeeting.StartDateTime,
+            MeetingEndDateTime = overdueMeeting.EndDateTime
+        };
     }
 
 
@@ -340,11 +395,12 @@ public class BookedMeetingService
         switch (ex.Number)
         {
             case 50006:
-                throw new InvalidOperationException("Student has reached the maximum number of bans (30). Cannot book meeting.");
+                throw new InvalidOperationException("Student has reached the maximum number of bans . Cannot book meeting.");
             case 50007:
                 throw new InvalidOperationException("The meeting time conflicts with staff's leave schedule.");
-            case 50008:
-                throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
+            //NOTE: currently not check direct via constraint in database anymore 
+            // case 50008:
+            // throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
             case 50009:
                 throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot.");
             case 50010:

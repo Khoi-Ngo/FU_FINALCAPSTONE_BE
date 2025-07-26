@@ -129,9 +129,7 @@ public class MeetingController : BaseController
     }
 
     /// <summary>
-    /// ACTIVE but End phase (COMPLETED, MISSED stats) -> Feedback (no change stat)
-    /// The student giving the feedback for the end of phase && active one
-    /// just check after the EndTime of the Meeting Time slot to do this action
+    /// ACTIVE but End phase (COMPLETED, MISSED stats) -> Feedback (no change stat)The student giving the feedback for the end of phase && active one just check after the EndTime of the Meeting Time slot to do this action
     /// </summary>
     [HttpPost("feedback/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]

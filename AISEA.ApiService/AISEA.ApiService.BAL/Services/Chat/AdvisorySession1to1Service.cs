@@ -344,4 +344,9 @@ public class AdvisorySession1to1Service
 
     private long GetUserIdFromToken(string accessToken) =>
         long.Parse(_jWTService.GetAllClaimsFromToken(accessToken).GetValueOrDefault(_jwtSettings.UserId));
+
+    public async Task<List<long>> RemoveAllExistedOverDaysAsync(int sessionExpiryDays)
+    {
+        return await _advisorySession1To1Repository.RemoveAllExistedOverDaysAsync(sessionExpiryDays);
+    }
 }

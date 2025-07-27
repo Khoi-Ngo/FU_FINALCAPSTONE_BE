@@ -1,3 +1,4 @@
+using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,9 +30,9 @@ public class ChatBgService : BackgroundService
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var repository = scope.ServiceProvider.GetRequiredService<AdvisorySession1to1Repository>();
+                var advisorySession1to1Service = scope.ServiceProvider.GetRequiredService<AdvisorySession1to1Service>();
 
-                var removedSessionIds = await repository.RemoveAllExistedOverDaysAsync(_chatSessionSettings.SessionExpiryDays);
+                var removedSessionIds = await advisorySession1to1Service.RemoveAllExistedOverDaysAsync(_chatSessionSettings.SessionExpiryDays);
 
                 if (removedSessionIds.Any())
                 {

@@ -1,3 +1,4 @@
+using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,9 +30,9 @@ public class NotiBgService : BackgroundService
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var repository = scope.ServiceProvider.GetRequiredService<NotificationRepository>();
+                var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
 
-                var removedNotiIds = await repository.RemoveAllExistedOverDaysAsync(_notificationSettings.ExpiredDays);
+                var removedNotiIds = await notificationService.RemoveAllExistedOverDaysAsync(_notificationSettings.ExpiredDays);
 
                 if (removedNotiIds.Any())
                 {

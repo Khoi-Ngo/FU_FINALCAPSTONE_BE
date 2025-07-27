@@ -76,4 +76,9 @@ public class NotificationService
 
     private long GetUserIdFromToken(string accessToken) =>
      long.Parse(_jwtService.GetAllClaimsFromToken(accessToken).GetValueOrDefault(_jwtSettings.UserId));
+
+    public async Task<List<long>> RemoveAllExistedOverDaysAsync(int expiredDays)
+    {
+        return await _notificationRepository.RemoveAllExistedOverDaysAsync(expiredDays);
+    }
 }

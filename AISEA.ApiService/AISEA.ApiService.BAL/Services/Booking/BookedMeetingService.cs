@@ -120,8 +120,7 @@ public class BookedMeetingService
 
 
         if (!(completedMeeting.Status == EBookingStatus.CONFIRMED
-        //TODO: Uncomment when using on prod
-        // && DateTime.Now > completedMeeting.StartDateTime
+        && DateTime.Now > completedMeeting.StartDateTime
         && request.CheckInCode == completedMeeting.CheckInCode
         )) throw new InvalidOperationException("Too soon to complete this meeting or the status/ checkin code of this meeting not true");
 
@@ -360,7 +359,7 @@ public class BookedMeetingService
             MeetingStartDateTime = canceledMeeting.StartDateTime,
             MeetingEndDateTime = canceledMeeting.EndDateTime,
             StatusChangedTo = canceledMeeting.Status
-            
+
         }, _bookingSettings.NumberOfBanWhenStuCancelTheConfirm);
 
     }

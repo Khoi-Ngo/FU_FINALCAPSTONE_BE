@@ -52,12 +52,22 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
-        /// Gets syllabus by subject ID
+        /// Gets syllabus by subject ID (uses smart ordering: default > active > recent)
         /// </summary>
         [HttpGet("by-subject/{subjectId}")]
         public async Task<IActionResult> GetSyllabusBySubjectId(long subjectId)
         {
             var result = await _syllabusService.GetSyllabusBySubjectIdAsync(subjectId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets syllabus for the default version of a subject explicitly
+        /// </summary>
+        [HttpGet("by-subject/{subjectId}/default")]
+        public async Task<IActionResult> GetSyllabusBySubjectIdDefaultVersion(long subjectId)
+        {
+            var result = await _syllabusService.GetSyllabusBySubjectIdDefaultVersionAsync(subjectId);
             return Ok(result);
         }
 

@@ -10,8 +10,7 @@ public partial class SubjectClass
     [Column("id")]
     public long Id { get; set; }
 
-    [ForeignKey("SubjectId")]
-    public long SubjectId { get; set; }
+    public long SubjectVersionId { get; set; }
 
     public int SemesterNumber { get; set; }
     public string ClassCode { get; set; } = null!;
@@ -20,6 +19,7 @@ public partial class SubjectClass
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; } = false;
 
-    public virtual Subject Subject { get; set; } = null!;
+    [ForeignKey(nameof(SubjectVersionId))]
+    public virtual SubjectVersion SubjectVersion { get; set; } = null!;
     public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 }

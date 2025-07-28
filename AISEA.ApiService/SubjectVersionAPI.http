@@ -1,0 +1,69 @@
+### SubjectVersion API Test
+
+@base_url = https://localhost:7141/api
+@token = Bearer YOUR_TOKEN_HERE
+
+### 1. Create a new SubjectVersion
+POST {{base_url}}/SubjectVersion
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "subjectId": 1,
+  "versionCode": "1.0",
+  "versionName": "First Version",
+  "description": "Initial version of the subject",
+  "isActive": true,
+  "isDefault": true,
+  "effectiveFrom": "2024-01-01T00:00:00Z",
+  "effectiveTo": null
+}
+
+### 2. Get all SubjectVersions (paginated)
+GET {{base_url}}/SubjectVersion?pageNumber=1&pageSize=10
+Authorization: {{token}}
+
+### 3. Get SubjectVersions by Subject ID
+GET {{base_url}}/SubjectVersion/subject/1
+Authorization: {{token}}
+
+### 4. Get SubjectVersion by ID
+GET {{base_url}}/SubjectVersion/1
+Authorization: {{token}}
+
+### 5. Get default version for a subject
+GET {{base_url}}/SubjectVersion/subject/1/default
+Authorization: {{token}}
+
+### 6. Get all active versions
+GET {{base_url}}/SubjectVersion/active
+Authorization: {{token}}
+
+### 7. Update a SubjectVersion
+PUT {{base_url}}/SubjectVersion/1
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "versionCode": "1.1",
+  "versionName": "Updated Version",
+  "description": "Updated description",
+  "isActive": true,
+  "isDefault": true,
+  "effectiveFrom": "2024-01-01T00:00:00Z",
+  "effectiveTo": null
+}
+
+### 8. Set version as default
+POST {{base_url}}/SubjectVersion/1/set-default
+Content-Type: application/json
+Authorization: {{token}}
+
+### 9. Toggle active status
+POST {{base_url}}/SubjectVersion/1/toggle-active
+Content-Type: application/json
+Authorization: {{token}}
+
+### 10. Delete a SubjectVersion
+DELETE {{base_url}}/SubjectVersion/1
+Authorization: {{token}}

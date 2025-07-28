@@ -3,6 +3,7 @@ using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.BAL.Services.Role;
 using AISEA.ApiService.BAL.Services.Subject;
+using AISEA.ApiService.BAL.Services.SubjectVersion;
 using AISEA.ApiService.BAL.Services.Syllabus;
 using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.BAL.Services.User;
@@ -33,6 +34,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<StaffProfileService>();
             services.AddScoped<AdvisorySession1to1Service>();
             services.AddScoped<SubjectService>();
+            services.AddScoped<SubjectVersionService>();
             services.AddScoped<SyllabusService>();
             services.AddScoped<CurriculumService>();
             services.AddScoped<ComboService>();

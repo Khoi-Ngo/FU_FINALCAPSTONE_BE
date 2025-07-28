@@ -32,6 +32,10 @@ public class StudentProfileService
     {
         return await _studentProfileRepository.GetByIdAsync(studentProfileId);
     }
+    public async Task ResetNumberOfBansAsync()
+    {
+        await _studentProfileRepository.ResetNumberOfBansAsync();
+    }
 
     private bool IsValidAccess(string accessToken, long userId)
     => _jWTService.GetRoleIdFromToken(accessToken) == (long)EUserRole.ADMIN

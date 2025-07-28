@@ -40,6 +40,10 @@ public class BookingSettings
     public long EstimateNumberOfBanIncreasedToAntiSpam { get; set; }
     public long CheckStudentCancelPendingMeetingSpamIntervalMillis { get; set; }
     public long GeneralPurposeIntervalMillis { get; set; }
-    public long CheckNotMatchBookingAvaiIntervalMillis { get; set; }
+    public int ResetNumberOfBanIntervalDays { get; set; }
+    public int ResetCheckIntervalHours { get; set; }
+    public int ErrorRetryDelayMinutes { get; set; }
+
+
     #endregion
 }

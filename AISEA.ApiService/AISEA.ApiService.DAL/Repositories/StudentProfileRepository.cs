@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
 {
@@ -12,6 +9,11 @@ namespace AISEA.ApiService.DAL.Repositories
     {
         public StudentProfileRepository(AiseaContext context) : base(context)
         {
+        }
+        public async Task ResetNumberOfBansAsync()
+        {
+            await _context.StudentProfiles
+                .ExecuteUpdateAsync(setters => setters.SetProperty(sp => sp.NumberOfBan, 0));
         }
     }
 }

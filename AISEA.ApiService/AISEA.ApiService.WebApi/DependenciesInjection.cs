@@ -158,6 +158,7 @@ public static class DependenciesInjection
         services.AddHostedService<NotiBgService>();
         services.AddHostedService<ChatBgService>();
         services.AddHostedService<MeetingOverdueBgService>();
+        services.AddHostedService<ResetNoOfBanBgService>();
 
 
         return services;

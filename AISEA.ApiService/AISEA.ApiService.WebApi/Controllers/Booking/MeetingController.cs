@@ -46,7 +46,7 @@ public class MeetingController : BaseController
     /// PENDING -> STU_CANCELED
     /// Student cancel a meeting
     /// </summary>
-    [HttpPut("cancel-the-pending/{id}")]
+    [HttpPost("stu-cancel-the-pending/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {
@@ -56,18 +56,20 @@ public class MeetingController : BaseController
     }
 
     /// <summary>
-    /// PENDING -> NOT_APPROVED
-    /// Advisor disapprove bulk to create a leave
+    /// PENDING || CONFIRMED-> ADV_CANCELED
+    /// Advisor cancel the PENDING meeting with a note
     /// </summary>
-    [HttpPost("disapprove")]
+    [HttpPut("adv-cancel/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> DisapprovePendingMeetings([FromBody] DisApproveRequest request)
+    public async Task<IActionResult> AdvisorCancelMeeting([FromBody] NoteDTO request, long meetingId)
     {
-        var meetingNotiForStudentResponses = await _bookedMeetingService.DisapprovePendingMeetingsAsync(AccessToken, request);
+        var res = await _bookedMeetingService.AdvisorCancelMeetingAsync(AccessToken, request, meetingId);
 
-        //notify the advisor
+        await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
 
-        //notify the student
+        await _notifier.NotifyUser(res.PartnerUserId
+        , res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
+
 
         return Ok("OK");
     }
@@ -101,31 +103,14 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        var numberOfBan = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
-        if (numberOfBan > 0)
-        {
-            await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled and you get " + (-numberOfBan) + " on booking point");
-        }
-        else
-        {
-            await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
-        }
-        return Ok("Ok");
+        var (meetingNotiForPartnerResponse, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
+        await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled your NoOfBan increase by " + numberOfBan);
+        await _notifier.NotifyUser(meetingNotiForPartnerResponse.PartnerUserId
+       , meetingNotiForPartnerResponse.StatusChangedTo.ToString(), $"The meeting {meetingNotiForPartnerResponse.MeetingStartDateTime} to {meetingNotiForPartnerResponse.MeetingEndDateTime} has been {meetingNotiForPartnerResponse.StatusChangedTo.ToString()}");
+
+        return Ok(new { NumberOfBanIncrease = numberOfBan });
     }
 
-
-    /// <summary>
-    /// CONFIRMED -> ADV_CANCELED
-    /// Advisor cancel the confirmed meeting
-    /// </summary>
-    [HttpPut("advisor-cancel-the-confirmed/{id}")]
-    [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> AdvCancelTheConfirmed(long id, [FromBody] NoteDTO request)
-    {
-        await _bookedMeetingService.AdvCancelTheConfirmedAsync(id, request, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "The meeting has been canceled");
-        return Ok("Ok");
-    }
 
 
     /// <summary>
@@ -144,30 +129,14 @@ public class MeetingController : BaseController
     }
 
     /// <summary>
-    /// COMPLETED -> Feedback (no change stat)
-    /// The student giving the feedback for the completed one
+    /// ACTIVE but End phase (COMPLETED, MISSED stats) -> Feedback (no change stat)The student giving the feedback for the end of phase && active one just check after the EndTime of the Meeting Time slot to do this action
     /// </summary>
-    [HttpPost("feedback")]
+    [HttpPost("feedback/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request)
+    public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request, long meetingId)
     {
-        await _bookedMeetingService.FeedbackAsync(AccessToken, request);
+        await _bookedMeetingService.FeedbackAsync(AccessToken, request, meetingId);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Give feedback ok!");
-        return Ok("Ok");
-    }
-
-
-    /// <summary>
-    /// CONFIRMED -> STUDENT_MISSED
-    /// Advisor mark the student missed the meeting then ban
-    /// </summary>
-    [HttpPut("mark-stu-missed/{id}")]
-    [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> MarkStudentMissed(long id)
-    {
-        var studentUserIdToNotify = await _bookedMeetingService.MarkStudentMissedAsync(AccessToken, id);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Mark student missing the meeting successfully");
-        await _notifier.NotifyUser(studentUserIdToNotify, "Alert", "Existing meeting you missed please check");
         return Ok("Ok");
     }
 
@@ -180,9 +149,11 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> MarkAdvisorMissed(long id, [FromBody] NoteDTO request)
     {
-        var advisorUserIdToNotify = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
+        var res = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Mark advisor missing the meeting successfully");
-        await _notifier.NotifyUser(advisorUserIdToNotify, "Alert", "Existing meeting you missed please check");
+
+        await _notifier.NotifyUser(res.PartnerUserId, res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
+
         return Ok("Ok");
     }
 
@@ -190,13 +161,13 @@ public class MeetingController : BaseController
     /// PENDING -> OVERDUE(No Behavior : This shift of stat will be handled in the background job)
     /// advisor create a note for OVERDUE
     /// </summary>
-    [HttpPost("reason-for-overdue")]
+    [HttpPost("reason-for-overdue/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> AddReasonForOverdue([FromBody] ReasonOverdueRequest request)
+    public async Task<IActionResult> AddReasonForOverdue([FromBody] NoteDTO request, long meetingId)
     {
-        var studentUserIdToNotify = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request);
+        var res = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request, meetingId);
         await _notifier.NotifyUser(AccessToken, "Successfully", "Give reason ok!");
-        await _notifier.NotifyUser(studentUserIdToNotify, "Info", "An overdue meeting has been updated ");
+        await _notifier.NotifyUser(res.PartnerUserId, "Updated", $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been updated some note");
         return Ok("Ok");
     }
 
@@ -208,9 +179,8 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
     {
-        throw new NotImplementedException();
-        // var res = await _bookedMeetingService.GetAllAsync(request);
-        // return Ok(res);
+        var res = await _bookedMeetingService.GetAllAsync(request);
+        return Ok(res);
     }
 
 
@@ -218,38 +188,57 @@ public class MeetingController : BaseController
     /// Support FrontEnd for Student View Role only
     /// Student view list all basic information of Advisor's Meetings by staffProfileId
     /// </summary>
+    [HttpGet("all-of-one-adv/paged/{staffProfileId}")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllByStaffProfileIdForStudentRole([FromQuery] PaginationRequest request, long staffProfileId)
+    {
+        var res = await _bookedMeetingService.GetAllByStaffProfileIdForStudentRoleAsync(request, staffProfileId);
+        return Ok(res);
+    }
 
 
 
     /// <summary>
     /// Student view list all of their own meeting by token
     /// </summary>
-
+    [HttpGet("all-stu-self/paged")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllByStudentSelf([FromQuery] PaginationRequest request)
+    {
+        var res = await _bookedMeetingService.GetAllByStudentSelfAsync(request, AccessToken);
+        return Ok(res);
+    }
 
 
 
     /// <summary>
     /// Advisor view list all of their own meeting by token
     /// </summary>
+    [HttpGet("all-adv-self/paged")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetAllByAdvSelf([FromQuery] PaginationRequest request)
+    {
+        var res = await _bookedMeetingService.GetAllByAdvSelfAsync(request, AccessToken);
+        return Ok(res);
+    }
 
 
 
 
-    /// <summary>
-    ///  Admin view detail of meeting
-    /// </summary>
-
-
-
-    /// <summary>
-    /// Student view detail of their involved meeting
-    /// </summary>
-
-
+    #region  View Detail Meeting
 
     /// <summary>
-    /// Advisor view detail of their involved meeting
+    ///  Admin || Involved Student Or Advisor view detail of meeting
     /// </summary>
+    [HttpGet("detail/{meetingId}")]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT, (int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetDetailMeeting(long meetingId)
+    {
+        var res = await _bookedMeetingService.GetDetailMeetingAsync(meetingId, AccessToken);
+        return Ok(res);
+    }
+
+    #endregion
 
 
     /// <summary>
@@ -264,12 +253,6 @@ public class MeetingController : BaseController
         return Ok("Ok");
     }
 
-
-
-    /// <summary>
-    ///  Get all the meeting by StaffProfileId 
-    /// (PENDING || CONFIRMED || STUDENT_CANCEL) query by time range (default will be all) => pagination
-    /// </summary>
 
 
 }

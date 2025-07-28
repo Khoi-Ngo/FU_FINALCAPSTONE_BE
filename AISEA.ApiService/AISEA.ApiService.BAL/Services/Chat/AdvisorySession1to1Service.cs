@@ -242,24 +242,45 @@ public class AdvisorySession1to1Service
         return await _messageRepository.GetMessagesAsync(chatSessionId, request.PageNumber, request.PageSize);
     }
 
-    private string ConstructPromptInit(string studentName, object? studentJsonData = null, object? fPTUAcademicResourceJsonData = null, string? message = null)
+    private string ConstructPrompt(
+        string studentName,
+        string? message = null,
+        object? studentJsonData = null,
+        object? fPTUAcademicResourceJsonData = null,
+        object? personalRoadMapData = null,
+        object? detailedPersonalAcademicPerformance = null,
+        object? systemFeedbackMeetingData = null,
+        object? personelCourseTrackData = null)
     {
+        //TODO: HAVE TO FILL ALL DATA VIA REDIS/RDB LATER
         var studentJson = studentJsonData != null ? JsonSerializer.Serialize(studentJsonData) : "{}";
         var resourceJson = fPTUAcademicResourceJsonData != null ? JsonSerializer.Serialize(fPTUAcademicResourceJsonData) : "{}";
+        var personalRoadMapJson = personalRoadMapData != null ? JsonSerializer.Serialize(personalRoadMapData) : "{}";
+        var detailedPerformanceJson = detailedPersonalAcademicPerformance != null ? JsonSerializer.Serialize(detailedPersonalAcademicPerformance) : "{}";
+        var systemFeedbackJson = systemFeedbackMeetingData != null ? JsonSerializer.Serialize(systemFeedbackMeetingData) : "{}";
         var msg = message ?? "";
+        var courseTrackJson = personelCourseTrackData != null ? JsonSerializer.Serialize(personelCourseTrackData) : "{}";
 
         return ChatBotConst.GeneralMessageStructFromStudent
             .Replace("{studentName}", studentName)
             .Replace("{studentJsonData}", studentJson)
             .Replace("{FPTUAcademicResourceJsonData}", resourceJson)
-            .Replace("{message}", msg);
+            .Replace("{message}", msg)
+            .Replace("{personalRoadMapData}", personalRoadMapJson)
+            .Replace("{detailedPersonalAcademicPerformance}", detailedPerformanceJson)
+            .Replace("{systemFeedbackMeetingData}", systemFeedbackJson)
+            .Replace("{personelCourseTrackData}", courseTrackJson);
+
     }
+
 
     public async Task<GetChatBotResponse> SendMsgAsync(SendChatBotRequest request, string accessToken)
     {
         var userId = GetUserIdFromToken(accessToken);
+        var studentName = _jWTService.GetFirstNameFromToken(accessToken) + " " + _jWTService.GetLastNameFromToken(accessToken);
+
         await CreateMessageAsync(request.Message, userId, request.ChatSessionId);
-        var aiResponse = await _chatOpenAIService.SendMsgAsync(request.Message);
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(studentName, request.Message));
         aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, request.ChatSessionId);
         return new GetChatBotResponse { Message = aiResponse };
@@ -267,10 +288,9 @@ public class AdvisorySession1to1Service
 
     public async Task<InitChatBotResponse> InitMsgAsync(InitChatBotRequest request, string accessToken)
     {
-        var userData = _jWTService.GetAllClaimsFromToken(accessToken);
-        var profileId = int.Parse(userData[_jwtSettings.ProfileId]);
-        var userId = int.Parse(userData[_jwtSettings.UserId]);
-        var studentName = $"{userData.GetValueOrDefault(_jwtSettings.FirstName, string.Empty)} {userData.GetValueOrDefault(_jwtSettings.LastName, string.Empty)}";
+        var profileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var userId = _jWTService.GetUserIdFromToken(accessToken);
+        var studentName = _jWTService.GetFirstNameFromToken(accessToken) + " " + _jWTService.GetLastNameFromToken(accessToken);
 
         var chatSession = await CreateSessionAsync(
             profileId,
@@ -279,7 +299,7 @@ public class AdvisorySession1to1Service
             System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(Advisory1to1Util.GenerateChatBotSessionTitle(request.Message))));
 
         await CreateMessageAsync(request.Message, userId, chatSession.Id);
-        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPromptInit(studentName, null, null, request.Message));
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(studentName, request.Message));
         aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, chatSession.Id);
         return new InitChatBotResponse { Message = aiResponse, ChatSessionId = chatSession.Id };

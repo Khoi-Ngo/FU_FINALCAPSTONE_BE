@@ -1,12 +1,19 @@
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
+using AISEA.ApiService.SHARED.PropConfigs;
 using FluentValidation;
 
 namespace AISEA.ApiService.BAL.Validators.Booking
 {
     public class UpdateBookingAvailabilityRequestValidator : AbstractValidator<UpdateBookingAvailabilityRequest>
     {
-        public UpdateBookingAvailabilityRequestValidator()
+        private readonly BookingSettings _bookingSettings;
+
+        public UpdateBookingAvailabilityRequestValidator(BookingSettings bookingSettings)
         {
+
+            _bookingSettings = bookingSettings;
+
+
             RuleFor(x => x.StartTime)
                 .Must(BeValidTimeSpan).WithMessage("StartTime must be a valid time between 00:00:00 and 23:59:59.")
                 .NotNull().WithMessage("StartTime is required.");
@@ -21,16 +28,15 @@ namespace AISEA.ApiService.BAL.Validators.Booking
 
             RuleFor(x => x.DayInWeek)
                 .IsInEnum().WithMessage("DayInWeek must be a valid day of the week (Monday to Sunday).");
-            //TODO: Get From properties
 
-            // Enforce time range to be exactly 30min or 1h
             RuleFor(x => x)
                 .Must(x =>
                 {
                     var duration = RoundToMinute(x.EndTime) - RoundToMinute(x.StartTime);
-                    return duration == TimeSpan.FromMinutes(30) || duration == TimeSpan.FromHours(1);
+                    return _bookingSettings.AllowedBookingDurationsMinutes.Contains((int)duration.TotalMinutes);
                 })
-                .WithMessage("The time range must be exactly 30 minutes or exactly 1 hour.");
+                .WithMessage($"The time range must be one of the allowed durations: {string.Join(", ", _bookingSettings.AllowedBookingDurationsMinutes)} minutes.");
+
         }
 
         private bool BeValidTimeSpan(TimeSpan time)

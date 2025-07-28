@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace AISEA.ApiService.BAL.Services.BgJob;
+namespace AISEA.ApiService.WebApi.BgJob;
 
 public class ChatBgService : BackgroundService
 {

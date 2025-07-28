@@ -18,9 +18,28 @@ public class BookingSettings
     #endregion
 
     #region Meeting Values
-    public int MinTimeAdvConfirmPendingMeetingDays { get; set; }
+    public int MinTimeAdvConfirmOrCancelMeetingDays { get; set; }
     public int MinTimeToGoStuCreateMeetingDays { get; set; }
+    public int MinTimeStudentCancelTheConfirmMeetingDays { get; set; }
+    public int NumberOfBanWhenStuCancelTheConfirm { get; set; }
+    public int NumberOfBanWhenStuMissingTheMeeting { get; set; }
+
     public int MaxNumberOfBan { get; set; }
-    
+    public int MaxStuCancelStatPerStuInMonth { get; set; }
+    public int MaxLateTimeForAdvToMeetingMins { get; set; }
+
+    #endregion
+
+    #region Booking Durations
+
+    public List<int> AllowedBookingDurationsMinutes { get; set; }
+
+    #endregion
+
+    #region Background service props
+    public long EstimateNumberOfBanIncreasedToAntiSpam { get; set; }
+    public long CheckStudentCancelPendingMeetingSpamIntervalMillis { get; set; }
+    public long GeneralPurposeIntervalMillis { get; set; }
+    public long CheckNotMatchBookingAvaiIntervalMillis { get; set; }
     #endregion
 }

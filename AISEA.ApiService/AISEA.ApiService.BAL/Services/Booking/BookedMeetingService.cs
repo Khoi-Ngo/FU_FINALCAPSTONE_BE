@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Booking;
+using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -12,10 +13,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.BAL.Services.Booking;
-//TODO: Replace Task<long> with MeetingNotiForPartnerResponse
+
 public class BookedMeetingService
 {
-    //TODO: Temp reset the min day to confirm and min day to create = 2 for prod the cur = 0 for testing
     private readonly BookedMeetingRepository _bookedMeetingRepository;
     private readonly StaffProfileRepository _staffProfileRepository;
     private readonly StudentProfileRepository _studentProfileRepository;
@@ -36,33 +36,77 @@ public class BookedMeetingService
         _bookingSettings = bookingSettings;
         _mailService = mailService;
     }
+    #region GET MULTIPLE
 
-    public async Task<long> AddReasonForOverdueAsync(string accessToken, ReasonOverdueRequest request)
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllAsync(PaginationRequest request)
     {
-        //return the studentUserIdToNotify
-
-        throw new NotImplementedException();
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllAsync(request);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 
-    public async Task AdvCancelTheConfirmedAsync(long id, NoteDTO request, string accessToken)
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllByStudentSelfAsync(PaginationRequest request, string accessToken)
     {
-        throw new NotImplementedException();
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStudentProfileIdAsync(request, studentProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllByAdvSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var staffProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllByStaffProfileIdForStudentRoleAsync(PaginationRequest request, long staffProfileId)
+    {
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    #endregion
+
+
 
     public async Task StuCancelPendingAsync(long id, NoteDTO request, string accessToken)
     {
-        throw new NotImplementedException();
-        // //simply shift the status to the STU_CANCELED
-        // var pendingMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
+        //simply shift the status to the STU_CANCELED without any BAN (The mechanism anti spam will be on the worker service)
+        var pendingMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
 
-        // if (pendingMeeting.Status != EBookingStatus.PENDING) throw new InvalidCurMeetingStatException("Cannot execute command on the meeting if the status of meeting is not current " + EBookingStatus.PENDING.ToString());//only this no need to check more about the time current w start time
+        if (pendingMeeting.Status != EBookingStatus.PENDING) throw new InvalidCurMeetingStatException("Cannot execute command on the meeting if the status of meeting is not current " + EBookingStatus.PENDING.ToString());
 
-        // if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
+        if (DateTime.Now > pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
 
-        // pendingMeeting.Note = request.Note;
-        // pendingMeeting.Status = EBookingStatus.STU_CANCELED;
+        if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
 
-        // await _bookedMeetingRepository.UpdateAsync(pendingMeeting);
+        pendingMeeting.Note = request.Note;
+        pendingMeeting.Status = EBookingStatus.STU_CANCELED;
+
+        await _bookedMeetingRepository.UpdateAsync(pendingMeeting);
 
     }
 
@@ -103,11 +147,18 @@ public class BookedMeetingService
 
         if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("You have no permission to confirm this meeting");
 
+        //check the status
+        if (confirmedMeeting.Status != EBookingStatus.PENDING)
+            throw new InvalidOperationException("The status of this meeting not true");
+
+
         var daysGap = GetTheTimeGap(confirmedMeeting.StartDateTime, DateTime.Now).TotalDays;
 
-        if (!(confirmedMeeting.Status == EBookingStatus.PENDING
-        && daysGap >= _bookingSettings.MinTimeAdvConfirmPendingMeetingDays
-        )) throw new InvalidOperationException("Too late to confirm this meeting or the status of this meeting not true");
+        if (DateTime.Now >= confirmedMeeting.StartDateTime
+        || daysGap < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
+            throw new InvalidOperationException("Too late to confirm this meeting");
+
+
 
         confirmedMeeting.Status = EBookingStatus.CONFIRMED;
         await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
@@ -188,55 +239,153 @@ public class BookedMeetingService
         }
 
     }
-
     public async Task DeleteAsync(long id)
     {
         var removedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
         await _bookedMeetingRepository.RemoveAsync(removedMeeting);
     }
 
-    public async Task<MeetingNotiForPartnerResponse> DisapprovePendingMeetingsAsync(string accessToken, DisApproveRequest request)
+    public async Task<MeetingNotiForPartnerResponse> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
     {
-        throw new NotImplementedException();
-
+        var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //validate the access to meeting
+        if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to cancel this meeting");
 
-        //shift to the status NOT_APPROVED with the same reason
+        //check status
+        if (!(canceledMeeting.Status == EBookingStatus.CONFIRMED || canceledMeeting.Status == EBookingStatus.PENDING))
+            throw new InvalidOperationException("The status is not true for processing the action");
 
-        //have to check all whether before the start time and have status = PENDING ? (trigger)
+        //check the gap if too late then deny => overdue(FU admin internally observe then giving real-life penalties)
+        if (DateTime.Now >= canceledMeeting.StartDateTime || GetTheTimeGap(canceledMeeting.StartDateTime, DateTime.Now).TotalDays < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
+            throw new InvalidOperationException("Too late to cancel the meeting, this will be shifted to OVERDUE soon");
 
         //save to the database
+        canceledMeeting.Note = request.Note;
+        canceledMeeting.Status = EBookingStatus.ADV_CANCELED;
 
-        //notify for all student related to the meeting(s) by the MeetingNotiForStudentResponses taken from trigger while saving into database
+        await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
+
+        //Get the PartnerResponse
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(canceledMeeting.StudentProfileId);
+        return new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = studentProfile.UserId,
+            MeetingStartDateTime = canceledMeeting.StartDateTime,
+            MeetingEndDateTime = canceledMeeting.EndDateTime,
+            StatusChangedTo = canceledMeeting.Status
+        };
 
     }
 
-    public async Task FeedbackAsync(string accessToken, FeedbackRequest request)
+    public async Task FeedbackAsync(string accessToken, FeedbackRequest request, long meetingId)
     {
-        throw new NotImplementedException();
+        var meeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        //validate the access meeting
+        if (!IsValidAccess(meeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to give feedback for this meeting");
+
+        //validate the time + the status ACTIVE but END OF PHASE
+        if (DateTime.Now <= meeting.EndDateTime) throw new InvalidOperationException("You cannot give the feedback when the meeting is not over");
+
+        if (meeting.Status != EBookingStatus.COMPLETED && meeting.Status != EBookingStatus.STUDENT_MISSED && meeting.Status != EBookingStatus.ADVISOR_MISSED)
+            throw new InvalidOperationException("Cannot give the feedback when the stat of the meeting not comes to the end stat YET");
+
+        meeting.Feedback = request.Feedback;
+        meeting.SuggestionFromAdvisor = request.SuggestionFromAdvisor;
+
+        await _bookedMeetingRepository.UpdateAsync(meeting);
     }
 
-    public async Task GetAllAsync(PaginationRequest request)
+
+    public async Task<MeetingNotiForPartnerResponse> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
     {
-        throw new NotImplementedException();
+        var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        //valid access the meeting
+        if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to report the Advisor missed this meeting");
+
+        //check the stat is CONFIRM
+        if (confirmedMeeting.Status != EBookingStatus.CONFIRMED)
+            throw new InvalidOperationException("Cannot report the Advisor missed this meeting when the stat of the meeting is NOT CONFIRMED");
+
+        //check the time after start = _bookingSettings.MinLateTimeMinOfAdv
+        if (!(DateTime.Now > confirmedMeeting.StartDateTime
+        && GetTheTimeGap(DateTime.Now, confirmedMeeting.StartDateTime).TotalMinutes >= _bookingSettings.MaxLateTimeForAdvToMeetingMins))
+            throw new InvalidOperationException($"Not appropriate time for reporting Advisor missing the meeting, make sure the current time a head of StartTime about ${_bookingSettings.MaxLateTimeForAdvToMeetingMins} minutes");
+
+        confirmedMeeting.Note = request.Note;
+        confirmedMeeting.Status = EBookingStatus.ADVISOR_MISSED;
+        await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
+        var advisorProfile = await _staffProfileRepository.GetByIdAsync(confirmedMeeting.StaffProfileId);
+        //get the MeetingNotiForPartnerResponse then notify
+        return new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = advisorProfile.UserId,
+            MeetingStartDateTime = confirmedMeeting.StartDateTime,
+            MeetingEndDateTime = confirmedMeeting.EndDateTime,
+            StatusChangedTo = confirmedMeeting.Status
+        };
     }
 
-    public async Task<long> MarkAdvisorMissedAsync(string accessToken, long id, NoteDTO request)
+    public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
-        //return the advisorUserIdToNotify
-        throw new NotImplementedException();
+        var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        // -Validate the access
+        if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to cancel this meeting");
+        // -Validate the status
+        if (canceledMeeting.Status != EBookingStatus.CONFIRMED) throw new InvalidOperationException("Cannot process with NON-CONFIRMED meeting");
+
+        // -Validate the time, the time gap btw Current - StartTime must be >= Min TimeGap allowing to Cancel
+        var dayGaps = GetTheTimeGap(DateTime.Now, canceledMeeting.StartDateTime).TotalDays;
+
+        if (DateTime.Now >= canceledMeeting.StartDateTime || dayGaps < _bookingSettings.MinTimeStudentCancelTheConfirmMeetingDays)
+            throw new InvalidOperationException("Too late to cancel the confirm meeting");
+
+        /*
+                -If cancel -> Number of Ban + 2 if cannot due to too late to do then later the Meeting will be set as StudentMissed and Number of Ban + 3
+        
+                -Happy case: update the status, note of the meeting then return the number of ban = 2
+        */
+        canceledMeeting.Note = request.Note;
+        canceledMeeting.Status = EBookingStatus.STU_CANCELED;
+        await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
+
+        var advisorProfile = await _staffProfileRepository.GetByIdAsync(canceledMeeting.StaffProfileId);
+
+        return (new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = advisorProfile.UserId,
+            MeetingStartDateTime = canceledMeeting.StartDateTime,
+            MeetingEndDateTime = canceledMeeting.EndDateTime,
+            StatusChangedTo = canceledMeeting.Status
+            
+        }, _bookingSettings.NumberOfBanWhenStuCancelTheConfirm);
+
+    }
+    public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
+    {
+        var overdueMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        //validate the access
+        if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessMeeting("No permission to give the reason for this overdue meeting");
+
+        //validate the status is overdue or not
+        if (overdueMeeting.Status != EBookingStatus.OVERDUE) throw new InvalidOperationException("Cannot process with NON-OVERDUE meeting");
+
+        //giving the reason for overdue
+        overdueMeeting.Note = request.Note;
+        await _bookedMeetingRepository.UpdateAsync(overdueMeeting);
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(overdueMeeting.StudentProfileId);
+        return new MeetingNotiForPartnerResponse
+        {
+            PartnerUserId = studentProfile.UserId,
+            MeetingStartDateTime = overdueMeeting.StartDateTime,
+            MeetingEndDateTime = overdueMeeting.EndDateTime
+        };
     }
 
-    public async Task<long> MarkStudentMissedAsync(string accessToken, long id)
-    {
-        //return the studentUserIdToNotify
-        throw new NotImplementedException();
-    }
-
-    public async Task<int> StuCancelTheConfirmedAsync(long id, NoteDTO request, string accessToken)
-    {
-        throw new NotImplementedException();
-    }
 
 
 
@@ -246,11 +395,12 @@ public class BookedMeetingService
         switch (ex.Number)
         {
             case 50006:
-                throw new InvalidOperationException("Student has reached the maximum number of bans (30). Cannot book meeting.");
+                throw new InvalidOperationException("Student has reached the maximum number of bans . Cannot book meeting.");
             case 50007:
                 throw new InvalidOperationException("The meeting time conflicts with staff's leave schedule.");
-            case 50008:
-                throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
+            //NOTE: currently not check direct via constraint in database anymore 
+            // case 50008:
+            // throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
             case 50009:
                 throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot.");
             case 50010:
@@ -273,5 +423,19 @@ public class BookedMeetingService
     private TimeSpan GetTheTimeGap(DateTime time1, DateTime time2)
     => (time1 - time2).Duration();
 
+
+
+
+
     #endregion
+
+    //get detail meeting
+    public async Task<MeetingViewDetailResponse> GetDetailMeetingAsync(long meetingId, string accessToken)
+    {
+        var meeting = await _bookedMeetingRepository.GetDetailByIdAsync(meetingId);
+        if (!IsValidAccess(meeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+            throw new InvalidAccessBookingAvailability("No permission to access this detail meeting");
+
+        return _mapper.Map<MeetingViewDetailResponse>(meeting);
+    }
 }

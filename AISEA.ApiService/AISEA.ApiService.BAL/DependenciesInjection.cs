@@ -16,7 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.BAL.Services.AuditLog;
-using AISEA.ApiService.BAL.Services.BgJob;
 using AISEA.ApiService.BAL.Services.Booking;
 
 namespace AISEA.ApiService.BAL
@@ -58,10 +57,7 @@ namespace AISEA.ApiService.BAL
             );
             services.AddFluentValidationAutoValidation();
 
-            //adding background jobs
-            services.AddHostedService<NotiBgService>();
-            services.AddHostedService<ChatBgService>();
-
+          
             return services;
         }
     }

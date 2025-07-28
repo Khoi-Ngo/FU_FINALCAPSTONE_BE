@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.WebApi.HubUtil;
+using AISEA.ApiService.WebApi.BgJob;
 
 namespace AISEA.ApiService.WebApi;
 
@@ -151,6 +152,12 @@ public static class DependenciesInjection
         //other services
         services.AddScoped<AdvisorySessionHubNotifier>();
         services.AddScoped<NotificationHubNotifier>();
+
+
+        //adding background jobs
+        services.AddHostedService<NotiBgService>();
+        services.AddHostedService<ChatBgService>();
+
 
         return services;
     }

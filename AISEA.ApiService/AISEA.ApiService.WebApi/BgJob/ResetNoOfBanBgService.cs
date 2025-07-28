@@ -33,6 +33,8 @@ public class ResetNoOfBanBgService : BackgroundService
                 var now = DateTime.UtcNow;
                 var delay = nextReset - now;
 
+                _logger.LogInformation($"The Reset Number Of Ban Worker Service Running at {now}, the delay is now {delay}");
+
                 if (delay.TotalMilliseconds <= 0)
                 {
                     using (var scope = _serviceProvider.CreateScope())

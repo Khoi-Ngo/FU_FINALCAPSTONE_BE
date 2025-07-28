@@ -16,7 +16,12 @@ namespace AISEA.ApiService.DAL.Repositories
             return await _context.Syllabi
                 .Include(s => s.SubjectVersion)
                     .ThenInclude(sv => sv.Subject)
-                .FirstOrDefaultAsync(s => s.SubjectVersion.SubjectId == subjectId && !s.IsDeleted);
+                .Where(s => s.SubjectVersion.SubjectId == subjectId && !s.IsDeleted)
+                .OrderByDescending(s => s.SubjectVersion.IsDefault) // Default version first
+                .ThenByDescending(s => s.SubjectVersion.IsActive)   // Then active versions
+                .ThenByDescending(s => s.SubjectVersion.EffectiveFrom) // Then by most recent effective date
+                .ThenByDescending(s => s.SubjectVersion.CreatedAt)  // Finally by creation date
+                .FirstOrDefaultAsync();
         }
         
         public async Task<Syllabus?> GetBySubjectVersionIdAsync(long subjectVersionId)
@@ -25,6 +30,22 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Include(s => s.SubjectVersion)
                     .ThenInclude(sv => sv.Subject)
                 .FirstOrDefaultAsync(s => s.SubjectVersionId == subjectVersionId && !s.IsDeleted);
+        }
+
+        /// <summary>
+        /// Gets the syllabus for the default version of a subject
+        /// </summary>
+        public async Task<Syllabus?> GetBySubjectIdDefaultVersionAsync(long subjectId)
+        {
+            return await _context.Syllabi
+                .Include(s => s.SubjectVersion)
+                    .ThenInclude(sv => sv.Subject)
+                .Where(s => s.SubjectVersion.SubjectId == subjectId && 
+                           s.SubjectVersion.IsDefault && 
+                           s.SubjectVersion.IsActive && 
+                           !s.SubjectVersion.IsDeleted &&
+                           !s.IsDeleted)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Syllabus?> GetDetailByIdAsync(long id)

@@ -24,7 +24,7 @@ namespace AISEA.ApiService.DAL.Repositories
             int pageNumber, int pageSize, long? subjectId = null, string? search = null, bool? isActive = null)
         {
             var query = _context.SubjectVersions
-                .Include(sv => sv.Subject)
+                .Include(sv => sv.Subject)  
                 .Where(sv => !sv.IsDeleted);
 
             if (subjectId.HasValue)

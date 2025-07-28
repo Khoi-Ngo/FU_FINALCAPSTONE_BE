@@ -26,7 +26,7 @@ namespace AISEA.ApiService.SHARED.Const.Enums
         /// </summary>
         STUDENT_MISSED = 5,
         ADVISOR_MISSED = 6, //VALID TIME TO DO: After the 15 mins from StartDateTime of the meeting TimeSlot VALID CUR STAT: CONFIRMED, MUST HAVE NOTE, VALID ACCESS TO THE MEETING
-        OVERDUE = 8,// After the EndTime of the meeting timeSlot the worker service will handle shift Stat from PENDING to OVERDUE
+        OVERDUE = 8,// After the STARTTIME of the meeting timeSlot the worker service will handle shift Stat from PENDING to OVERDUE
 
         /*
 

@@ -157,6 +157,7 @@ public static class DependenciesInjection
         //adding background jobs
         services.AddHostedService<NotiBgService>();
         services.AddHostedService<ChatBgService>();
+        services.AddHostedService<MeetingOverdueBgService>();
 
 
         return services;

@@ -28,6 +28,11 @@ public class StudentProfileService
         await _studentProfileRepository.CreateAsync(studentProfile);
     }
 
+    public async Task<StudentProfile> GetByIdAsync(long studentProfileId)
+    {
+        return await _studentProfileRepository.GetByIdAsync(studentProfileId);
+    }
+
     private bool IsValidAccess(string accessToken, long userId)
     => _jWTService.GetRoleIdFromToken(accessToken) == (long)EUserRole.ADMIN
     || _jWTService.GetUserIdFromToken(accessToken) == userId;

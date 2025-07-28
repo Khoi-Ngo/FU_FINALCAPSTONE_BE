@@ -34,7 +34,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
         return Ok("Ok");
     }
 
@@ -46,7 +46,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
         await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
         return Ok("Ok");
     }
 
@@ -58,7 +58,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _leaveScheduleService.DeleteAsync(id, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Leave Schedule has been deleted.");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leave Schedule has been deleted.");
         return Ok("Ok");
     }
     #endregion

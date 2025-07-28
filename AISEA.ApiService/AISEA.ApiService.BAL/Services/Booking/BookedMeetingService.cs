@@ -114,6 +114,8 @@ public class BookedMeetingService
     {
 
         //validate the time to do + current status + validate access + check in code (trigger)
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var completedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
 
         if (!IsValidAccess(completedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessBookingAvailability("Deny access to the meeting");
@@ -141,6 +143,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> ConfirmMeetingAsync(long id, string accessToken)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         //validate time + status + access permission
         var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
 
@@ -178,6 +182,7 @@ public class BookedMeetingService
     {
         try
         {
+            //TODO: GetUserId of Profile By ProfileId async
             //avoid book the meeting on holiday
             var checkHolidays = await _holidayService.CheckHolidayAsync(DateOnly.FromDateTime(request.StartDateTime));
             if (checkHolidays.Any()) throw new OnHolidayException("You cannot book a meeting on Holiday (VN)", checkHolidays);
@@ -246,6 +251,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //validate the access to meeting
         if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -299,6 +306,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //valid access the meeting
         if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -329,6 +338,8 @@ public class BookedMeetingService
 
     public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         // -Validate the access
         if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -365,6 +376,8 @@ public class BookedMeetingService
     }
     public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var overdueMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //validate the access
         if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -436,5 +449,15 @@ public class BookedMeetingService
             throw new InvalidAccessBookingAvailability("No permission to access this detail meeting");
 
         return _mapper.Map<MeetingViewDetailResponse>(meeting);
+    }
+
+    public async Task<List<OverdueMeetingDTO>> GetPendingOverdueMeetingsWithUserIdsAsync()
+    {
+        return await _bookedMeetingRepository.GetPendingOverdueMeetingsWithUserIdsAsync();
+    }
+
+    public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)
+    {
+        await _bookedMeetingRepository.UpdateMeetingStatusesAsync(meetingIds, status);
     }
 }

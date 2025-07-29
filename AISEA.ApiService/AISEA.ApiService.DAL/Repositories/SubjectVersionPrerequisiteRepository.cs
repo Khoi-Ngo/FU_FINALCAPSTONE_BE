@@ -70,10 +70,57 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task<bool> HasCircularDependencyAsync(long subjectVersionId, long prerequisiteSubjectVersionId)
         {
-            // Check if adding this prerequisite would create a circular dependency
-            // This is a simple check - you might want to implement a more comprehensive graph traversal
-            var existingPrerequisites = await GetPrerequisitesBySubjectVersionIdAsync(prerequisiteSubjectVersionId);
-            return existingPrerequisites.Any(p => p.Id == subjectVersionId);
+            // If adding prerequisiteSubjectVersionId as a prerequisite of subjectVersionId would create a cycle,
+            // then there must be a path from prerequisiteSubjectVersionId back to subjectVersionId
+            return await HasPathAsync(prerequisiteSubjectVersionId, subjectVersionId, new HashSet<long>());
+        }
+
+        /// <summary>
+        /// Checks if there's a path from startSubjectVersionId to targetSubjectVersionId using DFS
+        /// This detects both direct and transitive circular dependencies
+        /// </summary>
+        /// <param name="startSubjectVersionId">Starting subject version ID</param>
+        /// <param name="targetSubjectVersionId">Target subject version ID we're looking for</param>
+        /// <param name="visited">Set of already visited nodes to prevent infinite loops</param>
+        /// <returns>True if a path exists, false otherwise</returns>
+        private async Task<bool> HasPathAsync(long startSubjectVersionId, long targetSubjectVersionId, HashSet<long> visited)
+        {
+            // If we've already visited this node, there's no cycle through this path
+            if (visited.Contains(startSubjectVersionId))
+            {
+                return false;
+            }
+
+            // If we've reached our target, we found a path (potential cycle)
+            if (startSubjectVersionId == targetSubjectVersionId)
+            {
+                return true;
+            }
+
+            // Mark this node as visited
+            visited.Add(startSubjectVersionId);
+
+            try
+            {
+                // Get all prerequisites of the current subject version
+                var prerequisites = await GetPrerequisitesBySubjectVersionIdAsync(startSubjectVersionId);
+
+                // For each prerequisite, recursively check if there's a path to the target
+                foreach (var prerequisite in prerequisites)
+                {
+                    if (await HasPathAsync(prerequisite.Id, targetSubjectVersionId, new HashSet<long>(visited)))
+                    {
+                        return true; // Found a path through this prerequisite
+                    }
+                }
+
+                return false; // No path found through any prerequisite
+            }
+            finally
+            {
+                // Remove from visited set to allow other paths to explore this node
+                visited.Remove(startSubjectVersionId);
+            }
         }
 
         public async Task<bool> RestoreSoftDeletedPrerequisiteAsync(long subjectVersionId, long prerequisiteSubjectVersionId)

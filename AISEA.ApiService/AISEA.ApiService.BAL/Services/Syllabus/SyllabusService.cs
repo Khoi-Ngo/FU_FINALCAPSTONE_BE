@@ -136,6 +136,30 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             return _mapper.Map<GetSyllabusDetailResponse>(detailSyllabus);
         }
 
+        /// <summary>
+        /// Gets the syllabus for a specific subject version
+        /// </summary>
+        public async Task<GetSyllabusDetailResponse> GetSyllabusBySubjectVersionIdAsync(long subjectVersionId)
+        {
+            // First, validate that the subject version exists
+            var subjectVersion = await _subjectVersionRepository.GetByIdAsync(subjectVersionId);
+            if (subjectVersion == null || subjectVersion.IsDeleted)
+            {
+                throw new NotFoundException("Subject version not found.");
+            }
+
+            // Get syllabus for the specific subject version
+            var syllabus = await _syllabusRepository.GetBySubjectVersionIdAsync(subjectVersionId);
+            if (syllabus == null || syllabus.IsDeleted)
+            {
+                throw new NotFoundException($"No syllabus found for subject version '{subjectVersion.VersionName}' (ID: {subjectVersionId}) " +
+                    $"of subject '{subjectVersion.Subject?.SubjectName}'. Please ensure a syllabus exists for this version.");
+            }
+
+            var detailSyllabus = await _syllabusRepository.GetDetailByIdAsync(syllabus.Id);
+            return _mapper.Map<GetSyllabusDetailResponse>(detailSyllabus);
+        }
+
         public async Task UpdateSyllabusAsync(long id, UpdateSyllabusRequest request)
         {
             var syllabus = await _syllabusRepository.GetByIdAsync(id);

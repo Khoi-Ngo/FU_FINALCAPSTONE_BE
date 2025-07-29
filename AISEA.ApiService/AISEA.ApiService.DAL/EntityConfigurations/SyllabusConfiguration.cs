@@ -24,3 +24,4 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
         }
     }
 }
+

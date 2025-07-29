@@ -36,7 +36,7 @@ public static class DependenciesInjection
         services.AddScoped<StudentProfileRepository>();
         services.AddScoped<SubjectRepository>();
         services.AddScoped<SubjectVersionRepository>();
-        services.AddScoped<SubjectPrerequisiteRepository>();
+        services.AddScoped<SubjectVersionPrerequisiteRepository>();
         services.AddScoped<SyllabusRepository>();
         services.AddScoped<SyllabusAssessmentRepository>();
         services.AddScoped<SyllabusLearningMaterialRepository>();

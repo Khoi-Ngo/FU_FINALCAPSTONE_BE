@@ -39,6 +39,12 @@ namespace AISEA.ApiService.DAL.Entities
         [InverseProperty("SubjectVersion")]
         public virtual ICollection<CurriculumSubject> CurriculumSubjects { get; set; } = new List<CurriculumSubject>();
         
+        [InverseProperty("SubjectVersion")]
+        public virtual ICollection<SubjectVersionPrerequisite> Prerequisites { get; set; } = new List<SubjectVersionPrerequisite>();
+        
+        [InverseProperty("PrerequisiteSubjectVersion")]
+        public virtual ICollection<SubjectVersionPrerequisite> DependentSubjectVersions { get; set; } = new List<SubjectVersionPrerequisite>();
+        
         [ForeignKey("SubjectId")]
         [InverseProperty("SubjectVersions")]
         public virtual Subject Subject { get; set; } = null!;

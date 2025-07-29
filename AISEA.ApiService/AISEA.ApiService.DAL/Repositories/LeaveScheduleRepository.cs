@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace AISEA.ApiService.DAL.Repositories;
 
@@ -11,6 +12,16 @@ public class LeaveScheduleRepository : GenericRepository<LeaveSchedule>
 {
     public LeaveScheduleRepository(AiseaContext context) : base(context)
     {
+    }
+    public async Task CreateBulkAsync(List<LeaveSchedule> entities)
+    {
+        await _context.AddRangeAsync(entities);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await _context.Database.BeginTransactionAsync();
     }
 
     public async Task<object> CheckDayOfWeekSQLAsync(DateTime date)

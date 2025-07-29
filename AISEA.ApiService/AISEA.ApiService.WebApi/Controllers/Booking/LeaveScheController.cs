@@ -28,7 +28,7 @@ public class LeaveScheController : BaseController
 
     #region Command action
     /// <summary>
-    /// Creates Leaving Schedule for a staff member.
+    /// Creates Leaving Schedule for a advisor member.
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
@@ -36,7 +36,16 @@ public class LeaveScheController : BaseController
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
         await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
-        return Ok("Ok");
+        return Ok(new { message = "Leave schedule created successfully" });
+    }
+
+    [HttpPost("bulk")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
+    {
+        await _leaveScheduleService.CreateBulkAsync(requests, AccessToken);
+        await _notifier.NotifyUserAsync(AccessToken, "Success", $"{requests.Count} leave schedules created successfully.");
+        return Ok(new { message = $"{requests.Count} leave schedules created successfully" });
     }
 
     /// <summary>

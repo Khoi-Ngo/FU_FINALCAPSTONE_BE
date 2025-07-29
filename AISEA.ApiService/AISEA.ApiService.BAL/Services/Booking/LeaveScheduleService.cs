@@ -65,6 +65,55 @@ public class LeaveScheduleService
         }
     }
 
+    public async Task CreateBulkAsync(List<CreateLeaveScheRequest> requests, string accessToken)
+    {
+        try
+        {
+            var staffProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+            var leaveSchedules = new List<LeaveSchedule>();
+
+            foreach (var request in requests)
+            {
+                // Validate holiday overlap for each request
+                var holidays = await CheckHolidaysAsync(request.StartDateTime, request.EndDateTime);
+                if (holidays.Any())
+                {
+                    throw new OnHolidayException($"Leave request from {request.StartDateTime} to {request.EndDateTime} includes holiday(s)", holidays);
+                }
+
+                var leaveSchedule = _mapper.Map<LeaveSchedule>(request);
+                leaveSchedule.StaffProfileId = staffProfileId;
+                leaveSchedules.Add(leaveSchedule);
+            }
+
+            // Use transaction for bulk insert
+            using var transaction = await _leaveScheduleRepository.BeginTransactionAsync();
+            try
+            {
+                await _leaveScheduleRepository.CreateBulkAsync(leaveSchedules);
+                foreach (var schedule in leaveSchedules)
+                {
+                    CacheLeaveScheAsync(schedule);
+                }
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx)
+        {
+            HandleLeaveSqlException(sqlEx);
+        }
+        catch (SqlException ex)
+        {
+            HandleLeaveSqlException(ex);
+        }
+    }
+
+
     //update a leave schedule
     public async Task UpdateAsync(UpdateLeaveScheRequest request, long id, string accessToken)
     {

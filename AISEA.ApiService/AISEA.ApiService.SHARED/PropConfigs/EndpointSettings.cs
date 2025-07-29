@@ -13,6 +13,6 @@ public class EndpointSettings
     public required string NotificationHubEndpoint { get; set; }
     public required string ProdClientOrigin { get; set; }
     public required string DevClientOrigin { get; set; }
-
+    public required string AdditionalClientOrigin { get; set; }
 
 }

@@ -72,6 +72,16 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
+        /// Gets syllabus by subject version ID
+        /// </summary>
+        [HttpGet("by-subject-version/{subjectVersionId}")]
+        public async Task<IActionResult> GetSyllabusBySubjectVersionId(long subjectVersionId)
+        {
+            var result = await _syllabusService.GetSyllabusBySubjectVersionIdAsync(subjectVersionId);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Updates an existing syllabus (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]

@@ -35,6 +35,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<AdvisorySession1to1Service>();
             services.AddScoped<SubjectService>();
             services.AddScoped<SubjectVersionService>();
+            services.AddScoped<SubjectVersionPrerequisiteService>();
             services.AddScoped<SyllabusService>();
             services.AddScoped<CurriculumService>();
             services.AddScoped<ComboService>();

@@ -11,14 +11,10 @@ public partial class Syllabus
     [Column("id")]
     public long Id { get; set; }
 
-    public long SubjectId { get; set; }
-
     [Column(TypeName = "text")]
     public string Content { get; set; } = null!;
-
-    [ForeignKey("SubjectId")]
-    [InverseProperty("Syllabi")]
-    public virtual Subject Subject { get; set; } = null!;
+    
+    public long SubjectVersionId { get; set; }
 
     public virtual ICollection<SyllabusAssessment> SyllabusAssessments { get; set; } = new List<SyllabusAssessment>();
 
@@ -27,6 +23,10 @@ public partial class Syllabus
     public virtual ICollection<SyllabusLearningOutcome> SyllabusLearningOutcomes { get; set; } = new List<SyllabusLearningOutcome>();
 
     public virtual ICollection<SyllabusSession> SyllabusSessions { get; set; } = new List<SyllabusSession>();
+    
+    [ForeignKey(nameof(SubjectVersionId))]
+    [InverseProperty("Syllabi")]
+    public virtual SubjectVersion SubjectVersion { get; set; } = null!;
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

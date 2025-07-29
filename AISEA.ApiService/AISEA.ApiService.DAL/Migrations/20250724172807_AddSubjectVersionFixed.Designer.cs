@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250724172807_AddSubjectVersionFixed")]
+    partial class AddSubjectVersionFixed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,13 +194,9 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.ToTable("BookedMeeting", t =>
                         {
-                            t.HasTrigger("TR_BookedMeeting_AntiStudentSpamCancel");
-
                             t.HasTrigger("TR_BookedMeeting_CheckExternalTables");
 
                             t.HasTrigger("TR_BookedMeeting_CheckInternalData");
-
-                            t.HasTrigger("TR_BookedMeeting_PreventStudentTooManyPending");
                         });
 
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
@@ -372,9 +371,9 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("curriculum_id");
 
-                    b.Property<long>("SubjectVersionId")
+                    b.Property<long>("SubjectId")
                         .HasColumnType("bigint")
-                        .HasColumnName("subject_version_id");
+                        .HasColumnName("subject_id");
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -391,17 +390,22 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<int>("SemesterNumber")
                         .HasColumnType("int");
 
+                    b.Property<long?>("SubjectVersionId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("CurriculumId", "SubjectVersionId")
+                    b.HasKey("CurriculumId", "SubjectId")
                         .HasName("curriculumsubject_composite_primary");
 
                     b.HasIndex("CurriculumId")
                         .HasDatabaseName("IX_CurriculumSubject_CurriculumId");
 
-                    b.HasIndex("SubjectVersionId")
-                        .HasDatabaseName("IX_CurriculumSubject_SubjectVersionId");
+                    b.HasIndex("SubjectId")
+                        .HasDatabaseName("IX_CurriculumSubject_SubjectId");
+
+                    b.HasIndex("SubjectVersionId");
 
                     b.ToTable("CurriculumSubject");
                 });
@@ -879,7 +883,10 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<int>("SemesterNumber")
                         .HasColumnType("int");
 
-                    b.Property<long>("SubjectVersionId")
+                    b.Property<long>("SubjectId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("SubjectVersionId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -888,11 +895,47 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("subjectclass_id_primary");
 
-                    b.HasIndex("SubjectVersionId", "SemesterNumber", "ClassCode")
+                    b.HasIndex("SubjectVersionId");
+
+                    b.HasIndex("SubjectId", "SemesterNumber", "ClassCode")
                         .IsUnique()
                         .HasDatabaseName("IX_SubjectClass_UniqueClass");
 
                     b.ToTable("SubjectClass");
+                });
+
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectPrerequisite", b =>
+                {
+                    b.Property<long>("SubjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("subject_id");
+
+                    b.Property<long>("PrerequisiteSubjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("prerequisite_subject_id");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SubjectId", "PrerequisiteSubjectId")
+                        .HasName("subjectprerequisite_composite_primary");
+
+                    b.HasIndex("PrerequisiteSubjectId")
+                        .HasDatabaseName("IX_SubjectPrerequisite_PrerequisiteSubjectId");
+
+                    b.HasIndex("SubjectId")
+                        .HasDatabaseName("IX_SubjectPrerequisite_SubjectId");
+
+                    b.ToTable("SubjectPrerequisite");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersion", b =>
@@ -952,40 +995,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.ToTable("SubjectVersion", (string)null);
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersionPrerequisite", b =>
-                {
-                    b.Property<long>("SubjectVersionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("subject_version_id");
-
-                    b.Property<long>("PrerequisiteSubjectVersionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("prerequisite_subject_version_id");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SubjectVersionId", "PrerequisiteSubjectVersionId")
-                        .HasName("subjectversionprerequisite_composite_primary");
-
-                    b.HasIndex("PrerequisiteSubjectVersionId")
-                        .HasDatabaseName("IX_SubjectVersionPrerequisite_PrerequisiteSubjectVersionId");
-
-                    b.HasIndex("SubjectVersionId")
-                        .HasDatabaseName("IX_SubjectVersionPrerequisite_SubjectVersionId");
-
-                    b.ToTable("SubjectVersionPrerequisite", (string)null);
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Syllabus", b =>
                 {
                     b.Property<long>("Id")
@@ -1008,7 +1017,10 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<long>("SubjectVersionId")
+                    b.Property<long>("SubjectId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("SubjectVersionId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -1017,8 +1029,10 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("syllabus_id_primary");
 
-                    b.HasIndex("SubjectVersionId")
-                        .HasDatabaseName("IX_Syllabus_SubjectVersionId");
+                    b.HasIndex("SubjectId")
+                        .HasDatabaseName("IX_Syllabus_SubjectId");
+
+                    b.HasIndex("SubjectVersionId");
 
                     b.ToTable("Syllabus");
                 });
@@ -1397,13 +1411,19 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("curriculumsubject_curriculumid_foreign");
 
+                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "Subject")
+                        .WithMany("CurriculumSubjects")
+                        .HasForeignKey("SubjectId")
+                        .IsRequired()
+                        .HasConstraintName("curriculumsubject_subjectid_foreign");
+
                     b.HasOne("AISEA.ApiService.DAL.Entities.SubjectVersion", "SubjectVersion")
                         .WithMany("CurriculumSubjects")
-                        .HasForeignKey("SubjectVersionId")
-                        .IsRequired()
-                        .HasConstraintName("curriculumsubject_subjectversionid_foreign");
+                        .HasForeignKey("SubjectVersionId");
 
                     b.Navigation("Curriculum");
+
+                    b.Navigation("Subject");
 
                     b.Navigation("SubjectVersion");
                 });
@@ -1529,13 +1549,38 @@ namespace AISEA.ApiService.DAL.Migrations
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectClass", b =>
                 {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.SubjectVersion", "SubjectVersion")
+                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "Subject")
                         .WithMany("SubjectClasses")
-                        .HasForeignKey("SubjectVersionId")
+                        .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AISEA.ApiService.DAL.Entities.SubjectVersion", "SubjectVersion")
+                        .WithMany("SubjectClasses")
+                        .HasForeignKey("SubjectVersionId");
+
+                    b.Navigation("Subject");
+
                     b.Navigation("SubjectVersion");
+                });
+
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectPrerequisite", b =>
+                {
+                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "PrerequisiteSubject")
+                        .WithMany("Prerequisites")
+                        .HasForeignKey("PrerequisiteSubjectId")
+                        .IsRequired()
+                        .HasConstraintName("subjectprerequisite_prerequisitesubjectid_foreign");
+
+                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "Subject")
+                        .WithMany("DependentSubjects")
+                        .HasForeignKey("SubjectId")
+                        .IsRequired()
+                        .HasConstraintName("subjectprerequisite_subjectid_foreign");
+
+                    b.Navigation("PrerequisiteSubject");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersion", b =>
@@ -1549,34 +1594,19 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersionPrerequisite", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.SubjectVersion", "PrerequisiteSubjectVersion")
-                        .WithMany("DependentSubjectVersions")
-                        .HasForeignKey("PrerequisiteSubjectVersionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subjectversionprerequisite_prerequisitesubjectversionid_foreign");
-
-                    b.HasOne("AISEA.ApiService.DAL.Entities.SubjectVersion", "SubjectVersion")
-                        .WithMany("Prerequisites")
-                        .HasForeignKey("SubjectVersionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subjectversionprerequisite_subjectversionid_foreign");
-
-                    b.Navigation("PrerequisiteSubjectVersion");
-
-                    b.Navigation("SubjectVersion");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Syllabus", b =>
                 {
+                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "Subject")
+                        .WithMany("Syllabi")
+                        .HasForeignKey("SubjectId")
+                        .IsRequired()
+                        .HasConstraintName("syllabus_subjectid_foreign");
+
                     b.HasOne("AISEA.ApiService.DAL.Entities.SubjectVersion", "SubjectVersion")
                         .WithMany("Syllabi")
-                        .HasForeignKey("SubjectVersionId")
-                        .IsRequired()
-                        .HasConstraintName("syllabus_subjectversionid_foreign");
+                        .HasForeignKey("SubjectVersionId");
+
+                    b.Navigation("Subject");
 
                     b.Navigation("SubjectVersion");
                 });
@@ -1691,7 +1721,17 @@ namespace AISEA.ApiService.DAL.Migrations
                 {
                     b.Navigation("ComboSubjects");
 
+                    b.Navigation("CurriculumSubjects");
+
+                    b.Navigation("DependentSubjects");
+
+                    b.Navigation("Prerequisites");
+
+                    b.Navigation("SubjectClasses");
+
                     b.Navigation("SubjectVersions");
+
+                    b.Navigation("Syllabi");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectClass", b =>
@@ -1702,10 +1742,6 @@ namespace AISEA.ApiService.DAL.Migrations
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersion", b =>
                 {
                     b.Navigation("CurriculumSubjects");
-
-                    b.Navigation("DependentSubjectVersions");
-
-                    b.Navigation("Prerequisites");
 
                     b.Navigation("SubjectClasses");
 

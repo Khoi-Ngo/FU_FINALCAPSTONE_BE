@@ -11,26 +11,27 @@ namespace AISEA.ApiService.DAL.Repositories
         {
         }
 
-        public async Task<bool> ExistsAsync(long curriculumId, long subjectId)
+        public async Task<bool> ExistsAsync(long curriculumId, long subjectVersionId)
         {
             return await _context.CurriculumSubjects
-                .AnyAsync(cs => cs.CurriculumId == curriculumId && cs.SubjectId == subjectId && !cs.IsDeleted);
+                .AnyAsync(cs => cs.CurriculumId == curriculumId && cs.SubjectVersionId == subjectVersionId && !cs.IsDeleted);
         }
 
         public async Task<List<CurriculumSubject>> GetByCurriculumIdAsync(long curriculumId)
         {
             return await _context.CurriculumSubjects
-                .Include(cs => cs.Subject)
+                .Include(cs => cs.SubjectVersion)
+                    .ThenInclude(sv => sv.Subject)
                 .Where(cs => cs.CurriculumId == curriculumId && !cs.IsDeleted)
                 .OrderBy(cs => cs.SemesterNumber)
-                .ThenBy(cs => cs.Subject.SubjectCode)
+                .ThenBy(cs => cs.SubjectVersion.Subject.SubjectCode)
                 .ToListAsync();
         }
 
-        public async Task RemoveSubjectFromCurriculumAsync(long curriculumId, long subjectId)
+        public async Task RemoveSubjectFromCurriculumAsync(long curriculumId, long subjectVersionId)
         {
             var curriculumSubject = await _context.CurriculumSubjects
-                .FirstOrDefaultAsync(cs => cs.CurriculumId == curriculumId && cs.SubjectId == subjectId && !cs.IsDeleted);
+                .FirstOrDefaultAsync(cs => cs.CurriculumId == curriculumId && cs.SubjectVersionId == subjectVersionId && !cs.IsDeleted);
             
             if (curriculumSubject != null)
             {

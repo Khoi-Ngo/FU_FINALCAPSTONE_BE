@@ -23,7 +23,8 @@ namespace AISEA.ApiService.DAL.Repositories
             return await _context.Curricula
                 .Include(c => c.Program)
                 .Include(c => c.CurriculumSubjects.Where(cs => !cs.IsDeleted))
-                    .ThenInclude(cs => cs.Subject)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Subject)
                 .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
         }
 

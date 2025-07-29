@@ -7,8 +7,8 @@ namespace AISEA.ApiService.BAL.Validators.Syllabus
     {
         public CreateSyllabusRequestValidator()
         {
-            RuleFor(x => x.SubjectId)
-                .GreaterThan(0).WithMessage("Subject ID must be greater than 0.");
+            RuleFor(x => x.SubjectVersionId)
+                .GreaterThan(0).WithMessage("Subject Version ID must be greater than 0.");
 
             RuleFor(x => x.Content)
                 .NotEmpty().WithMessage("Content is required.")

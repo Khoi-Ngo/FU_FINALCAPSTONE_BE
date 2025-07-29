@@ -12,6 +12,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
     {
         private readonly SyllabusRepository _syllabusRepository;
         private readonly SubjectRepository _subjectRepository;
+        private readonly SubjectVersionRepository _subjectVersionRepository;
         private readonly SyllabusAssessmentRepository _assessmentRepository;
         private readonly SyllabusLearningMaterialRepository _materialRepository;
         private readonly SyllabusLearningOutcomeRepository _outcomeRepository;
@@ -22,6 +23,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
         public SyllabusService(
             SyllabusRepository syllabusRepository,
             SubjectRepository subjectRepository,
+            SubjectVersionRepository subjectVersionRepository,
             SyllabusAssessmentRepository assessmentRepository,
             SyllabusLearningMaterialRepository materialRepository,
             SyllabusLearningOutcomeRepository outcomeRepository,
@@ -31,6 +33,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
         {
             _syllabusRepository = syllabusRepository;
             _subjectRepository = subjectRepository;
+            _subjectVersionRepository = subjectVersionRepository;
             _assessmentRepository = assessmentRepository;
             _materialRepository = materialRepository;
             _outcomeRepository = outcomeRepository;
@@ -41,16 +44,16 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
 
         public async Task<long> CreateSyllabusAsync(CreateSyllabusRequest request)
         {
-            var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
-            if (subject == null || subject.IsDeleted)
+            var subjectVersion = await _subjectVersionRepository.GetByIdAsync(request.SubjectVersionId);
+            if (subjectVersion == null || subjectVersion.IsDeleted)
             {
-                throw new NotFoundException("Subject not found.");
+                throw new NotFoundException("Subject version not found.");
             }
 
-            var existingSyllabus = await _syllabusRepository.GetBySubjectIdAsync(request.SubjectId);
+            var existingSyllabus = await _syllabusRepository.GetBySubjectVersionIdAsync(request.SubjectVersionId);
             if (existingSyllabus != null)
             {
-                throw new InvalidUserCreatedException("Syllabus for this subject already exists.");
+                throw new InvalidUserCreatedException("Syllabus for this subject version already exists.");
             }
 
             var syllabus = _mapper.Map<DAL.Entities.Syllabus>(request);
@@ -86,10 +89,71 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
 
         public async Task<GetSyllabusDetailResponse> GetSyllabusBySubjectIdAsync(long subjectId)
         {
+            // First, validate that the subject exists
+            var subject = await _subjectRepository.GetByIdAsync(subjectId);
+            if (subject == null || subject.IsDeleted)
+            {
+                throw new NotFoundException("Subject not found.");
+            }
+
+            // Get syllabus using deterministic ordering:
+            // 1. Default version first
+            // 2. Then active versions
+            // 3. Then by most recent effective date
+            // 4. Finally by creation date
             var syllabus = await _syllabusRepository.GetBySubjectIdAsync(subjectId);
             if (syllabus == null || syllabus.IsDeleted)
             {
-                throw new NotFoundException("Syllabus not found for this subject.");
+                throw new NotFoundException($"No syllabus found for subject '{subject.SubjectName}' (ID: {subjectId}). " +
+                    "Please ensure a syllabus exists for the default or active version of this subject.");
+            }
+
+            var detailSyllabus = await _syllabusRepository.GetDetailByIdAsync(syllabus.Id);
+            return _mapper.Map<GetSyllabusDetailResponse>(detailSyllabus);
+        }
+
+        /// <summary>
+        /// Gets the syllabus for the default version of a subject explicitly
+        /// </summary>
+        public async Task<GetSyllabusDetailResponse> GetSyllabusBySubjectIdDefaultVersionAsync(long subjectId)
+        {
+            // First, validate that the subject exists
+            var subject = await _subjectRepository.GetByIdAsync(subjectId);
+            if (subject == null || subject.IsDeleted)
+            {
+                throw new NotFoundException("Subject not found.");
+            }
+
+            // Get syllabus for the default version only
+            var syllabus = await _syllabusRepository.GetBySubjectIdDefaultVersionAsync(subjectId);
+            if (syllabus == null || syllabus.IsDeleted)
+            {
+                throw new NotFoundException($"No syllabus found for the default version of subject '{subject.SubjectName}' (ID: {subjectId}). " +
+                    "Please ensure a default subject version exists and has a syllabus.");
+            }
+
+            var detailSyllabus = await _syllabusRepository.GetDetailByIdAsync(syllabus.Id);
+            return _mapper.Map<GetSyllabusDetailResponse>(detailSyllabus);
+        }
+
+        /// <summary>
+        /// Gets the syllabus for a specific subject version
+        /// </summary>
+        public async Task<GetSyllabusDetailResponse> GetSyllabusBySubjectVersionIdAsync(long subjectVersionId)
+        {
+            // First, validate that the subject version exists
+            var subjectVersion = await _subjectVersionRepository.GetByIdAsync(subjectVersionId);
+            if (subjectVersion == null || subjectVersion.IsDeleted)
+            {
+                throw new NotFoundException("Subject version not found.");
+            }
+
+            // Get syllabus for the specific subject version
+            var syllabus = await _syllabusRepository.GetBySubjectVersionIdAsync(subjectVersionId);
+            if (syllabus == null || syllabus.IsDeleted)
+            {
+                throw new NotFoundException($"No syllabus found for subject version '{subjectVersion.VersionName}' (ID: {subjectVersionId}) " +
+                    $"of subject '{subjectVersion.Subject?.SubjectName}'. Please ensure a syllabus exists for this version.");
             }
 
             var detailSyllabus = await _syllabusRepository.GetDetailByIdAsync(syllabus.Id);

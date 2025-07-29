@@ -13,12 +13,21 @@ namespace AISEA.ApiService.BAL.Mappings.Syllabus
             CreateMap<UpdateSyllabusRequest, DAL.Entities.Syllabus>();
             
             CreateMap<DAL.Entities.Syllabus, GetSyllabusResponse>()
-                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.SubjectName))
-                .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.Subject.SubjectCode));
+                .ForMember(dest => dest.SubjectVersionId, opt => opt.MapFrom(src => src.SubjectVersionId))
+                .ForMember(dest => dest.SubjectId, opt => opt.MapFrom(src => src.SubjectVersion.Subject.Id))
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.SubjectVersion.Subject.SubjectName))
+                .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.SubjectVersion.Subject.SubjectCode))
+                .ForMember(dest => dest.VersionCode, opt => opt.MapFrom(src => src.SubjectVersion.VersionCode))
+                .ForMember(dest => dest.VersionName, opt => opt.MapFrom(src => src.SubjectVersion.VersionName))
+                .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(src => src.SubjectVersion.IsDefault))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.SubjectVersion.IsActive));
 
             CreateMap<DAL.Entities.Syllabus, GetSyllabusDetailResponse>()
-                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.Subject.SubjectName))
-                .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.Subject.SubjectCode))
+                .ForMember(dest => dest.SubjectVersionId, opt => opt.MapFrom(src => src.SubjectVersionId))
+                .ForMember(dest => dest.SubjectId, opt => opt.MapFrom(src => src.SubjectVersion.Subject.Id))
+                .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.SubjectVersion.Subject.SubjectName))
+                .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.SubjectVersion.Subject.SubjectCode))
+                .ForMember(dest => dest.SubjectVersion, opt => opt.MapFrom(src => src.SubjectVersion))
                 .ForMember(dest => dest.Assessments, opt => opt.MapFrom(src => src.SyllabusAssessments))
                 .ForMember(dest => dest.LearningMaterials, opt => opt.MapFrom(src => src.SyllabusLearningMaterials))
                 .ForMember(dest => dest.LearningOutcomes, opt => opt.MapFrom(src => src.SyllabusLearningOutcomes))

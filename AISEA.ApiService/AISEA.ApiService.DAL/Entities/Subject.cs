@@ -22,18 +22,11 @@ public partial class Subject
     [Column(TypeName = "text")]
     public string? Description { get; set; }
 
-    public virtual ICollection<Syllabus> Syllabi { get; set; } = new List<Syllabus>();
-
-    public virtual ICollection<CurriculumSubject> CurriculumSubjects { get; set; } = new List<CurriculumSubject>();
+    public virtual ICollection<SubjectVersion> SubjectVersions { get; set; } = new List<SubjectVersion>();
 
     public virtual ICollection<ComboSubject> ComboSubjects { get; set; } = new List<ComboSubject>();
 
     // public virtual ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
-
-    public virtual ICollection<SubjectPrerequisite> Prerequisites { get; set; } = new List<SubjectPrerequisite>();
-
-    public virtual ICollection<SubjectPrerequisite> DependentSubjects { get; set; } = new List<SubjectPrerequisite>();
-    public virtual ICollection<SubjectClass> SubjectClasses { get; set; } = new List<SubjectClass>();
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

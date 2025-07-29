@@ -24,8 +24,9 @@ public class BookingSettings
     public int NumberOfBanWhenStuCancelTheConfirm { get; set; }
     public int NumberOfBanWhenStuMissingTheMeeting { get; set; }
 
-    public int MaxNumberOfBan { get; set; }
-    public int MaxStuCancelStatPerStuInMonth { get; set; }
+    public int MaxNumberOfBan { get; set; }// Already set the value in the Trigger in Migration
+    public int MaxStuCancelStatPerStuIn2Week { get; set; }// Already set the value in the Trigger in Migration
+    public int MaxPendingMeetingsAtATimeForStudent { get; set; }// Already set the value in the Trigger in Migration
     public int MaxLateTimeForAdvToMeetingMins { get; set; }
 
     #endregion
@@ -37,12 +38,11 @@ public class BookingSettings
     #endregion
 
     #region Background service props
-    public long EstimateNumberOfBanIncreasedToAntiSpam { get; set; }
-    public long CheckStudentCancelPendingMeetingSpamIntervalMillis { get; set; }
     public long GeneralPurposeIntervalMillis { get; set; }
     public int ResetNumberOfBanIntervalDays { get; set; }
     public int ResetCheckIntervalHours { get; set; }
     public int ErrorRetryDelayMinutes { get; set; }
+    public int DaysToCheckStudentMissedAfterEndMeeting { get; set; }
 
 
     #endregion

@@ -6,6 +6,7 @@ using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.Booking;
@@ -110,6 +111,8 @@ public class LeaveScheController : BaseController
 
 
     #region using for check time only
+
+    [AllowAnonymous]
     [HttpGet("check-datetime-backend")]
     public IActionResult CheckDateTime()
     {
@@ -120,12 +123,22 @@ public class LeaveScheController : BaseController
         });
     }
 
+    [AllowAnonymous]
     [HttpGet("check-datetime-database")]
     public async Task<IActionResult> CheckDateTimeDB()
     {
         var res = await _leaveScheduleService.CheckDateTimeDBAsync();
         return Ok(res);
     }
+
+    [AllowAnonymous]
+    [HttpGet("check-day-of-week-sql")]
+    public async Task<IActionResult> CheckDayOfWeekSQL([FromQuery] DateTime? date = null)
+    {
+        var res = await _leaveScheduleService.CheckDayOfWeekSQLAsync(date ?? DateTime.Now);
+        return Ok(res);
+    }
+
     #endregion
 
 }

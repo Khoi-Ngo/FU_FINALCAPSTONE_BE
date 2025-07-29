@@ -230,14 +230,14 @@ public class BookedMeetingService
         {
             if (ex.InnerException is SqlException sqlEx)
             {
-                HandleLeaveSqlException(sqlEx);
+                HandleMeetingSqlException(sqlEx);
 
             }
             throw;
         }
         catch (SqlException ex)
         {
-            HandleLeaveSqlException(ex);
+            HandleMeetingSqlException(ex);
             throw;
 
         }
@@ -402,7 +402,7 @@ public class BookedMeetingService
 
 
     #region Private methods
-    private void HandleLeaveSqlException(SqlException ex)
+    private void HandleMeetingSqlException(SqlException ex)
     {
         switch (ex.Number)
         {
@@ -410,9 +410,8 @@ public class BookedMeetingService
                 throw new InvalidOperationException("Student has reached the maximum number of bans . Cannot book meeting.");
             case 50007:
                 throw new InvalidOperationException("The meeting time conflicts with staff's leave schedule.");
-            //NOTE: currently not check direct via constraint in database anymore 
-            // case 50008:
-            // throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
+            case 50008:
+                throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
             case 50009:
                 throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot.");
             case 50010:
@@ -459,5 +458,27 @@ public class BookedMeetingService
     public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)
     {
         await _bookedMeetingRepository.UpdateMeetingStatusesAsync(meetingIds, status);
+    }
+
+    public async Task<List<StuMissedMeetingDTO>> GetConfirmedStudentMissedMeetingsAsync(int daysToCheckStudentMissedAfterEndMeeting)
+    {
+        return await _bookedMeetingRepository.GetConfirmedStudentMissedMeetingsAsync(daysToCheckStudentMissedAfterEndMeeting);
+    }
+
+    public object? GetMaxNumberOfBan()
+    {
+        return new
+        {
+            MaxNoOfBan = _bookingSettings.MaxNumberOfBan
+        };
+    }
+
+    public async Task<object?> GetCurNumberOfBanAsync(string accessToken)
+    {
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(_jWTService.GetProfileIdFromToken(accessToken));
+        return new
+        {
+            CurNoOfBan = studentProfile.NumberOfBan
+        };
     }
 }

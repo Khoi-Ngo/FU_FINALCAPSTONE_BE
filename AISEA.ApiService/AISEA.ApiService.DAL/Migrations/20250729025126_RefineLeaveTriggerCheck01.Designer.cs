@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250729025126_RefineLeaveTriggerCheck01")]
+    partial class RefineLeaveTriggerCheck01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,13 +194,9 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.ToTable("BookedMeeting", t =>
                         {
-                            t.HasTrigger("TR_BookedMeeting_AntiStudentSpamCancel");
-
                             t.HasTrigger("TR_BookedMeeting_CheckExternalTables");
 
                             t.HasTrigger("TR_BookedMeeting_CheckInternalData");
-
-                            t.HasTrigger("TR_BookedMeeting_PreventStudentTooManyPending");
                         });
 
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);

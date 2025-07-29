@@ -184,8 +184,8 @@ public class LeaveScheduleService
                 throw new LeaveScheduleOverlapEx("The leave schedule overlaps with an existing leave schedule for the same staff.");
             case 50004: // No matching booking availability
                 throw new NoMatchingBookingAvailabilityEx("No matching booking availability found for the specified staff and time range.");
-            case 50005: // Existing PENDING or CONFIRMED meetings
-                throw new LeaveScheduleConflictWithMeetingsEx("Cannot register leave due to existing PENDING or CONFIRMED meetings. Cancel/Disapprove those meetings first.");
+            case 50005: // Existing Active meetings
+                throw new LeaveScheduleConflictWithMeetingsEx("Cannot register leave due to existing Active meetings. Cancel/Disapprove those meetings first.");
             case 547:
                 throw new InvalidOperationException("Invalid leave schedule data. Ensure staff profile exists.");
             default:
@@ -231,6 +231,11 @@ public class LeaveScheduleService
     public async Task<DateTime> CheckDateTimeDBAsync()
     {
         return await _leaveScheduleRepository.GetDatabaseUtcDateTimeAsync();
+    }
+
+    public async Task<object> CheckDayOfWeekSQLAsync(DateTime date)
+    {
+        return await _leaveScheduleRepository.CheckDayOfWeekSQLAsync(date);
     }
 
 

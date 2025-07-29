@@ -254,5 +254,28 @@ public class MeetingController : BaseController
     }
 
 
+    /// <summary>
+    ///  Student view the max number of ban configured by system
+    /// </summary>
+    [HttpGet("max-number-of-ban")]
+    public async Task<IActionResult> GetMaxNumberOfBan()
+    {
+        var res = _bookedMeetingService.GetMaxNumberOfBan();
+        return Ok(res);
+    }
+
+
+    /// <summary>
+    ///  Student self view his or her current number of ban
+    /// </summary>
+    [HttpGet("cur-number-of-ban")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetCurNumberOfBan()
+    {
+        var res = await _bookedMeetingService.GetCurNumberOfBanAsync(AccessToken);
+        return Ok(res);
+    }
+
+
 
 }

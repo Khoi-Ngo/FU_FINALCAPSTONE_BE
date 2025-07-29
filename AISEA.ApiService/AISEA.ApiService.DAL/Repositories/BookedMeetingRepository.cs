@@ -95,4 +95,21 @@ public class BookedMeetingRepository : GenericRepository<BookedMeeting>
             .Where(m => meetingIds.Contains(m.Id))
             .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.Status, status));
     }
+    public async Task<List<StuMissedMeetingDTO>> GetConfirmedStudentMissedMeetingsAsync(int daysToCheckStudentMissedAfterEndMeeting)
+    {
+        return await _context.BookedMeetings
+            .Where(m => m.Status == EBookingStatus.CONFIRMED &&
+                        m.EndDateTime <= DateTime.UtcNow.AddDays(-daysToCheckStudentMissedAfterEndMeeting))
+            .Join(_context.StudentProfiles,
+                m => m.StudentProfileId,
+                sp => sp.Id,
+                (m, sp) => new StuMissedMeetingDTO
+                {
+                    Id = m.Id,
+                    StudentUserId = sp.UserId,
+                    StudentProfileId = m.StudentProfileId,
+                    StartDateTime = m.StartDateTime
+                })
+            .ToListAsync();
+    }
 }

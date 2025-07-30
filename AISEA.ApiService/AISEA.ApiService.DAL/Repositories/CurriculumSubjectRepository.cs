@@ -17,6 +17,15 @@ namespace AISEA.ApiService.DAL.Repositories
                 .AnyAsync(cs => cs.CurriculumId == curriculumId && cs.SubjectVersionId == subjectVersionId && !cs.IsDeleted);
         }
 
+        public async Task<bool> HasSubjectWithSubjectCodeAsync(long curriculumId, string subjectCode)
+        {
+            return await _context.CurriculumSubjects
+                .Include(cs => cs.SubjectVersion)
+                    .ThenInclude(sv => sv.Subject)
+                .Where(cs => cs.CurriculumId == curriculumId && !cs.IsDeleted)
+                .AnyAsync(cs => cs.SubjectVersion.Subject.SubjectCode == subjectCode);
+        }
+
         public async Task<List<CurriculumSubject>> GetByCurriculumIdAsync(long curriculumId)
         {
             return await _context.CurriculumSubjects

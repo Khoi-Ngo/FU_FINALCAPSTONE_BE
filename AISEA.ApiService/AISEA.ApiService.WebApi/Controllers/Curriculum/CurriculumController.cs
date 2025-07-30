@@ -105,14 +105,14 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         }
 
         /// <summary>
-        /// Removes a subject from a curriculum (Academic Staff only)
+        /// Removes a subject version from a curriculum (Academic Staff only)
         /// </summary>
-        [HttpDelete("{id}/subjects/{subjectId}")]
+        [HttpDelete("{id}/subjects/{subjectVersionId}")]
         [PermissionAuthorize(1, 2)] // Admin, Academic Staff
-        public async Task<IActionResult> RemoveSubjectFromCurriculum(long id, long subjectId)
+        public async Task<IActionResult> RemoveSubjectFromCurriculum(long id, long subjectVersionId)
         {
-            await _curriculumService.RemoveSubjectFromCurriculumAsync(id, subjectId);
-            return Ok(new { Message = "Subject removed from curriculum successfully." });
+            await _curriculumService.RemoveSubjectFromCurriculumAsync(id, subjectVersionId);
+            return Ok(new { Message = "Subject version removed from curriculum successfully." });
         }
     }
 }

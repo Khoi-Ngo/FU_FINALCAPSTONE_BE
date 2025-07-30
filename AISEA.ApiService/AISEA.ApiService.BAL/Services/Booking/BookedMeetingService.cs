@@ -114,14 +114,15 @@ public class BookedMeetingService
     {
 
         //validate the time to do + current status + validate access + check in code (trigger)
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var completedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
 
         if (!IsValidAccess(completedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessBookingAvailability("Deny access to the meeting");
 
 
         if (!(completedMeeting.Status == EBookingStatus.CONFIRMED
-        //TODO: Uncomment when using on prod
-        // && DateTime.Now > completedMeeting.StartDateTime
+        && DateTime.Now > completedMeeting.StartDateTime
         && request.CheckInCode == completedMeeting.CheckInCode
         )) throw new InvalidOperationException("Too soon to complete this meeting or the status/ checkin code of this meeting not true");
 
@@ -142,6 +143,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> ConfirmMeetingAsync(long id, string accessToken)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         //validate time + status + access permission
         var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
 
@@ -179,6 +182,7 @@ public class BookedMeetingService
     {
         try
         {
+            //TODO: GetUserId of Profile By ProfileId async
             //avoid book the meeting on holiday
             var checkHolidays = await _holidayService.CheckHolidayAsync(DateOnly.FromDateTime(request.StartDateTime));
             if (checkHolidays.Any()) throw new OnHolidayException("You cannot book a meeting on Holiday (VN)", checkHolidays);
@@ -226,14 +230,14 @@ public class BookedMeetingService
         {
             if (ex.InnerException is SqlException sqlEx)
             {
-                HandleLeaveSqlException(sqlEx);
+                HandleMeetingSqlException(sqlEx);
 
             }
             throw;
         }
         catch (SqlException ex)
         {
-            HandleLeaveSqlException(ex);
+            HandleMeetingSqlException(ex);
             throw;
 
         }
@@ -247,6 +251,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //validate the access to meeting
         if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -300,6 +306,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //valid access the meeting
         if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -330,6 +338,8 @@ public class BookedMeetingService
 
     public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         // -Validate the access
         if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -360,12 +370,14 @@ public class BookedMeetingService
             MeetingStartDateTime = canceledMeeting.StartDateTime,
             MeetingEndDateTime = canceledMeeting.EndDateTime,
             StatusChangedTo = canceledMeeting.Status
-            
+
         }, _bookingSettings.NumberOfBanWhenStuCancelTheConfirm);
 
     }
     public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
     {
+        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
+
         var overdueMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
         //validate the access
         if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
@@ -390,7 +402,7 @@ public class BookedMeetingService
 
 
     #region Private methods
-    private void HandleLeaveSqlException(SqlException ex)
+    private void HandleMeetingSqlException(SqlException ex)
     {
         switch (ex.Number)
         {
@@ -398,9 +410,8 @@ public class BookedMeetingService
                 throw new InvalidOperationException("Student has reached the maximum number of bans . Cannot book meeting.");
             case 50007:
                 throw new InvalidOperationException("The meeting time conflicts with staff's leave schedule.");
-            //NOTE: currently not check direct via constraint in database anymore 
-            // case 50008:
-            // throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
+            case 50008:
+                throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
             case 50009:
                 throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot.");
             case 50010:
@@ -437,5 +448,37 @@ public class BookedMeetingService
             throw new InvalidAccessBookingAvailability("No permission to access this detail meeting");
 
         return _mapper.Map<MeetingViewDetailResponse>(meeting);
+    }
+
+    public async Task<List<OverdueMeetingDTO>> GetPendingOverdueMeetingsWithUserIdsAsync()
+    {
+        return await _bookedMeetingRepository.GetPendingOverdueMeetingsWithUserIdsAsync();
+    }
+
+    public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)
+    {
+        await _bookedMeetingRepository.UpdateMeetingStatusesAsync(meetingIds, status);
+    }
+
+    public async Task<List<StuMissedMeetingDTO>> GetConfirmedStudentMissedMeetingsAsync(int daysToCheckStudentMissedAfterEndMeeting)
+    {
+        return await _bookedMeetingRepository.GetConfirmedStudentMissedMeetingsAsync(daysToCheckStudentMissedAfterEndMeeting);
+    }
+
+    public object? GetMaxNumberOfBan()
+    {
+        return new
+        {
+            MaxNoOfBan = _bookingSettings.MaxNumberOfBan
+        };
+    }
+
+    public async Task<object?> GetCurNumberOfBanAsync(string accessToken)
+    {
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(_jWTService.GetProfileIdFromToken(accessToken));
+        return new
+        {
+            CurNoOfBan = studentProfile.NumberOfBan
+        };
     }
 }

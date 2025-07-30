@@ -72,7 +72,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
         await _userService.UpdateUserAsync(id, request, AccessToken);
-        _notifier.NotifyUser(AccessToken, "Successfully", "User is updated successfully");
+        _notifier.NotifyUserAsync(AccessToken, "Successfully", "User is updated successfully");
 
         return Ok("Ok");
     }
@@ -84,7 +84,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
     {
         await _userService.UpdateUserAsync(id, request, AccessToken);
-        _notifier.NotifyUser(AccessToken, "Successfully", "User is updated successfully");
+        _notifier.NotifyUserAsync(AccessToken, "Successfully", "User is updated successfully");
 
         return Ok("Ok");
     }
@@ -98,7 +98,7 @@ public class UserController : BaseController
     public async Task<IActionResult> DisableUser(long id)
     {
         await _userService.DisableUserAsync(id);
-        _notifier.NotifyUser(AccessToken, "Successfully", "User is disabled successfully");
+        _notifier.NotifyUserAsync(AccessToken, "Successfully", "User is disabled successfully");
 
         return Ok("Ok");
     }
@@ -293,7 +293,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
     {
         await _userService.UpdateAvatarAsync(AccessToken, request);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "The avatar has been updated successfully");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The avatar has been updated successfully");
         return Ok("Update ok");
     }
     /// <summary>
@@ -304,7 +304,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
     {
         await _userService.UpdateAvatarAsync(userId, request);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "The avatar has been updated successfully");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The avatar has been updated successfully");
         return Ok("Update ok");
     }
 
@@ -314,7 +314,7 @@ public class UserController : BaseController
     /// </summary>
     private IActionResult NotifyAndNoContent(string message)
     {
-        _notifier.NotifyUser(AccessToken, "Successfully", message);
+        _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
         return Ok("Ok");
     }
 

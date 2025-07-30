@@ -6,6 +6,7 @@ using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.Booking;
@@ -27,15 +28,24 @@ public class LeaveScheController : BaseController
 
     #region Command action
     /// <summary>
-    /// Creates Leaving Schedule for a staff member.
+    /// Creates Leaving Schedule for a advisor member.
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
+        return Ok(new { message = "Leave schedule created successfully" });
+    }
+
+    [HttpPost("bulk")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
+    {
+        await _leaveScheduleService.CreateBulkAsync(requests, AccessToken);
+        await _notifier.NotifyUserAsync(AccessToken, "Success", $"{requests.Count} leave schedules created successfully.");
+        return Ok(new { message = $"{requests.Count} leave schedules created successfully" });
     }
 
     /// <summary>
@@ -46,7 +56,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
         await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
         return Ok("Ok");
     }
 
@@ -58,7 +68,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _leaveScheduleService.DeleteAsync(id, AccessToken);
-        await _notifier.NotifyUser(AccessToken, "Successfully", "Leave Schedule has been deleted.");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leave Schedule has been deleted.");
         return Ok("Ok");
     }
     #endregion
@@ -110,6 +120,8 @@ public class LeaveScheController : BaseController
 
 
     #region using for check time only
+
+    [AllowAnonymous]
     [HttpGet("check-datetime-backend")]
     public IActionResult CheckDateTime()
     {
@@ -120,12 +132,22 @@ public class LeaveScheController : BaseController
         });
     }
 
+    [AllowAnonymous]
     [HttpGet("check-datetime-database")]
     public async Task<IActionResult> CheckDateTimeDB()
     {
         var res = await _leaveScheduleService.CheckDateTimeDBAsync();
         return Ok(res);
     }
+
+    [AllowAnonymous]
+    [HttpGet("check-day-of-week-sql")]
+    public async Task<IActionResult> CheckDayOfWeekSQL([FromQuery] DateTime? date = null)
+    {
+        var res = await _leaveScheduleService.CheckDayOfWeekSQLAsync(date ?? DateTime.Now);
+        return Ok(res);
+    }
+
     #endregion
 
 }

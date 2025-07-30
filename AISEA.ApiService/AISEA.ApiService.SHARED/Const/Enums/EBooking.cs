@@ -2,7 +2,6 @@ namespace AISEA.ApiService.SHARED.Const.Enums
 {
     public enum EBookingStatus
     {
-        NOT_MATCHED_BOOKING_AVAI = 169,
         PENDING = 1, //VALID TIME TO DO: FUTURE (before 2 days to go), VALID CUR STAT: NONE (Only need valid meeting data like no duplicate, ...)
         CONFIRMED = 2,//VALID TIME TO DO: before the StartTime of the meeting timeSlot 1 day, VALID CUR STAT: PENDING, VALID ACCESS TO THE MEETING
         ADV_CANCELED = 3,//VALID TIME TO DO: before the StartTime of the meeting timeSlot 12hours OR 1 day, VALID CUR STAT: CONFIRMED, VALID ACCESS TO THE MEETING
@@ -26,12 +25,12 @@ namespace AISEA.ApiService.SHARED.Const.Enums
         /// </summary>
         STUDENT_MISSED = 5,
         ADVISOR_MISSED = 6, //VALID TIME TO DO: After the 15 mins from StartDateTime of the meeting TimeSlot VALID CUR STAT: CONFIRMED, MUST HAVE NOTE, VALID ACCESS TO THE MEETING
-        OVERDUE = 8,// After the EndTime of the meeting timeSlot the worker service will handle shift Stat from PENDING to OVERDUE
+        OVERDUE = 8,// After the STARTTIME of the meeting timeSlot the worker service will handle shift Stat from PENDING to OVERDUE
 
         /*
 
         ///At the same time (Check overload also) A Staff and Student cannot have more than 1 "ACTIVE" Meeting
-        ///NON ACTIVE: STU_CANCELED,  NOT_APPROVED, OVERDUE, ADV_CANCELED, NOT_MATCHED_BOOKING_AVAI
+        ///NON ACTIVE: STU_CANCELED,  NOT_APPROVED, OVERDUE, ADV_CANCELED
 
         ///  LEAVE NOTE:
         
@@ -45,13 +44,13 @@ namespace AISEA.ApiService.SHARED.Const.Enums
 
     public enum DayOfWeekAISEA
     {
-        Monday = 1,
-        Tuesday = 2,
-        Wednesday = 3,
-        Thursday = 4,
-        Friday = 5,
-        Saturday = 6,
-        Sunday = 7
+        Monday = 2,
+        Tuesday = 3,
+        Wednesday = 4,
+        Thursday = 5,
+        Friday = 6,
+        Saturday = 7,
+        Sunday = 1
 
     }
 

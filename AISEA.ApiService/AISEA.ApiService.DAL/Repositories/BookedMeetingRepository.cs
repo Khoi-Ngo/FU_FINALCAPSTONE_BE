@@ -1,7 +1,9 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
+using AISEA.ApiService.SHARED.DTOs.Responses.Booking;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories;
@@ -62,5 +64,52 @@ public class BookedMeetingRepository : GenericRepository<BookedMeeting>
             .Include(m => m.StaffProfile).ThenInclude(sp => sp.User)
             .Include(m => m.StudentProfile).ThenInclude(sp => sp.User)
             .FirstOrDefaultAsync(m => m.Id == id);
+    }
+
+
+    public async Task<List<OverdueMeetingDTO>> GetPendingOverdueMeetingsWithUserIdsAsync()
+    {
+        return await _context.BookedMeetings
+            .Where(m => m.Status == EBookingStatus.PENDING && m.StartDateTime < DateTime.UtcNow)
+            .Join(_context.StaffProfiles,
+                m => m.StaffProfileId,
+                sp => sp.Id,
+                (m, sp) => new { Meeting = m, StaffUserId = sp.UserId })
+            .Join(_context.StudentProfiles,
+                ms => ms.Meeting.StudentProfileId,
+                sp => sp.Id,
+                (ms, sp) => new OverdueMeetingDTO
+                {
+                    Id = ms.Meeting.Id,
+                    StaffUserId = ms.StaffUserId,
+                    StudentUserId = sp.UserId,
+                    StartDateTime = ms.Meeting.StartDateTime,
+                    Status = ms.Meeting.Status
+                })
+            .ToListAsync();
+    }
+
+    public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)
+    {
+        await _context.BookedMeetings
+            .Where(m => meetingIds.Contains(m.Id))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.Status, status));
+    }
+    public async Task<List<StuMissedMeetingDTO>> GetConfirmedStudentMissedMeetingsAsync(int daysToCheckStudentMissedAfterEndMeeting)
+    {
+        return await _context.BookedMeetings
+            .Where(m => m.Status == EBookingStatus.CONFIRMED &&
+                        m.EndDateTime <= DateTime.UtcNow.AddDays(-daysToCheckStudentMissedAfterEndMeeting))
+            .Join(_context.StudentProfiles,
+                m => m.StudentProfileId,
+                sp => sp.Id,
+                (m, sp) => new StuMissedMeetingDTO
+                {
+                    Id = m.Id,
+                    StudentUserId = sp.UserId,
+                    StudentProfileId = m.StudentProfileId,
+                    StartDateTime = m.StartDateTime
+                })
+            .ToListAsync();
     }
 }

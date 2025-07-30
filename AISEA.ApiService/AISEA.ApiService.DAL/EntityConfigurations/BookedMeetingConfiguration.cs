@@ -26,6 +26,8 @@ public class BookedMeetingConfiguration : IEntityTypeConfiguration<BookedMeeting
                 {
                     t.HasTrigger("TR_BookedMeeting_CheckExternalTables");
                     t.HasTrigger("TR_BookedMeeting_CheckInternalData");
+                    t.HasTrigger("TR_BookedMeeting_AntiStudentSpamCancel");
+                    t.HasTrigger("TR_BookedMeeting_PreventStudentTooManyPending");
                 });
     }
 }

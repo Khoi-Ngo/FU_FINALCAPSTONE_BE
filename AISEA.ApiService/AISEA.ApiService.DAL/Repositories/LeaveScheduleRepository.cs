@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace AISEA.ApiService.DAL.Repositories;
 
@@ -11,6 +12,52 @@ public class LeaveScheduleRepository : GenericRepository<LeaveSchedule>
 {
     public LeaveScheduleRepository(AiseaContext context) : base(context)
     {
+    }
+    public async Task CreateBulkAsync(List<LeaveSchedule> entities)
+    {
+        await _context.AddRangeAsync(entities);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task<object> CheckDayOfWeekSQLAsync(DateTime date)
+    {
+        using (var command = _context.Database.GetDbConnection().CreateCommand())
+        {
+            command.CommandText = @"
+            SELECT 
+                @InputDate AS InputDate,
+                DATEPART(WEEKDAY, @InputDate) AS DayOfWeekNumber,
+                DATENAME(WEEKDAY, @InputDate) AS DayOfWeekName
+        ";
+            command.CommandType = System.Data.CommandType.Text;
+
+            var param = command.CreateParameter();
+            param.ParameterName = "@InputDate";
+            param.Value = date;
+            command.Parameters.Add(param);
+
+            await _context.Database.OpenConnectionAsync();
+
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                if (await reader.ReadAsync())
+                {
+                    return new
+                    {
+                        InputDate = reader.GetDateTime(0),
+                        DayOfWeekNumber = reader.GetInt32(1),
+                        DayOfWeekName = reader.GetString(2)
+                    };
+                }
+            }
+
+            return new { Error = "No result returned" };
+        }
     }
 
 

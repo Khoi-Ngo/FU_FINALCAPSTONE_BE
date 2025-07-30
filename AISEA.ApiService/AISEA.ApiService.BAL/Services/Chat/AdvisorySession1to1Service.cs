@@ -252,7 +252,7 @@ public class AdvisorySession1to1Service
         object? systemFeedbackMeetingData = null,
         object? personelCourseTrackData = null)
     {
-        //TODO: HAVE TO FILL ALL DATA VIA REDIS/RDB LATER
+        //TODO: HAVE TO FILL ALL DATA VIA REDIS/RDB LATER, The FLM data should be queried by personal meaning that no need to query all
         var studentJson = studentJsonData != null ? JsonSerializer.Serialize(studentJsonData) : "{}";
         var resourceJson = fPTUAcademicResourceJsonData != null ? JsonSerializer.Serialize(fPTUAcademicResourceJsonData) : "{}";
         var personalRoadMapJson = personalRoadMapData != null ? JsonSerializer.Serialize(personalRoadMapData) : "{}";
@@ -344,4 +344,9 @@ public class AdvisorySession1to1Service
 
     private long GetUserIdFromToken(string accessToken) =>
         long.Parse(_jWTService.GetAllClaimsFromToken(accessToken).GetValueOrDefault(_jwtSettings.UserId));
+
+    public async Task<List<long>> RemoveAllExistedOverDaysAsync(int sessionExpiryDays)
+    {
+        return await _advisorySession1To1Repository.RemoveAllExistedOverDaysAsync(sessionExpiryDays);
+    }
 }

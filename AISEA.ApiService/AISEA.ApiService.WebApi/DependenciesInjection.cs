@@ -110,12 +110,13 @@ public static class DependenciesInjection
         var corsPolicyName = configuration.GetSection(EndpointSettings.Section)["CORSPolicy"];
         var prodClientOrigin = configuration.GetSection(EndpointSettings.Section)["ProdClientOrigin"];
         var devClientOrigin = configuration.GetSection(EndpointSettings.Section)["DevClientOrigin"];
+        var additionalClientOrigin = configuration.GetSection(EndpointSettings.Section)["AdditionalClientOrigin"];
 
         services.AddCors(options =>
         {
             options.AddPolicy(corsPolicyName, builder =>
             {
-                builder.WithOrigins(prodClientOrigin, devClientOrigin)
+                builder.WithOrigins(prodClientOrigin, devClientOrigin, additionalClientOrigin)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
@@ -157,6 +158,9 @@ public static class DependenciesInjection
         //adding background jobs
         services.AddHostedService<NotiBgService>();
         services.AddHostedService<ChatBgService>();
+        services.AddHostedService<MeetingOverdueBgService>();
+        services.AddHostedService<ResetNoOfBanBgService>();
+        services.AddHostedService<StuMissedMeetingBgService>();
 
 
         return services;

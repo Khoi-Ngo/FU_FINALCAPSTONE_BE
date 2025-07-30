@@ -91,7 +91,7 @@ public class AuthController : BaseController
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
         //notify that user reset password ok
-        _notifier.NotifyUser(AccessToken, "Successfully", "Reset password ok!");
+        _notifier.NotifyUserAsync(AccessToken, "Successfully", "Reset password ok!");
         return Ok("Ok");
     }
 

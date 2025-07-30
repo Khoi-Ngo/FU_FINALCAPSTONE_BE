@@ -44,10 +44,13 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                 throw new InvalidUserCreatedException("A subject version cannot be a prerequisite of itself.");
             }
 
-            // Validate they are different subjects (optional - you might want to allow different versions of the same subject)
-            if (subjectVersion.SubjectId == prerequisiteSubjectVersion.SubjectId)
+            // Check if a prerequisite with the same subject code already exists
+            var hasPrerequisiteWithSameSubjectCode = await _prerequisiteRepository.HasPrerequisiteWithSubjectCodeAsync(
+                subjectVersionId, prerequisiteSubjectVersion.Subject.SubjectCode);
+            if (hasPrerequisiteWithSameSubjectCode)
             {
-                throw new InvalidUserCreatedException("A subject version cannot have another version of the same subject as a prerequisite.");
+                throw new InvalidUserCreatedException(
+                    $"A prerequisite with subject code '{prerequisiteSubjectVersion.Subject.SubjectCode}' already exists for this subject version.");
             }
 
             // Check if prerequisite was soft deleted and restore it if found

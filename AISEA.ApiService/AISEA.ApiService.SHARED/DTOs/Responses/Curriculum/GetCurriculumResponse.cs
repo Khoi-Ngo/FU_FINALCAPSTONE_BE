@@ -21,8 +21,11 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Curriculum
     public class CurriculumSubjectResponse
     {
         public long SubjectId { get; set; }
+        public long SubjectVersionId { get; set; }
         public string SubjectCode { get; set; } = null!;
         public string SubjectName { get; set; } = null!;
+        public string VersionCode { get; set; } = null!;
+        public string VersionName { get; set; } = null!;
         public int Credits { get; set; }
         public int SemesterNumber { get; set; }
         public bool IsMandatory { get; set; }

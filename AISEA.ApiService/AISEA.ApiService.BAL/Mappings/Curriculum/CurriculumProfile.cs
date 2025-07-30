@@ -26,7 +26,10 @@ namespace AISEA.ApiService.BAL.Mappings.Curriculum
                 .ForMember(dest => dest.SubjectCode, opt => opt.MapFrom(src => src.SubjectVersion.Subject.SubjectCode))
                 .ForMember(dest => dest.SubjectName, opt => opt.MapFrom(src => src.SubjectVersion.Subject.SubjectName))
                 .ForMember(dest => dest.Credits, opt => opt.MapFrom(src => src.SubjectVersion.Subject.Credits))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.SubjectVersion.Subject.Description));
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.SubjectVersion.Subject.Description))
+                .ForMember(dest => dest.SubjectVersionId, opt => opt.MapFrom(src => src.SubjectVersion.Id))
+                .ForMember(dest => dest.VersionCode, opt => opt.MapFrom(src => src.SubjectVersion.VersionCode))
+                .ForMember(dest => dest.VersionName, opt => opt.MapFrom(src => src.SubjectVersion.VersionName));
 
             CreateMap<AddSubjectToCurriculumRequest, CurriculumSubject>();
         }

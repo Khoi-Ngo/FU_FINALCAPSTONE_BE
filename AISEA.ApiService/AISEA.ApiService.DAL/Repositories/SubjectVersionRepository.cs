@@ -129,6 +129,12 @@ namespace AISEA.ApiService.DAL.Repositories
         public new async Task<SubjectVersion?> GetByIdAsync(long id)
         {
             return await _context.SubjectVersions
+                .FirstOrDefaultAsync(sv => sv.Id == id && !sv.IsDeleted);
+        }
+
+        public async Task<SubjectVersion?> GetByIdWithSubjectAsync(long id)
+        {
+            return await _context.SubjectVersions
                 .Include(sv => sv.Subject)
                 .FirstOrDefaultAsync(sv => sv.Id == id && !sv.IsDeleted);
         }

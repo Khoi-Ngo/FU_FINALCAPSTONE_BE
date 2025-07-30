@@ -13,20 +13,20 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
         private readonly CurriculumRepository _curriculumRepository;
         private readonly CurriculumSubjectRepository _curriculumSubjectRepository;
         private readonly ProgramRepository _programRepository;
-        private readonly SubjectRepository _subjectRepository;
+        private readonly SubjectVersionRepository _subjectVersionRepository;
         private readonly IMapper _mapper;
 
         public CurriculumService(
             CurriculumRepository curriculumRepository,
             CurriculumSubjectRepository curriculumSubjectRepository,
             ProgramRepository programRepository,
-            SubjectRepository subjectRepository,
+            SubjectVersionRepository subjectVersionRepository,
             IMapper mapper)
         {
             _curriculumRepository = curriculumRepository;
             _curriculumSubjectRepository = curriculumSubjectRepository;
             _programRepository = programRepository;
-            _subjectRepository = subjectRepository;
+            _subjectVersionRepository = subjectVersionRepository;
             _mapper = mapper;
         }
 
@@ -161,17 +161,17 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
                 throw new NotFoundException("Curriculum not found.");
             }
 
-            var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
-            if (subject == null || subject.IsDeleted)
+            var subjectVersion = await _subjectVersionRepository.GetByIdWithSubjectAsync(request.SubjectVersionId);
+            if (subjectVersion == null || subjectVersion.IsDeleted)
             {
-                throw new NotFoundException("Subject not found.");
+                throw new NotFoundException("Subject version not found.");
             }
 
-            // Check if subject is already in curriculum
-            var exists = await _curriculumSubjectRepository.ExistsAsync(curriculumId, request.SubjectId);
-            if (exists)
+            // Check if a different version of the same subject already exists
+            var hasSubjectWithSameCode = await _curriculumSubjectRepository.HasSubjectWithSubjectCodeAsync(curriculumId, subjectVersion.Subject.SubjectCode);
+            if (hasSubjectWithSameCode)
             {
-                throw new InvalidUserCreatedException("Subject is already in this curriculum.");
+                throw new InvalidUserCreatedException($"A version of subject with code '{subjectVersion.Subject.SubjectCode}' already exists in this curriculum.");
             }
 
             var curriculumSubject = _mapper.Map<DAL.Entities.CurriculumSubject>(request);
@@ -193,7 +193,7 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
             return _mapper.Map<List<CurriculumSubjectResponse>>(curriculumSubjects);
         }
 
-        public async Task RemoveSubjectFromCurriculumAsync(long curriculumId, long subjectId)
+        public async Task RemoveSubjectFromCurriculumAsync(long curriculumId, long subjectVersionId)
         {
             var curriculum = await _curriculumRepository.GetByIdAsync(curriculumId);
             if (curriculum == null || curriculum.IsDeleted)
@@ -201,13 +201,13 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
                 throw new NotFoundException("Curriculum not found.");
             }
 
-            var exists = await _curriculumSubjectRepository.ExistsAsync(curriculumId, subjectId);
+            var exists = await _curriculumSubjectRepository.ExistsAsync(curriculumId, subjectVersionId);
             if (!exists)
             {
-                throw new NotFoundException("Subject not found in this curriculum.");
+                throw new NotFoundException("Subject version not found in this curriculum.");
             }
 
-            await _curriculumSubjectRepository.RemoveSubjectFromCurriculumAsync(curriculumId, subjectId);
+            await _curriculumSubjectRepository.RemoveSubjectFromCurriculumAsync(curriculumId, subjectVersionId);
         }
     }
 }

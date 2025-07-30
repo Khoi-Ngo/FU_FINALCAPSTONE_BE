@@ -15,12 +15,10 @@ public class ProfileController : BaseController
 {
     private readonly StudentProfileService _studentProfileService;
     private readonly StaffProfileService _staffProfileService;
-    private readonly NotificationHubNotifier _notifier;
-    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService, NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService) : base(endpointSettings)
     {
         _staffProfileService = staffProfileService;
         _studentProfileService = studentProfileService;
-        _notifier = notificationHubNotifier;
     }
 
     #region Student Profile

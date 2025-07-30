@@ -1,3 +1,5 @@
+using AISEA.ApiService.SHARED.Const.Enums;
+
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Booking
 {
     public class BookingAvailabilitySimplyResponse
@@ -8,7 +10,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Booking
 
         public TimeSpan EndTime { get; set; }
 
-        public DayOfWeek DayInWeek { get; set; }
+        public DayOfWeekAISEA DayInWeek { get; set; }
 
         public long StaffProfileId { get; set; }
     }

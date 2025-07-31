@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Syllabus;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Syllabus;
 using AISEA.ApiService.SHARED.Exceptions;
+using AISEA.ApiService.SHARED.Interfaces;
 using AutoMapper;
 
 namespace AISEA.ApiService.BAL.Services.Syllabus
@@ -18,6 +19,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
         private readonly SyllabusLearningOutcomeRepository _outcomeRepository;
         private readonly SyllabusSessionRepository _sessionRepository;
         private readonly SessionOutcomeMappingRepository _mappingRepository;
+        private readonly IJWTService _jwtService;
         private readonly IMapper _mapper;
 
         public SyllabusService(
@@ -29,6 +31,7 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             SyllabusLearningOutcomeRepository outcomeRepository,
             SyllabusSessionRepository sessionRepository,
             SessionOutcomeMappingRepository mappingRepository,
+            IJWTService jwtService,
             IMapper mapper)
         {
             _syllabusRepository = syllabusRepository;
@@ -39,10 +42,11 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             _outcomeRepository = outcomeRepository;
             _sessionRepository = sessionRepository;
             _mappingRepository = mappingRepository;
+            _jwtService = jwtService;
             _mapper = mapper;
         }
 
-        public async Task<long> CreateSyllabusAsync(CreateSyllabusRequest request)
+        public async Task<long> CreateSyllabusAsync(CreateSyllabusRequest request, string accessToken)
         {
             var subjectVersion = await _subjectVersionRepository.GetByIdAsync(request.SubjectVersionId);
             if (subjectVersion == null || subjectVersion.IsDeleted)
@@ -56,7 +60,9 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
                 throw new InvalidUserCreatedException("Syllabus for this subject version already exists.");
             }
 
+            var createdBy = _jwtService.GetUsernameFromToken(accessToken);
             var syllabus = _mapper.Map<DAL.Entities.Syllabus>(request);
+            syllabus.CreatedBy = createdBy;
             syllabus.CreatedAt = DateTime.UtcNow;
             
             await _syllabusRepository.CreateAsync(syllabus);

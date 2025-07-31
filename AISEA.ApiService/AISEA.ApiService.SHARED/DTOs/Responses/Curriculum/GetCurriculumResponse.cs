@@ -1,3 +1,5 @@
+using AISEA.ApiService.SHARED.Enums;
+
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Curriculum
 {
     public class GetCurriculumResponse
@@ -11,6 +13,13 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Curriculum
         public DateTimeOffset EffectiveDate { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        
+        // Approval workflow fields
+        public string? CreatedBy { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? RejectionReason { get; set; }
     }
 
     public class GetCurriculumDetailResponse : GetCurriculumResponse

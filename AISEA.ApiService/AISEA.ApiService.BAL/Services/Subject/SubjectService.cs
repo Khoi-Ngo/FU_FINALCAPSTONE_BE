@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Subject;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using AISEA.ApiService.SHARED.Exceptions;
+using AISEA.ApiService.SHARED.Interfaces;
 using AutoMapper;
 
 namespace AISEA.ApiService.BAL.Services.Subject
@@ -11,15 +12,17 @@ namespace AISEA.ApiService.BAL.Services.Subject
     public class SubjectService
     {
         private readonly SubjectRepository _subjectRepository;
+        private readonly IJWTService _jwtService;
         private readonly IMapper _mapper;
 
-        public SubjectService(SubjectRepository subjectRepository, IMapper mapper)
+        public SubjectService(SubjectRepository subjectRepository, IJWTService jwtService, IMapper mapper)
         {
             _subjectRepository = subjectRepository;
+            _jwtService = jwtService;
             _mapper = mapper;
         }
 
-        public async Task CreateSubjectAsync(CreateSubjectRequest request)
+        public async Task CreateSubjectAsync(CreateSubjectRequest request, string accessToken)
         {
             var existingSubject = await _subjectRepository.GetByCodeAsync(request.SubjectCode);
             if (existingSubject != null)
@@ -27,7 +30,9 @@ namespace AISEA.ApiService.BAL.Services.Subject
                 throw new InvalidUserCreatedException($"Subject with code '{request.SubjectCode}' already exists.");
             }
 
+            var createdBy = _jwtService.GetUsernameFromToken(accessToken);
             var subject = _mapper.Map<DAL.Entities.Subject>(request);
+            subject.CreatedBy = createdBy;
             subject.CreatedAt = DateTime.UtcNow;
             
             await _subjectRepository.CreateAsync(subject);
@@ -95,8 +100,10 @@ namespace AISEA.ApiService.BAL.Services.Subject
             await _subjectRepository.UpdateAsync(subject);
         }
 
-        public async Task<bool> CreateSubjectsAsync(List<CreateSubjectRequest> requests)
+        public async Task<bool> CreateSubjectsAsync(List<CreateSubjectRequest> requests, string accessToken)
         {
+            var createdBy = _jwtService.GetUsernameFromToken(accessToken);
+            
             foreach (var request in requests)
             {
                 var existingSubject = await _subjectRepository.GetByCodeAsync(request.SubjectCode);
@@ -106,6 +113,7 @@ namespace AISEA.ApiService.BAL.Services.Subject
                 }
 
                 var subject = _mapper.Map<DAL.Entities.Subject>(request);
+                subject.CreatedBy = createdBy;
                 subject.CreatedAt = DateTime.UtcNow;
 
                 await _subjectRepository.CreateAsync(subject);

@@ -28,11 +28,15 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
 
         public async Task CreateSubjectVersionAsync(CreateSubjectVersionRequest request)
         {
-            // Validate subject exists
+            // Validate subject exists and is approved
             var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
             if (subject == null || subject.IsDeleted)
             {
                 throw new NotFoundException("Subject not found.");
+            }
+            if (subject.ApprovalStatus != SHARED.Const.Enums.EApprovalStatus.APPROVED)
+            {
+                throw new InvalidOperationException("Cannot create a version for a subject that is not approved.");
             }
 
             // Check if version code already exists for this subject

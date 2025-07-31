@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.BAL.Services.AuditLog;
+using AISEA.ApiService.BAL.Services.Approval;
 using AISEA.ApiService.BAL.Services.Booking;
 
 namespace AISEA.ApiService.BAL
@@ -42,6 +43,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<ProgramService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<AuditLogService>();
+            services.AddScoped<ApprovalService>();
             services.AddScoped<BookingAvailabilityService>();
             services.AddScoped<LeaveScheduleService>();
             services.AddScoped<BookedMeetingService>();

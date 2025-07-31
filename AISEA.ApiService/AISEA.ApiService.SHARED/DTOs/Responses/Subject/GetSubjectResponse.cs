@@ -1,3 +1,5 @@
+using AISEA.ApiService.SHARED.Enums;
+
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Subject
 {
     public class GetSubjectResponse
@@ -10,6 +12,13 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Subject
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<GetSubjectResponse>? Prerequisites { get; set; }
+        
+        // Approval workflow fields
+        public string? CreatedBy { get; set; }
+        public ApprovalStatus ApprovalStatus { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? RejectionReason { get; set; }
 
     }
 }

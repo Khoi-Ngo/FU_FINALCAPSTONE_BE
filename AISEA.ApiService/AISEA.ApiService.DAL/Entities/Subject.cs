@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.ApiService.DAL.Abstract;
+using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.DAL.Entities;
 
@@ -27,6 +28,14 @@ public partial class Subject
     public virtual ICollection<ComboSubject> ComboSubjects { get; set; } = new List<ComboSubject>();
 
     // public virtual ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
+    
+    // Approval properties
+    public EApprovalStatus ApprovalStatus { get; set; } = EApprovalStatus.PENDING;
+    public string? CreatedBy { get; set; }
+    public string? ApprovedBy { get; set; }
+    public DateTime? ApprovedAt { get; set; }
+    public string? RejectionReason { get; set; }
+    
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

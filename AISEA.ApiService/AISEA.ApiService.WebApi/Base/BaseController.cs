@@ -35,6 +35,7 @@ public abstract class BaseController : ControllerBase
             return string.Empty;
         }
     }
+    
     protected string AuthorizationTokenGoogle
     {
         get
@@ -45,5 +46,18 @@ public abstract class BaseController : ControllerBase
             }
             return string.Empty;
         }
+    }
+    
+    protected string GetAccessTokenFromHeader()
+    {
+        if (Request.Headers.TryGetValue("Authorization", out var authHeader))
+        {
+            var token = authHeader.ToString();
+            if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return token.Substring("Bearer ".Length).Trim();
+            }
+        }
+        return null;
     }
 }

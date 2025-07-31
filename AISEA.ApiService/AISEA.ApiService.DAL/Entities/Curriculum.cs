@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AISEA.ApiService.DAL.Abstract;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Entities;
@@ -27,6 +28,14 @@ public partial class Curriculum
     public virtual Program Program { get; set; } = null;
 
     public virtual ICollection<CurriculumSubject> CurriculumSubjects { get; set; } = new List<CurriculumSubject>();
+    
+    // Approval properties
+    public EApprovalStatus ApprovalStatus { get; set; } = EApprovalStatus.PENDING;
+    public string? CreatedBy { get; set; }
+    public string? ApprovedBy { get; set; }
+    public DateTime? ApprovedAt { get; set; }
+    public string? RejectionReason { get; set; }
+    
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }

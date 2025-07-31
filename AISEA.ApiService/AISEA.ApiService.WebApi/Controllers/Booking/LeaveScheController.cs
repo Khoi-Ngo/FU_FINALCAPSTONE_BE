@@ -35,7 +35,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
         return Ok(new { message = "Leave schedule created successfully" });
     }
 
@@ -44,7 +44,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
     {
         await _leaveScheduleService.CreateBulkAsync(requests, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, "Success", $"{requests.Count} leave schedules created successfully.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Success", $"{requests.Count} leave schedules created successfully.");
         return Ok(new { message = $"{requests.Count} leave schedules created successfully" });
     }
 
@@ -56,7 +56,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
         await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
         return Ok("Ok");
     }
 
@@ -68,7 +68,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _leaveScheduleService.DeleteAsync(id, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leave Schedule has been deleted.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leave Schedule has been deleted.");
         return Ok("Ok");
     }
     #endregion

@@ -33,7 +33,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> CreateBookingAvailability([FromBody] CreateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been created successfully.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been created successfully.");
         return Ok("Ok");
     }
 
@@ -46,7 +46,7 @@ public class BookingAvailabilityController : BaseController
     {
         await _bookingAvailabilityService.
        BulkCreateBookingAvailabilityAsync(request, AccessToken);
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availabilities have been bulk created successfully.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availabilities have been bulk created successfully.");
         return Ok("Ok");
     }
 
@@ -93,7 +93,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been updated successfully.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been updated successfully.");
         return Ok("Ok");
     }
 
@@ -105,7 +105,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> DeleteBookingAvailability(long id)
     {
         await _bookingAvailabilityService.DeleteAsync(id, AccessToken);
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been deleted.");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been deleted.");
         return Ok("Ok");
     }
 

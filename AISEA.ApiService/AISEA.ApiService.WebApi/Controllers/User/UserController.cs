@@ -309,7 +309,7 @@ public class UserController : BaseController
     /// </summary>
     private IActionResult NotifyAndResponseDummy(string message)
     {
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
         return Ok("Ok");
     }
 

@@ -43,7 +43,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> LoginWithGoogle()
     {
         var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", $"New login at {DateTime.UtcNow}");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", $"New login at {DateTime.UtcNow}");
         return Ok(res);
     }
 
@@ -56,7 +56,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login([FromBody] AuthFEIDRequest request)
     {
         var res = await _authService.LoginAsync(request);
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", $"New login at {DateTime.UtcNow}");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", $"New login at {DateTime.UtcNow}");
         return Ok(res);
     }
 
@@ -93,7 +93,7 @@ public class AuthController : BaseController
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
         //notify that user reset password ok
-        _notifier.NotifyUserAsync(AccessToken, "Successfully", "Reset password ok!");
+        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Reset password ok!");
         return Ok("Ok");
     }
 

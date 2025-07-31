@@ -416,6 +416,10 @@ public class BookedMeetingService
                 throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot.");
             case 50010:
                 throw new InvalidOperationException("The student already has an active meeting scheduled in the same time slot.");
+            case 50011:
+                throw new InvalidOperationException("The student has reached maximum pending meeting");
+            case 50012:
+                throw new InvalidOperationException("The student has reached maximum canceled per 15 days");
             case 547:
                 throw new InvalidOperationException("Invalid meeting data. Ensure staff and student profiles exist.");
 

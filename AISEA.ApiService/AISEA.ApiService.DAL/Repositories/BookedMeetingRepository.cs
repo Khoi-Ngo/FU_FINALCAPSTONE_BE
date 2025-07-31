@@ -14,6 +14,28 @@ public class BookedMeetingRepository : GenericRepository<BookedMeeting>
     {
     }
 
+    public async Task<(BookedMeeting Meeting, long AdvisorUserId)> GetMeetingWithAdvisorUserIdAsync(long id)
+    {
+        return await _context.BookedMeetings
+            .Where(m => m.Id == id)
+            .Join(_context.StaffProfiles,
+                m => m.StaffProfileId,
+                sp => sp.Id,
+                (m, sp) => new ValueTuple<BookedMeeting, long>(m, sp.UserId))
+            .FirstAsync();
+    }
+
+    public async Task<(BookedMeeting Meeting, long StudentUserId)> GetMeetingWithStudentUserIdAsync(long id)
+    {
+        return await _context.BookedMeetings
+            .Where(m => m.Id == id)
+            .Join(_context.StudentProfiles,
+                m => m.StudentProfileId,
+                sp => sp.Id,
+                (m, sp) => new ValueTuple<BookedMeeting, long>(m, sp.UserId))
+            .FirstAsync();
+    }
+
     public async Task<(IEnumerable<BookedMeeting> meetings, int TotalCount)> GetAllAsync(PaginationRequest request)
     {
         var query = _context.BookedMeetings

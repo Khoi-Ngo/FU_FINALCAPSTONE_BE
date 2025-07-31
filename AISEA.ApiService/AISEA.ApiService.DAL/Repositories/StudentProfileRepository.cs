@@ -15,6 +15,13 @@ namespace AISEA.ApiService.DAL.Repositories
             await _context.StudentProfiles
                 .ExecuteUpdateAsync(setters => setters.SetProperty(sp => sp.NumberOfBan, 0));
         }
+        public async Task<long> GetUserIdByIdAsync(long id)
+        {
+            return await _context.StudentProfiles
+                .Where(sp => sp.Id == id)
+                .Select(sp => sp.UserId)
+                .FirstOrDefaultAsync();
+        }
 
         public async Task IncreaseNumberOfBansAsync(Dictionary<long, int> studentProfileIdToBanIncrement)
         {

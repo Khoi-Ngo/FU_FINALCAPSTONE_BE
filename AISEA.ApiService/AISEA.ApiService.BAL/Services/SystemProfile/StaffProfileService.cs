@@ -22,8 +22,4 @@ public class StaffProfileService
         await _staffProfileRepository.CreateAsync(staffProfile);
     }
 
-    public async Task<StaffProfile> GetByIdAsync(long staffProfileId)
-    {
-        return await _staffProfileRepository.GetByIdAsync(staffProfileId);
-    }
 }

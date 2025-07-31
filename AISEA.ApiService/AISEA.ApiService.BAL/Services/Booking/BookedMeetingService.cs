@@ -16,6 +16,9 @@ namespace AISEA.ApiService.BAL.Services.Booking;
 
 public class BookedMeetingService
 {
+
+    #region Init
+
     private readonly BookedMeetingRepository _bookedMeetingRepository;
     private readonly StaffProfileRepository _staffProfileRepository;
     private readonly StudentProfileRepository _studentProfileRepository;
@@ -36,7 +39,62 @@ public class BookedMeetingService
         _bookingSettings = bookingSettings;
         _mailService = mailService;
     }
+
+    #endregion
+
     #region GET MULTIPLE
+
+    public object? GetMaxNumberOfBan()
+    {
+        return new
+        {
+            MaxNoOfBan = _bookingSettings.MaxNumberOfBan
+        };
+    }
+    public async Task<object?> GetCurNumberOfBanAsync(string accessToken)
+    {
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(_jWTService.GetProfileIdFromToken(accessToken));
+        return new
+        {
+            CurNoOfBan = studentProfile.NumberOfBan
+        };
+    }
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllActiveByStudentSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStudentProfileIdAsync(request, studentProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllActiveByAdvSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var staffProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+
+    public async Task<List<OverdueMeetingDTO>> GetPendingOverdueMeetingsWithUserIdsAsync()
+    {
+        return await _bookedMeetingRepository.GetPendingOverdueMeetingsWithUserIdsAsync();
+    }
+
+
+    public async Task<List<StuMissedMeetingDTO>> GetConfirmedStudentMissedMeetingsAsync(int daysToCheckStudentMissedAfterEndMeeting)
+    {
+        return await _bookedMeetingRepository.GetConfirmedStudentMissedMeetingsAsync(daysToCheckStudentMissedAfterEndMeeting);
+    }
 
     public async Task<PagedResult<MeetingItemListResponse>> GetAllAsync(PaginationRequest request)
     {
@@ -114,9 +172,8 @@ public class BookedMeetingService
     {
 
         //validate the time to do + current status + validate access + check in code (trigger)
-        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
 
-        var completedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
+        var (completedMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(id);
 
         if (!IsValidAccess(completedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessBookingAvailability("Deny access to the meeting");
 
@@ -129,11 +186,9 @@ public class BookedMeetingService
         completedMeeting.Status = EBookingStatus.COMPLETED;
         await _bookedMeetingRepository.UpdateAsync(completedMeeting);
 
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(completedMeeting.StudentProfileId);
-
         return new MeetingNotiForPartnerResponse
         {
-            PartnerUserId = studentProfile.UserId,
+            PartnerUserId = studentUserId,
             MeetingStartDateTime = completedMeeting.StartDateTime,
             MeetingEndDateTime = completedMeeting.EndDateTime,
             StatusChangedTo = EBookingStatus.COMPLETED
@@ -143,10 +198,9 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> ConfirmMeetingAsync(long id, string accessToken)
     {
-        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
 
         //validate time + status + access permission
-        var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(id);
+        var (confirmedMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(id);
 
         if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("You have no permission to confirm this meeting");
 
@@ -166,11 +220,10 @@ public class BookedMeetingService
         confirmedMeeting.Status = EBookingStatus.CONFIRMED;
         await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
 
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(confirmedMeeting.StudentProfileId);
 
         return new MeetingNotiForPartnerResponse
         {
-            PartnerUserId = studentProfile.UserId,
+            PartnerUserId = studentUserId,
             MeetingStartDateTime = confirmedMeeting.StartDateTime,
             MeetingEndDateTime = confirmedMeeting.EndDateTime,
             StatusChangedTo = EBookingStatus.CONFIRMED
@@ -182,7 +235,6 @@ public class BookedMeetingService
     {
         try
         {
-            //TODO: GetUserId of Profile By ProfileId async
             //avoid book the meeting on holiday
             var checkHolidays = await _holidayService.CheckHolidayAsync(DateOnly.FromDateTime(request.StartDateTime));
             if (checkHolidays.Any()) throw new OnHolidayException("You cannot book a meeting on Holiday (VN)", checkHolidays);
@@ -215,12 +267,12 @@ public class BookedMeetingService
             //save into the database without caching
             await _bookedMeetingRepository.CreateAsync(newMeeting);
 
-            var staffProfile = await _staffProfileRepository.GetByIdAsync(request.StaffProfileId);
+            var advisorUserId = await _staffProfileRepository.GetUserIdByIdAsync(request.StaffProfileId);
             await _mailService.SendEmailAsync(_jWTService.GetEmailFromToken(accessToken), "CHECK IN CODE", $"The check in code for your meeting {request.StartDateTime} to {request.EndDateTime} is : {checkinCode}");
             //return the notified advisor user id
             return new MeetingNotiForPartnerResponse
             {
-                PartnerUserId = staffProfile.UserId,
+                PartnerUserId = advisorUserId,
                 MeetingStartDateTime = request.StartDateTime,
                 MeetingEndDateTime = request.EndDateTime,
                 StatusChangedTo = EBookingStatus.PENDING
@@ -251,9 +303,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
     {
-        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
 
-        var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        var (canceledMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(meetingId);
         //validate the access to meeting
         if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
             throw new InvalidAccessMeeting("No permission to cancel this meeting");
@@ -272,11 +323,9 @@ public class BookedMeetingService
 
         await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
 
-        //Get the PartnerResponse
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(canceledMeeting.StudentProfileId);
         return new MeetingNotiForPartnerResponse
         {
-            PartnerUserId = studentProfile.UserId,
+            PartnerUserId = studentUserId,
             MeetingStartDateTime = canceledMeeting.StartDateTime,
             MeetingEndDateTime = canceledMeeting.EndDateTime,
             StatusChangedTo = canceledMeeting.Status
@@ -306,9 +355,8 @@ public class BookedMeetingService
 
     public async Task<MeetingNotiForPartnerResponse> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
     {
-        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
 
-        var confirmedMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        var (confirmedMeeting, advisorUserId) = await _bookedMeetingRepository.GetMeetingWithAdvisorUserIdAsync(meetingId);
         //valid access the meeting
         if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
             throw new InvalidAccessMeeting("No permission to report the Advisor missed this meeting");
@@ -325,11 +373,10 @@ public class BookedMeetingService
         confirmedMeeting.Note = request.Note;
         confirmedMeeting.Status = EBookingStatus.ADVISOR_MISSED;
         await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
-        var advisorProfile = await _staffProfileRepository.GetByIdAsync(confirmedMeeting.StaffProfileId);
-        //get the MeetingNotiForPartnerResponse then notify
+
         return new MeetingNotiForPartnerResponse
         {
-            PartnerUserId = advisorProfile.UserId,
+            PartnerUserId = advisorUserId,
             MeetingStartDateTime = confirmedMeeting.StartDateTime,
             MeetingEndDateTime = confirmedMeeting.EndDateTime,
             StatusChangedTo = confirmedMeeting.Status
@@ -338,9 +385,8 @@ public class BookedMeetingService
 
     public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
-        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
 
-        var canceledMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        var (canceledMeeting, advisorUserId) = await _bookedMeetingRepository.GetMeetingWithAdvisorUserIdAsync(meetingId);
         // -Validate the access
         if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
             throw new InvalidAccessMeeting("No permission to cancel this meeting");
@@ -362,11 +408,10 @@ public class BookedMeetingService
         canceledMeeting.Status = EBookingStatus.STU_CANCELED;
         await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
 
-        var advisorProfile = await _staffProfileRepository.GetByIdAsync(canceledMeeting.StaffProfileId);
 
         return (new MeetingNotiForPartnerResponse
         {
-            PartnerUserId = advisorProfile.UserId,
+            PartnerUserId = advisorUserId,
             MeetingStartDateTime = canceledMeeting.StartDateTime,
             MeetingEndDateTime = canceledMeeting.EndDateTime,
             StatusChangedTo = canceledMeeting.Status
@@ -376,9 +421,8 @@ public class BookedMeetingService
     }
     public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
     {
-        //TODO: Replace GetByIdAsync With GetByIdWithUserIdsAsync
 
-        var overdueMeeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
+        var (overdueMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(meetingId);
         //validate the access
         if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
             throw new InvalidAccessMeeting("No permission to give the reason for this overdue meeting");
@@ -389,14 +433,20 @@ public class BookedMeetingService
         //giving the reason for overdue
         overdueMeeting.Note = request.Note;
         await _bookedMeetingRepository.UpdateAsync(overdueMeeting);
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(overdueMeeting.StudentProfileId);
+     
         return new MeetingNotiForPartnerResponse
         {
-            PartnerUserId = studentProfile.UserId,
+            PartnerUserId = studentUserId,
             MeetingStartDateTime = overdueMeeting.StartDateTime,
             MeetingEndDateTime = overdueMeeting.EndDateTime
         };
     }
+
+    public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)
+    {
+        await _bookedMeetingRepository.UpdateMeetingStatusesAsync(meetingIds, status);
+    }
+
 
 
 
@@ -452,63 +502,6 @@ public class BookedMeetingService
             throw new InvalidAccessBookingAvailability("No permission to access this detail meeting");
 
         return _mapper.Map<MeetingViewDetailResponse>(meeting);
-    }
-
-    public async Task<List<OverdueMeetingDTO>> GetPendingOverdueMeetingsWithUserIdsAsync()
-    {
-        return await _bookedMeetingRepository.GetPendingOverdueMeetingsWithUserIdsAsync();
-    }
-
-    public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)
-    {
-        await _bookedMeetingRepository.UpdateMeetingStatusesAsync(meetingIds, status);
-    }
-
-    public async Task<List<StuMissedMeetingDTO>> GetConfirmedStudentMissedMeetingsAsync(int daysToCheckStudentMissedAfterEndMeeting)
-    {
-        return await _bookedMeetingRepository.GetConfirmedStudentMissedMeetingsAsync(daysToCheckStudentMissedAfterEndMeeting);
-    }
-
-    public object? GetMaxNumberOfBan()
-    {
-        return new
-        {
-            MaxNoOfBan = _bookingSettings.MaxNumberOfBan
-        };
-    }
-
-    public async Task<object?> GetCurNumberOfBanAsync(string accessToken)
-    {
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(_jWTService.GetProfileIdFromToken(accessToken));
-        return new
-        {
-            CurNoOfBan = studentProfile.NumberOfBan
-        };
-    }
-
-    public async Task<PagedResult<MeetingItemListResponse>> GetAllActiveByStudentSelfAsync(PaginationRequest request, string accessToken)
-    {
-        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
-        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStudentProfileIdAsync(request, studentProfileId);
-        return new PagedResult<MeetingItemListResponse>
-        {
-            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
-    }
-    public async Task<PagedResult<MeetingItemListResponse>> GetAllActiveByAdvSelfAsync(PaginationRequest request, string accessToken)
-    {
-        var staffProfileId = _jWTService.GetProfileIdFromToken(accessToken);
-        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStaffProfileIdAsync(request, staffProfileId);
-        return new PagedResult<MeetingItemListResponse>
-        {
-            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
     }
 
 }

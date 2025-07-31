@@ -28,10 +28,6 @@ public class StudentProfileService
         await _studentProfileRepository.CreateAsync(studentProfile);
     }
 
-    public async Task<StudentProfile> GetByIdAsync(long studentProfileId)
-    {
-        return await _studentProfileRepository.GetByIdAsync(studentProfileId);
-    }
     public async Task ResetNumberOfBansAsync()
     {
         await _studentProfileRepository.ResetNumberOfBansAsync();

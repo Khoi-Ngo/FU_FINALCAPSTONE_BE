@@ -192,8 +192,7 @@ public class AuthService
     {
         // Get username from access token
 
-        var userData = _jwtService.GetAllClaimsFromToken(accessToken);
-        var username = userData.GetValueOrDefault(_jwtSettings.UserName);
+        var username = _jwtService.GetUsernameFromToken(accessToken);
 
         // Get user from DB
         var user = await _userRepository.GetUserByUsernameAsync(username);

@@ -1,4 +1,3 @@
-using System;
 using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Booking;

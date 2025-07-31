@@ -1,44 +1,44 @@
-using AISEA.ApiService.SHARED.Enums;
+using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.Extensions
 {
     public static class ApprovalStatusExtensions
     {
-        public static string GetDisplayName(this ApprovalStatus status)
+        public static string GetDisplayName(this EApprovalStatus status)
         {
             return status switch
             {
-                ApprovalStatus.Pending => "Pending",
-                ApprovalStatus.Approved => "Approved",
-                ApprovalStatus.Rejected => "Rejected",
+                EApprovalStatus.PENDING => "Pending",
+                EApprovalStatus.APPROVED => "Approved",
+                EApprovalStatus.REJECTED => "Rejected",
                 _ => "Unknown"
             };
         }
 
-        public static string GetDescription(this ApprovalStatus status)
+        public static string GetDescription(this EApprovalStatus status)
         {
             return status switch
             {
-                ApprovalStatus.Pending => "Awaiting approval from administrator",
-                ApprovalStatus.Approved => "Approved by administrator",
-                ApprovalStatus.Rejected => "Rejected by administrator",
+                EApprovalStatus.PENDING => "Awaiting approval from administrator",
+                EApprovalStatus.APPROVED => "Approved by administrator",
+                EApprovalStatus.REJECTED => "Rejected by administrator",
                 _ => "Status unknown"
             };
         }
 
-        public static bool IsApproved(this ApprovalStatus status)
+        public static bool IsApproved(this EApprovalStatus status)
         {
-            return status == ApprovalStatus.Approved;
+            return status == EApprovalStatus.APPROVED;
         }
 
-        public static bool IsPending(this ApprovalStatus status)
+        public static bool IsPending(this EApprovalStatus status)
         {
-            return status == ApprovalStatus.Pending;
+            return status == EApprovalStatus.PENDING;
         }
 
-        public static bool IsRejected(this ApprovalStatus status)
+        public static bool IsRejected(this EApprovalStatus status)
         {
-            return status == ApprovalStatus.Rejected;
+            return status == EApprovalStatus.REJECTED;
         }
     }
 }

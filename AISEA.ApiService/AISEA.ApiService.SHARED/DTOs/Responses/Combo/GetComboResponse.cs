@@ -1,4 +1,4 @@
-using AISEA.ApiService.SHARED.Enums;
+using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Combo
 {
@@ -13,7 +13,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Combo
         
         // Approval workflow fields
         public string? CreatedBy { get; set; }
-        public ApprovalStatus ApprovalStatus { get; set; }
+        public EApprovalStatus ApprovalStatus { get; set; }
         public string? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }
         public string? RejectionReason { get; set; }

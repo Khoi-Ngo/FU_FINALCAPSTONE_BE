@@ -1,4 +1,5 @@
 using AISEA.ApiService.SHARED.DTOs.Responses.SubjectVersion;
+using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Syllabus
 {
@@ -15,6 +16,13 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Syllabus
         
         // Subject Version Information
         public GetSubjectVersionResponse? SubjectVersion { get; set; }
+        
+        // Approval workflow fields
+        public string? CreatedBy { get; set; }
+        public EApprovalStatus ApprovalStatus { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? RejectionReason { get; set; }
         
         public List<SyllabusAssessmentResponse> Assessments { get; set; } = new();
         public List<SyllabusLearningMaterialResponse> LearningMaterials { get; set; } = new();

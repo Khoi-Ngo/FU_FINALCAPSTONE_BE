@@ -26,7 +26,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateCurriculum([FromBody] CreateCurriculumRequest request)
         {
-            var curriculumId = await _curriculumService.CreateCurriculumAsync(request);
+            var curriculumId = await _curriculumService.CreateCurriculumAsync(request, AccessToken);
             return Ok(new { Message = "Curriculum created successfully.", CurriculumId = curriculumId });
         }
 
@@ -37,7 +37,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateCurricula([FromBody] List<CreateCurriculumRequest> requests)
         {
-            await _curriculumService.CreateCurriculaAsync(requests);
+            await _curriculumService.CreateCurriculaAsync(requests, AccessToken);
             return Ok(new { Message = "Curricula created successfully." });
         }
 

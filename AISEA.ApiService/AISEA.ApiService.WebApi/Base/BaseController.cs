@@ -35,6 +35,7 @@ public abstract class BaseController : ControllerBase
             return string.Empty;
         }
     }
+    
     protected string AuthorizationTokenGoogle
     {
         get

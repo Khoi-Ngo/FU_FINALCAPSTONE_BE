@@ -20,25 +20,25 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         }
 
         /// <summary>
-        /// Creates a new subject (Academic Staff only)
+        /// Creates a new subject (Academic Staff only) - Requires Manager approval
         /// </summary>
         [HttpPost]
         [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSubject([FromBody] CreateSubjectRequest request)
         {
-            await _subjectService.CreateSubjectAsync(request);
-            return Ok(new { Message = "Subject created successfully." });
+            await _subjectService.CreateSubjectAsync(request, AccessToken);
+            return Ok(new { Message = "Subject created successfully and pending approval." });
         }
 
         /// <summary>
-        /// Creates multiple subjects in bulk (Academic Staff only)
+        /// Creates multiple subjects in bulk (Academic Staff only) - Requires Manager approval
         /// </summary>
         [HttpPost("bulk")]
         [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSubjects([FromBody] List<CreateSubjectRequest> requests)
         {
-            await _subjectService.CreateSubjectsAsync(requests);
-            return Ok(new { Message = "Subjects created successfully." });
+            await _subjectService.CreateSubjectsAsync(requests, AccessToken);
+            return Ok(new { Message = "Subjects created successfully and pending approval." });
         }
 
         /// <summary>

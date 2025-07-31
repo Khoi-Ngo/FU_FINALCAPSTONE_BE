@@ -141,5 +141,17 @@ namespace AISEA.ApiService.DAL.Repositories
 
             return false; // No soft-deleted prerequisite found
         }
+
+        /// <summary>
+        /// Checks if a subject version already has a prerequisite with the same subject code
+        /// </summary>
+        public async Task<bool> HasPrerequisiteWithSubjectCodeAsync(long subjectVersionId, string subjectCode)
+        {
+            return await _context.SubjectVersionPrerequisites
+                .Where(svp => svp.SubjectVersionId == subjectVersionId && !svp.IsDeleted)
+                .Include(svp => svp.PrerequisiteSubjectVersion)
+                    .ThenInclude(sv => sv.Subject)
+                .AnyAsync(svp => svp.PrerequisiteSubjectVersion.Subject.SubjectCode == subjectCode);
+        }
     }
 }

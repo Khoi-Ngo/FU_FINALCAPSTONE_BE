@@ -78,7 +78,7 @@ public class BookedMeetingService
 
     public async Task<PagedResult<MeetingItemListResponse>> GetAllByStaffProfileIdForStudentRoleAsync(PaginationRequest request, long staffProfileId)
     {
-        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllByStaffProfileIdAsync(request, staffProfileId);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStaffProfileIdAsync(request, staffProfileId);
         return new PagedResult<MeetingItemListResponse>
         {
             Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
@@ -481,4 +481,30 @@ public class BookedMeetingService
             CurNoOfBan = studentProfile.NumberOfBan
         };
     }
+
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllActiveByStudentSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStudentProfileIdAsync(request, studentProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+    public async Task<PagedResult<MeetingItemListResponse>> GetAllActiveByAdvSelfAsync(PaginationRequest request, string accessToken)
+    {
+        var staffProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var (meetings, totalCount) = await _bookedMeetingRepository.GetAllActiveByStaffProfileIdAsync(request, staffProfileId);
+        return new PagedResult<MeetingItemListResponse>
+        {
+            Items = _mapper.Map<List<MeetingItemListResponse>>(meetings),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
 }

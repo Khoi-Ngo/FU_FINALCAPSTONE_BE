@@ -209,6 +209,18 @@ public class MeetingController : BaseController
         return Ok(res);
     }
 
+    /// <summary>
+    /// Student view list ACTIVE of their own meeting by token
+    /// </summary>
+    [HttpGet("all-stu-self/active/paged")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllActiveByStudentSelf([FromQuery] PaginationRequest request)
+    {
+        var res = await _bookedMeetingService.GetAllActiveByStudentSelfAsync(request, AccessToken);
+        return Ok(res);
+    }
+
+
 
 
     /// <summary>
@@ -221,6 +233,18 @@ public class MeetingController : BaseController
         var res = await _bookedMeetingService.GetAllByAdvSelfAsync(request, AccessToken);
         return Ok(res);
     }
+
+    /// <summary>
+    /// Advisor view list all of their own meeting by token
+    /// </summary>
+    [HttpGet("all-adv-self/active/paged")]
+    [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    public async Task<IActionResult> GetAllActiveByAdvSelf([FromQuery] PaginationRequest request)
+    {
+        var res = await _bookedMeetingService.GetAllActiveByAdvSelfAsync(request, AccessToken);
+        return Ok(res);
+    }
+
 
 
 

@@ -112,4 +112,56 @@ public class BookedMeetingRepository : GenericRepository<BookedMeeting>
                 })
             .ToListAsync();
     }
+
+    public async Task<(IEnumerable<BookedMeeting> meetings, int TotalCount)> GetAllActiveByStaffProfileIdAsync(PaginationRequest request, long staffProfileId)
+    {
+        var activeStatuses = new[]
+        {
+        EBookingStatus.PENDING,
+        EBookingStatus.CONFIRMED,
+        EBookingStatus.COMPLETED,
+        EBookingStatus.STUDENT_MISSED,
+        EBookingStatus.ADVISOR_MISSED
+    };
+
+        var query = _context.BookedMeetings
+            .Where(m => m.StaffProfileId == staffProfileId && activeStatuses.Contains(m.Status))
+            .Include(m => m.StaffProfile).ThenInclude(sp => sp.User)
+            .Include(m => m.StudentProfile).ThenInclude(sp => sp.User)
+            .OrderByDescending(m => m.StartDateTime);
+
+        var totalCount = await query.CountAsync();
+        var meetings = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        return (meetings, totalCount);
+    }
+
+    public async Task<(IEnumerable<BookedMeeting> meetings, int TotalCount)> GetAllActiveByStudentProfileIdAsync(PaginationRequest request, long studentProfileId)
+    {
+        var activeStatuses = new[]
+        {
+        EBookingStatus.PENDING,
+        EBookingStatus.CONFIRMED,
+        EBookingStatus.COMPLETED,
+        EBookingStatus.STUDENT_MISSED,
+        EBookingStatus.ADVISOR_MISSED
+    };
+
+        var query = _context.BookedMeetings
+            .Where(m => m.StudentProfileId == studentProfileId && activeStatuses.Contains(m.Status))
+            .Include(m => m.StaffProfile).ThenInclude(sp => sp.User)
+            .Include(m => m.StudentProfile).ThenInclude(sp => sp.User)
+            .OrderByDescending(m => m.StartDateTime);
+
+        var totalCount = await query.CountAsync();
+        var meetings = await query
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        return (meetings, totalCount);
+    }
 }

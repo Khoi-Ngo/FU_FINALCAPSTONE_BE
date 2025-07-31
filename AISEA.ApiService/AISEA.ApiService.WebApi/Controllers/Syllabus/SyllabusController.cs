@@ -27,7 +27,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSyllabus([FromBody] CreateSyllabusRequest request)
         {
-            var syllabusId = await _syllabusService.CreateSyllabusAsync(request);
+            var syllabusId = await _syllabusService.CreateSyllabusAsync(request, AccessToken);
             return Ok(new { Message = "Syllabus created successfully.", SyllabusId = syllabusId });
         }
 

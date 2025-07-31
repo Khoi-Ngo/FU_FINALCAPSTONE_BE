@@ -1,3 +1,5 @@
+using AISEA.ApiService.SHARED.Const.Enums;
+
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Combo
 {
     public class GetComboResponse
@@ -8,6 +10,13 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Combo
         public int SubjectCount { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        
+        // Approval workflow fields
+        public string? CreatedBy { get; set; }
+        public EApprovalStatus ApprovalStatus { get; set; }
+        public string? ApprovedBy { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? RejectionReason { get; set; }
     }
 
     public class GetComboDetailResponse : GetComboResponse

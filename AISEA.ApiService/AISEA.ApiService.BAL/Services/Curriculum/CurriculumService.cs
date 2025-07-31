@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Curriculum;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.Exceptions;
+using AISEA.ApiService.SHARED.Interfaces;
 using AutoMapper;
 
 namespace AISEA.ApiService.BAL.Services.Curriculum
@@ -14,6 +15,7 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
         private readonly CurriculumSubjectRepository _curriculumSubjectRepository;
         private readonly ProgramRepository _programRepository;
         private readonly SubjectVersionRepository _subjectVersionRepository;
+        private readonly IJWTService _jwtService;
         private readonly IMapper _mapper;
 
         public CurriculumService(
@@ -21,16 +23,18 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
             CurriculumSubjectRepository curriculumSubjectRepository,
             ProgramRepository programRepository,
             SubjectVersionRepository subjectVersionRepository,
+            IJWTService jwtService,
             IMapper mapper)
         {
             _curriculumRepository = curriculumRepository;
             _curriculumSubjectRepository = curriculumSubjectRepository;
             _programRepository = programRepository;
             _subjectVersionRepository = subjectVersionRepository;
+            _jwtService = jwtService;
             _mapper = mapper;
         }
 
-        public async Task<long> CreateCurriculumAsync(CreateCurriculumRequest request)
+        public async Task<long> CreateCurriculumAsync(CreateCurriculumRequest request, string accessToken)
         {
             // Validate program exists
             var program = await _programRepository.GetByIdAsync(request.ProgramId);
@@ -46,15 +50,18 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
                 throw new InvalidUserCreatedException($"Curriculum with code '{request.CurriculumCode}' already exists.");
             }
 
+            var createdBy = _jwtService.GetUsernameFromToken(accessToken);
             var curriculum = _mapper.Map<DAL.Entities.Curriculum>(request);
+            curriculum.CreatedBy = createdBy;
             curriculum.CreatedAt = DateTime.UtcNow;
             
             await _curriculumRepository.CreateAsync(curriculum);
             return curriculum.Id;
         }
 
-        public async Task<bool> CreateCurriculaAsync(List<CreateCurriculumRequest> requests)
+        public async Task<bool> CreateCurriculaAsync(List<CreateCurriculumRequest> requests, string accessToken)
         {
+            var createdBy = _jwtService.GetUsernameFromToken(accessToken);
             foreach(var request in requests)
             {
                 //Validate program exists
@@ -70,6 +77,7 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
                        throw new InvalidUserCreatedException($"Curriculum with code '{request.CurriculumCode}' already exists.");
                 }
                 var curriculum = _mapper.Map<DAL.Entities.Curriculum>(request);
+                curriculum.CreatedBy = createdBy;
                 curriculum.CreatedAt = DateTime.UtcNow;
 
                 await _curriculumRepository.CreateAsync(curriculum);

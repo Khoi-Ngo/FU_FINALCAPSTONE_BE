@@ -34,9 +34,6 @@ namespace AISEA.ApiService.DAL.Entities
         public virtual ICollection<Syllabus> Syllabi { get; set; } = new List<Syllabus>();
 
         [InverseProperty("SubjectVersion")]
-        public virtual ICollection<SubjectClass> SubjectClasses { get; set; } = new List<SubjectClass>();
-
-        [InverseProperty("SubjectVersion")]
         public virtual ICollection<CurriculumSubject> CurriculumSubjects { get; set; } = new List<CurriculumSubject>();
         
         [InverseProperty("SubjectVersion")]

@@ -54,11 +54,7 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<BookedMeeting> BookedMeetings { get; set; }
     public virtual DbSet<BookingAvailability> BookingAvailabilities { get; set; }
     public virtual DbSet<LeaveSchedule> LeaveSchedules { get; set; }
-    public virtual DbSet<SubjectClass> SubjectClasses { get; set; }
     public virtual DbSet<SubjectVersion> SubjectVersions { get; set; }
-    public virtual DbSet<Schedule> Schedules { get; set; }
-    public virtual DbSet<AttendanceChecklist> AttendanceChecklists { get; set; }
-    public virtual DbSet<MarkReport> MarkReports { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -89,10 +85,6 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new BookedMeetingConfiguration());
         modelBuilder.ApplyConfiguration(new BookingAvailabilityConfiguration());
         modelBuilder.ApplyConfiguration(new LeaveScheduleConfiguration());
-        modelBuilder.ApplyConfiguration(new SubjectClassConfiguration());
-        modelBuilder.ApplyConfiguration(new ScheduleConfiguration());
-        modelBuilder.ApplyConfiguration(new AttendanceChecklistConfiguration());
-        modelBuilder.ApplyConfiguration(new MarkReportConfiguration());
         OnModelCreatingPartial(modelBuilder);
         OnModelCreatingPartial(modelBuilder);
 

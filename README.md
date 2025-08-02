@@ -2,9 +2,9 @@
 
 This repository contains the backend services for the **AISEA** project, developed using **.NET 8.0**. The solution is split into two main components:
 
-- **AISEA.ApiService**: An ASP.NET Core Web API providing RESTful endpoints
+- **AISEA.ApiService**: An ASP.NET Core Web API providing RESTful endpoints and some background job via worker service
 
-Both services are containerized using Docker and orchestrated with Docker Compose, enabling a consistent development environment with support for code updates via volume mounts.
+
 
 ---
 

@@ -18,7 +18,6 @@ namespace AISEA.ApiService.BAL.Mappings.SubjectVersion
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.Subject, opt => opt.Ignore())
                 .ForMember(dest => dest.Syllabi, opt => opt.Ignore())
-                .ForMember(dest => dest.SubjectClasses, opt => opt.Ignore())
                 .ForMember(dest => dest.CurriculumSubjects, opt => opt.Ignore());
 
             CreateMap<UpdateSubjectVersionRequest, DAL.Entities.SubjectVersion>()
@@ -30,7 +29,6 @@ namespace AISEA.ApiService.BAL.Mappings.SubjectVersion
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.Subject, opt => opt.Ignore())
                 .ForMember(dest => dest.Syllabi, opt => opt.Ignore())
-                .ForMember(dest => dest.SubjectClasses, opt => opt.Ignore())
                 .ForMember(dest => dest.CurriculumSubjects, opt => opt.Ignore());
 
             // Entity to Response mappings

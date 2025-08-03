@@ -30,7 +30,19 @@ public partial class StudentProfile
 
     [InverseProperty("StudentProfile")]
     public virtual ICollection<BookedMeeting> BookedMeetings { get; set; } = new List<BookedMeeting>();
+
+    [InverseProperty("StudentProfile")]
+    public virtual ICollection<JoinedCourse> JoinedCourses { get; set; } = new List<JoinedCourse>();
+
+    [InverseProperty("StudentProfile")]
+    public virtual ICollection<DelayJoinedCourse> DelayJoinedCourses { get; set; } = new List<DelayJoinedCourse>();
+
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
+    public int CurrentSemesterNumber { get; set; } = 1;
+    public bool IsCurrentPostponed { get; set; } = false;
+    public string RegisteredComboCode { get; set; } = "Unregistered";
+
+
 
 }

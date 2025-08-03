@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250803080311_AddTblsHanldleJoinedCourseNTransciprt")]
+    partial class AddTblsHanldleJoinedCourseNTransciprt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -429,8 +432,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id")
-                        .HasName("delayjoinedcourse_id_primary");
+                    b.HasKey("Id");
 
                     b.HasIndex("StudentProfileId");
 
@@ -472,9 +474,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPassed")
-                        .HasColumnType("bit");
-
                     b.Property<string>("SemesterName")
                         .HasColumnType("nvarchar(max)");
 
@@ -487,8 +486,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<int>("type")
                         .HasColumnType("int");
 
-                    b.HasKey("Id")
-                        .HasName("joinedcourse_id_primary");
+                    b.HasKey("Id");
 
                     b.HasIndex("StudentProfileId");
 
@@ -1410,9 +1408,8 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
                         .WithMany("DelayJoinedCourses")
                         .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("delayjoinedcourse_studentprofileid_foreign");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("StudentProfile");
                 });
@@ -1422,9 +1419,8 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
                         .WithMany("JoinedCourses")
                         .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("joinedcourse_studentprofileid_foreign");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("StudentProfile");
                 });

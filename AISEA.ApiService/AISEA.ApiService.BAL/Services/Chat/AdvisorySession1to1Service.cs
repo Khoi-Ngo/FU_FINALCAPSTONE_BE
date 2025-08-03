@@ -199,7 +199,7 @@ public class AdvisorySession1to1Service
         {
             chatSession.StaffJoinAt = DateTime.UtcNow;
         }
-        else if (chatSession.StaffId == _staffUserSettings.SystemBotUser.StaffId && roleId == (int)EUserRole.ADVISOR)
+        else if (chatSession.StaffId == _staffUserSettings.EmptyStaffProfileId && roleId == (int)EUserRole.ADVISOR)
         {
             chatSession.StaffId = profileId;
             chatSession.UpdatedAt = DateTime.UtcNow;
@@ -252,7 +252,11 @@ public class AdvisorySession1to1Service
         object? systemFeedbackMeetingData = null,
         object? personelCourseTrackData = null)
     {
+
+        //TODO: Existed messages in the same session 
+
         //TODO: HAVE TO FILL ALL DATA VIA REDIS/RDB LATER, The FLM data should be queried by personal meaning that no need to query all
+        
         var studentJson = studentJsonData != null ? JsonSerializer.Serialize(studentJsonData) : "{}";
         var resourceJson = fPTUAcademicResourceJsonData != null ? JsonSerializer.Serialize(fPTUAcademicResourceJsonData) : "{}";
         var personalRoadMapJson = personalRoadMapData != null ? JsonSerializer.Serialize(personalRoadMapData) : "{}";

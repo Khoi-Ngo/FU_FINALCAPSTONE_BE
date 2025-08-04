@@ -40,7 +40,6 @@ public class BookingSettings
     #region Background service props
     public long GeneralPurposeIntervalMillis { get; set; }
     public int ResetNumberOfBanIntervalDays { get; set; }
-    public int ResetCheckIntervalHours { get; set; }
     public int ErrorRetryDelayMinutes { get; set; }
     public int DaysToCheckStudentMissedAfterEndMeeting { get; set; }
 

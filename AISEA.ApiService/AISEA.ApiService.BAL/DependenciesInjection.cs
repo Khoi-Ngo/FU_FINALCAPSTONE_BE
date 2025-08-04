@@ -18,6 +18,7 @@ using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Approval;
 using AISEA.ApiService.BAL.Services.Booking;
+using AISEA.ApiService.BAL.Services.CourseTracker;
 
 namespace AISEA.ApiService.BAL
 {
@@ -47,6 +48,8 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<BookingAvailabilityService>();
             services.AddScoped<LeaveScheduleService>();
             services.AddScoped<BookedMeetingService>();
+            services.AddScoped<SemesterReferService>();
+            services.AddScoped<JoinedCourseService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

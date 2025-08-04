@@ -23,7 +23,7 @@ public static class DependenciesInjection
         services.Configure<ChatSessionSettings>(configuration.GetSection(ChatSessionSettings.Section));
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.Section));
         services.Configure<BookingSettings>(configuration.GetSection(BookingSettings.Section));
-
+        services.Configure<CourseTrackSettings>(configuration.GetSection(CourseTrackSettings.Section));
 
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
@@ -38,6 +38,7 @@ public static class DependenciesInjection
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatSessionSettings>>().Value);
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<NotificationSettings>>().Value);
         services.AddSingleton(sp => sp.GetRequiredService<IOptions<BookingSettings>>().Value);
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<CourseTrackSettings>>().Value);
 
         return services;
     }

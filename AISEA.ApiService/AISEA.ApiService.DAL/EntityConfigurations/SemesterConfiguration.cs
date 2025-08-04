@@ -14,6 +14,10 @@ public class SemesterConfiguration : IEntityTypeConfiguration<Semester>
             .IsRequired()
             .HasMaxLength(50); // Adjust max length as needed
 
+        // Ensure SemesterName is unique
+        builder.HasIndex(e => e.SemesterName)
+            .IsUnique()
+            .HasDatabaseName("IX_Semester_SemesterName_Unique");
 
         // Configure the relationship with JoinedCourse
         builder.HasMany(e => e.JoinedCourses)

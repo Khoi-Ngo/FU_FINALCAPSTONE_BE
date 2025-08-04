@@ -15,5 +15,10 @@ public class JoinedCourseConfiguration : IEntityTypeConfiguration<JoinedCourse>
             .HasForeignKey(d => d.StudentProfileId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("joinedcourse_studentprofileid_foreign");
+
+        // Ensure CourseName is unique per StudentProfile
+        builder.HasIndex(e => new { e.StudentProfileId, e.CourseName })
+            .IsUnique()
+            .HasDatabaseName("IX_JoinedCourse_StudentProfileId_CourseName_Unique");
     }
 }

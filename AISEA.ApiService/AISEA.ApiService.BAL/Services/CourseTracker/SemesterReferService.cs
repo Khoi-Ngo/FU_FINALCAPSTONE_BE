@@ -2,6 +2,9 @@ namespace AISEA.ApiService.BAL.Services.CourseTracker
 {
     using AISEA.ApiService.DAL.Entities;
     using AISEA.ApiService.DAL.Repositories;
+    using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
+    using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
+
     public class SemesterReferService
     {
         private readonly SemesterRepository _semesterRepository;
@@ -17,11 +20,16 @@ namespace AISEA.ApiService.BAL.Services.CourseTracker
 
         public async Task AddSemesterAsync(string semesterName, DateTime createdAt)
         {
-           await _semesterRepository.CreateAsync(new Semester
+            await _semesterRepository.CreateAsync(new Semester
             {
                 SemesterName = semesterName,
                 CreatedAt = createdAt
             });
+        }
+
+        public async Task<PagedResult<Semester>> GetAllAsyncPaged(PaginationRequest request)
+        {
+            return await _semesterRepository.GetAllAsyncPaged(request);
         }
     }
 }

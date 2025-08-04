@@ -26,9 +26,13 @@ public class JoinedCourse
     [ForeignKey("StudentProfile")]
     public long StudentProfileId { get; set; }
 
+    [ForeignKey("Semester")]
+    public long SemesterId { get; set; }
 
-
-    [ForeignKey("StudentProfileId")]
+    // [ForeignKey("StudentProfileId")]
     [InverseProperty("JoinedCourses")]
     public virtual StudentProfile StudentProfile { get; set; } = null!;
+
+    [InverseProperty("JoinedCourses")]
+    public virtual Semester Semester { get; set; } = null!;
 }

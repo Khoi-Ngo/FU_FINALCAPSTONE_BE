@@ -56,6 +56,8 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<LeaveSchedule> LeaveSchedules { get; set; }
     public virtual DbSet<SubjectVersion> SubjectVersions { get; set; }
     public virtual DbSet<JoinedCourse> JoinedCourses { get; set; }
+    public virtual DbSet<Semester> Semesters { get; set; }
+
 
 
     #endregion
@@ -89,6 +91,7 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new BookingAvailabilityConfiguration());
         modelBuilder.ApplyConfiguration(new LeaveScheduleConfiguration());
         modelBuilder.ApplyConfiguration(new JoinedCourseConfiguration());
+        modelBuilder.ApplyConfiguration(new SemesterConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
         OnModelCreatingPartial(modelBuilder);

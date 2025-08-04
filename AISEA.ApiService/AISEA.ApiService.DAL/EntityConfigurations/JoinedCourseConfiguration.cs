@@ -20,5 +20,12 @@ public class JoinedCourseConfiguration : IEntityTypeConfiguration<JoinedCourse>
         builder.HasIndex(e => new { e.StudentProfileId, e.CourseName })
             .IsUnique()
             .HasDatabaseName("IX_JoinedCourse_StudentProfileId_CourseName_Unique");
+
+        // Relationship with Semester
+        builder.HasOne(d => d.Semester)
+            .WithMany(p => p.JoinedCourses)
+            .HasForeignKey(d => d.SemesterId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("joinedcourse_semesterid_foreign");
     }
 }

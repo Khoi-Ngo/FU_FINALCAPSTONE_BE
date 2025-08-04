@@ -44,7 +44,7 @@ public class SemesterReferBgService : BackgroundService
                         var d = new DateOnly(now.Year, now.Month, now.Day);
                         if (start <= end)
                             return d >= start && d <= end;
-                        // For ranges that cross year boundary
+                        //! For ranges that cross year boundary
                         return d >= start || d <= end;
                     }
 

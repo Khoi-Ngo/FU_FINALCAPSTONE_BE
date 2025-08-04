@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AISEA.ApiService.DAL.Entities;
-
+//TODO: Recheck the DTO response for this Entity
 [Table("StudentProfile")]
 public partial class StudentProfile
 {
@@ -34,14 +34,10 @@ public partial class StudentProfile
     [InverseProperty("StudentProfile")]
     public virtual ICollection<JoinedCourse> JoinedCourses { get; set; } = new List<JoinedCourse>();
 
-    [InverseProperty("StudentProfile")]
-    public virtual ICollection<DelayJoinedCourse> DelayJoinedCourses { get; set; } = new List<DelayJoinedCourse>();
-
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
-    public int CurrentSemesterNumber { get; set; } = 1;
-    public bool IsCurrentPostponed { get; set; } = false;
     public string RegisteredComboCode { get; set; } = "Unregistered";
+    public string CurriculumCode { get; set; } = "UnRegisteredCurriculum";
 
 
 

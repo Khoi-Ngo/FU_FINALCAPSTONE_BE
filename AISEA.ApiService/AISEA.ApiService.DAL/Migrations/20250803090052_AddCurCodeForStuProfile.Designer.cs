@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250803090052_AddCurCodeForStuProfile")]
+    partial class AddCurCodeForStuProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -400,6 +403,43 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.ToTable("CurriculumSubject");
                 });
 
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.DelayJoinedCourse", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("EndValidDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReasonDelay")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartValidDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("StudentProfileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SubjectCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id")
+                        .HasName("delayjoinedcourse_id_primary");
+
+                    b.HasIndex("StudentProfileId");
+
+                    b.ToTable("DelayJoinedCourse");
+                });
+
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.JoinedCourse", b =>
                 {
                     b.Property<long>("Id")
@@ -749,6 +789,9 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("CurrentSemesterNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("CurriculumCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -758,6 +801,9 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.Property<DateTimeOffset>("EnrolledAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsCurrentPostponed")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1366,6 +1412,18 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("SubjectVersion");
                 });
 
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.DelayJoinedCourse", b =>
+                {
+                    b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
+                        .WithMany("DelayJoinedCourses")
+                        .HasForeignKey("StudentProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("delayjoinedcourse_studentprofileid_foreign");
+
+                    b.Navigation("StudentProfile");
+                });
+
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.JoinedCourse", b =>
                 {
                     b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
@@ -1616,6 +1674,8 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("AdvisorySessions1to1");
 
                     b.Navigation("BookedMeetings");
+
+                    b.Navigation("DelayJoinedCourses");
 
                     b.Navigation("JoinedCourses");
                 });

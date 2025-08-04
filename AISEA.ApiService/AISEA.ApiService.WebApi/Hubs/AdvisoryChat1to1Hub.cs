@@ -97,11 +97,11 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// <summary>
     /// Student Get the mul data of chat sessions related to them
     /// </summary>
-    public async Task ListAllSessionByStudent()
+    public async Task ListAllSessionByStudent(PaginationRequest pagination)
     {
         EnsureUserHasRole(AccessToken, EUserRole.STUDENT);
         var studentProfileId = _jWTService.GetProfileIdFromToken(AccessToken);
-        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStudentAsync(new PaginationRequest (), studentProfileId);
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStudentAsync(pagination, studentProfileId);
         await Task.WhenAll(
             Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
             Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStudent}{studentProfileId}")
@@ -111,12 +111,12 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// <summary>
     /// Staff Get the mul data of chat sessions related to them
     /// </summary>
-    public async Task ListAllSessionByStaff()
+    public async Task ListAllSessionByStaff(PaginationRequest pagination)
     {
         EnsureUserHasRole(AccessToken, EUserRole.ADVISOR);
         var staffProfileId = _jWTService.GetProfileIdFromToken(AccessToken);
 
-        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest (), staffProfileId);
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(pagination, staffProfileId);
         await Task.WhenAll(
             Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
             Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{staffProfileId}")
@@ -126,11 +126,11 @@ public class AdvisoryChat1to1Hub : BaseHub
     /// <summary>
     ///Staff can access this chanel to view real time unassigned sessions
     /// </summary>
-    public async Task ListOpenedSession()
+    public async Task ListOpenedSession(PaginationRequest pagination)
     {
         EnsureUserHasRole(AccessToken, EUserRole.ADVISOR);
-        
-        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(new PaginationRequest (), _staffUserSettings.EmptyStaffProfileId);
+
+        var sessionsResponse = await _advisorySession1To1Service.GetHumanSessionsByStaffAsync(pagination, _staffUserSettings.EmptyStaffProfileId);
         await Task.WhenAll(
             Clients.Caller.SendAsync(_chatSessionSettings.GetSessionsHUBMethod, sessionsResponse),
             Groups.AddToGroupAsync(Context.ConnectionId, $"{_chatSessionSettings.MulDataSessionsPrefixStaff}{_staffUserSettings.EmptyStaffProfileId}")

@@ -11,6 +11,7 @@ using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using NanoidDotNet;
 
 namespace AISEA.ApiService.BAL.Services.Booking;
 
@@ -258,7 +259,7 @@ public class BookedMeetingService
 
 
             //generate the check-in code for the student then send via mail
-            var checkinCode = Guid.NewGuid().ToString();
+            var checkinCode = Nanoid.Generate(size: 8);
 
 
 

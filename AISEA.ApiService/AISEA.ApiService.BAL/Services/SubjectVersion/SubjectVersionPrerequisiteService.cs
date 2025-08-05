@@ -32,10 +32,16 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                 throw new NotFoundException("Subject version not found.");
             }
 
-            var prerequisiteSubjectVersion = await _subjectVersionRepository.GetByIdAsync(prerequisiteSubjectVersionId);
+            var prerequisiteSubjectVersion = await _subjectVersionRepository.GetByIdWithSubjectAsync(prerequisiteSubjectVersionId);
             if (prerequisiteSubjectVersion == null || prerequisiteSubjectVersion.IsDeleted)
             {
                 throw new NotFoundException("Prerequisite subject version not found.");
+            }
+
+            // Ensure the Subject navigation property is loaded
+            if (prerequisiteSubjectVersion.Subject == null)
+            {
+                throw new InvalidOperationException("Prerequisite subject version's subject information not available.");
             }
 
             // Validate they are not the same

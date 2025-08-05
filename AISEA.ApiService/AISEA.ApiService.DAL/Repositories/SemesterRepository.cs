@@ -2,6 +2,7 @@ using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
+using AISEA.ApiService.SHARED.DTOs.Responses.CourseTrack;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,11 @@ public class SemesterRepository : GenericRepository<Semester>
     {
     }
 
-    public async Task<PagedResult<Semester>> GetAllAsyncPaged(PaginationRequest request)
+    public async Task<PagedResult<SemesterReferDTO>> GetAllAsyncPaged(PaginationRequest request)
     {
         var query = _context.Semesters
             .OrderByDescending(s => s.CreatedAt)
-            .Select(s => new Semester
+            .Select(s => new SemesterReferDTO
             {
                 Id = s.Id,
                 SemesterName = s.SemesterName
@@ -29,7 +30,7 @@ public class SemesterRepository : GenericRepository<Semester>
             .Take(request.PageSize)
             .ToListAsync();
 
-        return new PagedResult<Semester>
+        return new PagedResult<SemesterReferDTO>
         {
             Items = semesters,
             TotalCount = totalCount,

@@ -189,6 +189,18 @@ public class UserController : BaseController
     }
 
     /// <summary>
+    /// Retrieves all active Advisors from the system. (Support Booking Feature ~ Student Access only)
+    /// </summary>
+    [HttpGet("students/active/paged")]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF)]
+    public async Task<IActionResult> GetAllActiveStudents([FromQuery] PaginationRequest request)
+    {
+        var students = await _userService.GetAllActiveStudentsAsync(request);
+        return Ok(students);
+    }
+
+
+    /// <summary>
     /// Creates a new user with the provided information. Duplicate usernames or emails will result in bad request errors.
     /// There are 3 cases: No profile, Student Profile only, and Staff Profile only.
     /// </summary>

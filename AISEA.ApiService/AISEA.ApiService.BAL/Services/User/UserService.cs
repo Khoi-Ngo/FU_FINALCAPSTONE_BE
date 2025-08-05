@@ -241,5 +241,18 @@ namespace AISEA.ApiService.BAL.Services.User
             user.AvatarUrl = request.URL;
             await _userRepository.UpdateAsync(user);
         }
+
+        public async Task<PagedResult<GetStudentListResponse>> GetAllActiveStudentsAsync(PaginationRequest request)
+        {
+            var (users, totalCount) = await _userRepository.GetActiveStudentsPagedAsync(request.PageNumber, request.PageSize);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
     }
 }

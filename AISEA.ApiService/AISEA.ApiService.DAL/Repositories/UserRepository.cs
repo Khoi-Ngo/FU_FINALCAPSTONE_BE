@@ -146,5 +146,19 @@ namespace AISEA.ApiService.DAL.Repositories
                 .ToListAsync();
             return (users, totalCount);
         }
+
+        public async Task<(object users, int totalCount)> GetActiveStudentsPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Users
+              .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE)
+              .Include(u => u.Role)
+              .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
     }
 }

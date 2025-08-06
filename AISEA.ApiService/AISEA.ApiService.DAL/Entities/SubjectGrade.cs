@@ -16,6 +16,6 @@
 //     public double Weight { get; set; }
 //     public double FailureGrade { get; set; }
 //     public CourseGradeType Type { get; set; }
-//     public double? StudentGrade { get; set; }
+//     public double? StudentGrade { get; set; } -> Default -1 : So that can pass the case that the student has full of 0 grades
     
 // }

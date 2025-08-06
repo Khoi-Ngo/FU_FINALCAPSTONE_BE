@@ -3,8 +3,8 @@ namespace AISEA.ApiService.BAL.Services.CourseTracker
     using AISEA.ApiService.DAL.Entities;
     using AISEA.ApiService.DAL.Repositories;
     using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
-    using AISEA.ApiService.SHARED.DTOs.Responses.CourseTrack;
     using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
+    using AISEA.ApiService.SHARED.DTOs.Responses.SemesterRefer;
 
     public class SemesterReferService
     {

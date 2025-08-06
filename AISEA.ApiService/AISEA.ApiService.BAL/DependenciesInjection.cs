@@ -49,7 +49,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<LeaveScheduleService>();
             services.AddScoped<BookedMeetingService>();
             services.AddScoped<SemesterReferService>();
-            services.AddScoped<JoinedCourseService>();
+            services.AddScoped<JoinedSubjectService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

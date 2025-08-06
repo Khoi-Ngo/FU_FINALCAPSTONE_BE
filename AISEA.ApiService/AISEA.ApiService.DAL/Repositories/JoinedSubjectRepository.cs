@@ -4,9 +4,9 @@ using AISEA.ApiService.DAL.Persistence;
 
 namespace AISEA.ApiService.DAL.Repositories;
 
-public class JoinedCourseRepository : GenericRepository<JoinedCourse>
+public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
 {
-    public JoinedCourseRepository(AiseaContext context) : base(context)
+    public JoinedSubjectRepository(AiseaContext context) : base(context)
     {
     }
 }

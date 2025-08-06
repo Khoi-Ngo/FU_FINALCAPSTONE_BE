@@ -53,7 +53,7 @@ public static class DependenciesInjection
         services.AddScoped<LeaveScheduleRepository>();
         services.AddScoped<BookedMeetingRepository>();
         services.AddScoped<SemesterRepository>();
-        services.AddScoped<JoinedCourseRepository>();
+        services.AddScoped<JoinedSubjectRepository>();
 
         #endregion
 

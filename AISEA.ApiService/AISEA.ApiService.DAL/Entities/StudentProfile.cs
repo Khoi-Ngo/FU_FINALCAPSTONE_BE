@@ -32,7 +32,7 @@ public partial class StudentProfile
     public virtual ICollection<BookedMeeting> BookedMeetings { get; set; } = new List<BookedMeeting>();
 
     [InverseProperty("StudentProfile")]
-    public virtual ICollection<JoinedCourse> JoinedCourses { get; set; } = new List<JoinedCourse>();
+    public virtual ICollection<JoinedSubject> JoinedCourses { get; set; } = new List<JoinedSubject>();
 
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;

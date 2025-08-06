@@ -2,8 +2,8 @@ using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
-using AISEA.ApiService.SHARED.DTOs.Responses.CourseTrack;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
+using AISEA.ApiService.SHARED.DTOs.Responses.SemesterRefer;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories;

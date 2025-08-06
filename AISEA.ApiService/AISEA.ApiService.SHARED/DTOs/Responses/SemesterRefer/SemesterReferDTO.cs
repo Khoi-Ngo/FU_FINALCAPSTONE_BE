@@ -1,4 +1,4 @@
-namespace AISEA.ApiService.SHARED.DTOs.Responses.CourseTrack
+namespace AISEA.ApiService.SHARED.DTOs.Responses.SemesterRefer
 {
     public class SemesterReferDTO
     {

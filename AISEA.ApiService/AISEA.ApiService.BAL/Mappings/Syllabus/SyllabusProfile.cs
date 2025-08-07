@@ -45,6 +45,12 @@ namespace AISEA.ApiService.BAL.Mappings.Syllabus
             CreateMap<CreateSyllabusLearningMaterialRequest, SyllabusLearningMaterial>();
             CreateMap<CreateSyllabusLearningOutcomeRequest, SyllabusLearningOutcome>();
             CreateMap<CreateSyllabusSessionRequest, SyllabusSession>();
+            
+            // Update mappings
+            CreateMap<UpdateSyllabusAssessmentRequest, SyllabusAssessment>();
+            CreateMap<UpdateSyllabusLearningMaterialRequest, SyllabusLearningMaterial>();
+            CreateMap<UpdateSyllabusLearningOutcomeRequest, SyllabusLearningOutcome>();
+            CreateMap<UpdateSyllabusSessionRequest, SyllabusSession>();
         }
     }
 }

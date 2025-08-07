@@ -15,10 +15,12 @@ public class ProfileController : BaseController
 {
     private readonly StudentProfileService _studentProfileService;
     private readonly StaffProfileService _staffProfileService;
-    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService) : base(endpointSettings)
+    private readonly NotificationHubNotifier _notifier;
+    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService, NotificationHubNotifier notifier) : base(endpointSettings)
     {
         _staffProfileService = staffProfileService;
         _studentProfileService = studentProfileService;
+        _notifier = notifier;
     }
 
     #region Student Profile
@@ -31,7 +33,7 @@ public class ProfileController : BaseController
     public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
     {
         await _studentProfileService.CreateAsync(request, AccessToken);
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Student profile created successfully.");
     }
 
     #endregion
@@ -46,9 +48,18 @@ public class ProfileController : BaseController
     public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
     {
         await _staffProfileService.CreateAsync(request, AccessToken);
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Staff profile created successfully.");
     }
 
 
     #endregion
+
+    /// <summary>
+    /// Helper to notify and return a success response
+    /// </summary>
+    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
+    {
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        return Ok(new { Message = message });
+    }
 }

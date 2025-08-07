@@ -14,10 +14,13 @@ namespace AISEA.ApiService.WebApi.Controllers.Role;
 [PermissionAuthorize((int)EUserRole.ADMIN)]
 public class RoleController : BaseController
 {
-
     private readonly RoleService _roleService;
     private readonly NotificationHubNotifier _notifier;
-    public RoleController(EndpointSettings endpointSettings, RoleService roleService, NotificationHubNotifier notifier) : base(endpointSettings)
+
+    public RoleController(
+        EndpointSettings endpointSettings,
+        RoleService roleService,
+        NotificationHubNotifier notifier) : base(endpointSettings)
     {
         _roleService = roleService;
         _notifier = notifier;
@@ -26,7 +29,6 @@ public class RoleController : BaseController
     /// <summary>
     /// Get all roles.
     /// </summary>
-    /// <returns>A list of roles.</returns>
     [HttpGet]
     public async Task<IActionResult> GetAllRoles()
     {
@@ -37,8 +39,6 @@ public class RoleController : BaseController
     /// <summary>
     /// Get a role by its ID.
     /// </summary>
-    /// <param name="id">The ID of the role.</param>
-    /// <returns>The role with the specified ID.</returns>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetRoleById(long id)
     {
@@ -49,28 +49,29 @@ public class RoleController : BaseController
     /// <summary>
     /// Create a new role.
     /// </summary>
-    /// <param name="role">The role to create.</param>
-    /// <returns>The created role.</returns>
     [HttpPost]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest role)
     {
         await _roleService.CreateRoleAsync(role);
-        //notify that the role created successfully
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "New role is created successfully");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("New role is created successfully");
     }
 
     /// <summary>
     /// Update an existing role.
     /// </summary>
-    /// <param name="id">The ID of the role to update.</param>
-    /// <param name="role">The updated role information.</param>
-    /// <returns>The updated role.</returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
     {
         await _roleService.UpdateRoleAsync(id, role);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The role is updated successfully");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("The role is updated successfully");
+    }
+
+    /// <summary>
+    /// Helper to notify and return a success response
+    /// </summary>
+    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
+    {
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        return Ok(new { Message = message });
     }
 }

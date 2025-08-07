@@ -17,13 +17,16 @@ public class AdvisorySession1to1Controller : BaseController
 {
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
     private readonly AdvisorySessionHubNotifier _advisorySessionHubNotifier;
+    private readonly NotificationHubNotifier _notifier;
 
     public AdvisorySession1to1Controller(EndpointSettings endpointSettings,
     AdvisorySession1to1Service advisorySession1To1Service,
-    AdvisorySessionHubNotifier advisorySessionHubNotifier) : base(endpointSettings)
+    AdvisorySessionHubNotifier advisorySessionHubNotifier,
+    NotificationHubNotifier notifier) : base(endpointSettings)
     {
         _advisorySession1To1Service = advisorySession1To1Service;
         _advisorySessionHubNotifier = advisorySessionHubNotifier;
+        _notifier = notifier;
     }
 
     /// <summary>
@@ -36,7 +39,9 @@ public class AdvisorySession1to1Controller : BaseController
 
         // Notify student, staff, and session groups
         await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Delete", "The chat session got deleted successfully");
+
+        return Ok("The chat session got deleted successfully");
     }
 
     /// <summary>
@@ -48,7 +53,7 @@ public class AdvisorySession1to1Controller : BaseController
         var (hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
         //call hub context -> push
         await _advisorySessionHubNotifier.NotifySessionCreatedAsync(studentProfileId, hubRes);
-        return Ok("Ok");
+        return Ok("The chat session got created successfully");
     }
 
     /// <summary>

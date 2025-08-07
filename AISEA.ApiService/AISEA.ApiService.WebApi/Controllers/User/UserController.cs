@@ -72,7 +72,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
         await _userService.UpdateUserAsync(id, request, AccessToken);
-        return NotifyAndResponseDummy("Update user successfully");
+        return await NotifyAndResponseOkAsync("Update user successfully");
 
     }
 
@@ -83,7 +83,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
     {
         await _userService.UpdateUserAsync(id, request, AccessToken);
-        return NotifyAndResponseDummy("Update user successfully");
+        return await NotifyAndResponseOkAsync("Update user successfully");
 
     }
 
@@ -96,7 +96,7 @@ public class UserController : BaseController
     public async Task<IActionResult> DisableUser(long id)
     {
         await _userService.DisableUserAsync(id);
-        return NotifyAndResponseDummy("Disable user successfully");
+        return await NotifyAndResponseOkAsync("Disable user successfully");
 
     }
     /// <summary>
@@ -209,7 +209,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
         await _userService.CreateUserAsync(request);
-        return NotifyAndResponseDummy("New user is created successfully");
+        return await NotifyAndResponseOkAsync("New user is created successfully");
     }
 
     /// <summary>
@@ -221,7 +221,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)
     {
         await _userService.CreateUsersAsync(requests);
-        return NotifyAndResponseDummy("New users are bulk created successfully");
+        return await NotifyAndResponseOkAsync("New users are bulk created successfully");
     }
 
     #region Bulk Create Users By Role
@@ -234,7 +234,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateStudents([FromBody] List<BulkCreateStudentRequest> requests)
     {
         await _userService.CreateUsersAsync(requests);
-        return NotifyAndResponseDummy("New students are bulk created successfully");
+        return await NotifyAndResponseOkAsync("New students are bulk created successfully");
     }
 
     /// <summary>
@@ -245,7 +245,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateAdvisors([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.ADVISOR);
-        return NotifyAndResponseDummy("New advisors are bulk created successfully");
+        return await NotifyAndResponseOkAsync("New advisors are bulk created successfully");
     }
 
     /// <summary>
@@ -256,7 +256,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateAcademicStaffs([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.ACADEMIC_STAFF);
-        return NotifyAndResponseDummy("New academic staffs are bulk created successfully");
+        return await NotifyAndResponseOkAsync("New academic staffs are bulk created successfully");
     }
 
     /// <summary>
@@ -267,7 +267,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateAdmins([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.ADMIN);
-        return NotifyAndResponseDummy("New admins are bulk created successfully");
+        return await NotifyAndResponseOkAsync("New admins are bulk created successfully");
     }
 
     /// <summary>
@@ -278,7 +278,7 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateManagers([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.MANAGER);
-        return NotifyAndResponseDummy("New managers are bulk created successfully");
+        return await NotifyAndResponseOkAsync("New managers are bulk created successfully");
     }
 
     #endregion
@@ -291,7 +291,7 @@ public class UserController : BaseController
     public async Task<IActionResult> ResetNumberOfBan(long studentProfileId)
     {
         await _userService.ResetNumberOfBanAsync(studentProfileId);
-        return NotifyAndResponseDummy("The number of ban for the student profile id has been reset");
+        return await NotifyAndResponseOkAsync("The number of ban for the student profile id has been reset");
     }
 
 
@@ -302,7 +302,7 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
     {
         await _userService.UpdateAvatarAsync(AccessToken, request);
-        return NotifyAndResponseDummy("The avatar has been updated successfully");
+        return await NotifyAndResponseOkAsync("The avatar has been updated successfully");
     }
     /// <summary>
     /// User can update the avatar the input is link firebase provided by front end
@@ -312,18 +312,19 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
     {
         await _userService.UpdateAvatarAsync(userId, request);
-        return NotifyAndResponseDummy("The avatar has been updated successfully");
+        return await NotifyAndResponseOkAsync("The avatar has been updated successfully");
     }
 
 
     /// <summary>
-    /// Helper to notify success and return NoContent
+    /// Helper to notify success and return Ok async
     /// </summary>
-    private IActionResult NotifyAndResponseDummy(string message)
+    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
     {
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        return Ok(new { Message = message });
     }
+
 
 
 

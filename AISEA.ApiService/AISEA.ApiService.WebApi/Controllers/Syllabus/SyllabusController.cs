@@ -159,6 +159,17 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
+        /// Unmaps a learning outcome from a session (Academic Staff only)
+        /// </summary>
+        [HttpDelete("sessions/{sessionId}/outcomes/{outcomeId}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> UnmapSessionFromOutcome(long sessionId, long outcomeId)
+        {
+            await _syllabusService.UnmapSessionFromOutcomeAsync(sessionId, outcomeId);
+            return Ok(new { Message = "Outcome unmapped from session successfully." });
+        }
+
+        /// <summary>
         /// Creates multiple assessments for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("assessments/bulk")]

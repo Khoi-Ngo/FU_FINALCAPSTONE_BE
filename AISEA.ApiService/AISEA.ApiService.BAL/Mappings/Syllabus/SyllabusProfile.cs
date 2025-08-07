@@ -39,7 +39,7 @@ namespace AISEA.ApiService.BAL.Mappings.Syllabus
             
             CreateMap<SyllabusSession, SyllabusSessionResponse>()
                 .ForMember(dest => dest.LearningOutcomeCodes, opt => opt.MapFrom(src => 
-                    src.SessionOutcomeMappings.Select(som => som.Outcome.OutcomeCode).ToList()));
+                    src.SessionOutcomeMappings.Where(som => !som.IsDeleted).Select(som => som.Outcome.OutcomeCode).ToList()));
 
             CreateMap<CreateSyllabusAssessmentRequest, SyllabusAssessment>();
             CreateMap<CreateSyllabusLearningMaterialRequest, SyllabusLearningMaterial>();

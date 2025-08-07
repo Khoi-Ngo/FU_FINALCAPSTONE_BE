@@ -278,12 +278,27 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
                 throw new NotFoundException("Learning outcome not found.");
             }
 
+            // Check if an active mapping already exists
             var exists = await _mappingRepository.ExistsAsync(sessionId, outcomeId);
             if (exists)
             {
                 throw new InvalidUserCreatedException("This session-outcome mapping already exists.");
             }
 
+            // Check if a soft-deleted mapping exists and reactivate it
+            var deletedMapping = await _mappingRepository.GetDeletedMappingAsync(sessionId, outcomeId);
+            if (deletedMapping != null)
+            {
+                // Reactivate the existing mapping
+                deletedMapping.IsDeleted = false;
+                deletedMapping.DeletedAt = null;
+                deletedMapping.UpdatedAt = DateTime.UtcNow;
+                
+                await _mappingRepository.UpdateAsync(deletedMapping);
+                return;
+            }
+
+            // Create new mapping if no existing mapping found
             var mapping = new DAL.Entities.SessionOutcomeMapping
             {
                 SessionId = sessionId,
@@ -292,6 +307,32 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             };
 
             await _mappingRepository.CreateAsync(mapping);
+        }
+
+        public async Task UnmapSessionFromOutcomeAsync(long sessionId, long outcomeId)
+        {
+            var session = await _sessionRepository.GetByIdAsync(sessionId);
+            if (session == null || session.IsDeleted)
+            {
+                throw new NotFoundException("Session not found.");
+            }
+
+            var outcome = await _outcomeRepository.GetByIdAsync(outcomeId);
+            if (outcome == null || outcome.IsDeleted)
+            {
+                throw new NotFoundException("Learning outcome not found.");
+            }
+
+            var mapping = await _mappingRepository.GetBySessionIdAndOutcomeIdAsync(sessionId, outcomeId);
+            if (mapping == null)
+            {
+                throw new NotFoundException("Session-outcome mapping not found.");
+            }
+
+            mapping.IsDeleted = true;
+            mapping.DeletedAt = DateTime.UtcNow;
+            
+            await _mappingRepository.UpdateAsync(mapping);
         }
 
         public async Task<bool> CreateSyllabusAssessmentsAsync(List<CreateSyllabusAssessmentRequest> requests)

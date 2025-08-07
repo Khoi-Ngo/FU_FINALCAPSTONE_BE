@@ -24,7 +24,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates a new syllabus (Academic Staff only)
         /// </summary>
         [HttpPost]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF | (int)EUserRole.ADMIN)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSyllabus([FromBody] CreateSyllabusRequest request)
         {
             var syllabusId = await _syllabusService.CreateSyllabusAsync(request, AccessToken);
@@ -85,7 +85,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Updates an existing syllabus (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF | (int)EUserRole.ADMIN)] // Admin, Academic Staff
         public async Task<IActionResult> UpdateSyllabus(long id, [FromBody] UpdateSyllabusRequest request)
         {
             await _syllabusService.UpdateSyllabusAsync(id, request);
@@ -96,7 +96,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Deletes a syllabus (Admin only)
         /// </summary>
         [HttpDelete("{id}")]
-        [PermissionAuthorize(1)] // Admin only
+        [PermissionAuthorize((int)EUserRole.ADMIN)] // Admin only
         public async Task<IActionResult> DeleteSyllabus(long id)
         {
             await _syllabusService.DeleteSyllabusAsync(id);
@@ -107,7 +107,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates an assessment for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("assessments")]
-        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
         public async Task<IActionResult> CreateAssessment([FromBody] CreateSyllabusAssessmentRequest request)
         {
             var assessmentId = await _syllabusService.CreateAssessmentAsync(request);
@@ -201,7 +201,94 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
             var sessionId = await _syllabusService.CreateSyllabusSessionsAsync(requests);
             return Ok(new { Message = "Session created successfully.", SessionId = sessionId });
         }
-        
+
+        /// <summary>
+        /// Updates an assessment (Academic Staff only)
+        /// </summary>
+        [HttpPut("assessments/{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> UpdateAssessment(long id, [FromBody] UpdateSyllabusAssessmentRequest request)
+        {
+            await _syllabusService.UpdateAssessmentAsync(id, request);
+            return Ok(new { Message = "Assessment updated successfully." });
+        }
+
+        /// <summary>
+        /// Deletes an assessment (Admin only)
+        /// </summary>
+        [HttpDelete("assessments/{id}")]
+        [PermissionAuthorize((int)EUserRole.MANAGER)] // Admin only
+        public async Task<IActionResult> DeleteAssessment(long id)
+        {
+            await _syllabusService.DeleteAssessmentAsync(id);
+            return Ok(new { Message = "Assessment deleted successfully." });
+        }
+
+        /// <summary>
+        /// Updates a learning material (Academic Staff only)
+        /// </summary>
+        [HttpPut("materials/{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> UpdateLearningMaterial(long id, [FromBody] UpdateSyllabusLearningMaterialRequest request)
+        {
+            await _syllabusService.UpdateLearningMaterialAsync(id, request);
+            return Ok(new { Message = "Learning material updated successfully." });
+        }
+
+        /// <summary>
+        /// Deletes a learning material (Admin only)
+        /// </summary>
+        [HttpDelete("materials/{id}")]
+        [PermissionAuthorize((int)EUserRole.MANAGER)] // Admin only
+        public async Task<IActionResult> DeleteLearningMaterial(long id)
+        {
+            await _syllabusService.DeleteLearningMaterialAsync(id);
+            return Ok(new { Message = "Learning material deleted successfully." });
+        }
+
+        /// <summary>
+        /// Updates a learning outcome (Academic Staff only)
+        /// </summary>
+        [HttpPut("outcomes/{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> UpdateLearningOutcome(long id, [FromBody] UpdateSyllabusLearningOutcomeRequest request)
+        {
+            await _syllabusService.UpdateLearningOutcomeAsync(id, request);
+            return Ok(new { Message = "Learning outcome updated successfully." });
+        }
+
+        /// <summary>
+        /// Deletes a learning outcome (Admin only)
+        /// </summary>
+        [HttpDelete("outcomes/{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> DeleteLearningOutcome(long id)
+        {
+            await _syllabusService.DeleteLearningOutcomeAsync(id);
+            return Ok(new { Message = "Learning outcome deleted successfully." });
+        }
+
+        /// <summary>
+        /// Updates a session (Academic Staff only)
+        /// </summary>
+        [HttpPut("sessions/{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> UpdateSession(long id, [FromBody] UpdateSyllabusSessionRequest request)
+        {
+            await _syllabusService.UpdateSessionAsync(id, request);
+            return Ok(new { Message = "Session updated successfully." });
+        }
+
+        /// <summary>
+        /// Deletes a session (Admin only)
+        /// </summary>
+        [HttpDelete("sessions/{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
+        public async Task<IActionResult> DeleteSession(long id)
+        {
+            await _syllabusService.DeleteSessionAsync(id);
+            return Ok(new { Message = "Session deleted successfully." });
+        }
 
     }
 }

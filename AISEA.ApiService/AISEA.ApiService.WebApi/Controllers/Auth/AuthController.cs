@@ -43,8 +43,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> LoginWithGoogle()
     {
         var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", $"New login at {DateTime.UtcNow}");
-        return Ok(res);
+        return await NotifyAndResponseOkAsync($"New login at {DateTime.UtcNow}", res);
     }
 
     /// <summary>
@@ -56,8 +55,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login([FromBody] AuthFEIDRequest request)
     {
         var res = await _authService.LoginAsync(request);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", $"New login at {DateTime.UtcNow}");
-        return Ok(res);
+        return await NotifyAndResponseOkAsync($"New login at {DateTime.UtcNow}", res);
     }
 
     // Forget password
@@ -69,7 +67,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
     {
         await _authService.ForgetPasswordAsync(request);
-        return Ok("Ok");
+        return Ok("Forget password request sent successfully.");
     }
 
     // Get Verification Code To Reset Password
@@ -81,7 +79,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> SendResetCode([FromBody] GetVerificationCodeRequest request)
     {
         await _authService.SendResetCodeAsync(request);
-        return Ok("Ok");
+        return Ok("Verification code sent successfully.");
     }
 
     // Reset password
@@ -92,9 +90,8 @@ public class AuthController : BaseController
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
-        //notify that user reset password ok
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Reset password ok!");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Reset password ok!");
+
     }
 
 
@@ -105,6 +102,12 @@ public class AuthController : BaseController
     public async Task<IActionResult> Logout()
     {
         await _authService.LogoutAsync(AccessToken);
-        return Ok("Ok");
+        return Ok("Logged out successfully");
+    }
+
+    private async Task<IActionResult> NotifyAndResponseOkAsync(string message, object? data = null)
+    {
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        return Ok(data ?? new { message });
     }
 }

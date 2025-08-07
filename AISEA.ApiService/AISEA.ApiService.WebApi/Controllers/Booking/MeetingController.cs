@@ -36,9 +36,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> CreateMeeting([FromBody] CreateMeetingRequest request)
     {
         var res = await _bookedMeetingService.CreateMeetingAsync(request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been created successfully.");
-        _ = _notifier.NotifyUserAsync(res.PartnerUserId, res.StatusChangedTo.ToString(), $"There is new meeting {res.MeetingStartDateTime} - {res.MeetingEndDateTime} with status {res.StatusChangedTo.ToString()} !");
-        return Ok("Ok");
+        await NotifyMeetingStatusAsync(res, "The meeting has been created successfully.");
+        return Ok("The meeting has been created successfully.");
     }
 
 
@@ -51,8 +50,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {
         await _bookedMeetingService.StuCancelPendingAsync(id, request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been canceled successfully");
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been canceled successfully");
+        return Ok("The meeting has been canceled successfully");
     }
 
     /// <summary>
@@ -65,13 +64,8 @@ public class MeetingController : BaseController
     {
         var res = await _bookedMeetingService.AdvisorCancelMeetingAsync(AccessToken, request, meetingId);
 
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been canceled");
-
-        _ = _notifier.NotifyUserAsync(res.PartnerUserId
-        , res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
-
-
-        return Ok("OK");
+        await NotifyMeetingStatusAsync(res, "The meeting has been canceled");
+        return Ok("The meeting has been canceled successfully.");
     }
 
 
@@ -85,12 +79,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> ConfirmMeeting(long id)
     {
         var res = await _bookedMeetingService.ConfirmMeetingAsync(id, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been confirmed");
-
-        _ = _notifier.NotifyUserAsync(res.PartnerUserId
-        , res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
-
-        return Ok("Ok");
+        await NotifyMeetingStatusAsync(res, "The meeting has been confirmed");
+        return Ok("The meeting has been confirmed successfully.");
     }
 
 
@@ -103,11 +93,8 @@ public class MeetingController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        var (meetingNotiForPartnerResponse, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been canceled your NoOfBan increase by " + numberOfBan);
-        _ = _notifier.NotifyUserAsync(meetingNotiForPartnerResponse.PartnerUserId
-       , meetingNotiForPartnerResponse.StatusChangedTo.ToString(), $"The meeting {meetingNotiForPartnerResponse.MeetingStartDateTime} to {meetingNotiForPartnerResponse.MeetingEndDateTime} has been {meetingNotiForPartnerResponse.StatusChangedTo.ToString()}");
-
+        var (res, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
+        await NotifyMeetingStatusAsync(res, $"The meeting has been canceled your NoOfBan increase by {numberOfBan}");
         return Ok(new { NumberOfBanIncrease = numberOfBan });
     }
 
@@ -122,10 +109,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> Complete(long id, [FromBody] InputCheckinRequest request)
     {
         var res = await _bookedMeetingService.CompleteAsync(AccessToken, id, request);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been checked in successfully");
-
-        _ = _notifier.NotifyUserAsync(res.PartnerUserId, res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
-        return Ok("Ok");
+        await NotifyMeetingStatusAsync(res, "The meeting has been checked in successfully");
+        return Ok("The meeting has been checked in successfully");
     }
 
     /// <summary>
@@ -136,8 +121,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request, long meetingId)
     {
         await _bookedMeetingService.FeedbackAsync(AccessToken, request, meetingId);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give feedback ok!");
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give feedback ok!");
+        return Ok("The feedback has been submitted successfully");
     }
 
 
@@ -150,11 +135,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> MarkAdvisorMissed(long id, [FromBody] NoteDTO request)
     {
         var res = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Mark advisor missing the meeting successfully");
-
-        _ = _notifier.NotifyUserAsync(res.PartnerUserId, res.StatusChangedTo.ToString(), $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo.ToString()}");
-
-        return Ok("Ok");
+        await NotifyMeetingStatusAsync(res, "Mark advisor missing the meeting successfully");
+        return Ok("The advisor has been marked as missed successfully");
     }
 
     /// <summary>
@@ -166,9 +148,9 @@ public class MeetingController : BaseController
     public async Task<IActionResult> AddReasonForOverdue([FromBody] NoteDTO request, long meetingId)
     {
         var res = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request, meetingId);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give reason ok!");
-        _ = _notifier.NotifyUserAsync(res.PartnerUserId, "Updated", $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been updated some note");
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give reason ok!");
+        await _notifier.NotifyUserAsync(res.PartnerUserId, "Updated", $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been updated some note");
+        return Ok("The reason for overdue has been added successfully");
     }
 
 
@@ -273,8 +255,8 @@ public class MeetingController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _bookedMeetingService.DeleteAsync(id);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been deleted successfully !");
-        return Ok("Ok");
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been deleted successfully !");
+        return Ok("The meeting has been deleted successfully !");
     }
 
 
@@ -298,6 +280,15 @@ public class MeetingController : BaseController
     {
         var res = await _bookedMeetingService.GetCurNumberOfBanAsync(AccessToken);
         return Ok(res);
+    }
+
+
+
+    private async Task NotifyMeetingStatusAsync(dynamic res, string successMessage)
+    {
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", successMessage);
+        await _notifier.NotifyUserAsync(res.PartnerUserId, res.StatusChangedTo.ToString(),
+            $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo}");
     }
 
 

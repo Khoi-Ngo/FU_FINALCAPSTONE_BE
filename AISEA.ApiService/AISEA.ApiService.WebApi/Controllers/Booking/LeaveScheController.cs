@@ -18,9 +18,9 @@ public class LeaveScheController : BaseController
     private readonly LeaveScheduleService _leaveScheduleService;
     private readonly NotificationHubNotifier _notifier;
     public LeaveScheController(
-        LeaveScheduleService leaveScheduleService
-    , NotificationHubNotifier notifier
-    , EndpointSettings endpointSettings) : base(endpointSettings)
+        LeaveScheduleService leaveScheduleService,
+        NotificationHubNotifier notifier,
+        EndpointSettings endpointSettings) : base(endpointSettings)
     {
         _leaveScheduleService = leaveScheduleService;
         _notifier = notifier;
@@ -35,8 +35,8 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been created successfully.");
-        return Ok(new { message = "Leave schedule created successfully" });
+        return await NotifyAndResponseOkAsync("Leaving Schedule has been created successfully.");
+
     }
 
     [HttpPost("bulk")]
@@ -44,8 +44,8 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
     {
         await _leaveScheduleService.CreateBulkAsync(requests, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Success", $"{requests.Count} leave schedules created successfully.");
-        return Ok(new { message = $"{requests.Count} leave schedules created successfully" });
+        return await NotifyAndResponseOkAsync("Leaving Schedule has been created successfully.");
+
     }
 
     /// <summary>
@@ -56,8 +56,7 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
         await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leaving Schedule has been updated successfully.");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Leaving Schedule has been updated successfully.");
     }
 
     /// <summary>
@@ -68,10 +67,13 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _leaveScheduleService.DeleteAsync(id, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Leave Schedule has been deleted.");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Leave Schedule has been deleted.");
+
     }
+
     #endregion
+
+    #region Query action
 
     /// <summary>
     /// STUDENT and ADMIN Retrieves all leave schedule pagination.
@@ -118,6 +120,8 @@ public class LeaveScheController : BaseController
         return Ok(res);
     }
 
+    #endregion
+
 
     #region using for check time only
 
@@ -149,5 +153,13 @@ public class LeaveScheController : BaseController
     }
 
     #endregion
+
+
+    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
+    {
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        return Ok(new { message });
+    }
+
 
 }

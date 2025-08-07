@@ -33,8 +33,8 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> CreateBookingAvailability([FromBody] CreateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been created successfully.");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Booking availability has been created successfully.");
+
     }
 
     /// <summary>
@@ -44,10 +44,9 @@ public class BookingAvailabilityController : BaseController
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
-        await _bookingAvailabilityService.
-       BulkCreateBookingAvailabilityAsync(request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availabilities have been bulk created successfully.");
-        return Ok("Ok");
+        await _bookingAvailabilityService.BulkCreateBookingAvailabilityAsync(request, AccessToken);
+       return await NotifyAndResponseOkAsync("Booking availabilities have been created successfully.");
+
     }
 
     /// <summary>
@@ -81,8 +80,8 @@ public class BookingAvailabilityController : BaseController
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetBookingAvailabilities([FromQuery] PaginationRequest request)
     {
-        var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(request);
-        return Ok(result);
+        var res = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(request);
+        return Ok(res);
     }
 
     /// <summary>
@@ -93,8 +92,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been updated successfully.");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Booking availability has been updated successfully.");
     }
 
     /// <summary>
@@ -105,8 +103,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> DeleteBookingAvailability(long id)
     {
         await _bookingAvailabilityService.DeleteAsync(id, AccessToken);
-        _ = _notifier.NotifyUserAsync(AccessToken, "Successfully", "Booking availability has been deleted.");
-        return Ok("Ok");
+        return await NotifyAndResponseOkAsync("Booking availability has been deleted.");
     }
 
     /// <summary>
@@ -119,5 +116,13 @@ public class BookingAvailabilityController : BaseController
         var res = await _bookingAvailabilityService.GetSimplyByIdAsync(id);
         return Ok(res);
     }
+
+
+    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
+    {
+        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        return Ok(new { message });
+    }
+
 
 }

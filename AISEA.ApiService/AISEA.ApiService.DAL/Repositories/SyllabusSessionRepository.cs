@@ -14,7 +14,7 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<List<SyllabusSession>> GetBySyllabusIdAsync(long syllabusId)
         {
             return await _context.SyllabusSessions
-                .Include(ss => ss.SessionOutcomeMappings)
+                .Include(ss => ss.SessionOutcomeMappings.Where(som => !som.IsDeleted))
                     .ThenInclude(som => som.Outcome)
                 .Where(ss => ss.SyllabusId == syllabusId && !ss.IsDeleted)
                 .OrderBy(ss => ss.SessionNumber)

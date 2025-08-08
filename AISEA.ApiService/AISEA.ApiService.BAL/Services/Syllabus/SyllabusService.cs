@@ -278,12 +278,27 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
                 throw new NotFoundException("Learning outcome not found.");
             }
 
+            // Check if an active mapping already exists
             var exists = await _mappingRepository.ExistsAsync(sessionId, outcomeId);
             if (exists)
             {
                 throw new InvalidUserCreatedException("This session-outcome mapping already exists.");
             }
 
+            // Check if a soft-deleted mapping exists and reactivate it
+            var deletedMapping = await _mappingRepository.GetDeletedMappingAsync(sessionId, outcomeId);
+            if (deletedMapping != null)
+            {
+                // Reactivate the existing mapping
+                deletedMapping.IsDeleted = false;
+                deletedMapping.DeletedAt = null;
+                deletedMapping.UpdatedAt = DateTime.UtcNow;
+                
+                await _mappingRepository.UpdateAsync(deletedMapping);
+                return;
+            }
+
+            // Create new mapping if no existing mapping found
             var mapping = new DAL.Entities.SessionOutcomeMapping
             {
                 SessionId = sessionId,
@@ -292,6 +307,32 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             };
 
             await _mappingRepository.CreateAsync(mapping);
+        }
+
+        public async Task UnmapSessionFromOutcomeAsync(long sessionId, long outcomeId)
+        {
+            var session = await _sessionRepository.GetByIdAsync(sessionId);
+            if (session == null || session.IsDeleted)
+            {
+                throw new NotFoundException("Session not found.");
+            }
+
+            var outcome = await _outcomeRepository.GetByIdAsync(outcomeId);
+            if (outcome == null || outcome.IsDeleted)
+            {
+                throw new NotFoundException("Learning outcome not found.");
+            }
+
+            var mapping = await _mappingRepository.GetBySessionIdAndOutcomeIdAsync(sessionId, outcomeId);
+            if (mapping == null)
+            {
+                throw new NotFoundException("Session-outcome mapping not found.");
+            }
+
+            mapping.IsDeleted = true;
+            mapping.DeletedAt = DateTime.UtcNow;
+            
+            await _mappingRepository.UpdateAsync(mapping);
         }
 
         public async Task<bool> CreateSyllabusAssessmentsAsync(List<CreateSyllabusAssessmentRequest> requests)
@@ -370,6 +411,129 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
                 await _sessionRepository.CreateAsync(session);
             }
             return true;
+        }
+
+        // Assessment UPDATE and DELETE methods
+        public async Task UpdateAssessmentAsync(long id, UpdateSyllabusAssessmentRequest request)
+        {
+            var assessment = await _assessmentRepository.GetByIdAsync(id);
+            if (assessment == null || assessment.IsDeleted)
+            {
+                throw new NotFoundException("Assessment not found.");
+            }
+
+            _mapper.Map(request, assessment);
+            assessment.UpdatedAt = DateTime.UtcNow;
+            
+            await _assessmentRepository.UpdateAsync(assessment);
+        }
+
+        public async Task DeleteAssessmentAsync(long id)
+        {
+            var assessment = await _assessmentRepository.GetByIdAsync(id);
+            if (assessment == null || assessment.IsDeleted)
+            {
+                throw new NotFoundException("Assessment not found.");
+            }
+
+            assessment.IsDeleted = true;
+            assessment.DeletedAt = DateTime.UtcNow;
+            
+            await _assessmentRepository.UpdateAsync(assessment);
+        }
+
+        // Learning Material UPDATE and DELETE methods
+        public async Task UpdateLearningMaterialAsync(long id, UpdateSyllabusLearningMaterialRequest request)
+        {
+            var material = await _materialRepository.GetByIdAsync(id);
+            if (material == null || material.IsDeleted)
+            {
+                throw new NotFoundException("Learning material not found.");
+            }
+
+            _mapper.Map(request, material);
+            material.UpdatedAt = DateTime.UtcNow;
+            
+            await _materialRepository.UpdateAsync(material);
+        }
+
+        public async Task DeleteLearningMaterialAsync(long id)
+        {
+            var material = await _materialRepository.GetByIdAsync(id);
+            if (material == null || material.IsDeleted)
+            {
+                throw new NotFoundException("Learning material not found.");
+            }
+
+            material.IsDeleted = true;
+            material.DeletedAt = DateTime.UtcNow;
+            
+            await _materialRepository.UpdateAsync(material);
+        }
+
+        // Learning Outcome UPDATE and DELETE methods
+        public async Task UpdateLearningOutcomeAsync(long id, UpdateSyllabusLearningOutcomeRequest request)
+        {
+            var outcome = await _outcomeRepository.GetByIdAsync(id);
+            if (outcome == null || outcome.IsDeleted)
+            {
+                throw new NotFoundException("Learning outcome not found.");
+            }
+
+            // Check if the new outcome code already exists for the same syllabus (excluding current record)
+            var existingOutcome = await _outcomeRepository.GetByCodeAsync(outcome.SyllabusId, request.OutcomeCode);
+            if (existingOutcome != null && existingOutcome.Id != id)
+            {
+                throw new InvalidUserCreatedException($"Learning outcome with code '{request.OutcomeCode}' already exists for this syllabus.");
+            }
+
+            _mapper.Map(request, outcome);
+            outcome.UpdatedAt = DateTime.UtcNow;
+            
+            await _outcomeRepository.UpdateAsync(outcome);
+        }
+
+        public async Task DeleteLearningOutcomeAsync(long id)
+        {
+            var outcome = await _outcomeRepository.GetByIdAsync(id);
+            if (outcome == null || outcome.IsDeleted)
+            {
+                throw new NotFoundException("Learning outcome not found.");
+            }
+
+            outcome.IsDeleted = true;
+            outcome.DeletedAt = DateTime.UtcNow;
+            
+            await _outcomeRepository.UpdateAsync(outcome);
+        }
+
+        // Session UPDATE and DELETE methods
+        public async Task UpdateSessionAsync(long id, UpdateSyllabusSessionRequest request)
+        {
+            var session = await _sessionRepository.GetByIdAsync(id);
+            if (session == null || session.IsDeleted)
+            {
+                throw new NotFoundException("Session not found.");
+            }
+
+            _mapper.Map(request, session);
+            session.UpdatedAt = DateTime.UtcNow;
+            
+            await _sessionRepository.UpdateAsync(session);
+        }
+
+        public async Task DeleteSessionAsync(long id)
+        {
+            var session = await _sessionRepository.GetByIdAsync(id);
+            if (session == null || session.IsDeleted)
+            {
+                throw new NotFoundException("Session not found.");
+            }
+
+            session.IsDeleted = true;
+            session.DeletedAt = DateTime.UtcNow;
+            
+            await _sessionRepository.UpdateAsync(session);
         }
     }
 }

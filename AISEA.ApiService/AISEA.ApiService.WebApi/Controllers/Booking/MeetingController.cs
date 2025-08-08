@@ -17,14 +17,17 @@ public class MeetingController : BaseController
 
     private readonly BookedMeetingService _bookedMeetingService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<MeetingController> _logger;
 
     public MeetingController(
         EndpointSettings endpointSettings,
         BookedMeetingService bookedMeetingService,
-        NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+        NotificationHubNotifier notificationHubNotifier,
+        ILogger<MeetingController> logger) : base(endpointSettings)
     {
         _bookedMeetingService = bookedMeetingService;
         _notifier = notificationHubNotifier;
+        _logger = logger;
     }
 
     /// <summary>
@@ -50,7 +53,16 @@ public class MeetingController : BaseController
     public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {
         await _bookedMeetingService.StuCancelPendingAsync(id, request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been canceled successfully");
+
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been canceled successfully");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about canceled meeting");
+        }
+
         return Ok("The meeting has been canceled successfully");
     }
 
@@ -63,7 +75,6 @@ public class MeetingController : BaseController
     public async Task<IActionResult> AdvisorCancelMeeting([FromBody] NoteDTO request, long meetingId)
     {
         var res = await _bookedMeetingService.AdvisorCancelMeetingAsync(AccessToken, request, meetingId);
-
         await NotifyMeetingStatusAsync(res, "The meeting has been canceled");
         return Ok("The meeting has been canceled successfully.");
     }
@@ -121,7 +132,16 @@ public class MeetingController : BaseController
     public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request, long meetingId)
     {
         await _bookedMeetingService.FeedbackAsync(AccessToken, request, meetingId);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give feedback ok!");
+
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give feedback ok!");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about feedback submission");
+        }
+
         return Ok("The feedback has been submitted successfully");
     }
 
@@ -148,8 +168,17 @@ public class MeetingController : BaseController
     public async Task<IActionResult> AddReasonForOverdue([FromBody] NoteDTO request, long meetingId)
     {
         var res = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request, meetingId);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give reason ok!");
-        await _notifier.NotifyUserAsync(res.PartnerUserId, "Updated", $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been updated some note");
+
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", "Give reason ok!");
+            await _notifier.NotifyUserAsync(res.PartnerUserId, "Updated", $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been updated some note");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about reason for overdue");
+        }
+
         return Ok("The reason for overdue has been added successfully");
     }
 
@@ -255,7 +284,16 @@ public class MeetingController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _bookedMeetingService.DeleteAsync(id);
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been deleted successfully !");
+
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", "The meeting has been deleted successfully !");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about meeting deletion");
+        }
+
         return Ok("The meeting has been deleted successfully !");
     }
 
@@ -286,9 +324,16 @@ public class MeetingController : BaseController
 
     private async Task NotifyMeetingStatusAsync(dynamic res, string successMessage)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", successMessage);
-        await _notifier.NotifyUserAsync(res.PartnerUserId, res.StatusChangedTo.ToString(),
-            $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo}");
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", successMessage);
+            await _notifier.NotifyUserAsync(res.PartnerUserId, res.StatusChangedTo.ToString(),
+                $"The meeting {res.MeetingStartDateTime} to {res.MeetingEndDateTime} has been {res.StatusChangedTo}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about meeting status");
+        }
     }
 
 

@@ -16,14 +16,16 @@ public class RoleController : BaseController
 {
     private readonly RoleService _roleService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<RoleController> _logger;
 
     public RoleController(
         EndpointSettings endpointSettings,
         RoleService roleService,
-        NotificationHubNotifier notifier) : base(endpointSettings)
+        NotificationHubNotifier notifier, ILogger<RoleController> logger) : base(endpointSettings)
     {
         _roleService = roleService;
         _notifier = notifier;
+        _logger = logger;
     }
 
     /// <summary>
@@ -71,7 +73,14 @@ public class RoleController : BaseController
     /// </summary>
     private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying user");
+        }
         return Ok(new { Message = message });
     }
 }

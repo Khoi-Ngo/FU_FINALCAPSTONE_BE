@@ -9,4 +9,5 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
     public JoinedSubjectRepository(AiseaContext context) : base(context)
     {
     }
+    
 }

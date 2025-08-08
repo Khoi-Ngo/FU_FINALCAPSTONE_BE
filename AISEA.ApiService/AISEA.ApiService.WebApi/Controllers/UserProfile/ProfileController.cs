@@ -16,11 +16,13 @@ public class ProfileController : BaseController
     private readonly StudentProfileService _studentProfileService;
     private readonly StaffProfileService _staffProfileService;
     private readonly NotificationHubNotifier _notifier;
-    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService, NotificationHubNotifier notifier) : base(endpointSettings)
+    private readonly ILogger<ProfileController> _logger;
+    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService, NotificationHubNotifier notifier, ILogger<ProfileController> logger) : base(endpointSettings)
     {
         _staffProfileService = staffProfileService;
         _studentProfileService = studentProfileService;
         _notifier = notifier;
+        _logger = logger;
     }
 
     #region Student Profile
@@ -59,7 +61,14 @@ public class ProfileController : BaseController
     /// </summary>
     private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying user");
+        }
         return Ok(new { Message = message });
     }
 }

@@ -17,13 +17,17 @@ public class LeaveScheController : BaseController
 {
     private readonly LeaveScheduleService _leaveScheduleService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<LeaveScheController> _logger;
+
     public LeaveScheController(
         LeaveScheduleService leaveScheduleService,
         NotificationHubNotifier notifier,
-        EndpointSettings endpointSettings) : base(endpointSettings)
+        EndpointSettings endpointSettings,
+        ILogger<LeaveScheController> logger) : base(endpointSettings)
     {
         _leaveScheduleService = leaveScheduleService;
         _notifier = notifier;
+        _logger = logger;
     }
 
     #region Command action
@@ -157,7 +161,15 @@ public class LeaveScheController : BaseController
 
     private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about leave schedule update");
+        }
         return Ok(new { message });
     }
 

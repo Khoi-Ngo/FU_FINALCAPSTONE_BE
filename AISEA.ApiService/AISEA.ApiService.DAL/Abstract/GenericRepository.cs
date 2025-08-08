@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.DAL.Persistence;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Abstract;
@@ -14,6 +11,35 @@ public class GenericRepository<T> where T : class
     public GenericRepository(AiseaContext context)
     {
         _context = context;
+    }
+
+    /// <summary>
+    /// Bulk inserts a collection of entities asynchronously using EFCore.BulkExtensions.
+    /// Optimized for large datasets (up to millions of rows).
+    /// </summary>
+    /// <param name="entities">The entities to insert.</param>
+    /// <returns>The number of inserted entities.</returns>
+    public virtual async Task<int> BulkInsertAsync(IEnumerable<T> entities)
+    {
+        if (entities == null) throw new ArgumentNullException(nameof(entities));
+
+        var entityList = entities as List<T> ?? entities.ToList();
+        if (!entityList.Any()) return 0;
+
+        try
+        {
+            await _context.BulkInsertAsync(entityList, new BulkConfig
+            {
+                PreserveInsertOrder = true,
+                SetOutputIdentity = false,
+                BatchSize = 10000 // Adjust based on your needs
+            });
+            return entityList.Count;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public List<T> GetAll()

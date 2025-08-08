@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.CourseTracker;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
@@ -15,71 +16,71 @@ public class JoinedSubjectController : BaseController
 {
     private readonly JoinedSubjectService _joinedSubjectService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<JoinedSubjectController> _logger;
     public JoinedSubjectController(EndpointSettings endpointSettings) : base(endpointSettings)
     {
     }
 
 
     ///<summary>
-    /// Singly import a course for a student
-    /// 1 Student - 1 Joined Course
+    /// Singly import a subject for a student
+    /// 1 Student - 1 Joined subject
     /// </summary>
     [HttpPost("import")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    public async Task<IActionResult> ImportCourseAsync([FromBody] SingleImportJoinedSubjectRequest request)
+    public async Task<IActionResult> ImportSubjectAsync([FromBody] SingleImportJoinedSubjectRequest request)
     {
         // Assuming you have a service to handle the import logic
         var res = await _joinedSubjectService.ImportSubjectAsync(request, AccessToken);
 
         //notify for the conductor
-        NotifyConductor("The course has been imported successfully");
+        await NotifyConductorAsync("The subject has been imported successfully");
 
         //notify for the student imported
-        NotifyStakeHolder(res.StakeholderUserId, res.Content, res.Title);
+        await NotifyStakeHolderAsync(res.StakeholderUserId, res.Content, res.Title);
 
         return Ok("Import successful");
     }
 
 
-    // ///<summary>
-    // /// Import N joined courses for ONE student
-    // /// 1 Student - N Joined Course
-    // /// </summary>
-    // [HttpPost("import-multiple")]
-    // [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    // public async Task<IActionResult> ImportMultipleCoursesAsync([FromBody] ImportMultipleJoinedCoursesRequest request)
-    // {
-    //     // Assuming you have a service to handle the import logic
-    //     var res = await _joinedCourseService.ImportMultipleCoursesAsync(request);
+    ///<summary>
+    /// Import N joined subjects for ONE student
+    /// 1 Student - N Joined Subjects
+    /// </summary>
+    [HttpPost("import-multiple")]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    public async Task<IActionResult> ImportMultipleSubjectsAsync([FromBody] ImportJoinedSubjectsForOneStudentRequest request)
+    {
+        // Assuming you have a service to handle the import logic
+        var res = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, AccessToken);
 
-    //     //notify for the conductor
-    //     NotifyConductor("The courses have been imported successfully");
+        //notify for the conductor
+        await NotifyConductorAsync("The courses have been imported successfully");
 
-    //     //notify for the student imported
-    //     NotifyStakeHolder(res.stakeHolderUserId, res.Content, res.Title);
+        //notify for the student imported
+        await NotifyStakeHolderAsync(res.StakeholderUserId, res.Content, res.Title);
 
-    //     return Ok("Import successful");
-    // }
+        return Ok("Import successful");
+    }
 
-    // ///<summary>
-    // /// Import N joined courses for N student
-    // /// N Student - N Joined Course
-    // /// </summary>
-    // [HttpPost("import-multiple-students")]
-    // [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    // public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportMultipleJoinedCoursesStudentsRequest request)
-    // {
-    //     // Assuming you have a service to handle the import logic
-    //     var res = await _joinedCourseService.ImportMultipleStudentsAsync(request);
+    ///<summary>
+    /// Import N joined subjects for N student
+    /// N Student - N Joined Subject
+    /// </summary>
+    [HttpPost("import-multiple-students")]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportJoinedSubjectsRequest request)
+    {
+        // Assuming you have a service to handle the import logic
+        var res = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, AccessToken);
 
-    //     //notify for the conductor
-    //     NotifyConductor("The students have been imported successfully");
+        //notify for the conductor
+        await NotifyConductorAsync("The students have been imported successfully");
 
-    //     //notify for the students imported
-    //     NotifyStakeHolders(res.Stakeholders, res.Content, res.Title);
+        await NotifyStakeHoldersAsync(res);
 
-    //     return Ok("Import successful");
-    // }
+        return Ok("Import successful");
+    }
 
 
 
@@ -88,23 +89,50 @@ public class JoinedSubjectController : BaseController
     #region private methods support notify
 
     //Notify the conductor after request to an API
-    private void NotifyConductor(string content = "The action has been completed", string title = "Successfully")
+    private async Task NotifyConductorAsync(string content = "The action has been completed", string title = "Successfully")
     {
-        Task.Run(() => _notifier.NotifyUserAsync(AccessToken, title, content));
+        try {
+            await _notifier.NotifyUserAsync(AccessToken, title, content);
+        } catch (Exception e) {
+            _logger.LogError(e, "Error while notifying conductor");
+        }
     }
-    //Notify to the stakeholder after having request to an API (1 stakeholder - 1 update - 1 notification || 1 stakeholder - N Updates - 1 same notification)
-    private void NotifyStakeHolder(long stakeHolderUserId, string content, string title = "Update")
+
+    // (1 stakeholder - 1 update - 1 notification || 1 stakeholder - N Updates - 1 same notification)
+    //Notify to the stakeholder after having request to an API
+    private async Task NotifyStakeHolderAsync(long stakeHolderUserId, string content, string title = "Update")
     {
-        Task.Run(() => _notifier.NotifyUserAsync(stakeHolderUserId, title, content));
+        try {
+            await _notifier.NotifyUserAsync(stakeHolderUserId, title, content);
+        } catch (Exception e) {
+            _logger.LogError(e, "Error while notifying stakeholder");
+        }
     }
-    //Notify to the stakeholders after having request to an API (N stakeholders - 1/N update foreach - 1 same notification for all stakeholders)
-    private void NotifyStakeHolders(IEnumerable<long> stakeHolderUserIds, string content, string title = "Update")
+
+    // Notify multiple stakeholders efficiently
+    private async Task NotifyStakeHoldersAsync(List<JoinedSubjectStakeholderNotification> notifications)
     {
-        Parallel.ForEach(stakeHolderUserIds, userId =>
+        try
         {
-            Task.Run(() => _notifier.NotifyUserAsync(userId, title, content));
-        });
+            if (notifications == null || notifications.Count == 0)
+                return;
+
+            var tasks = notifications.Select(n =>
+            {
+                var title = string.IsNullOrWhiteSpace(n.Title) ? "Notification" : n.Title;
+                var content = n.Content ?? string.Empty;
+
+                return _notifier.NotifyUserAsync(n.StakeholderUserId, title, content);
+            });
+
+            await Task.WhenAll(tasks); // Run all notifications in parallel
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying stakeholders");
+        }
     }
+
 
 
     #endregion

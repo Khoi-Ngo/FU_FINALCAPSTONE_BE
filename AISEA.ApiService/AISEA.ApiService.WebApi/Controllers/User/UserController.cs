@@ -16,12 +16,14 @@ public class UserController : BaseController
 {
     private readonly UserService _userService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<UserController> _logger;
     public UserController(EndpointSettings endpointSettings
     , UserService userService
-    , NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+    , NotificationHubNotifier notificationHubNotifier, ILogger<UserController> logger) : base(endpointSettings)
     {
         _userService = userService;
         _notifier = notificationHubNotifier;
+        _logger = logger;
     }
 
     /// <summary>
@@ -321,7 +323,14 @@ public class UserController : BaseController
     /// </summary>
     private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying user");
+        }
         return Ok(new { Message = message });
     }
 

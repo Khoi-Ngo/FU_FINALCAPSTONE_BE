@@ -16,13 +16,17 @@ public class BookingAvailabilityController : BaseController
 {
     private readonly BookingAvailabilityService _bookingAvailabilityService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<BookingAvailabilityController> _logger;
+
     public BookingAvailabilityController(
         BookingAvailabilityService bookingAvailabilityService
     , NotificationHubNotifier notifier
-    , EndpointSettings endpointSettings) : base(endpointSettings)
+    , EndpointSettings endpointSettings
+    , ILogger<BookingAvailabilityController> logger) : base(endpointSettings)
     {
         _bookingAvailabilityService = bookingAvailabilityService;
         _notifier = notifier;
+        _logger = logger;
     }
 
     /// <summary>
@@ -45,7 +49,7 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
         await _bookingAvailabilityService.BulkCreateBookingAvailabilityAsync(request, AccessToken);
-       return await NotifyAndResponseOkAsync("Booking availabilities have been created successfully.");
+        return await NotifyAndResponseOkAsync("Booking availabilities have been created successfully.");
 
     }
 
@@ -120,7 +124,14 @@ public class BookingAvailabilityController : BaseController
 
     private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about booking availability update");
+        }
         return Ok(new { message });
     }
 

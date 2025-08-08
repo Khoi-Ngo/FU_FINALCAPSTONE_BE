@@ -14,11 +14,13 @@ public class AuthController : BaseController
 {
     private readonly AuthService _authService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(EndpointSettings endpointSettings, AuthService authService, NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+    public AuthController(EndpointSettings endpointSettings, AuthService authService, NotificationHubNotifier notificationHubNotifier, ILogger<AuthController> logger) : base(endpointSettings)
     {
         _authService = authService;
         _notifier = notificationHubNotifier;
+        _logger = logger;
     }
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
@@ -107,7 +109,14 @@ public class AuthController : BaseController
 
     private async Task<IActionResult> NotifyAndResponseOkAsync(string message, object? data = null)
     {
-        await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error notifying user about auth action");
+        }
         return Ok(data ?? new { message });
     }
 }

@@ -65,6 +65,13 @@ namespace AISEA.ApiService.DAL.Repositories
             return await _context.Users.Include(u => u.StudentProfile)
             .FirstOrDefaultAsync(u => u.IsDeleted == false && u.Username == username && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT);
         }
+        public async Task<List<User>> GetUsersWStudentProfilesAsync(List<string> usernames)
+        {
+            return await _context.Users.Include(u => u.StudentProfile)
+            .Where(u => u.IsDeleted == false && usernames.Contains(u.Username) && u.Status == EUserStatus.ACTIVE && u.RoleId == (int)EUserRole.STUDENT)
+            .ToListAsync();
+        }
+
 
         public async Task<long> GetStudentProfileIdByUsernameAsync(string username)
         {
@@ -161,6 +168,6 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-       
+
     }
 }

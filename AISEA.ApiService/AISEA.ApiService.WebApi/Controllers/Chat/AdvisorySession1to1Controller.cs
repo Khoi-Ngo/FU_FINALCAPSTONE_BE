@@ -18,15 +18,18 @@ public class AdvisorySession1to1Controller : BaseController
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
     private readonly AdvisorySessionHubNotifier _advisorySessionHubNotifier;
     private readonly NotificationHubNotifier _notifier;
+    private readonly ILogger<AdvisorySession1to1Controller> _logger;
 
     public AdvisorySession1to1Controller(EndpointSettings endpointSettings,
     AdvisorySession1to1Service advisorySession1To1Service,
     AdvisorySessionHubNotifier advisorySessionHubNotifier,
-    NotificationHubNotifier notifier) : base(endpointSettings)
+    NotificationHubNotifier notifier,
+    ILogger<AdvisorySession1to1Controller> logger) : base(endpointSettings)
     {
         _advisorySession1To1Service = advisorySession1To1Service;
         _advisorySessionHubNotifier = advisorySessionHubNotifier;
         _notifier = notifier;
+        _logger = logger;
     }
 
     /// <summary>
@@ -39,8 +42,16 @@ public class AdvisorySession1to1Controller : BaseController
 
         // Notify student, staff, and session groups
         await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
-        await _notifier.NotifyUserAsync(AccessToken, "Delete", "The chat session got deleted successfully");
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, "Delete", "The chat session got deleted successfully");
 
+        }
+        catch (Exception e)
+        {
+            // Log the exception or handle it accordingly
+            _logger.LogError(e, "Error notifying user about deleted chat session");
+        }
         return Ok("The chat session got deleted successfully");
     }
 

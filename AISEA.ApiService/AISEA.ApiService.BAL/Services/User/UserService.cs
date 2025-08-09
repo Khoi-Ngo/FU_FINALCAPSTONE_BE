@@ -253,6 +253,77 @@ namespace AISEA.ApiService.BAL.Services.User
                 PageSize = request.PageSize
             };
         }
+   
+        public async Task<PagedResult<GetStudentListResponse>> GetAllStudentsByComboCodePagedAsync(PaginationRequest request, string comboCode)
+        {
+            var (users, totalCount) = await _userRepository.GetAllStudentsByComboCodePagedAsync(request.PageNumber, request.PageSize, comboCode);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
 
+        public async Task<PagedResult<GetStudentListResponse>> GetAllStudentsByProgramIdPagedAsync(PaginationRequest request, long programId)
+        {
+            var (users, totalCount) = await _userRepository.GetStudentsByProgramIdPagedAsync(request.PageNumber, request.PageSize, programId);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
+        public async Task<PagedResult<GetStudentListResponse>> GetAllStudentsByCurriculumCodePagedAsync(PaginationRequest request, string curriculumCode)
+        {
+            var (users, totalCount) = await _userRepository.GetStudentsByCurriculumCodePagedAsync(request.PageNumber, request.PageSize, curriculumCode);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
+        public async Task<PagedResult<GetStudentListResponse>> GetAllActiveStudentsByComboCodePagedAsync(PaginationRequest request, string comboCode)
+        {
+            var (users, totalCount) = await _userRepository.GetAllActiveStudentsByComboCodePagedAsync(request.PageNumber, request.PageSize, comboCode);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
+        public async Task<PagedResult<GetStudentListResponse>> GetAllActiveStudentsByProgramIdPagedAsync(PaginationRequest request, long programId)
+        {
+            var (users, totalCount) = await _userRepository.GetAllActiveStudentsByProgramIdPagedAsync(request.PageNumber, request.PageSize, programId);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
+
+        public async Task<PagedResult<GetStudentListResponse>> GetAllActiveStudentsByCurriculumCodePagedAsync(PaginationRequest request, string curriculumCode)
+        {
+            var (users, totalCount) = await _userRepository.GetAllActiveStudentsByCurriculumCodePagedAsync(request.PageNumber, request.PageSize, curriculumCode);
+            return new PagedResult<GetStudentListResponse>
+            {
+                Items = _mapper.Map<List<GetStudentListResponse>>(users),
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+        }
     }
 }

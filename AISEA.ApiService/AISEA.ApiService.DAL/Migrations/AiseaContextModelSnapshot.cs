@@ -69,7 +69,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("StudentId")
                         .HasDatabaseName("IX_AdvisorySession1to1_StudentId");
 
-                    b.ToTable("AdvisorySession1to1");
+                    b.ToTable("AdvisorySession1to1", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.AuditLog", b =>
@@ -94,7 +94,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("auditlog_id_primary");
 
-                    b.ToTable("AuditLog");
+                    b.ToTable("AuditLog", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.BookedMeeting", b =>
@@ -153,7 +153,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.HasIndex("StudentProfileId");
 
-                    b.ToTable("BookedMeeting", t =>
+                    b.ToTable("BookedMeeting", null, t =>
                         {
                             t.HasTrigger("TR_BookedMeeting_AntiStudentSpamCancel");
 
@@ -198,7 +198,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_BookingAvailability_UniqueTimeSlot");
 
-                    b.ToTable("BookingAvailability", t =>
+                    b.ToTable("BookingAvailability", null, t =>
                         {
                             t.HasTrigger("TR_BookingAvailability_CheckOverlap");
 
@@ -255,7 +255,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasKey("Id")
                         .HasName("combo_id_primary");
 
-                    b.ToTable("Combo");
+                    b.ToTable("Combo", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.ComboSubject", b =>
@@ -289,7 +289,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SubjectId")
                         .HasDatabaseName("IX_ComboSubject_SubjectId");
 
-                    b.ToTable("ComboSubject");
+                    b.ToTable("ComboSubject", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Curriculum", b =>
@@ -357,7 +357,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex(new[] { "CurriculumCode" }, "curriculum_code_unique")
                         .IsUnique();
 
-                    b.ToTable("Curriculum");
+                    b.ToTable("Curriculum", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.CurriculumSubject", b =>
@@ -397,7 +397,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SubjectVersionId")
                         .HasDatabaseName("IX_CurriculumSubject_SubjectVersionId");
 
-                    b.ToTable("CurriculumSubject");
+                    b.ToTable("CurriculumSubject", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.JoinedSubject", b =>
@@ -462,7 +462,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_JoinedSubject_StudentProfileId_Name_Unique");
 
-                    b.ToTable("JoinedSubject");
+                    b.ToTable("JoinedSubject", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.LeaveSchedule", b =>
@@ -493,7 +493,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_LeaveSchedule_UniqueSchedule");
 
-                    b.ToTable("LeaveSchedule", t =>
+                    b.ToTable("LeaveSchedule", null, t =>
                         {
                             t.HasTrigger("TR_LeaveSchedule_CheckConstraints");
 
@@ -537,7 +537,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SenderId")
                         .HasDatabaseName("IX_Message_SenderId");
 
-                    b.ToTable("Message");
+                    b.ToTable("Message", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Notification", b =>
@@ -574,7 +574,7 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notification");
+                    b.ToTable("Notification", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Program", b =>
@@ -615,7 +615,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("program_code_unique");
 
-                    b.ToTable("Program");
+                    b.ToTable("Program", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Role", b =>
@@ -649,7 +649,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex(new[] { "Name" }, "role_name_unique")
                         .IsUnique();
 
-                    b.ToTable("Role");
+                    b.ToTable("Role", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Semester", b =>
@@ -676,7 +676,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Semester_SemesterName_Unique");
 
-                    b.ToTable("Semester");
+                    b.ToTable("Semester", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SessionOutcomeMapping", b =>
@@ -710,7 +710,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SessionId")
                         .HasDatabaseName("IX_SessionOutcomeMapping_SessionId");
 
-                    b.ToTable("SessionOutcomeMapping");
+                    b.ToTable("SessionOutcomeMapping", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StaffProfile", b =>
@@ -765,7 +765,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_StaffProfile_UserId");
 
-                    b.ToTable("StaffProfile");
+                    b.ToTable("StaffProfile", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudentProfile", b =>
@@ -818,7 +818,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_StudentProfile_UserId");
 
-                    b.ToTable("StudentProfile");
+                    b.ToTable("StudentProfile", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>
@@ -880,7 +880,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("subject_code_unique");
 
-                    b.ToTable("Subject");
+                    b.ToTable("Subject", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersion", b =>
@@ -1023,7 +1023,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SubjectVersionId")
                         .HasDatabaseName("IX_Syllabus_SubjectVersionId");
 
-                    b.ToTable("Syllabus");
+                    b.ToTable("Syllabus", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SyllabusAssessment", b =>
@@ -1077,7 +1077,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SyllabusId")
                         .HasDatabaseName("IX_SyllabusAssessment_SyllabusId");
 
-                    b.ToTable("SyllabusAssessment");
+                    b.ToTable("SyllabusAssessment", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SyllabusLearningMaterial", b =>
@@ -1129,7 +1129,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SyllabusId")
                         .HasDatabaseName("IX_SyllabusLearningMaterial_SyllabusId");
 
-                    b.ToTable("SyllabusLearningMaterial");
+                    b.ToTable("SyllabusLearningMaterial", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SyllabusLearningOutcome", b =>
@@ -1171,7 +1171,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SyllabusId")
                         .HasDatabaseName("IX_SyllabusLearningOutcome_SyllabusId");
 
-                    b.ToTable("SyllabusLearningOutcome");
+                    b.ToTable("SyllabusLearningOutcome", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SyllabusSession", b =>
@@ -1215,7 +1215,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("SyllabusId")
                         .HasDatabaseName("IX_SyllabusSession_SyllabusId");
 
-                    b.ToTable("SyllabusSession");
+                    b.ToTable("SyllabusSession", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.User", b =>
@@ -1294,7 +1294,7 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex(new[] { "Username" }, "user_username_unique")
                         .IsUnique();
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.AdvisorySession1to1", b =>

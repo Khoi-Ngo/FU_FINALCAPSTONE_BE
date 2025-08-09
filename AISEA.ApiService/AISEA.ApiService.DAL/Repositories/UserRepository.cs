@@ -168,6 +168,88 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
+        public async Task<(object users, int totalCount)> GetStudentsByProgramIdPagedAsync(int pageNumber, int pageSize, long programId)
+        {
+            var query = _context.Users
+                .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.StudentProfile.ProgramId == programId)
+                .Include(u => u.Role)
+                .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
 
+        public async Task<(object users, int totalCount)> GetAllStudentsByComboCodePagedAsync(int pageNumber, int pageSize, string comboCode)
+        {
+            var query = _context.Users
+               .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.StudentProfile.RegisteredComboCode == comboCode)
+               .Include(u => u.Role)
+               .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<(object users, int totalCount)> GetStudentsByCurriculumCodePagedAsync(int pageNumber, int pageSize, string curriculumCode)
+        {
+            var query = _context.Users
+            .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.StudentProfile.CurriculumCode == curriculumCode)
+            .Include(u => u.Role)
+            .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<(object users, int totalCount)> GetAllActiveStudentsByComboCodePagedAsync(int pageNumber, int pageSize, string comboCode)
+        {
+            var query = _context.Users
+             .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.StudentProfile.RegisteredComboCode == comboCode && u.Status == EUserStatus.ACTIVE && u.IsDeleted == false)
+             .Include(u => u.Role)
+             .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<(object users, int totalCount)> GetAllActiveStudentsByProgramIdPagedAsync(int pageNumber, int pageSize, long programId)
+        {
+            var query = _context.Users
+             .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.StudentProfile.ProgramId == programId && u.Status == EUserStatus.ACTIVE && u.IsDeleted == false)
+             .Include(u => u.Role)
+             .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
+
+        public async Task<(object users, int totalCount)> GetAllActiveStudentsByCurriculumCodePagedAsync(int pageNumber, int pageSize, string curriculumCode)
+        {
+            var query = _context.Users
+             .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.StudentProfile.CurriculumCode == curriculumCode && u.Status == EUserStatus.ACTIVE && u.IsDeleted == false)
+             .Include(u => u.Role)
+             .Include(u => u.StudentProfile);
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return (users, totalCount);
+        }
     }
 }

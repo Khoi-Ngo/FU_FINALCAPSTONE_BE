@@ -36,8 +36,8 @@ public partial class StudentProfile
 
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
-    public string RegisteredComboCode { get; set; } = "Unregistered";
-    public string CurriculumCode { get; set; } = "UnRegisteredCurriculum";
+    public string RegisteredComboCode { get; set; } = "";
+    public string CurriculumCode { get; set; } = "";
 
 
 

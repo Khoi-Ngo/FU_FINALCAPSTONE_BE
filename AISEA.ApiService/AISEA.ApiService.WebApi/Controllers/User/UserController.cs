@@ -317,19 +317,72 @@ public class UserController : BaseController
         return await NotifyAndResponseOkAsync("The avatar has been updated successfully");
     }
 
-    //TODO
     ///<summary>
     /// View all student by combo
     /// </summary>
+    [HttpGet("student/{comboCode}/paged")]
+    [PermissionAuthorize( (int)EUserRole.ADMIN)]
+    public async Task<IActionResult> GetAllStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
+    {
+        var result = await _userService.GetAllStudentsByComboCodePagedAsync(request, comboCode);
+        return Ok(result);
+    }
+    ///<summary>
+    /// View all student by program
+    /// </summary>
+    [HttpGet("student/{programId}/paged")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
+    public async Task<IActionResult> GetAllStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
+    {
+        var result = await _userService.GetAllStudentsByProgramIdPagedAsync(request, programId);
+        return Ok(result);
+    }
 
     ///<summary>
-    /// View all student by curriculum
+    /// View all student by curriculum chosen
     /// </summary>
+    [HttpGet("student/{curriculumCode}/paged")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
+    public async Task<IActionResult> GetAllStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)
+    {
+        var result = await _userService.GetAllStudentsByCurriculumCodePagedAsync(request, curriculumCode);
+        return Ok(result);
+    }
+
 
 
     ///<summary>
-    /// View all student by program chosen
+    /// View all active student by combo
     /// </summary>
+    [HttpGet("student/active/{comboCode}/paged")]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    public async Task<IActionResult> GetAllActiveStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
+    {
+        var result = await _userService.GetAllActiveStudentsByComboCodePagedAsync(request, comboCode);
+        return Ok(result);
+    }
+    ///<summary>
+    /// View all student by program
+    /// </summary>
+    [HttpGet("student/active/{programId}/paged")]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    public async Task<IActionResult> GetAllActiveStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
+    {
+        var result = await _userService.GetAllActiveStudentsByProgramIdPagedAsync(request, programId);
+        return Ok(result);
+    }
+
+    ///<summary>
+    /// View all student by curriculum chosen
+    /// </summary>
+    [HttpGet("student/active/{curriculumCode}/paged")]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    public async Task<IActionResult> GetAllActiveStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)
+    {
+        var result = await _userService.GetAllActiveStudentsByCurriculumCodePagedAsync(request, curriculumCode);
+        return Ok(result);
+    }
+
 
 
     /// <summary>

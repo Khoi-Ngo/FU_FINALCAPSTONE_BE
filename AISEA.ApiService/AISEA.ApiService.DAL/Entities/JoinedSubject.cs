@@ -16,14 +16,13 @@ public class JoinedSubject
     public string SubjectCode { get; set; }
     public string SubjectVersionCode { get; set; }
     public string SubjectName { get; set; }
-    public string Name { get; set; } //Note: Subject Code + Subject Name + Unique number (none, 1, 2, ...) + SemesterName (within a Semester can not have more than one CourseName)
+    public string Name { get; set; }
     public string CreatedByUserName { get; set; }
     public ESemesterStudyBlockType SemesterStudyBlockType { get; set; }
     public bool IsPassed { get; set; } = false;
     public bool IsCompleted { get; set; } = false;
     public bool IsActive { get; set; } = true;// Case: Change Program~Curriculum, ChangeCombo ==> 
-    // //TODO: TRIGGER to update after change of Program or Curriculum or Combo
-    public int? Credits { get; set; }// TODO: Trigger to update after import
+    public int? Credits { get; set; }
 
     [ForeignKey("StudentProfile")]
     public long StudentProfileId { get; set; }

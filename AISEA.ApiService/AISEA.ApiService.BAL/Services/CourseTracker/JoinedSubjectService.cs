@@ -212,7 +212,7 @@ public class JoinedSubjectService
             #endregion
 
             #region Deleting 
-            //TODO: Refine business logic clearly
+            //TODO: Define business logic clearly
 
             #endregion
 

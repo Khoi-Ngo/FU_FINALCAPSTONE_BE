@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 
 namespace AISEA.ApiService.BAL.Validators.JoinedSubject
 {
-    ///TODO
     ///NOTE: Validation rules for this behavior
     //// No fields nullable or empty
     //// SubjectCode, SubjectVersionCode have to be existed in system (Trigger)

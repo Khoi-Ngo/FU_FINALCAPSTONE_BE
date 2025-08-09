@@ -1,7 +1,9 @@
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.Interfaces;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
@@ -15,6 +17,40 @@ public class JoinedSubjectService
     private readonly JoinedSubjectRepository _joinedSubjectRepository;
     private readonly IMapper _mapper;
     private readonly IJWTService _jWTService;
+
+    public async Task<JoinedSubjectStakeholderNotification> DeleteSubjectAsync(long id, string accessToken)
+    {
+        try
+        {
+            var subject = await _joinedSubjectRepository.GetByIdWStudentUserIdAsync(id);
+
+            _joinedSubjectRepository.RemoveAsync(subject);
+
+            return new JoinedSubjectStakeholderNotification
+            {
+                StakeholderUserId = subject.StudentProfile.UserId,
+                Content = $"You have been removed from the subject: {subject.SubjectCode}.",
+                Title = "Subject Removal Notification"
+            };
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException is SqlException sqlEx)
+            {
+                HandleMeetingSqlException(sqlEx);
+
+            }
+            throw;
+        }
+        catch (SqlException ex)
+        {
+            HandleMeetingSqlException(ex);
+            throw;
+
+        }
+    }
+
+
 
     public async Task<JoinedSubjectStakeholderNotification> ImportMultipleSubjectsAsync(ImportJoinedSubjectsForOneStudentRequest request, string accessToken)
     {
@@ -53,6 +89,7 @@ public class JoinedSubjectService
         ImportJoinedSubjectsRequest request,
         string accessToken)
     {
+        //TODO: Split the importing of each student
         try
         {
             var createdByUserName = _jWTService.GetUsernameFromToken(accessToken);
@@ -140,13 +177,14 @@ public class JoinedSubjectService
     }
 
 
-
     #region Private methods
 
     private void HandleMeetingSqlException(SqlException ex)
     {
         switch (ex.Number)
         {
+            #region Importing
+
             case 50013:
                 throw new InvalidOperationException("Import Exception, Import-Prerequisite not met");
             case 50015:
@@ -161,6 +199,13 @@ public class JoinedSubjectService
                 throw new InvalidOperationException("Import Exception, Invalid semester name, the semester name must be existed");
             case 50020:
                 throw new InvalidOperationException("Import Exception, Student must have not graduated");
+
+            #endregion
+
+            #region Deleting 
+            //TODO: Refine business logic clearly
+
+            #endregion
 
             case 547:
                 throw new InvalidOperationException("Invalid joined subject data. Ensure student profile(s) exist.");
@@ -196,6 +241,48 @@ public class JoinedSubjectService
             IsPassed = false,
             IsActive = true
         }).ToList();
+    }
+
+
+    #endregion
+
+
+    #region Response
+
+    public async Task<PagedResult<JoinedSubjectListItemResponse>> GetAllBySelfPagedAsync(PaginationRequest request, string accessToken)
+    {
+        var (joinedSubjects, totalCount) = await _joinedSubjectRepository.GetAllByStudentProfileIDPagedAsync(request.PageNumber, request.PageSize, _jWTService.GetProfileIdFromToken(accessToken));
+        return new PagedResult<JoinedSubjectListItemResponse>
+        {
+            Items = _mapper.Map<List<JoinedSubjectListItemResponse>>(joinedSubjects),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<JoinedSubjectListItemResponse>> GetAllBySelfLatestSemesterPagedAsync(PaginationRequest request, string accessToken)
+    {
+        var (joinedSubjects, totalCount) = await _joinedSubjectRepository.GetAllBySelfLatestSemesterPagedAsync(request.PageNumber, request.PageSize, _jWTService.GetProfileIdFromToken(accessToken));
+        return new PagedResult<JoinedSubjectListItemResponse>
+        {
+            Items = _mapper.Map<List<JoinedSubjectListItemResponse>>(joinedSubjects),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
+    }
+
+    public async Task<PagedResult<JoinedSubjectListItemResponse>> GetAllByStudentProfileIdPagedAsync(PaginationRequest request, long studentProfileId)
+    {
+        var (joinedSubjects, totalCount) = await _joinedSubjectRepository.GetAllByStudentProfileIDPagedAsync(request.PageNumber, request.PageSize, studentProfileId);
+        return new PagedResult<JoinedSubjectListItemResponse>
+        {
+            Items = _mapper.Map<List<JoinedSubjectListItemResponse>>(joinedSubjects),
+            TotalCount = totalCount,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        };
     }
 
 

@@ -15,10 +15,10 @@ public class JoinedSubject
     public string SubjectCode { get; set; }
     public string SubjectVersionCode { get; set; } 
     public string Name { get; set; } //Note: Subject Code + Subject Name + Unique number (none, 1, 2, ...) + SemesterName (within a Semester can not have more than one CourseName)
-    public int SemesterNumber { get; set; } //CN1, CN2, ...
     public string SemesterName { get; set; } // FALL2025, SPRING2025, ...
     public string CreatedByUserName { get; set; }
-    public bool IsPassed { get; set; } = false; //used as pass for FPTU Subject and Complete for External Course
+    public bool IsPassed { get; set; } = false;
+    public bool IsCompleted { get; set; } = false;
     public bool IsActive { get; set; } = true;// Case: Change Program~Curriculum, ChangeCombo ==> 
     // //TODO: TRIGGER to update after change of Program or Curriculum or Combo
     public int? Credits { get; set; }// TODO: Trigger to update after import

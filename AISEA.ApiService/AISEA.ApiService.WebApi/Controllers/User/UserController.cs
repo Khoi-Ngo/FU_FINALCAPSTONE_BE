@@ -317,6 +317,20 @@ public class UserController : BaseController
         return await NotifyAndResponseOkAsync("The avatar has been updated successfully");
     }
 
+    //TODO
+    ///<summary>
+    /// View all student by combo
+    /// </summary>
+
+    ///<summary>
+    /// View all student by curriculum
+    /// </summary>
+
+
+    ///<summary>
+    /// View all student by program chosen
+    /// </summary>
+
 
     /// <summary>
     /// Helper to notify success and return Ok async

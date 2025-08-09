@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.WebApi.HubUtil;
 using AISEA.ApiService.WebApi.BgJob;
+using AISEA.ApiService.WebApi.BgJob.BgTaskQueue;
 
 namespace AISEA.ApiService.WebApi;
 
@@ -163,6 +164,8 @@ public static class DependenciesInjection
         services.AddHostedService<StuMissedMeetingBgService>();
         services.AddHostedService<SemesterReferBgService>();
 
+        services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+        services.AddHostedService<QueuedHostedService>();
 
         return services;
     }

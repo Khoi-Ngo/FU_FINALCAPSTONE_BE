@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.CourseTracker;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -14,12 +15,83 @@ namespace AISEA.ApiService.WebApi.Controllers.CourseTracker;
 [Route("api/[controller]")]
 public class JoinedSubjectController : BaseController
 {
+
+    #region Init
+
     private readonly JoinedSubjectService _joinedSubjectService;
     private readonly NotificationHubNotifier _notifier;
     private readonly ILogger<JoinedSubjectController> _logger;
-    public JoinedSubjectController(EndpointSettings endpointSettings) : base(endpointSettings)
+    private readonly IBackgroundTaskQueue _taskQueue;
+
+    public JoinedSubjectController(EndpointSettings endpointSettings, JoinedSubjectService joinedSubjectService, NotificationHubNotifier notifier, ILogger<JoinedSubjectController> logger, IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
+        _joinedSubjectService = joinedSubjectService;
+        _notifier = notifier;
+        _logger = logger;
+        _taskQueue = taskQueue;
     }
+
+
+
+    #region private methods support notify
+
+    //Notify the conductor after request to an API
+    private async Task NotifyConductorAsync(string content = "The action has been completed", string title = "Successfully")
+    {
+        try
+        {
+            await _notifier.NotifyUserAsync(AccessToken, title, content);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying conductor");
+        }
+    }
+
+    // (1 stakeholder - 1 update - 1 notification || 1 stakeholder - N Updates - 1 same notification)
+    //Notify to the stakeholder after having request to an API
+    private async Task NotifyStakeHolderAsync(long stakeHolderUserId, string content, string title = "Update")
+    {
+        try
+        {
+            await _notifier.NotifyUserAsync(stakeHolderUserId, title, content);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying stakeholder");
+        }
+    }
+
+    // Notify multiple stakeholders efficiently
+    private async Task NotifyStakeHoldersAsync(List<JoinedSubjectStakeholderNotification> notifications)
+    {
+        try
+        {
+            if (notifications == null || notifications.Count == 0)
+                return;
+
+            var tasks = notifications.Select(n =>
+            {
+                var title = string.IsNullOrWhiteSpace(n.Title) ? "Notification" : n.Title;
+                var content = n.Content ?? string.Empty;
+
+                return _notifier.NotifyUserAsync(n.StakeholderUserId, title, content);
+            });
+
+            await Task.WhenAll(tasks); // Run all notifications in parallel
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while notifying stakeholders");
+        }
+    }
+
+
+
+    #endregion
+
+    #endregion
+
 
 
     ///<summary>
@@ -71,69 +143,73 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
     public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportJoinedSubjectsRequest request)
     {
-        // Assuming you have a service to handle the import logic
-        var res = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, AccessToken);
 
-        //notify for the conductor
-        await NotifyConductorAsync("The students have been imported successfully");
+        _taskQueue.QueueBackgroundWorkItem(async token =>
+        {
+            var res = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, AccessToken);
+            await NotifyConductorAsync("The students have been imported successfully");
+            await NotifyStakeHoldersAsync(res);
+        });
 
-        await NotifyStakeHoldersAsync(res);
 
         return Ok("Import successful");
     }
 
 
-
-
-
-    #region private methods support notify
-
-    //Notify the conductor after request to an API
-    private async Task NotifyConductorAsync(string content = "The action has been completed", string title = "Successfully")
+    ///<summary>
+    /// Delete a joined subject for a student
+    /// </summary>
+    [HttpDelete("{id}")]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
-        try {
-            await _notifier.NotifyUserAsync(AccessToken, title, content);
-        } catch (Exception e) {
-            _logger.LogError(e, "Error while notifying conductor");
-        }
-    }
+        // Assuming you have a service to handle the delete logic
+        var res = await _joinedSubjectService.DeleteSubjectAsync(id, AccessToken);
 
-    // (1 stakeholder - 1 update - 1 notification || 1 stakeholder - N Updates - 1 same notification)
-    //Notify to the stakeholder after having request to an API
-    private async Task NotifyStakeHolderAsync(long stakeHolderUserId, string content, string title = "Update")
-    {
-        try {
-            await _notifier.NotifyUserAsync(stakeHolderUserId, title, content);
-        } catch (Exception e) {
-            _logger.LogError(e, "Error while notifying stakeholder");
-        }
-    }
+        //notify for the conductor
+        await NotifyConductorAsync("The subject has been deleted successfully");
 
-    // Notify multiple stakeholders efficiently
-    private async Task NotifyStakeHoldersAsync(List<JoinedSubjectStakeholderNotification> notifications)
-    {
-        try
-        {
-            if (notifications == null || notifications.Count == 0)
-                return;
+        //notify for the student deleted
+        await NotifyStakeHolderAsync(res.StakeholderUserId, res.Content, res.Title);
 
-            var tasks = notifications.Select(n =>
-            {
-                var title = string.IsNullOrWhiteSpace(n.Title) ? "Notification" : n.Title;
-                var content = n.Content ?? string.Empty;
-
-                return _notifier.NotifyUserAsync(n.StakeholderUserId, title, content);
-            });
-
-            await Task.WhenAll(tasks); // Run all notifications in parallel
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error while notifying stakeholders");
-        }
+        return Ok("Delete successful");
     }
 
 
+    ///<summary>
+    /// The student view all data by him self
+    /// </summary>
+    [HttpGet("self")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllBySelfPaged([FromQuery] PaginationRequest request)
+    {
+        var res = await _joinedSubjectService.GetAllBySelfPagedAsync(request, AccessToken);
+        return Ok(res);
+    }
 
-    #endregion
+
+    ///<summary>
+    /// The student view all data by him self AND By the Latest Semester
+    /// </summary>
+    [HttpGet("self/latest-semester")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    public async Task<IActionResult> GetAllBySelfLatestSemesterPaged([FromQuery] PaginationRequest request)
+    {
+        var res = await _joinedSubjectService.GetAllBySelfLatestSemesterPagedAsync(request, AccessToken);
+        return Ok(res);
+    }
+
+
+    ///<summary>
+    /// The ACADEMIC_STAFF || MANAGER | ADMIN View all by  student profile id 
+    /// </summary>
+    [HttpGet("{studentProfileId}/all")]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.MANAGER, (int)EUserRole.ADMIN)]
+    public async Task<IActionResult> GetAllByStudentProfileIdPaged([FromQuery] PaginationRequest request, long studentProfileId)
+    {
+        var res = await _joinedSubjectService.GetAllByStudentProfileIdPagedAsync(request, studentProfileId);
+        return Ok(res);
+    }
+
+
 }

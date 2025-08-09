@@ -25,36 +25,6 @@ public class ProfileController : BaseController
         _logger = logger;
     }
 
-    #region Student Profile
-
-    /// <summary>
-    /// Create student profile with existed user in the system
-    /// </summary>
-    [HttpPost("student")]
-    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
-    {
-        await _studentProfileService.CreateAsync(request, AccessToken);
-        return await NotifyAndResponseOkAsync("Student profile created successfully.");
-    }
-
-    #endregion
-
-    #region Staff Profile
-
-    /// <summary>
-    /// Create staff profile with existed user in the system
-    /// </summary>
-    [HttpPost("staff")]
-    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADVISOR, (int)EUserRole.MANAGER)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
-    {
-        await _staffProfileService.CreateAsync(request, AccessToken);
-        return await NotifyAndResponseOkAsync("Staff profile created successfully.");
-    }
-
-
-    #endregion
 
     /// <summary>
     /// Helper to notify and return a success response
@@ -71,4 +41,30 @@ public class ProfileController : BaseController
         }
         return Ok(new { Message = message });
     }
+
+    /// <summary>
+    /// Create student profile with existed user in the system
+    /// </summary>
+    [HttpPost("student")]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
+    public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
+    {
+        await _studentProfileService.CreateAsync(request, AccessToken);
+        return await NotifyAndResponseOkAsync("Student profile created successfully.");
+    }
+
+
+
+    /// <summary>
+    /// Create staff profile with existed user in the system
+    /// </summary>
+    [HttpPost("staff")]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADVISOR, (int)EUserRole.MANAGER)]
+    public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
+    {
+        await _staffProfileService.CreateAsync(request, AccessToken);
+        return await NotifyAndResponseOkAsync("Staff profile created successfully.");
+    }
+
+
 }

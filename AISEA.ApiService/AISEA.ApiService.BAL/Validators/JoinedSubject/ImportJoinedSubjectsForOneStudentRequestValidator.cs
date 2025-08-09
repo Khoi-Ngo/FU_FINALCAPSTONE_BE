@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AISEA.ApiService.BAL.Validators.JoinedSubject
 {
-    public class ImportJoinedSubjectsForOneStudentRequestValidator 
+    public class ImportJoinedSubjectsForOneStudentRequestValidator
         : AbstractValidator<ImportJoinedSubjectsForOneStudentRequest>
     {
         public ImportJoinedSubjectsForOneStudentRequestValidator()
@@ -24,7 +24,7 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
     }
 
     // Validator for each subject item
-    public class ImportJoinedSubjectsForOneStudent_DataValidator 
+    public class ImportJoinedSubjectsForOneStudent_DataValidator
         : AbstractValidator<ImportJoinedSubjects_Data>
     {
         public ImportJoinedSubjectsForOneStudent_DataValidator()
@@ -37,11 +37,16 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
             RuleFor(x => x.SubjectVersionCode)
                 .NotEmpty().WithMessage("SubjectVersionCode is required.");
 
-            // SemesterName with same format rule as SingleImportJoinedSubjectRequest
-            RuleFor(x => x.SemesterName)
-                .NotEmpty().WithMessage("SemesterName is required.")
-                .Must(BeValidSemesterNameFormat)
-                .WithMessage("SemesterName must be in format 'SpringYYYY', 'SummerYYYY', or 'FallYYYY'.");
+            // SemesterId must be positive
+            RuleFor(x => x.SemesterId)
+                .GreaterThan(0).WithMessage("SemesterId must be a positive number.");
+
+            // SubjectName
+            RuleFor(x => x.SubjectName)
+                .NotEmpty().WithMessage("SubjectName is required.");
+            //Semester Study Block Type
+            RuleFor(x => x.SemesterStudyBlockType)
+            .IsInEnum().WithMessage("SemesterStudyBlockType must be a valid enum value.");
         }
 
         private bool BeValidSemesterNameFormat(string semesterName)

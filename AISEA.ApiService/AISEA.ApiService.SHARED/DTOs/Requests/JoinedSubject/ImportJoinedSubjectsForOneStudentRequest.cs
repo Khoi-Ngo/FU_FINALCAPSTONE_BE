@@ -1,3 +1,5 @@
+using AISEA.ApiService.SHARED.Const.Enums;
+
 namespace AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
 
 public class ImportJoinedSubjectsForOneStudentRequest
@@ -10,7 +12,10 @@ public class ImportJoinedSubjects_Data
 {
     public string SubjectCode { get; set; }
     public string SubjectVersionCode { get; set; }
-    public string SemesterName { get; set; }
+    public long SemesterId { get; set; }
+    public string SubjectName { get; set; }
+    public ESemesterStudyBlockType SemesterStudyBlockType { get; set; }
+
 
     public override bool Equals(object obj)
     {
@@ -18,7 +23,7 @@ public class ImportJoinedSubjects_Data
         {
             return string.Equals(SubjectCode, other.SubjectCode, StringComparison.OrdinalIgnoreCase)
                 && string.Equals(SubjectVersionCode, other.SubjectVersionCode, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(SemesterName, other.SemesterName, StringComparison.OrdinalIgnoreCase);
+                && SemesterId == other.SemesterId;
         }
         return false;
     }
@@ -28,7 +33,7 @@ public class ImportJoinedSubjects_Data
         return HashCode.Combine(
             SubjectCode?.ToLowerInvariant(),
             SubjectVersionCode?.ToLowerInvariant(),
-            SemesterName?.ToLowerInvariant()
+            SemesterId
         );
     }
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.DAL.Entities;
 
@@ -13,10 +14,11 @@ public class JoinedSubject
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public string? GithubRepositoryURL { get; set; }
     public string SubjectCode { get; set; }
-    public string SubjectVersionCode { get; set; } 
+    public string SubjectVersionCode { get; set; }
+    public string SubjectName { get; set; }
     public string Name { get; set; } //Note: Subject Code + Subject Name + Unique number (none, 1, 2, ...) + SemesterName (within a Semester can not have more than one CourseName)
-    public string SemesterName { get; set; } // FALL2025, SPRING2025, ...
     public string CreatedByUserName { get; set; }
+    public ESemesterStudyBlockType SemesterStudyBlockType { get; set; }
     public bool IsPassed { get; set; } = false;
     public bool IsCompleted { get; set; } = false;
     public bool IsActive { get; set; } = true;// Case: Change Program~Curriculum, ChangeCombo ==> 

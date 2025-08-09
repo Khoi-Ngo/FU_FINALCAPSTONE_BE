@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250809104823_addSubjectNametoJoinedSubject")]
+    partial class addSubjectNametoJoinedSubject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -438,8 +441,9 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<long>("SemesterId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("SemesterStudyBlockType")
-                        .HasColumnType("int");
+                    b.Property<string>("SemesterName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("StudentProfileId")
                         .HasColumnType("bigint");
@@ -461,9 +465,9 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     b.HasIndex("SemesterId");
 
-                    b.HasIndex("StudentProfileId", "Name", "SemesterId")
+                    b.HasIndex("StudentProfileId", "Name")
                         .IsUnique()
-                        .HasDatabaseName("IX_JoinedSubject_StudentProfileId_Name_SemesterId_Unique");
+                        .HasDatabaseName("IX_JoinedSubject_StudentProfileId_Name_Unique");
 
                     b.ToTable("JoinedSubject");
                 });

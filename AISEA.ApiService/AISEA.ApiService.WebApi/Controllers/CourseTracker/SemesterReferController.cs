@@ -28,4 +28,35 @@ public class SemesterReferController : BaseController
         var result = await _semesterReferService.GetAllAsyncPaged(request);
         return Ok(result);
     }
+
+    ///<summary>
+    /// Get All Block Types
+    /// </summary>
+    [HttpGet("block-types")]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    public async Task<IActionResult> GetAllBlockTypesAsync([FromQuery] PaginationRequest request)
+    {
+        var allBlockTypes = Enum.GetValues(typeof(ESemesterStudyBlockType))
+            .Cast<ESemesterStudyBlockType>()
+            .Select(bt => new
+            {
+                Id = (int)bt,
+                Name = bt.ToString()
+            })
+            .ToList();
+
+        var pagedData = allBlockTypes
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
+        var result = new
+        {
+            Data = pagedData,
+            TotalCount = allBlockTypes.Count
+        };
+
+        return Ok(result);
+    }
+
 }

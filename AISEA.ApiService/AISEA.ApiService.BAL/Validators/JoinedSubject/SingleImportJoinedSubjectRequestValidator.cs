@@ -15,7 +15,7 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
     //// SubjectCode && VersionCode must be associated with the ComboName and CurriculumCode and ProgramCode of student (Trigger)
     //// The student must not be graduated (Trigger)
     //// The account of student must be active (Auto fail when query to get needed data before inserting)
-  
+
     public class SingleImportJoinedSubjectRequestValidator : AbstractValidator<SingleImportJoinedSubjectRequest>
     {
         private static readonly string[] ValidSemesterPrefixes = { "Spring", "Summer", "Fall" };
@@ -34,10 +34,16 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
             RuleFor(x => x.SubjectVersionCode)
                 .NotEmpty().WithMessage("SubjectVersionCode is required.");
 
-            // SemesterName must match format (e.g., Spring2025)
-            RuleFor(x => x.SemesterName)
-                .NotEmpty().WithMessage("SemesterName is required.")
-                .Must(BeValidSemesterNameFormat).WithMessage("SemesterName must be in format 'SpringYYYY', 'SummerYYYY', or 'FallYYYY'.");
+            // SemesterId must be positive
+            RuleFor(x => x.SemesterId)
+                .GreaterThan(0).WithMessage("SemesterId must be a positive number.");
+
+            // SubjectName
+            RuleFor(x => x.SubjectName)
+                .NotEmpty().WithMessage("SubjectName is required.");
+            //Semester Study Block Type
+            RuleFor(x => x.SemesterStudyBlockType)
+            .IsInEnum().WithMessage("SemesterStudyBlockType must be a valid enum value.");
         }
 
         private bool BeValidSemesterNameFormat(string semesterName)
@@ -51,7 +57,7 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
             if (!match.Success)
                 return false;
 
-           
+
             var yearStr = match.Groups[2].Value;
             if (int.TryParse(yearStr, out int year))
             {

@@ -18,6 +18,14 @@ public class JoinedSubjectService
     private readonly IMapper _mapper;
     private readonly IJWTService _jWTService;
 
+    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService)
+    {
+        _userRepository = userRepository;
+        _joinedSubjectRepository = joinedSubjectRepository;
+        _mapper = mapper;
+        _jWTService = jWTService;
+    }
+
     public async Task<JoinedSubjectStakeholderNotification> DeleteSubjectAsync(long id, string accessToken)
     {
         try
@@ -199,7 +207,8 @@ public class JoinedSubjectService
                 throw new InvalidOperationException("Import Exception, Invalid semester name, the semester name must be existed");
             case 50020:
                 throw new InvalidOperationException("Import Exception, Student must have not graduated");
-
+            case 50021:
+                throw new InvalidOperationException("Invalid subject name");
             #endregion
 
             #region Deleting 
@@ -217,11 +226,11 @@ public class JoinedSubjectService
 
     private JoinedSubject MapToJoinedSubject(SingleImportJoinedSubjectRequest request, long studentProfileId, string createdByUserName)
     {
-        return _mapper.Map<JoinedSubject>(request, opts =>
-        {
-            opts.Items["StudentProfileId"] = studentProfileId.ToString();
-            opts.Items["CreatedByUserName"] = createdByUserName;
-        });
+        var joinedSubject = _mapper.Map<JoinedSubject>(request);
+        joinedSubject.StudentProfileId = studentProfileId;
+        joinedSubject.CreatedByUserName = createdByUserName;
+        joinedSubject.Name = $"{request.SubjectCode} ({request.SemesterStudyBlockType.ToString()})  {request.SubjectName}";
+        return joinedSubject;
     }
 
     private List<JoinedSubject> MapToJoinedSubjects(
@@ -234,9 +243,9 @@ public class JoinedSubjectService
         {
             SubjectCode = subject.SubjectCode,
             SubjectVersionCode = subject.SubjectVersionCode,
-            SemesterName = subject.SemesterName,
             StudentProfileId = studentProfileId,
             CreatedByUserName = createdByUserName,
+            Name = $"{subject.SubjectCode} ({subject.SemesterStudyBlockType.ToString()})  {subject.SubjectName}",
             CreatedAt = DateTime.Now,
             IsPassed = false,
             IsActive = true

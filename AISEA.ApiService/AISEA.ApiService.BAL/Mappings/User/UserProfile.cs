@@ -24,6 +24,7 @@ namespace AISEA.ApiService.BAL.Mappings.User
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name));
 
             #region User with Profile View Detail
+            // Mapping for GetStudentDetailResponse
             CreateMap<DAL.Entities.User, GetStudentDetailResponse>()
                             .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name))
                             .ForMember(dest => dest.StudentDataDetailResponse, opt => opt.MapFrom(src => src.StudentProfile));
@@ -39,7 +40,7 @@ namespace AISEA.ApiService.BAL.Mappings.User
             #endregion
 
 
-            #region ProfileController
+            #region Create User With Profile
             // Map StudentProfileData to StudentProfile
             CreateMap<StudentProfileData, StudentProfile>();
 

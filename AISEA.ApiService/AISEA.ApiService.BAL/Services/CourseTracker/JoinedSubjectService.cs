@@ -229,7 +229,7 @@ public class JoinedSubjectService
         var joinedSubject = _mapper.Map<JoinedSubject>(request);
         joinedSubject.StudentProfileId = studentProfileId;
         joinedSubject.CreatedByUserName = createdByUserName;
-        joinedSubject.Name = $"{request.SubjectCode} ({request.SemesterStudyBlockType.ToString()})  {request.SubjectName}";
+        // joinedSubject.Name = $"{request.SubjectCode} ({request.SemesterStudyBlockType.ToString()})  {request.SubjectName}";
         return joinedSubject;
     }
 
@@ -245,7 +245,7 @@ public class JoinedSubjectService
             SubjectVersionCode = subject.SubjectVersionCode,
             StudentProfileId = studentProfileId,
             CreatedByUserName = createdByUserName,
-            Name = $"{subject.SubjectCode} ({subject.SemesterStudyBlockType.ToString()})  {subject.SubjectName}",
+            // Name = $"{subject.SubjectCode} ({subject.SemesterStudyBlockType.ToString()})  {subject.SubjectName}",
             CreatedAt = DateTime.Now,
             IsPassed = false,
             IsActive = true

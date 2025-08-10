@@ -17,8 +17,12 @@ public class CreateUserRequest
 }
 public class StudentProfileData
 {
+    public bool DoGraduate { get; set; } = false;
     public DateTimeOffset EnrolledAt { get; set; }
     public string? CareerGoal { get; set; }
+    public required long ProgramId { get; set; }
+    public string RegisteredComboCode { get; set; }
+    public required string CurriculumCode { get; set; }
 
 }
 public class StaffProfileData

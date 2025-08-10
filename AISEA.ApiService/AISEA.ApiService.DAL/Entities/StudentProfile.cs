@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AISEA.ApiService.DAL.Entities;
-//TODO: Recheck the DTO response for this Entity
 [Table("StudentProfile")]
 public partial class StudentProfile
 {

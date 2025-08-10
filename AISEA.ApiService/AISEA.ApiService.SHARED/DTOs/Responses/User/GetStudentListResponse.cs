@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.User;
@@ -28,5 +24,8 @@ public class StudentDataListResponse
     public bool DoGraduate { get; set; }
     public string? CareerGoal { get; set; }
     public int NumberOfBan { get; set; }
+    public long ProgramId { get; set; }
+    public string RegisteredComboCode { get; set; }
+    public string CurriculumCode { get; set; }
 
 }

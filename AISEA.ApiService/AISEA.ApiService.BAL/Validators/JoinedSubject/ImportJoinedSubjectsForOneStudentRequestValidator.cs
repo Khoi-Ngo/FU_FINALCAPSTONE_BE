@@ -41,9 +41,6 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
             RuleFor(x => x.SemesterId)
                 .GreaterThan(0).WithMessage("SemesterId must be a positive number.");
 
-            // SubjectName
-            RuleFor(x => x.SubjectName)
-                .NotEmpty().WithMessage("SubjectName is required.");
             //Semester Study Block Type
             RuleFor(x => x.SemesterStudyBlockType)
             .IsInEnum().WithMessage("SemesterStudyBlockType must be a valid enum value.");

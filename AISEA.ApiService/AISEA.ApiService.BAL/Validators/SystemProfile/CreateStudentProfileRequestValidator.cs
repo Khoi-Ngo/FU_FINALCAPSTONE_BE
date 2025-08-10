@@ -16,6 +16,11 @@ namespace AISEA.ApiService.BAL.Validators.SystemProfile
             RuleFor(x => x.CareerGoal)
                 .MaximumLength(1000).WithMessage("CareerGoal must be less than 1000 characters.")
                 .When(x => !string.IsNullOrWhiteSpace(x.CareerGoal));
+
+            RuleFor(x => x.ProgramId)
+                .GreaterThan(0).WithMessage("ProgramId must be greater than 0.");
+            RuleFor(x => x.CurriculumCode)
+                .NotEmpty().WithMessage("CurriculumCode is required.");
         }
     }
 }

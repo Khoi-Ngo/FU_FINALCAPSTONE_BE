@@ -22,6 +22,9 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.User
         public bool DoGraduate { get; set; }
         public string? CareerGoal { get; set; }
         public int NumberOfBan { get; set; }
+        public long ProgramId { get; set; }
+        public string RegisteredComboCode { get; set; }
+        public string CurriculumCode { get; set; }
 
     }
 

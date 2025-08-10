@@ -16,7 +16,7 @@ public class JoinedSubject
     public string SubjectCode { get; set; }
     public string SubjectVersionCode { get; set; }
     public string SubjectName { get; set; }
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public string CreatedByUserName { get; set; }
     public ESemesterStudyBlockType SemesterStudyBlockType { get; set; }
     public bool IsPassed { get; set; } = false;

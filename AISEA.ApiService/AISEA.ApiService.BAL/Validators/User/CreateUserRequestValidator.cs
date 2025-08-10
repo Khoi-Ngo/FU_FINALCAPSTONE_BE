@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using FluentValidation;
 
@@ -63,6 +59,11 @@ namespace AISEA.ApiService.BAL.Validators.User
             RuleFor(x => x.StudentProfileData.CareerGoal)
                 .MaximumLength(1000).WithMessage("CareerGoal must be less than 1000 characters.")
                 .When(x => !string.IsNullOrWhiteSpace(x.StudentProfileData.CareerGoal));
+                
+            RuleFor(x => x.StudentProfileData.ProgramId)
+                    .GreaterThan(0).WithMessage("ProgramId must be greater than 0.");
+            RuleFor(x => x.StudentProfileData.CurriculumCode)
+                .NotEmpty().WithMessage("CurriculumCode is required.");
         });
 
             When(x => x.StaffProfileData is not null, () =>

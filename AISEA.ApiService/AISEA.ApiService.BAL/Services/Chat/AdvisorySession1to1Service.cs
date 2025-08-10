@@ -253,7 +253,8 @@ public class AdvisorySession1to1Service
         object? personelCourseTrackData = null)
     {
 
-        ///TODO:Existed messages in the same session
+        ///TODO:Prompt Construct NOTEs
+        /// Existed messages in the same session
         /// HAVE TO FILL ALL DATA VIA REDIS/RDB LATER, The FLM data should be queried by personal meaning that no need to query all
 
         var studentJson = studentJsonData != null ? JsonSerializer.Serialize(studentJsonData) : "{}";

@@ -24,7 +24,7 @@ public class ProfileController : BaseController
         _notifier = notifier;
         _logger = logger;
     }
-    //TODO: CRUD Combo or Program or Curriculum
+    //TODO: CRUD Combo or Program or Curriculum -> Need Worker Trigger to change data in JoinedSubject table
 
 
     /// <summary>

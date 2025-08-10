@@ -198,26 +198,27 @@ public class JoinedSubjectService
             case 50015:
                 throw new InvalidOperationException("Import Exception, Invalid subject code");
             case 50016:
-                throw new InvalidOperationException("Import Exception, Invalid subject version code");
+                throw new InvalidOperationException("Import Exception, Invalid subject version code of subject code");
             case 50017:
-                throw new InvalidOperationException("Import Exception, Invalid combo code");
+                throw new InvalidOperationException("Import Exception, Invalid combo code of student");
             case 50018:
-                throw new InvalidOperationException("Import Exception, Invalid curriculum code");
-            case 50019:
-                throw new InvalidOperationException("Import Exception, Invalid semester name, the semester name must be existed");
+                throw new InvalidOperationException("Import Exception, Invalid curriculum code of student");
             case 50020:
                 throw new InvalidOperationException("Import Exception, Student must have not graduated");
-            case 50021:
-                throw new InvalidOperationException("Invalid subject name");
+
             #endregion
 
             #region Deleting 
-            //TODO: Define business logic clearly
+
+            case 50022:
+                throw new InvalidOperationException("Delete Exception, Conflict Prerequisite");
+            case 50023:
+                throw new InvalidOperationException("Delete Exception, The subject(s) having marks already");
 
             #endregion
 
             case 547:
-                throw new InvalidOperationException("Invalid joined subject data. Ensure student profile(s) exist.");
+                throw new InvalidOperationException("Invalid joined subject data. Please check Profile Data and Semester Data.");
 
         }
         throw ex;

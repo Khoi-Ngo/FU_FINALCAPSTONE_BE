@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.User
@@ -21,6 +17,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.User
     }
     public class StudentDataDetailResponse
     {
+        public long Id { get; set; }
         public DateTimeOffset EnrolledAt { get; set; }
         public bool DoGraduate { get; set; }
         public string? CareerGoal { get; set; }
@@ -43,6 +40,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.User
     }
     public class StaffDataDetailResponse
     {
+        public long Id { get; set; }
         public string Campus { get; set; }
         public string Position { get; set; }
         public string Department { get; set; }

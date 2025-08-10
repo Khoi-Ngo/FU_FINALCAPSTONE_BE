@@ -458,21 +458,21 @@ public class BookedMeetingService
         switch (ex.Number)
         {
             case 50006:
-                throw new InvalidOperationException("Student has reached the maximum number of bans . Cannot book meeting.");
+                throw new InvalidOperationException("Student has reached the maximum number of bans . Cannot book meeting." + ex.Message);
             case 50007:
-                throw new InvalidOperationException("The meeting time conflicts with staff's leave schedule.");
+                throw new InvalidOperationException("The meeting time conflicts with staff's leave schedule." + ex.Message);
             case 50008:
-                throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability.");
+                throw new InvalidOperationException("The meeting time does not exactly match staff's booking availability." + ex.Message);
             case 50009:
-                throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot.");
+                throw new InvalidOperationException("The staff already has an active meeting scheduled in the same time slot." + ex.Message);
             case 50010:
-                throw new InvalidOperationException("The student already has an active meeting scheduled in the same time slot.");
+                throw new InvalidOperationException("The student already has an active meeting scheduled in the same time slot." + ex.Message);
             case 50011:
-                throw new InvalidOperationException("The student has reached maximum pending meeting");
+                throw new InvalidOperationException("The student has reached maximum pending meeting" + ex.Message);
             case 50012:
-                throw new InvalidOperationException("The student has reached maximum canceled per 15 days");
+                throw new InvalidOperationException("The student has reached maximum canceled per 15 days" + ex.Message);
             case 547:
-                throw new InvalidOperationException("Invalid meeting data. Ensure staff and student profiles exist.");
+                throw new InvalidOperationException("Invalid meeting data. Ensure staff and student profiles exist." + ex.Message);
 
         }
         throw ex;

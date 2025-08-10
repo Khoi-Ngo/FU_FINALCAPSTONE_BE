@@ -228,17 +228,17 @@ public class LeaveScheduleService
         {
             case 2601: // Unique index violation
             case 2627: // Unique constraint violation
-                throw new LeaveScheduleDuplicateEx("A leave schedule with the same start time, end time, and staff profile already exists.");
+                throw new LeaveScheduleDuplicateEx("A leave schedule with the same start time, end time, and staff profile already exists." + ex.Message);
             case 50003: // Overlap
-                throw new LeaveScheduleOverlapEx("The leave schedule overlaps with an existing leave schedule for the same staff.");
+                throw new LeaveScheduleOverlapEx("The leave schedule overlaps with an existing leave schedule for the same staff." + ex.Message);
             case 50004: // No matching booking availability
-                throw new NoMatchingBookingAvailabilityEx("No matching booking availability found for the specified staff and time range.");
+                throw new NoMatchingBookingAvailabilityEx("No matching booking availability found for the specified staff and time range." + ex.Message);
             case 50005: // Existing Active meetings
-                throw new LeaveScheduleConflictWithMeetingsEx("Cannot register leave due to existing Active meetings. Cancel/Disapprove those meetings first.");
+                throw new LeaveScheduleConflictWithMeetingsEx("Cannot register leave due to existing Active meetings. Cancel/Disapprove those meetings first." + ex.Message);
             case 547:
-                throw new InvalidOperationException("Invalid leave schedule data. Ensure staff profile exists.");
+                throw new InvalidOperationException("Invalid leave schedule data. Ensure staff profile exists." + ex.Message);
             default:
-                throw new InvalidOperationException("An error occurred while processing the leave schedule.", ex);
+                throw new InvalidOperationException("An error occurred while processing the leave schedule." + ex.Message);
         }
     }
 

@@ -226,9 +226,9 @@ public class BookingAvailabilityService
     private void HandleSqlException(SqlException ex)
     {
         if (ex.Number == 50001) // Trigger error for overlap
-            throw new BookingAvaiOverlapEx("The time slot overlaps with an existing slot for the same staff and day.");
+            throw new BookingAvaiOverlapEx("The time slot overlaps with an existing slot for the same staff and day." + ex.Message);
         if (ex.Number == 2601 || ex.Number == 2627) // Unique constraint violation
-            throw new BookingAvaiDuplicateEx("A time slot with the same start time, end time, day, and staff already exists.");
+            throw new BookingAvaiDuplicateEx("A time slot with the same start time, end time, day, and staff already exists." + ex.Message);
     }
 
     #endregion

@@ -165,7 +165,14 @@ public static class DependenciesInjection
         services.AddHostedService<SemesterReferBgService>();
 
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-        services.AddHostedService<QueuedHostedService>();
+        
+        services.AddHostedService(provider =>
+            new QueuedHostedService(
+                provider.GetRequiredService<IBackgroundTaskQueue>(),
+                provider.GetRequiredService<IServiceProvider>())
+        );
+
+
 
         return services;
     }

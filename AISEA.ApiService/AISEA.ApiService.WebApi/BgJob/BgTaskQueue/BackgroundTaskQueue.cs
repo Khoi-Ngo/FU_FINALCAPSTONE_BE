@@ -2,30 +2,27 @@ using System.Threading.Channels;
 
 public interface IBackgroundTaskQueue
 {
-    void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem);
-    Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken);
+    void QueueBackgroundWorkItem(Func<IServiceProvider, CancellationToken, Task> workItem);
+    Task<Func<IServiceProvider, CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken);
 }
 
 public class BackgroundTaskQueue : IBackgroundTaskQueue
 {
-    private readonly Channel<Func<CancellationToken, Task>> _queue;
+    private readonly Channel<Func<IServiceProvider, CancellationToken, Task>> _queue;
 
-    public BackgroundTaskQueue()
+    public BackgroundTaskQueue(int capacity = 100)
     {
-        _queue = Channel.CreateUnbounded<Func<CancellationToken, Task>>();
+        _queue = Channel.CreateBounded<Func<IServiceProvider, CancellationToken, Task>>(capacity);
     }
 
-    public void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem)
+    public void QueueBackgroundWorkItem(Func<IServiceProvider, CancellationToken, Task> workItem)
     {
-        if (workItem == null)
-            throw new ArgumentNullException(nameof(workItem));
-
+        if (workItem == null) throw new ArgumentNullException(nameof(workItem));
         _queue.Writer.TryWrite(workItem);
     }
 
-    public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
+    public async Task<Func<IServiceProvider, CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
     {
-        var workItem = await _queue.Reader.ReadAsync(cancellationToken);
-        return workItem;
+        return await _queue.Reader.ReadAsync(cancellationToken);
     }
 }

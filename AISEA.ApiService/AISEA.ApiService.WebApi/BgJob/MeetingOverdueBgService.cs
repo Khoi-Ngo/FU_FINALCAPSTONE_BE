@@ -1,5 +1,6 @@
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.HubUtil;
 
@@ -41,8 +42,8 @@ public class MeetingOverdueBgService : BackgroundService
 
                     // Batch notifications to reduce SignalR overhead
                     var notificationTasks = new List<Task>();
-                    var studentNotifications = new List<(long UserId, string Title, string Content)>();
-                    var staffNotifications = new List<(long UserId, string Title, string Content)>();
+                    var studentNotifications = new List<(long UserId, NotificationDTO Notification)>();
+                    var staffNotifications = new List<(long UserId, NotificationDTO Notification)>();
 
                     foreach (var meeting in overdueMeetings)
                     {
@@ -51,16 +52,22 @@ public class MeetingOverdueBgService : BackgroundService
                             // Prepare student notification
                             studentNotifications.Add((
                                 meeting.StudentUserId,
-                                "Meeting Overdue",
-                                $"The meeting starting at {meeting.StartDateTime:yyyy-MM-dd HH:mm} is now overdue."
-                            ));
+                                new NotificationDTO
+                                {
+                                    Title = "Meeting Overdue",
+                                    Content = $"The meeting starting at {meeting.StartDateTime:yyyy-MM-dd HH:mm} is now overdue."
+                                }
+                                ));
 
-                            // Prepare staff notification
+
                             staffNotifications.Add((
                                 meeting.StaffUserId,
-                                "Alert: Meeting Overdue",
-                                $"The meeting starting at {meeting.StartDateTime:yyyy-MM-dd HH:mm} is now overdue. Please provide a reason."
-                            ));
+                                new NotificationDTO
+                                {
+                                    Title = "Alert: Meeting Overdue",
+                                    Content = $"The meeting starting at {meeting.StartDateTime:yyyy-MM-dd HH:mm} is now overdue. Please provide a reason."
+                                }
+                                ));
                         }
                         catch (Exception ex)
                         {

@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -17,17 +18,14 @@ public class LeaveScheController : BaseController
 {
     private readonly LeaveScheduleService _leaveScheduleService;
     private readonly NotificationHubNotifier _notifier;
-    private readonly ILogger<LeaveScheController> _logger;
 
     public LeaveScheController(
         LeaveScheduleService leaveScheduleService,
         NotificationHubNotifier notifier,
-        EndpointSettings endpointSettings,
-        ILogger<LeaveScheController> logger) : base(endpointSettings)
+        EndpointSettings endpointSettings) : base(endpointSettings)
     {
         _leaveScheduleService = leaveScheduleService;
         _notifier = notifier;
-        _logger = logger;
     }
 
     #region Command action
@@ -39,7 +37,9 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
         await _leaveScheduleService.CreateAsync(request, AccessToken);
-        return await NotifyAndResponseOkAsync("Leaving Schedule has been created successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully." });
+        return Ok("Leaving Schedule has been created successfully.");
+
 
     }
 
@@ -48,7 +48,8 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
     {
         await _leaveScheduleService.CreateBulkAsync(requests, AccessToken);
-        return await NotifyAndResponseOkAsync("Leaving Schedule has been created successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully" });
+        return Ok("Leaving Schedule has been created successfully!");
 
     }
 
@@ -60,7 +61,8 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
         await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
-        return await NotifyAndResponseOkAsync("Leaving Schedule has been updated successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been updated successfully" });
+        return Ok("Leaving Schedule has been updated successfully!");
     }
 
     /// <summary>
@@ -71,7 +73,8 @@ public class LeaveScheController : BaseController
     public async Task<IActionResult> DeleteAsync(long id)
     {
         await _leaveScheduleService.DeleteAsync(id, AccessToken);
-        return await NotifyAndResponseOkAsync("Leave Schedule has been deleted.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leave Schedule has been deleted" });
+        return Ok("Leave Schedule has been deleted!");
 
     }
 
@@ -158,20 +161,6 @@ public class LeaveScheController : BaseController
 
     #endregion
 
-
-    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
-    {
-        try
-        {
-            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
-
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error notifying user about leave schedule update");
-        }
-        return Ok(new { message });
-    }
 
 
 }

@@ -1,5 +1,6 @@
 using AISEA.ApiService.BAL.Services.User;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.Filters;
@@ -16,14 +17,12 @@ public class UserController : BaseController
 {
     private readonly UserService _userService;
     private readonly NotificationHubNotifier _notifier;
-    private readonly ILogger<UserController> _logger;
     public UserController(EndpointSettings endpointSettings
     , UserService userService
-    , NotificationHubNotifier notificationHubNotifier, ILogger<UserController> logger) : base(endpointSettings)
+    , NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
     {
         _userService = userService;
         _notifier = notificationHubNotifier;
-        _logger = logger;
     }
 
     /// <summary>
@@ -74,7 +73,10 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
         await _userService.UpdateUserAsync(id, request, AccessToken);
-        return await NotifyAndResponseOkAsync("Update user successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+        new NotificationDTO { Title = "Successfully", Content = "Update user successfully" });
+        return Ok("Update user successfully");
 
     }
 
@@ -85,7 +87,10 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
     {
         await _userService.UpdateUserAsync(id, request, AccessToken);
-        return await NotifyAndResponseOkAsync("Update user successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+        new NotificationDTO { Title = "Successfully", Content = "Update user successfully" });
+        return Ok("Update user successfully");
 
     }
 
@@ -98,7 +103,10 @@ public class UserController : BaseController
     public async Task<IActionResult> DisableUser(long id)
     {
         await _userService.DisableUserAsync(id);
-        return await NotifyAndResponseOkAsync("Disable user successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+        new NotificationDTO { Title = "Successfully", Content = "Disable user successfully" });
+        return Ok("Disable user successfully");
 
     }
     /// <summary>
@@ -211,7 +219,11 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
         await _userService.CreateUserAsync(request);
-        return await NotifyAndResponseOkAsync("New user is created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+                new NotificationDTO { Title = "Successfully", Content = "New user is created successfully" });
+        return Ok("New user is created successfully");
+
     }
 
     /// <summary>
@@ -223,7 +235,10 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)
     {
         await _userService.CreateUsersAsync(requests);
-        return await NotifyAndResponseOkAsync("New users are bulk created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "New users are bulk created successfully" });
+        return Ok("New users are bulk created successfully");
     }
 
     #region Bulk Create Users By Role
@@ -236,7 +251,10 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateStudents([FromBody] List<BulkCreateStudentRequest> requests)
     {
         await _userService.CreateUsersAsync(requests);
-        return await NotifyAndResponseOkAsync("New students are bulk created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "New students are bulk created successfully" });
+        return Ok("New students are bulk created successfully");
     }
 
     /// <summary>
@@ -247,7 +265,10 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateAdvisors([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.ADVISOR);
-        return await NotifyAndResponseOkAsync("New advisors are bulk created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "New advisors are bulk created successfully" });
+        return Ok("New advisors are bulk created successfully");
     }
 
     /// <summary>
@@ -258,7 +279,10 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateAcademicStaffs([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.ACADEMIC_STAFF);
-        return await NotifyAndResponseOkAsync("New academic staffs are bulk created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "New academic staffs are bulk created successfully" });
+        return Ok("New academic staffs are bulk created successfully");
     }
 
     /// <summary>
@@ -269,7 +293,10 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateAdmins([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.ADMIN);
-        return await NotifyAndResponseOkAsync("New admins are bulk created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+                      new NotificationDTO { Title = "Successfully", Content = "New admins are bulk created successfully" });
+        return Ok("New admins are bulk created successfully");
     }
 
     /// <summary>
@@ -280,7 +307,10 @@ public class UserController : BaseController
     public async Task<IActionResult> CreateManagers([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         await _userService.CreateUsersAsync(requests, EUserRole.MANAGER);
-        return await NotifyAndResponseOkAsync("New managers are bulk created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "New managers are bulk created successfully" });
+        return Ok("New managers are bulk created successfully");
     }
 
     #endregion
@@ -293,7 +323,10 @@ public class UserController : BaseController
     public async Task<IActionResult> ResetNumberOfBan(long studentProfileId)
     {
         await _userService.ResetNumberOfBanAsync(studentProfileId);
-        return await NotifyAndResponseOkAsync("The number of ban for the student profile id has been reset");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "The number of ban for the student profile id has been reset" });
+        return Ok("The number of ban for the student profile id has been reset");
     }
 
 
@@ -304,7 +337,10 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
     {
         await _userService.UpdateAvatarAsync(AccessToken, request);
-        return await NotifyAndResponseOkAsync("The avatar has been updated successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "The avatar has been updated successfully" });
+        return Ok("The avatar has been updated successfully");
     }
     /// <summary>
     /// User can update the avatar the input is link firebase provided by front end
@@ -314,14 +350,17 @@ public class UserController : BaseController
     public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
     {
         await _userService.UpdateAvatarAsync(userId, request);
-        return await NotifyAndResponseOkAsync("The avatar has been updated successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "The avatar has been updated successfully" });
+        return Ok("The avatar has been updated successfully");
     }
 
     ///<summary>
     /// View all student by combo
     /// </summary>
     [HttpGet("student/{comboCode}/paged")]
-    [PermissionAuthorize( (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> GetAllStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
     {
         var result = await _userService.GetAllStudentsByComboCodePagedAsync(request, comboCode);
@@ -382,27 +421,6 @@ public class UserController : BaseController
         var result = await _userService.GetAllActiveStudentsByCurriculumCodePagedAsync(request, curriculumCode);
         return Ok(result);
     }
-
-
-
-    /// <summary>
-    /// Helper to notify success and return Ok async
-    /// </summary>
-    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
-    {
-        try
-        {
-            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error while notifying user");
-        }
-        return Ok(new { Message = message });
-    }
-
-
-
 
 
 }

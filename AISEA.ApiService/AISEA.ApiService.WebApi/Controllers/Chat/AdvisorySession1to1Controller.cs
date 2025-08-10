@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Chat;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -18,18 +19,15 @@ public class AdvisorySession1to1Controller : BaseController
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
     private readonly AdvisorySessionHubNotifier _advisorySessionHubNotifier;
     private readonly NotificationHubNotifier _notifier;
-    private readonly ILogger<AdvisorySession1to1Controller> _logger;
 
     public AdvisorySession1to1Controller(EndpointSettings endpointSettings,
     AdvisorySession1to1Service advisorySession1To1Service,
     AdvisorySessionHubNotifier advisorySessionHubNotifier,
-    NotificationHubNotifier notifier,
-    ILogger<AdvisorySession1to1Controller> logger) : base(endpointSettings)
+    NotificationHubNotifier notifier) : base(endpointSettings)
     {
         _advisorySession1To1Service = advisorySession1To1Service;
         _advisorySessionHubNotifier = advisorySessionHubNotifier;
         _notifier = notifier;
-        _logger = logger;
     }
 
     /// <summary>
@@ -42,16 +40,10 @@ public class AdvisorySession1to1Controller : BaseController
 
         // Notify student, staff, and session groups
         await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
-        try
-        {
-            await _notifier.NotifyUserAsync(AccessToken, "Delete", "The chat session got deleted successfully");
 
-        }
-        catch (Exception e)
-        {
-            // Log the exception or handle it accordingly
-            _logger.LogError(e, "Error notifying user about deleted chat session");
-        }
+        await _notifier.NotifyUserAsync(AccessToken,
+        new NotificationDTO { Title = "Successfully", Content = "The chat session got deleted successfully" });
+
         return Ok("The chat session got deleted successfully");
     }
 

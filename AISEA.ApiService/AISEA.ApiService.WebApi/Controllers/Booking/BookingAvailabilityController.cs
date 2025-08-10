@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -16,17 +17,15 @@ public class BookingAvailabilityController : BaseController
 {
     private readonly BookingAvailabilityService _bookingAvailabilityService;
     private readonly NotificationHubNotifier _notifier;
-    private readonly ILogger<BookingAvailabilityController> _logger;
 
     public BookingAvailabilityController(
         BookingAvailabilityService bookingAvailabilityService
     , NotificationHubNotifier notifier
     , EndpointSettings endpointSettings
-    , ILogger<BookingAvailabilityController> logger) : base(endpointSettings)
+    ) : base(endpointSettings)
     {
         _bookingAvailabilityService = bookingAvailabilityService;
         _notifier = notifier;
-        _logger = logger;
     }
 
     /// <summary>
@@ -37,7 +36,8 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> CreateBookingAvailability([FromBody] CreateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
-        return await NotifyAndResponseOkAsync("Booking availability has been created successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been created successfully" });
+        return Ok("Booking availability has been created successfully!");
 
     }
 
@@ -49,7 +49,8 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
         await _bookingAvailabilityService.BulkCreateBookingAvailabilityAsync(request, AccessToken);
-        return await NotifyAndResponseOkAsync("Booking availabilities have been created successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availabilities have been created successfully" });
+        return Ok("Booking availabilities have been created successfully!");
 
     }
 
@@ -96,7 +97,8 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
         await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
-        return await NotifyAndResponseOkAsync("Booking availability has been updated successfully.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been updated successfully" });
+        return Ok("Booking availability has been updated successfully!");
     }
 
     /// <summary>
@@ -107,7 +109,8 @@ public class BookingAvailabilityController : BaseController
     public async Task<IActionResult> DeleteBookingAvailability(long id)
     {
         await _bookingAvailabilityService.DeleteAsync(id, AccessToken);
-        return await NotifyAndResponseOkAsync("Booking availability has been deleted.");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been deleted" });
+        return Ok("Booking availability has been deleted!");
     }
 
     /// <summary>
@@ -120,20 +123,5 @@ public class BookingAvailabilityController : BaseController
         var res = await _bookingAvailabilityService.GetSimplyByIdAsync(id);
         return Ok(res);
     }
-
-
-    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
-    {
-        try
-        {
-            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error notifying user about booking availability update");
-        }
-        return Ok(new { message });
-    }
-
 
 }

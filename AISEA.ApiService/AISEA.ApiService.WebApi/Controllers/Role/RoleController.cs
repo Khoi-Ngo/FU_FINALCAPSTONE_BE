@@ -1,5 +1,6 @@
 using AISEA.ApiService.BAL.Services.Role;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Role;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -16,17 +17,16 @@ public class RoleController : BaseController
 {
     private readonly RoleService _roleService;
     private readonly NotificationHubNotifier _notifier;
-    private readonly ILogger<RoleController> _logger;
 
     public RoleController(
         EndpointSettings endpointSettings,
         RoleService roleService,
-        NotificationHubNotifier notifier, ILogger<RoleController> logger) : base(endpointSettings)
+        NotificationHubNotifier notifier) : base(endpointSettings)
     {
         _roleService = roleService;
         _notifier = notifier;
-        _logger = logger;
     }
+    
 
     /// <summary>
     /// Get all roles.
@@ -55,7 +55,10 @@ public class RoleController : BaseController
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest role)
     {
         await _roleService.CreateRoleAsync(role);
-        return await NotifyAndResponseOkAsync("New role is created successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+                      new NotificationDTO { Title = "Successfully", Content = "New role is created successfully" });
+        return Ok("New role is created successfully");
     }
 
     /// <summary>
@@ -65,22 +68,10 @@ public class RoleController : BaseController
     public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
     {
         await _roleService.UpdateRoleAsync(id, role);
-        return await NotifyAndResponseOkAsync("The role is updated successfully");
+
+        await _notifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "The role is updated successfully" });
+        return Ok("The role is updated successfully");
     }
 
-    /// <summary>
-    /// Helper to notify and return a success response
-    /// </summary>
-    private async Task<IActionResult> NotifyAndResponseOkAsync(string message)
-    {
-        try
-        {
-            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error while notifying user");
-        }
-        return Ok(new { Message = message });
-    }
 }

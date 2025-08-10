@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.HubUtil;
 
@@ -51,12 +52,18 @@ public class StuMissedMeetingBgService : BackgroundService
                             .GroupBy(m => m.StudentProfileId)
                             .ToDictionary(g => g.Key, g => g.Count() * _bookingSettings.NumberOfBanWhenStuMissingTheMeeting);
 
+                    
                     var studentNotifications = missedMeetings
                                 .Select(m => (
                                 m.StudentUserId,
-                                "Meeting Missed",
-                                $"The meeting starting at {m.StartDateTime:yyyy-MM-dd HH:mm} was missed and marked as STUDENT_MISSED."))
+                                new NotificationDTO
+                                {
+                                Title = "Meeting Missed",
+                                Content = $"The meeting starting at {m.StartDateTime:yyyy-MM-dd HH:mm} was missed and marked as STUDENT_MISSED.",
+                                }
+                                ))
                                 .ToList();
+
 
                     // Bulk update meeting statuses to STUDENT_MISSED
                     await bookedMeetingService.UpdateMeetingStatusesAsync(meetingIds, EBookingStatus.STUDENT_MISSED);

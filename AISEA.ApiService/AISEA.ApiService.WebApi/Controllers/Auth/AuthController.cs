@@ -1,5 +1,6 @@
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -14,13 +15,11 @@ public class AuthController : BaseController
 {
     private readonly AuthService _authService;
     private readonly NotificationHubNotifier _notifier;
-    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(EndpointSettings endpointSettings, AuthService authService, NotificationHubNotifier notificationHubNotifier, ILogger<AuthController> logger) : base(endpointSettings)
+    public AuthController(EndpointSettings endpointSettings, AuthService authService, NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
     {
         _authService = authService;
         _notifier = notificationHubNotifier;
-        _logger = logger;
     }
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
@@ -45,7 +44,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> LoginWithGoogle()
     {
         var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
-        return await NotifyAndResponseOkAsync($"New login at {DateTime.UtcNow}", res);
+        return Ok(res);
     }
 
     /// <summary>
@@ -57,7 +56,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login([FromBody] AuthFEIDRequest request)
     {
         var res = await _authService.LoginAsync(request);
-        return await NotifyAndResponseOkAsync($"New login at {DateTime.UtcNow}", res);
+        return Ok(res);
     }
 
     // Forget password
@@ -92,7 +91,8 @@ public class AuthController : BaseController
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
-        return await NotifyAndResponseOkAsync("Reset password ok!");
+        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Ok", Content = "Reset password ok" });
+        return Ok("Reset password ok!");
 
     }
 
@@ -107,16 +107,4 @@ public class AuthController : BaseController
         return Ok("Logged out successfully");
     }
 
-    private async Task<IActionResult> NotifyAndResponseOkAsync(string message, object? data = null)
-    {
-        try
-        {
-            await _notifier.NotifyUserAsync(AccessToken, "Successfully", message);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error notifying user about auth action");
-        }
-        return Ok(data ?? new { message });
-    }
 }

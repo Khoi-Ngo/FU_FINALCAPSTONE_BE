@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
@@ -26,7 +27,7 @@ public class JoinedSubjectService
         _jWTService = jWTService;
     }
 
-    public async Task<JoinedSubjectStakeholderNotification> DeleteSubjectAsync(long id, string accessToken)
+    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id, string accessToken)
     {
         try
         {
@@ -34,12 +35,11 @@ public class JoinedSubjectService
 
             _joinedSubjectRepository.RemoveAsync(subject);
 
-            return new JoinedSubjectStakeholderNotification
+            return (new NotificationDTO
             {
-                StakeholderUserId = subject.StudentProfile.UserId,
                 Content = $"You have been removed from the subject: {subject.SubjectCode}.",
                 Title = "Subject Removal Notification"
-            };
+            }, subject.StudentProfile.UserId);
         }
         catch (DbUpdateException ex)
         {
@@ -60,7 +60,7 @@ public class JoinedSubjectService
 
 
 
-    public async Task<JoinedSubjectStakeholderNotification> ImportMultipleSubjectsAsync(ImportJoinedSubjectsForOneStudentRequest request, string accessToken)
+    public async Task<(NotificationDTO stakeHodlerNoti, long StakeholderUserId)> ImportMultipleSubjectsAsync(ImportJoinedSubjectsForOneStudentRequest request, string accessToken)
     {
         try
         {
@@ -68,12 +68,11 @@ public class JoinedSubjectService
             var studentUser = await _userRepository.GetUserWStudentProfileAsync(request.StudentUserName);
             await _joinedSubjectRepository.BulkInsertAsync(MapToJoinedSubjects(request.SubjectsData, studentUser.StudentProfile.Id, _jWTService.GetUsernameFromToken(accessToken)));
 
-            return new JoinedSubjectStakeholderNotification
+            return (new NotificationDTO
             {
-                StakeholderUserId = studentUser.Id,
                 Content = $"You have been successfully enrolled in the subjects: {string.Join(", ", request.SubjectsData.Select(s => s.SubjectCode))}.",
                 Title = "Subject Enrollment Notification",
-            };
+            }, studentUser.Id);
 
         }
         catch (DbUpdateException ex)
@@ -93,64 +92,84 @@ public class JoinedSubjectService
         }
     }
 
-    public async Task<List<JoinedSubjectStakeholderNotification>> ImportMultipleSubjectsAsync(
-        ImportJoinedSubjectsRequest request,
-        string accessToken)
+    public async Task<List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)>> ImportMultipleSubjectsAsync(ImportJoinedSubjectsRequest request, string accessToken)
     {
-        //TODO: Split the importing of each student
-        try
+        var createdByUserName = _jWTService.GetUsernameFromToken(accessToken);
+
+        var studentUsers = await _userRepository
+            .GetUsersWStudentProfilesAsync(request.UserNameToSubjectsMap.Keys.ToList());
+
+        var studentUserDict = studentUsers.ToDictionary(u => u.Username, u => u);
+
+        var notifications = new List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)>();
+
+        foreach (var kvp in request.UserNameToSubjectsMap)
         {
-            var createdByUserName = _jWTService.GetUsernameFromToken(accessToken);
-
-            // 1️⃣ Load all required students in a single query
-            var studentUsers = await _userRepository
-                .GetUsersWStudentProfilesAsync(request.UserNameToSubjectsMap.Keys.ToList());
-
-            var studentUserDict = studentUsers.ToDictionary(u => u.Username, u => u);
-
-            var allJoinedSubjects = new List<JoinedSubject>(
-                request.UserNameToSubjectsMap.Sum(kvp => kvp.Value.Count)
-            );
-            var notifications = new List<JoinedSubjectStakeholderNotification>(studentUsers.Count);
-
-            // 2️⃣ Loop through each student and prepare subjects + notification
-            foreach (var kvp in request.UserNameToSubjectsMap)
+            if (!studentUserDict.TryGetValue(kvp.Key, out var studentUser))
             {
-                if (!studentUserDict.TryGetValue(kvp.Key, out var studentUser))
-                    continue; // Skip if student not found
-
-                var joinedSubjects = MapToJoinedSubjects(kvp.Value, studentUser.StudentProfile.Id, createdByUserName);
-                allJoinedSubjects.AddRange(joinedSubjects);
-
-                // One notification per student
-                notifications.Add(new JoinedSubjectStakeholderNotification
-                {
-                    StakeholderUserId = studentUser.Id,
-                    Content = $"You have been successfully enrolled in the subjects: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
-                    Title = "Subject Enrollment Notification"
-                });
+                // If student not found, mark all subjects for this user as failed
+                notifications.Add((
+                 stakeHolderUserId: studentUser.Id,
+                 stakeHolderNoti: new NotificationDTO
+                 {
+                     Title = "Subject Enrollment Failed",
+                     Content = $"Failed to enroll in subject: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}."
+                 }
+             ));
+                continue;
             }
 
-            // 3️⃣ Bulk insert all subjects in one DB call
-            await _joinedSubjectRepository.BulkInsertAsync(allJoinedSubjects);
+            var joinedSubjects = MapToJoinedSubjects(kvp.Value, studentUser.StudentProfile.Id, createdByUserName);
 
-            return notifications;
+            try
+            {
+                await _joinedSubjectRepository.BulkInsertAsync(joinedSubjects);
+
+                notifications.Add((
+               stakeHolderUserId: studentUser.Id,
+               stakeHolderNoti: new NotificationDTO
+               {
+                   Content = $"You have been successfully enrolled in the subjects: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
+                   Title = "Subject Enrollment Notification"
+               }
+           ));
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx)
+            {
+
+
+                notifications.Add((
+                stakeHolderUserId: studentUser.Id,
+                stakeHolderNoti: new NotificationDTO
+                {
+                    Content = $"Failed to enroll in subject: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
+                    Title = "Subject Enrollment Failed"
+                }
+            ));
+
+
+
+                HandleMeetingSqlException(sqlEx);
+            }
+            catch (SqlException sqlEx)
+            {
+                notifications.Add((
+                stakeHolderUserId: studentUser.Id,
+                stakeHolderNoti: new NotificationDTO
+                {
+                    Content = $"Failed to enroll in subject: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
+                    Title = "Subject Enrollment Failed"
+                }
+            ));
+
+                HandleMeetingSqlException(sqlEx);
+            }
         }
-        catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx)
-        {
-            HandleMeetingSqlException(sqlEx);
-            throw;
-        }
-        catch (SqlException ex)
-        {
-            HandleMeetingSqlException(ex);
-            throw;
-        }
+
+        return notifications;
     }
 
-
-
-    public async Task<JoinedSubjectStakeholderNotification> ImportSubjectAsync(SingleImportJoinedSubjectRequest request, string accessToken)
+    public async Task<(NotificationDTO stakeHolderNoti, long StakeholderUserId)> ImportSubjectAsync(SingleImportJoinedSubjectRequest request, string accessToken)
     {
         try
         {
@@ -158,12 +177,11 @@ public class JoinedSubjectService
             var studentUser = await _userRepository.GetUserWStudentProfileAsync(request.StudentUserName);
             await _joinedSubjectRepository.CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, _jWTService.GetUsernameFromToken(accessToken)));
 
-            return new JoinedSubjectStakeholderNotification
+            return (new NotificationDTO
             {
-                StakeholderUserId = studentUser.Id,
                 Content = $"You have been successfully enrolled in the subject: {request.SubjectCode}.",
                 Title = "Subject Enrollment Notification",
-            };
+            }, studentUser.Id);
 
         }
         catch (DbUpdateException ex)
@@ -194,31 +212,33 @@ public class JoinedSubjectService
             #region Importing
 
             case 50013:
-                throw new InvalidOperationException("Import Exception, Import-Prerequisite not met");
+                throw new InvalidOperationException("Import Exception, Import-Prerequisite not met" + ex.Message);
             case 50015:
-                throw new InvalidOperationException("Import Exception, Invalid subject code");
+                throw new InvalidOperationException("Import Exception, Invalid subject code" + ex.Message);
             case 50016:
-                throw new InvalidOperationException("Import Exception, Invalid subject version code of subject code");
+                throw new InvalidOperationException("Import Exception, Invalid subject version code of subject code" + ex.Message);
             case 50017:
-                throw new InvalidOperationException("Import Exception, Invalid combo code of student");
+                throw new InvalidOperationException("Import Exception, Invalid combo code of student" + ex.Message);
             case 50018:
-                throw new InvalidOperationException("Import Exception, Invalid curriculum code of student");
+                throw new InvalidOperationException("Import Exception, Invalid curriculum code of student" + ex.Message);
             case 50020:
-                throw new InvalidOperationException("Import Exception, Student must have not graduated");
+                throw new InvalidOperationException("Import Exception, Student must have not graduated" + ex.Message);
+            case 50021:
+                throw new InvalidOperationException("Import Exception, More than 2 subject code in the same semester" + ex.Message);
 
             #endregion
 
             #region Deleting 
 
             case 50022:
-                throw new InvalidOperationException("Delete Exception, Conflict Prerequisite");
+                throw new InvalidOperationException("Delete Exception, Conflict Prerequisite" + ex.Message);
             case 50023:
-                throw new InvalidOperationException("Delete Exception, The subject(s) having marks already");
+                throw new InvalidOperationException("Delete Exception, The subject(s) having marks already" + ex.Message);
 
             #endregion
 
             case 547:
-                throw new InvalidOperationException("Invalid joined subject data. Please check Profile Data and Semester Data.");
+                throw new InvalidOperationException("Invalid joined subject data. Please check Profile Data and Semester Data." + ex.Message);
 
         }
         throw ex;

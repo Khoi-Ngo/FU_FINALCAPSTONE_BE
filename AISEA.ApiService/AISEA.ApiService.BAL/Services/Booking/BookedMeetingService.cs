@@ -2,6 +2,7 @@ using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
+using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Booking;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
@@ -169,7 +170,7 @@ public class BookedMeetingService
 
     }
 
-    public async Task<MeetingNotiForPartnerResponse> CompleteAsync(string accessToken, long id, InputCheckinRequest request)
+    public async Task<(NotificationDTO parterNoti, long partnerUserId)> CompleteAsync(string accessToken, long id, InputCheckinRequest request)
     {
 
         //validate the time to do + current status + validate access + check in code (trigger)
@@ -187,17 +188,17 @@ public class BookedMeetingService
         completedMeeting.Status = EBookingStatus.COMPLETED;
         await _bookedMeetingRepository.UpdateAsync(completedMeeting);
 
-        return new MeetingNotiForPartnerResponse
-        {
-            PartnerUserId = studentUserId,
-            MeetingStartDateTime = completedMeeting.StartDateTime,
-            MeetingEndDateTime = completedMeeting.EndDateTime,
-            StatusChangedTo = EBookingStatus.COMPLETED
-        };
+        return (
+            new NotificationDTO
+            {
+                Title = completedMeeting.Status.ToString(),
+                Content = $"The meeting {completedMeeting.StartDateTime} - {completedMeeting.EndDateTime} has been {completedMeeting.Status.ToString()}"
+            }, partnerUserId: studentUserId
+        );
 
     }
 
-    public async Task<MeetingNotiForPartnerResponse> ConfirmMeetingAsync(long id, string accessToken)
+    public async Task<(NotificationDTO partnerNoti, long partnerUserId)> ConfirmMeetingAsync(long id, string accessToken)
     {
 
         //validate time + status + access permission
@@ -221,18 +222,17 @@ public class BookedMeetingService
         confirmedMeeting.Status = EBookingStatus.CONFIRMED;
         await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
 
-
-        return new MeetingNotiForPartnerResponse
-        {
-            PartnerUserId = studentUserId,
-            MeetingStartDateTime = confirmedMeeting.StartDateTime,
-            MeetingEndDateTime = confirmedMeeting.EndDateTime,
-            StatusChangedTo = EBookingStatus.CONFIRMED
-        };
+        return (
+             new NotificationDTO
+             {
+                 Title = confirmedMeeting.Status.ToString(),
+                 Content = $"The meeting {confirmedMeeting.StartDateTime} - {confirmedMeeting.EndDateTime} has been {confirmedMeeting.Status.ToString()}"
+             }, partnerUserId: studentUserId
+         );
 
     }
 
-    public async Task<MeetingNotiForPartnerResponse> CreateMeetingAsync(CreateMeetingRequest request, string accessToken)
+    public async Task<(NotificationDTO partnerNoti, long partnerUserId)> CreateMeetingAsync(CreateMeetingRequest request, string accessToken)
     {
         try
         {
@@ -271,13 +271,13 @@ public class BookedMeetingService
             var advisorUserId = await _staffProfileRepository.GetUserIdByIdAsync(request.StaffProfileId);
             await _mailService.SendEmailAsync(_jWTService.GetEmailFromToken(accessToken), "CHECK IN CODE", $"The check in code for your meeting {request.StartDateTime} to {request.EndDateTime} is : {checkinCode}");
             //return the notified advisor user id
-            return new MeetingNotiForPartnerResponse
-            {
-                PartnerUserId = advisorUserId,
-                MeetingStartDateTime = request.StartDateTime,
-                MeetingEndDateTime = request.EndDateTime,
-                StatusChangedTo = EBookingStatus.PENDING
-            };
+            return (
+                new NotificationDTO
+                {
+                    Title = EBookingStatus.PENDING.ToString(),
+                    Content = $"The meeting {request.StartDateTime} - {request.EndDateTime} created"
+                }, partnerUserId: advisorUserId
+            );
         }
         catch (DbUpdateException ex)
         {
@@ -302,7 +302,7 @@ public class BookedMeetingService
         await _bookedMeetingRepository.RemoveAsync(removedMeeting);
     }
 
-    public async Task<MeetingNotiForPartnerResponse> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
+    public async Task<(NotificationDTO partnerNoi, long partnerUserId)> AdvisorCancelMeetingAsync(string accessToken, NoteDTO request, long meetingId)
     {
 
         var (canceledMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(meetingId);
@@ -324,13 +324,13 @@ public class BookedMeetingService
 
         await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
 
-        return new MeetingNotiForPartnerResponse
-        {
-            PartnerUserId = studentUserId,
-            MeetingStartDateTime = canceledMeeting.StartDateTime,
-            MeetingEndDateTime = canceledMeeting.EndDateTime,
-            StatusChangedTo = canceledMeeting.Status
-        };
+        return (
+             new NotificationDTO
+             {
+                 Title = canceledMeeting.Status.ToString(),
+                 Content = $"The meeting {canceledMeeting.StartDateTime} - {canceledMeeting.EndDateTime} has been {canceledMeeting.Status.ToString()}"
+             }, partnerUserId: studentUserId
+         );
 
     }
 
@@ -354,7 +354,7 @@ public class BookedMeetingService
     }
 
 
-    public async Task<MeetingNotiForPartnerResponse> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
+    public async Task<(NotificationDTO partnerNoti, long partnerUserId)> MarkAdvisorMissedAsync(string accessToken, long meetingId, NoteDTO request)
     {
 
         var (confirmedMeeting, advisorUserId) = await _bookedMeetingRepository.GetMeetingWithAdvisorUserIdAsync(meetingId);
@@ -375,16 +375,17 @@ public class BookedMeetingService
         confirmedMeeting.Status = EBookingStatus.ADVISOR_MISSED;
         await _bookedMeetingRepository.UpdateAsync(confirmedMeeting);
 
-        return new MeetingNotiForPartnerResponse
-        {
-            PartnerUserId = advisorUserId,
-            MeetingStartDateTime = confirmedMeeting.StartDateTime,
-            MeetingEndDateTime = confirmedMeeting.EndDateTime,
-            StatusChangedTo = confirmedMeeting.Status
-        };
+        return (
+             new NotificationDTO
+             {
+                 Title = confirmedMeeting.Status.ToString(),
+                 Content = $"The meeting {confirmedMeeting.StartDateTime} - {confirmedMeeting.EndDateTime} has been {confirmedMeeting.Status.ToString()}"
+             }, partnerUserId: advisorUserId
+         );
+
     }
 
-    public async Task<(MeetingNotiForPartnerResponse meetingNotiForPartnerResponse, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
+    public async Task<(NotificationDTO partnerNoti, long partnerUserId, int numberOfBan)> StuCancelTheConfirmedAsync(long meetingId, NoteDTO request, string accessToken)
     {
 
         var (canceledMeeting, advisorUserId) = await _bookedMeetingRepository.GetMeetingWithAdvisorUserIdAsync(meetingId);
@@ -410,17 +411,16 @@ public class BookedMeetingService
         await _bookedMeetingRepository.UpdateAsync(canceledMeeting);
 
 
-        return (new MeetingNotiForPartnerResponse
-        {
-            PartnerUserId = advisorUserId,
-            MeetingStartDateTime = canceledMeeting.StartDateTime,
-            MeetingEndDateTime = canceledMeeting.EndDateTime,
-            StatusChangedTo = canceledMeeting.Status
-
-        }, _bookingSettings.NumberOfBanWhenStuCancelTheConfirm);
+        return (
+             new NotificationDTO
+             {
+                 Title = canceledMeeting.Status.ToString(),
+                 Content = $"The meeting {canceledMeeting.StartDateTime} - {canceledMeeting.EndDateTime} has been {canceledMeeting.Status.ToString()}"
+             }, partnerUserId: advisorUserId, _bookingSettings.NumberOfBanWhenStuCancelTheConfirm
+         );
 
     }
-    public async Task<MeetingNotiForPartnerResponse> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
+    public async Task<(NotificationDTO partnerNoti, long partnerUserId)> AddReasonForOverdueAsync(string accessToken, NoteDTO request, long meetingId)
     {
 
         var (overdueMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(meetingId);
@@ -434,13 +434,15 @@ public class BookedMeetingService
         //giving the reason for overdue
         overdueMeeting.Note = request.Note;
         await _bookedMeetingRepository.UpdateAsync(overdueMeeting);
-     
-        return new MeetingNotiForPartnerResponse
-        {
-            PartnerUserId = studentUserId,
-            MeetingStartDateTime = overdueMeeting.StartDateTime,
-            MeetingEndDateTime = overdueMeeting.EndDateTime
-        };
+
+        return (
+                    new NotificationDTO
+                    {
+                        Title = "Update",
+                        Content = $"The meeting {overdueMeeting.StartDateTime} - {overdueMeeting.EndDateTime} has been updated reason"
+                    }, partnerUserId: studentUserId
+                );
+
     }
 
     public async Task UpdateMeetingStatusesAsync(List<long> meetingIds, EBookingStatus status)

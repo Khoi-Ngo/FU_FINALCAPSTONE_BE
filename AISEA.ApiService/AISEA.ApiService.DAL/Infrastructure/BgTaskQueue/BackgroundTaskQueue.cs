@@ -1,10 +1,7 @@
 using System.Threading.Channels;
+using AISEA.ApiService.SHARED.Interfaces;
 
-public interface IBackgroundTaskQueue
-{
-    void QueueBackgroundWorkItem(Func<IServiceProvider, CancellationToken, Task> workItem);
-    Task<Func<IServiceProvider, CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken);
-}
+namespace AISEA.ApiService.DAL.Infrastructure.BgTaskQueue;
 
 public class BackgroundTaskQueue : IBackgroundTaskQueue
 {

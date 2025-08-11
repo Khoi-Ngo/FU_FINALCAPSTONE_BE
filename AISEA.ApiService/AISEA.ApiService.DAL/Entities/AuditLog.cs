@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using AISEA.ApiService.SHARED.Const.Enums;
 
 namespace AISEA.ApiService.DAL.Entities;
 
@@ -12,7 +11,8 @@ public class AuditLog
     public long Id { get; set; }
 
     [Required]
-    public EAuditLogTag Tag { get; set; }
+    public string Tag { get; set; }
+    public bool IsSuccessAction { get; set; } = true;
 
     [StringLength(20000)]
     public string? Description { get; set; }

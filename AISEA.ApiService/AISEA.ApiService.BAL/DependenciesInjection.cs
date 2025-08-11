@@ -19,6 +19,7 @@ using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Approval;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.BAL.Services.CourseTracker;
+using AISEA.ApiService.SHARED.Filters;
 
 namespace AISEA.ApiService.BAL
 {
@@ -63,7 +64,8 @@ namespace AISEA.ApiService.BAL
             );
             services.AddFluentValidationAutoValidation();
 
-          
+            services.AddScoped<AuditLogFilter>();
+
             return services;
         }
     }

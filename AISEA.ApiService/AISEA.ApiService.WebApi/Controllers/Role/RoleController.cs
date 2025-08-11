@@ -26,12 +26,13 @@ public class RoleController : BaseController
         _roleService = roleService;
         _notifier = notifier;
     }
-    
+
 
     /// <summary>
     /// Get all roles.
     /// </summary>
     [HttpGet]
+    [AuditLog(Tag = "VIEW_ROLE", Description = "")]
     public async Task<IActionResult> GetAllRoles()
     {
         var res = await _roleService.GetAllRolesAsync();
@@ -42,6 +43,7 @@ public class RoleController : BaseController
     /// Get a role by its ID.
     /// </summary>
     [HttpGet("{id}")]
+    [AuditLog(Tag = "VIEW_ROLE", Description = "")]
     public async Task<IActionResult> GetRoleById(long id)
     {
         var res = await _roleService.GetRoleByIdAsync(id);
@@ -52,6 +54,7 @@ public class RoleController : BaseController
     /// Create a new role.
     /// </summary>
     [HttpPost]
+    [AuditLog(Tag = "CREATE_ROLE", Description = "The role has been created")]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest role)
     {
         await _roleService.CreateRoleAsync(role);
@@ -65,6 +68,7 @@ public class RoleController : BaseController
     /// Update an existing role.
     /// </summary>
     [HttpPut("{id}")]
+    [AuditLog(Tag = "UPDATE_ROLE", Description = "The role has been updated")]
     public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
     {
         await _roleService.UpdateRoleAsync(id, role);

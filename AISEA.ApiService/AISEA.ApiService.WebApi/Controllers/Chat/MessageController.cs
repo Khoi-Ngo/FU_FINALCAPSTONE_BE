@@ -24,9 +24,10 @@ public class MessageController : BaseController
     /// Retrieves paginated  messages only for the chatbot messages
     /// </summary>
     [HttpGet("{chatSessionId}")]
+    [AuditLog(Tag = "VIEW_CHATBOT_MESSAGE", Description = "")]
     public async Task<IActionResult> Get([FromQuery] PaginationRequest request, long chatSessionId)
     {
-        var result = await _advisorySession1To1Service.GetChatBotMessagesAsync(request,chatSessionId);
+        var result = await _advisorySession1To1Service.GetChatBotMessagesAsync(request, chatSessionId);
         return Ok(result);
     }
 }

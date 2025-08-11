@@ -27,7 +27,8 @@ public class AuditLogRepository : GenericRepository<AuditLog>
             Id = a.Id,
             Tag = a.Tag.ToString(),
             CreatedAt = a.CreatedAt,
-            Description = a.Description
+            Description = a.Description,
+            IsSuccessAction = a.IsSuccessAction
         }).ToList();
 
         return new PagedResult<AuditLogDTO>
@@ -63,7 +64,8 @@ public class AuditLogRepository : GenericRepository<AuditLog>
                               Id = a.Id,
                               Tag = a.Tag.ToString(),
                               CreatedAt = a.CreatedAt,
-                              Description = a.Description
+                              Description = a.Description,
+                              IsSuccessAction = a.IsSuccessAction
                           }).ToList()
                       )
             );
@@ -71,9 +73,4 @@ public class AuditLogRepository : GenericRepository<AuditLog>
         return dict;
     }
 
-    public async Task AddRangeAsync(IEnumerable<AuditLog> logs)
-    {
-        await _context.AuditLogs.AddRangeAsync(logs);
-        await _context.SaveChangesAsync();
-    }
 }

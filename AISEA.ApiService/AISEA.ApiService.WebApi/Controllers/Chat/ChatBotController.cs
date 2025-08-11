@@ -25,6 +25,7 @@ public class ChatBotController : BaseController
     /// This is for sending message to Chat Bot only with Existed Session
     /// </summary>
     [HttpPost("send")]
+    [AuditLog(Tag = "SEND_CHATBOT_MESSAGE", Description = "")]
     public async Task<IActionResult> SendMsgAsync([FromBody] SendChatBotRequest request)
     {
         var res = await _advisorySession1To1Service.SendMsgAsync(request, AccessToken);
@@ -35,6 +36,7 @@ public class ChatBotController : BaseController
     /// This is for initializing new session with AI ChatBot
     /// </summary>
     [HttpPost("init")]
+    [AuditLog(Tag = "INIT_CHATBOT_CHAT_SESSION", Description = "")]
     public async Task<IActionResult> InitMsgAsync([FromBody] InitChatBotRequest request)
     {
         var res = await _advisorySession1To1Service.InitMsgAsync(request, AccessToken);

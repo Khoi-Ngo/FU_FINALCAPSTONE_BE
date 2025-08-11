@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
+using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -41,6 +42,7 @@ public class AuthController : BaseController
     // Login with google
     [HttpPost("google")]
     [AllowAnonymous]
+    [AuditLog(Tag = "LOGIN", Description = "")]
     public async Task<IActionResult> LoginWithGoogle()
     {
         var res = await _authService.GoogleLoginAsync(AuthorizationTokenGoogle);
@@ -53,6 +55,7 @@ public class AuthController : BaseController
     // Login with username and password
     [HttpPost("login")]
     [AllowAnonymous]
+    [AuditLog(Tag = "LOGIN", Description = "")]
     public async Task<IActionResult> Login([FromBody] AuthFEIDRequest request)
     {
         var res = await _authService.LoginAsync(request);
@@ -65,6 +68,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("forget-password")]
     [AllowAnonymous]
+    [AuditLog(Tag = "RESET_FORGET_PASS", Description = "")]
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordFEIDRequest request)
     {
         await _authService.ForgetPasswordAsync(request);
@@ -77,6 +81,7 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("send-reset-code")]
     [AllowAnonymous]
+    [AuditLog(Tag = "GET_RESET_PASS_CODE", Description = "")]
     public async Task<IActionResult> SendResetCode([FromBody] GetVerificationCodeRequest request)
     {
         await _authService.SendResetCodeAsync(request);
@@ -88,6 +93,7 @@ public class AuthController : BaseController
     /// Resets the password using current FEID password and new password.
     /// </summary>
     [HttpPost("reset-password")]
+    [AuditLog(Tag = "RESET_PASS", Description = "")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
     {
         await _authService.ResetPasswordAsync(request, AccessToken);
@@ -101,6 +107,7 @@ public class AuthController : BaseController
     /// Logs out the current user and blacklists the access token.
     /// </summary>
     [HttpPost("logout")]
+    [AuditLog(Tag = "LOGOUT", Description = "")]
     public async Task<IActionResult> Logout()
     {
         await _authService.LogoutAsync(AccessToken);

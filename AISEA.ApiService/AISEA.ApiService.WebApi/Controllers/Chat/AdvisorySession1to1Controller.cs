@@ -34,6 +34,7 @@ public class AdvisorySession1to1Controller : BaseController
     /// Delete Chat Session
     /// </summary>
     [HttpDelete("{id}")]
+    [AuditLog(Tag = "DELETE_CHAT_SESSION", Description = "")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
         var sessionDeleted = await _advisorySession1To1Service.DeleteAsync(id, AccessToken);
@@ -51,6 +52,7 @@ public class AdvisorySession1to1Controller : BaseController
     /// Initialize the chat session with Staffs User
     /// </summary>
     [HttpPost("human")]
+    [AuditLog(Tag = "INIT_ADVISOR_CHAT_SESSION", Description = "")]
     public async Task<IActionResult> InitHumanChatSessionAsync([FromBody] InitHumanChatSessionRequest request)
     {
         var (hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
@@ -63,6 +65,7 @@ public class AdvisorySession1to1Controller : BaseController
     /// Get AI CHATBOTSessions paginated
     /// </summary>
     [HttpGet]
+    [AuditLog(Tag = "VIEW_CHATBOT_SESSION", Description = "")]
     public async Task<IActionResult> GetAsync([FromQuery] PaginationRequest request)
     {
         var res = await _advisorySession1To1Service.GetBotSessionsAsync(request, AccessToken);

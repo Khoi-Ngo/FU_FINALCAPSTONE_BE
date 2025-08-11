@@ -1,8 +1,7 @@
 using AISEA.ApiService.SHARED.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-namespace AISEA.ApiService.DAL.Infrastructure.BgTaskQueue;
+namespace AISEA.ApiService.WebApi.BgJob;
+
 
 public class QueuedHostedService : BackgroundService
 {

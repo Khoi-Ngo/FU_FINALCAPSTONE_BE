@@ -52,14 +52,14 @@ public class StuMissedMeetingBgService : BackgroundService
                             .GroupBy(m => m.StudentProfileId)
                             .ToDictionary(g => g.Key, g => g.Count() * _bookingSettings.NumberOfBanWhenStuMissingTheMeeting);
 
-                    
+
                     var studentNotifications = missedMeetings
                                 .Select(m => (
                                 m.StudentUserId,
                                 new NotificationDTO
                                 {
-                                Title = "Meeting Missed",
-                                Content = $"The meeting starting at {m.StartDateTime:yyyy-MM-dd HH:mm} was missed and marked as STUDENT_MISSED.",
+                                    Title = "Meeting Missed",
+                                    Content = $"The meeting starting at {m.StartDateTime:yyyy-MM-dd HH:mm} was missed and marked as STUDENT_MISSED.",
                                 }
                                 ))
                                 .ToList();
@@ -72,10 +72,10 @@ public class StuMissedMeetingBgService : BackgroundService
                     await studentProfileService.IncreaseNumberOfBansAsync(studentBans);
 
                     // Batch notify students
-                    if (studentNotifications.Any())
-                    {
-                        await notifier.NotifyUsersAsync(studentNotifications);
-                    }
+                    // if (studentNotifications.Any())
+                    // {
+                    //     await notifier.NotifyUsersAsync(studentNotifications);
+                    // }
 
                     _logger.LogInformation("Processed {Count} missed meetings at {Time}", missedMeetings.Count, DateTime.UtcNow);
                 }

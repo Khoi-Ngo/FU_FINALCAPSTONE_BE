@@ -64,7 +64,6 @@ namespace AISEA.ApiService.BAL
             );
             services.AddFluentValidationAutoValidation();
 
-            services.AddScoped<AuditLogFilter>();
 
             return services;
         }

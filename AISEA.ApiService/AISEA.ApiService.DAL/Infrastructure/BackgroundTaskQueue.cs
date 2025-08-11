@@ -1,7 +1,8 @@
 using System.Threading.Channels;
 using AISEA.ApiService.SHARED.Interfaces;
 
-namespace AISEA.ApiService.DAL.Infrastructure.BgTaskQueue;
+namespace AISEA.ApiService.DAL.Infrastructure;
+
 
 public class BackgroundTaskQueue : IBackgroundTaskQueue
 {

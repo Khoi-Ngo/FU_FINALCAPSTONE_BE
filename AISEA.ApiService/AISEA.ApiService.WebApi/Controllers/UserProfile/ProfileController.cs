@@ -6,6 +6,7 @@ using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
+using AISEA.ApiService.WebApi.InterceptorAPI;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.UserProfile;

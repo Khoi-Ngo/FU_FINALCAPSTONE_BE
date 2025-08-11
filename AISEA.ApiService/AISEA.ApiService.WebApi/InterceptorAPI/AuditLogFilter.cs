@@ -4,9 +4,9 @@ using AISEA.ApiService.SHARED.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace AISEA.ApiService.SHARED.Filters;
+
+namespace AISEA.ApiService.WebApi.InterceptorAPI;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class AuditLogAttribute : Attribute

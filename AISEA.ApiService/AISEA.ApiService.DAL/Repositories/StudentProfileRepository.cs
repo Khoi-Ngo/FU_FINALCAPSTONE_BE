@@ -25,19 +25,21 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task IncreaseNumberOfBansAsync(Dictionary<long, int> studentProfileIdToBanIncrement)
         {
-            var updates = studentProfileIdToBanIncrement
-                .Select(entry => new { StudentProfileId = entry.Key, Increment = entry.Value })
-                .ToList();
-
-            foreach (var batch in updates.Chunk(1000))
+            foreach (var entry in studentProfileIdToBanIncrement)
             {
-                var studentIds = batch.Select(u => u.StudentProfileId).ToList();
-                await _context.StudentProfiles
-                    .Where(sp => studentIds.Contains(sp.Id))
-                    .ExecuteUpdateAsync(setters => setters.SetProperty(
-                        sp => sp.NumberOfBan,
-                        sp => sp.NumberOfBan + batch.First(b => b.StudentProfileId == sp.Id).Increment));
+                var studentProfile = await _context.StudentProfiles
+                    .FirstOrDefaultAsync(sp => sp.Id == entry.Key);
+
+                if (studentProfile != null)
+                {
+                    studentProfile.NumberOfBan += entry.Value;
+                }
             }
+
+            await _context.SaveChangesAsync();
         }
+
+
+
     }
 }

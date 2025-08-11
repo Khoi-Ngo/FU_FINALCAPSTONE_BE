@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AISEA.ApiService.DAL.Infrastructure;
-using AISEA.ApiService.DAL.Infrastructure.BgTaskQueue;
 using AISEA.ApiService.DAL.Persistence;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Interfaces;
@@ -102,11 +101,7 @@ public static class DependenciesInjection
 
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
-        services.AddHostedService(provider =>
-            new QueuedHostedService(
-                provider.GetRequiredService<IBackgroundTaskQueue>(),
-                provider.GetRequiredService<IServiceProvider>())
-        );
+    
 
         return services;
     }

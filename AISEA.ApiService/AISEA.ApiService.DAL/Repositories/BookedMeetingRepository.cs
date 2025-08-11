@@ -132,6 +132,7 @@ public class BookedMeetingRepository : GenericRepository<BookedMeeting>
                     StudentProfileId = m.StudentProfileId,
                     StartDateTime = m.StartDateTime
                 })
+            .Take(100)
             .ToListAsync();
     }
 

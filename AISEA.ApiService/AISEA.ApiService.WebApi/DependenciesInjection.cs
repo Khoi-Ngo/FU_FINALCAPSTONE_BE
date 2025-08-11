@@ -9,6 +9,8 @@ using Microsoft.OpenApi.Models;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.WebApi.HubUtil;
 using AISEA.ApiService.WebApi.BgJob;
+using AISEA.ApiService.WebApi.InterceptorAPI;
+using AISEA.ApiService.SHARED.Interfaces;
 
 namespace AISEA.ApiService.WebApi;
 
@@ -127,6 +129,8 @@ public static class DependenciesInjection
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         services.AddScoped<BlacklistedTokenFilter>();
+        services.AddScoped<AuditLogFilter>();
+
 
         services.AddControllers(opt =>
         {
@@ -163,8 +167,12 @@ public static class DependenciesInjection
         services.AddHostedService<ResetNoOfBanBgService>();
         services.AddHostedService<StuMissedMeetingBgService>();
         services.AddHostedService<SemesterReferBgService>();
+        services.AddHostedService(provider =>
+                new QueuedHostedService(
+                    provider.GetRequiredService<IBackgroundTaskQueue>(),
+                    provider.GetRequiredService<IServiceProvider>())
+            );
 
-      
 
 
         return services;

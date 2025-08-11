@@ -1,5 +1,6 @@
 using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -17,7 +18,9 @@ public class NotificationHubNotifier
         IHubContext<NotificationHub> hubContext,
         NotificationService notificationService,
         NotificationSettings notificationSettings,
-        ILogger<NotificationHubNotifier> logger)
+        ILogger<NotificationHubNotifier> logger
+        // ,IBackgroundTaskQueue taskQueue
+        )
     {
         _hubContext = hubContext;
         _notificationService = notificationService;

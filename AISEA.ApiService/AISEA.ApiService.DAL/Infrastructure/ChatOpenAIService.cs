@@ -1,9 +1,6 @@
 using System.Text;
-using AISEA.ApiService.SHARED.DTOs.Requests.ChatBot;
-using AISEA.ApiService.SHARED.DTOs.Responses.ChatBot;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AISEA.ApiService.DAL.Infrastructure

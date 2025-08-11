@@ -40,4 +40,11 @@ public class StudentProfileService
     private bool IsValidAccess(string accessToken, long userId)
     => _jWTService.GetRoleIdFromToken(accessToken) == (long)EUserRole.ADMIN
     || _jWTService.GetUserIdFromToken(accessToken) == userId;
+
+    public async Task IncreaseNumberOfBansAsync(long studentProfileId, int numberOfBan)
+    {
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+        studentProfile.NumberOfBan = studentProfile.NumberOfBan + numberOfBan;
+        await _studentProfileRepository.UpdateAsync(studentProfile);
+    }
 }

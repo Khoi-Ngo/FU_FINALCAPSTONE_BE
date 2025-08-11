@@ -1,9 +1,11 @@
 using AISEA.ApiService.BAL.Services.Booking;
+using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -18,14 +20,19 @@ public class MeetingController : BaseController
 
     private readonly BookedMeetingService _bookedMeetingService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly StudentProfileService _studentProfileService
+    ;
 
     public MeetingController(
         EndpointSettings endpointSettings,
         BookedMeetingService bookedMeetingService,
-        NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+        NotificationHubNotifier notificationHubNotifier,
+        IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _bookedMeetingService = bookedMeetingService;
         _notifier = notificationHubNotifier;
+        _taskQueue = taskQueue;
     }
 
     /// <summary>
@@ -110,10 +117,21 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "STUDENT_CANCEL_CONFIRMED_MEETING", Description = "")]
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        var (parterNoti, partnerUserId, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
+        var (parterNoti, partnerUserId, studentProfileId,numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
 
         await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
+
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+        {
+            var studentProfileService = sp.GetRequiredService<StudentProfileService>();
+
+            await studentProfileService.IncreaseNumberOfBansAsync(studentProfileId, numberOfBan);
+
+            var notifier = sp.GetRequiredService<NotificationHubNotifier>();
+            await notifier.NotifyUserAsync(AccessToken,
+            new NotificationDTO { Title = "Warning", Content = $"Your ban point increased {numberOfBan}" });
+        });
 
         return Ok(new { NumberOfBanIncrease = numberOfBan });
     }

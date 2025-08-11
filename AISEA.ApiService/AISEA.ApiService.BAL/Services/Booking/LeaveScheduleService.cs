@@ -149,12 +149,27 @@ public class LeaveScheduleService
     //delete a leave schedule
     public async Task DeleteAsync(long id, string accessToken)
     {
-        var leaveSchedule = await GetLeaveScheduleAsync(id);
-        if (!IsValidAccess(leaveSchedule, accessToken)) throw new InvalidAccessLeaveSche("Cannot access the Leave Schedule");
+        try
+        {
+            var leaveSchedule = await GetLeaveScheduleAsync(id);
+            if (!IsValidAccess(leaveSchedule, accessToken)) throw new InvalidAccessLeaveSche("Cannot access the Leave Schedule");
 
-        await _leaveScheduleRepository.RemoveAsync(leaveSchedule);
-        var cachedKey = $"{_bookingSettings.LeaveSchePrefix}{id}";
-        await _redisRepository.RemoveByKeyAsync(cachedKey);
+            await _leaveScheduleRepository.RemoveAsync(leaveSchedule);
+            var cachedKey = $"{_bookingSettings.LeaveSchePrefix}{id}";
+            await _redisRepository.RemoveByKeyAsync(cachedKey);
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException is SqlException sqlEx)
+            {
+                HandleLeaveSqlException(sqlEx);
+
+            }
+        }
+        catch (SqlException ex)
+        {
+            HandleLeaveSqlException(ex);
+        }
     }
 
 

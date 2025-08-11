@@ -9,22 +9,14 @@ namespace AISEA.ApiService.WebApi.HubUtil;
 
 public class NotificationHubNotifier
 {
-    private readonly IHubContext<NotificationHub> _hubContext;
-    private readonly NotificationService _notificationService;
-    private readonly NotificationSettings _notificationSettings;
+    private readonly IBackgroundTaskQueue _taskQueue;
     private readonly ILogger<NotificationHubNotifier> _logger;
 
     public NotificationHubNotifier(
-        IHubContext<NotificationHub> hubContext,
-        NotificationService notificationService,
-        NotificationSettings notificationSettings,
-        ILogger<NotificationHubNotifier> logger
-        // ,IBackgroundTaskQueue taskQueue
-        )
+        IBackgroundTaskQueue taskQueue,
+        ILogger<NotificationHubNotifier> logger)
     {
-        _hubContext = hubContext;
-        _notificationService = notificationService;
-        _notificationSettings = notificationSettings;
+        _taskQueue = taskQueue;
         _logger = logger;
     }
 
@@ -32,33 +24,45 @@ public class NotificationHubNotifier
     {
         try
         {
-            var (notification, userId) = await _notificationService.CreateAsync(accessToken, notificationDTO);
-            var groupName = GetGroupName(userId);
-            await _hubContext.Clients.Group(groupName)
-                .SendAsync(_notificationSettings.NotificationCreatedMethod, notification);
+            _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+            {
+                using var scope = sp.CreateScope();
+                var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                var notificationSettings = scope.ServiceProvider.GetRequiredService<NotificationSettings>();
+
+                var (notification, userId) = await notificationService.CreateAsync(accessToken, notificationDTO);
+                var groupName = GetGroupName(userId, notificationSettings);
+                await hubContext.Clients.Group(groupName)
+                    .SendAsync(notificationSettings.NotificationCreatedMethod, notification);
+            });
         }
         catch (Exception e)
         {
-            // Log the error
-            _logger.LogError(e, "Error while notifying user");
+            _logger.LogError(e, "Error while queuing notification for user");
         }
     }
 
     public async Task NotifyUserAsync(long userToNotify, NotificationDTO notificationDTO)
     {
-
         try
         {
-            var notification = await _notificationService.CreateAsync(userToNotify, notificationDTO);
-            var groupName = GetGroupName(userToNotify);
-            await _hubContext.Clients.Group(groupName)
-                .SendAsync(_notificationSettings.NotificationCreatedMethod, notification);
+            _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+            {
+                using var scope = sp.CreateScope();
+                var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
+                var notificationSettings = scope.ServiceProvider.GetRequiredService<NotificationSettings>();
 
+                var notification = await notificationService.CreateAsync(userToNotify, notificationDTO);
+                var groupName = GetGroupName(userToNotify, notificationSettings);
+                await hubContext.Clients.Group(groupName)
+                    .SendAsync(notificationSettings.NotificationCreatedMethod, notification);
+            });
         }
         catch (Exception e)
         {
-            // Log the error
-            _logger.LogError(e, "Error while notifying user");
+            _logger.LogError(e, "Error while queuing notification for user");
         }
     }
 
@@ -66,37 +70,46 @@ public class NotificationHubNotifier
     {
         try
         {
-            var groupedNotifications = notifications
-                .GroupBy(n => n.UserId)
-                .Select(g => (UserId: g.Key, Notifications: g.Select(n => n.Notification).ToList()))
-                .ToList();
-
-            var allTasks = groupedNotifications.Select(async group =>
+            _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
             {
-                var groupName = GetGroupName(group.UserId);
+                using var scope = sp.CreateScope();
+                var notificationSettings = scope.ServiceProvider.GetRequiredService<NotificationSettings>();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<NotificationHub>>();
 
-                // Create notifications for this user in parallel
-                var createdNotifications = await Task.WhenAll(
-                    group.Notifications.Select(n => _notificationService.CreateAsync(group.UserId, n))
-                );
+                var groupedNotifications = notifications
+                    .GroupBy(n => n.UserId)
+                    .Select(g => (UserId: g.Key, Notifications: g.Select(n => n.Notification).ToList()))
+                    .ToList();
 
-                // Send them to the SignalR group
-                await _hubContext.Clients.Group(groupName)
-                    .SendAsync(_notificationSettings.NotificationCreatedMethod, createdNotifications);
+                var allTasks = groupedNotifications.Select(async group =>
+                {
+                    var groupName = GetGroupName(group.UserId, notificationSettings);
+
+                    // Run all notification saves in parallel, each with its own DbContext
+                    var createdNotifications = await Task.WhenAll(
+                        group.Notifications.Select(async n =>
+                        {
+                            using var innerScope = sp.CreateScope();
+                            var scopedNotificationService = innerScope.ServiceProvider
+                                .GetRequiredService<NotificationService>();
+                            return await scopedNotificationService.CreateAsync(group.UserId, n);
+                        })
+                    );
+
+                    // Send them all at once to SignalR
+                    await hubContext.Clients.Group(groupName)
+                        .SendAsync(notificationSettings.NotificationCreatedMethod, createdNotifications);
+                });
+
+                await Task.WhenAll(allTasks);
             });
-
-            // Run everything in parallel
-            await Task.WhenAll(allTasks);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while notifying users");
+            _logger.LogError(e, "Error while queuing notifications for users");
         }
     }
 
-
-
-
-
-    private string GetGroupName(long userId) => $"{_notificationSettings.IndividualUserGroupPrefix}{userId}";
+    private string GetGroupName(long userId, NotificationSettings notificationSettings)
+        => $"{notificationSettings.IndividualUserGroupPrefix}{userId}";
 }

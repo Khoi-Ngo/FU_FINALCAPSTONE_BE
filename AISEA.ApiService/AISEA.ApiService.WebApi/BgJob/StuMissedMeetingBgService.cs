@@ -59,7 +59,7 @@ public class StuMissedMeetingBgService : BackgroundService
                                 new NotificationDTO
                                 {
                                     Title = "Meeting Missed",
-                                    Content = $"The meeting starting at {m.StartDateTime:yyyy-MM-dd HH:mm} was missed and marked as STUDENT_MISSED.",
+                                    Content = $"The meeting starting at {m.StartDateTime:yyyy-MM-dd HH:mm} was missed and marked as {EBookingStatus.STUDENT_MISSED.ToString()}.",
                                 }
                                 ))
                                 .ToList();
@@ -72,10 +72,10 @@ public class StuMissedMeetingBgService : BackgroundService
                     await studentProfileService.IncreaseNumberOfBansAsync(studentBans);
 
                     // Batch notify students
-                    // if (studentNotifications.Any())
-                    // {
-                    //     await notifier.NotifyUsersAsync(studentNotifications);
-                    // }
+                    if (studentNotifications.Any())
+                    {
+                        await notifier.NotifyUsersAsync(studentNotifications);
+                    }
 
                     _logger.LogInformation("Processed {Count} missed meetings at {Time}", missedMeetings.Count, DateTime.UtcNow);
                 }

@@ -25,6 +25,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task IncreaseNumberOfBansAsync(Dictionary<long, int> studentProfileIdToBanIncrement)
         {
+            //TODO: Not really bulk
             foreach (var entry in studentProfileIdToBanIncrement)
             {
                 var studentProfile = await _context.StudentProfiles

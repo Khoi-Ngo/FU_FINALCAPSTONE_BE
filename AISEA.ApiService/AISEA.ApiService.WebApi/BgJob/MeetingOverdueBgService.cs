@@ -1,4 +1,6 @@
+using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Booking;
+using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -86,6 +88,31 @@ public class MeetingOverdueBgService : BackgroundService
                     }
 
                     await Task.WhenAll(notificationTasks);
+
+
+                    // Audit logs - create one per overdue meeting, using new scope for each
+                    var auditTasks = overdueMeetings.Select(async meeting =>
+                    {
+                        try
+                        {
+                            using var auditScope = _serviceProvider.CreateScope();
+                            var auditLogService = auditScope.ServiceProvider.GetRequiredService<AuditLogService>();
+
+                            await auditLogService.CreateAsync(new AuditLog
+                            {
+                                Tag = "MEETING_OVERDUE",
+                                Description = $"Meeting ID {meeting.Id} starting at {meeting.StartDateTime:yyyy-MM-dd HH:mm} is overdue.",
+                                UserId = meeting.StaffUserId,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Failed to create audit log for overdue meeting ID {meeting.Id}");
+                        }
+                    });
+
+                    await Task.WhenAll(auditTasks);
 
                     _logger.LogInformation("Processed {Count} overdue meetings", overdueMeetings.Count);
                 }

@@ -1,4 +1,6 @@
+using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.SystemProfile;
+using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.SHARED.PropConfigs;
 
 namespace AISEA.ApiService.WebApi.BgJob;
@@ -31,7 +33,17 @@ public class ResetNoOfBanBgService : BackgroundService
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var studentProfileService = scope.ServiceProvider.GetRequiredService<StudentProfileService>();
+                    var auditLogService = scope.ServiceProvider.GetRequiredService<AuditLogService>();
+
                     await studentProfileService.ResetNumberOfBansAsync();
+
+                    // Audit log for reset operation
+                    await auditLogService.CreateAsync(new AuditLog
+                    {
+                        Tag = "RESET_NUMBER_OF_BAN",
+                        Description = $"NumberOfBan reset to 0 for all student profiles at {DateTime.UtcNow}.",
+                    });
+
                     _logger.LogInformation("Successfully reset NumberOfBan to 0 for all student profiles at {Time}", DateTime.UtcNow);
                 }
             }

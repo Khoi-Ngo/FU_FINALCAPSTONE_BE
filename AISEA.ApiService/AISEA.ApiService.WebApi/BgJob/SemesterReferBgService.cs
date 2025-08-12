@@ -1,4 +1,6 @@
+using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.CourseTracker;
+using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.SHARED.PropConfigs;
 
 namespace AISEA.ApiService.WebApi.BgJob;
@@ -27,7 +29,8 @@ public class SemesterReferBgService : BackgroundService
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                var semesterReferService = scope.ServiceProvider.GetRequiredService<SemesterReferService>();
+                    var semesterReferService = scope.ServiceProvider.GetRequiredService<SemesterReferService>();
+                    var auditLogService = scope.ServiceProvider.GetRequiredService<AuditLogService>();
 
                     if (semesterReferService == null)
                     {
@@ -62,6 +65,17 @@ public class SemesterReferBgService : BackgroundService
                         {
                             await semesterReferService.AddSemesterAsync(semesterName, now);
                             _logger.LogInformation($"Added new semester: {semesterName}");
+
+
+                            // Audit log for adding new semester
+                            await auditLogService.CreateAsync(new AuditLog
+                            {
+                                Tag = "SEMESTER_ADDED",
+                                Description = $"Added new semester '{semesterName}' on {now:yyyy-MM-dd HH:mm:ss}.",
+                                UserId = null, // system process, or use a system user ID if you have one
+                                CreatedAt = DateTime.UtcNow
+                            });
+
                         }
                         else
                         {

@@ -22,8 +22,6 @@ public class MeetingController : BaseController
     private readonly BookedMeetingService _bookedMeetingService;
     private readonly NotificationHubNotifier _notifier;
     private readonly IBackgroundTaskQueue _taskQueue;
-    private readonly StudentProfileService _studentProfileService
-    ;
 
     public MeetingController(
         EndpointSettings endpointSettings,
@@ -338,7 +336,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("cur-number-of-ban")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_NUMBER_OF_BAN", Description = "")]
+    [AuditLog(Tag = "VIEW_SELF_NUMBER_OF_BAN", Description = "")]
     public async Task<IActionResult> GetCurNumberOfBan()
     {
         var res = await _bookedMeetingService.GetCurNumberOfBanAsync(AccessToken);

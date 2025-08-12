@@ -123,12 +123,12 @@ public class MeetingController : BaseController
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
         {
-            var studentProfileService = sp.GetRequiredService<StudentProfileService>();
+            var qStudentProfileService = sp.GetRequiredService<StudentProfileService>();
 
-            await studentProfileService.IncreaseNumberOfBansAsync(studentProfileId, numberOfBan);
+            await qStudentProfileService.IncreaseNumberOfBansAsync(studentProfileId, numberOfBan);
 
-            var notifier = sp.GetRequiredService<NotificationHubNotifier>();
-            await notifier.NotifyUserAsync(AccessToken,
+            var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+            await qNotifier.NotifyUserAsync(AccessToken,
             new NotificationDTO { Title = "Warning", Content = $"Your ban point increased {numberOfBan}" });
         });
 

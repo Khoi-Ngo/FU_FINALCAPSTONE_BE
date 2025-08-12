@@ -1,5 +1,7 @@
+using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.BAL.Services.SystemProfile;
+using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -76,6 +78,26 @@ public class StuMissedMeetingBgService : BackgroundService
                     {
                         await notifier.NotifyUsersAsync(studentNotifications);
                     }
+
+
+                    var auditTasks = missedMeetings.Select(async missedMeeting =>
+              {
+                  using var scope = _serviceProvider.CreateScope();
+                  var scopedAuditLogService = scope.ServiceProvider.GetRequiredService<AuditLogService>();
+
+                  await scopedAuditLogService.CreateAsync(new AuditLog
+                  {
+                      Tag = "STUDENT_MISSED_MEETING",
+                      Description = $"StudentProfileId {missedMeeting.StudentProfileId} missed meeting ID {missedMeeting.Id} starting at {missedMeeting.StartDateTime:yyyy-MM-dd HH:mm}.",
+                      UserId = missedMeeting.StudentUserId,
+                      CreatedAt = DateTime.UtcNow
+                  });
+              });
+
+
+                    await Task.WhenAll(auditTasks);
+
+
 
                     _logger.LogInformation("Processed {Count} missed meetings at {Time}", missedMeetings.Count, DateTime.UtcNow);
                 }

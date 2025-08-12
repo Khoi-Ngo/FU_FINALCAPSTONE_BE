@@ -28,5 +28,10 @@ namespace AISEA.ApiService.BAL.Services.AuditLog
         {
             return await _auditLogRepository.GetCountGroupedByMonthAndYearAsync(startDate, endDate);
         }
+
+        public async Task CreateAsync(DAL.Entities.AuditLog auditLog)
+        {
+            await _auditLogRepository.CreateAsync(auditLog);
+        }
     }
 }

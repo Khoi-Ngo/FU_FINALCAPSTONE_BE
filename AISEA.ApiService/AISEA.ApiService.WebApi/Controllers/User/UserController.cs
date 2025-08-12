@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.User;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -18,12 +19,16 @@ public class UserController : BaseController
 {
     private readonly UserService _userService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly IBackgroundTaskQueue _taskQueue;
+
     public UserController(EndpointSettings endpointSettings
     , UserService userService
-    , NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+    , NotificationHubNotifier notificationHubNotifier,
+    IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _userService = userService;
         _notifier = notificationHubNotifier;
+        _taskQueue = taskQueue;
     }
 
     /// <summary>
@@ -248,13 +253,21 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)
     {
-        await _userService.CreateUsersAsync(requests);
 
-        await _notifier.NotifyUserAsync(AccessToken,
-              new NotificationDTO { Title = "Successfully", Content = "New users are bulk created successfully" });
-        return Ok("New users are bulk created successfully");
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+      {
+          var qUserService = sp.GetRequiredService<UserService>();
+          await qUserService.CreateUsersAsync(requests);
+          var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+          await qNotifier.NotifyUserAsync(AccessToken,
+           new NotificationDTO { Title = "Successfully", Content = "New users are bulk created successfully" });
+      });
+
+
+        return Ok("Bulk create users has been queued successfully");
     }
 
     #region Bulk Create Users By Role
@@ -264,13 +277,20 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("student-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateStudents([FromBody] List<BulkCreateStudentRequest> requests)
     {
-        await _userService.CreateUsersAsync(requests);
 
-        await _notifier.NotifyUserAsync(AccessToken,
-              new NotificationDTO { Title = "Successfully", Content = "New students are bulk created successfully" });
-        return Ok("New students are bulk created successfully");
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+   {
+       var qUserService = sp.GetRequiredService<UserService>();
+       await qUserService.CreateUsersAsync(requests);
+       var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+       await qNotifier.NotifyUserAsync(AccessToken,
+             new NotificationDTO { Title = "Successfully", Content = "New students are bulk created successfully" });
+   });
+
+        return Ok("Bulk create student has been queued successfully");
     }
 
     /// <summary>
@@ -278,13 +298,20 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("advisor-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateAdvisors([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
-        await _userService.CreateUsersAsync(requests, EUserRole.ADVISOR);
 
-        await _notifier.NotifyUserAsync(AccessToken,
-              new NotificationDTO { Title = "Successfully", Content = "New advisors are bulk created successfully" });
-        return Ok("New advisors are bulk created successfully");
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+{
+    var qUserService = sp.GetRequiredService<UserService>();
+    await qUserService.CreateUsersAsync(requests, EUserRole.ADVISOR);
+    var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+    await qNotifier.NotifyUserAsync(AccessToken,
+                  new NotificationDTO { Title = "Successfully", Content = "New advisors are bulk created successfully" });
+});
+
+        return Ok("Bulk create advisors has been queued successfully");
     }
 
     /// <summary>
@@ -292,13 +319,19 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("academic-staff-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateAcademicStaffs([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
-        await _userService.CreateUsersAsync(requests, EUserRole.ACADEMIC_STAFF);
 
-        await _notifier.NotifyUserAsync(AccessToken,
-              new NotificationDTO { Title = "Successfully", Content = "New academic staffs are bulk created successfully" });
-        return Ok("New academic staffs are bulk created successfully");
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+{
+    var qUserService = sp.GetRequiredService<UserService>();
+    await qUserService.CreateUsersAsync(requests, EUserRole.ACADEMIC_STAFF);
+    var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+    await qNotifier.NotifyUserAsync(AccessToken,
+                  new NotificationDTO { Title = "Successfully", Content = "New academic staffs are bulk created successfully" });
+});
+        return Ok("Bulk create academic staff has been queued successfully");
     }
 
     /// <summary>
@@ -306,13 +339,20 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("admin-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateAdmins([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
-        await _userService.CreateUsersAsync(requests, EUserRole.ADMIN);
 
-        await _notifier.NotifyUserAsync(AccessToken,
-                      new NotificationDTO { Title = "Successfully", Content = "New admins are bulk created successfully" });
-        return Ok("New admins are bulk created successfully");
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+{
+    var qUserService = sp.GetRequiredService<UserService>();
+    await qUserService.CreateUsersAsync(requests, EUserRole.ADMIN);
+    var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+    await qNotifier.NotifyUserAsync(AccessToken,
+              new NotificationDTO { Title = "Successfully", Content = "New admins are bulk created successfully" });
+});
+
+        return Ok("Bulk create admins has been queued successfully");
     }
 
     /// <summary>
@@ -320,13 +360,20 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("manager-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateManagers([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
-        await _userService.CreateUsersAsync(requests, EUserRole.MANAGER);
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+{
+    var qUserService = sp.GetRequiredService<UserService>();
+    await qUserService.CreateUsersAsync(requests, EUserRole.MANAGER);
+    var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+    await qNotifier.NotifyUserAsync(AccessToken,
+          new NotificationDTO { Title = "Successfully", Content = "New managers are bulk created successfully" });
+});
 
-        await _notifier.NotifyUserAsync(AccessToken,
-              new NotificationDTO { Title = "Successfully", Content = "New managers are bulk created successfully" });
-        return Ok("New managers are bulk created successfully");
+        return Ok("Bulk create managers has been queued successfully");
+
     }
 
     #endregion

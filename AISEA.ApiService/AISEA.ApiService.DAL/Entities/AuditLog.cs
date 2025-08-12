@@ -17,4 +17,12 @@ public class AuditLog
     [StringLength(20000)]
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string? UserName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public long? RoleId { get; set; }
+    public string? Email { get; set; }
+    public string? IPAddress { get; set; }
+    public string? UserAgent { get; set; }
+    public long? UserId { get; set; }
 }

@@ -28,7 +28,15 @@ public class AuditLogRepository : GenericRepository<AuditLog>
             Tag = a.Tag.ToString(),
             CreatedAt = a.CreatedAt,
             Description = a.Description,
-            IsSuccessAction = a.IsSuccessAction
+            IsSuccessAction = a.IsSuccessAction,
+            UserName = a.UserName,
+            FirstName = a.FirstName,
+            LastName = a.LastName,
+            RoleId = a.RoleId,
+            Email = a.Email,
+            IPAddress = a.IPAddress,
+            UserAgent = a.UserAgent,
+            UserId = a.UserId
         }).ToList();
 
         return new PagedResult<AuditLogDTO>
@@ -65,7 +73,15 @@ public class AuditLogRepository : GenericRepository<AuditLog>
                               Tag = a.Tag.ToString(),
                               CreatedAt = a.CreatedAt,
                               Description = a.Description,
-                              IsSuccessAction = a.IsSuccessAction
+                              IsSuccessAction = a.IsSuccessAction,
+                              UserName = a.UserName,
+                              FirstName = a.FirstName,
+                              LastName = a.LastName,
+                              RoleId = a.RoleId,
+                              Email = a.Email,
+                              IPAddress = a.IPAddress,
+                              UserAgent = a.UserAgent,
+                              UserId = a.UserId
                           }).ToList()
                       )
             );

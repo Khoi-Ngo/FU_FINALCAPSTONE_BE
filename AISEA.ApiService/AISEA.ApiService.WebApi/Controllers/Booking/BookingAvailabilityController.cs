@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -18,15 +19,19 @@ public class BookingAvailabilityController : BaseController
 {
     private readonly BookingAvailabilityService _bookingAvailabilityService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly IBackgroundTaskQueue _taskQueue;
+
 
     public BookingAvailabilityController(
         BookingAvailabilityService bookingAvailabilityService
     , NotificationHubNotifier notifier
     , EndpointSettings endpointSettings
+    , IBackgroundTaskQueue taskQueue
     ) : base(endpointSettings)
     {
         _bookingAvailabilityService = bookingAvailabilityService;
         _notifier = notifier;
+        _taskQueue = taskQueue;
     }
 
     /// <summary>
@@ -48,11 +53,23 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpPost("bulk")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    [AuditLog(Tag = "BULK_CREATE_BOOKING_AVAILABILITY", Description = "")]
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
-        await _bookingAvailabilityService.BulkCreateBookingAvailabilityAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availabilities have been created successfully" });
-        return Ok("Booking availabilities have been created successfully!");
+
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+              {
+                  var qBookingAvaiService = sp.GetRequiredService<BookingAvailabilityService>();
+
+                  await qBookingAvaiService.BulkCreateBookingAvailabilityAsync(request, AccessToken);
+
+                  var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+                  
+                  await qNotifier.NotifyUserAsync(AccessToken,
+                  new NotificationDTO { Title = "Warning", Content = "Booking availabilities have been created successfully" });
+              });
+
+        return Ok("Bulk create booking availabilities has been queued successfully!");
 
     }
 

@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Booking;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
@@ -19,14 +20,17 @@ public class LeaveScheController : BaseController
 {
     private readonly LeaveScheduleService _leaveScheduleService;
     private readonly NotificationHubNotifier _notifier;
+    private readonly IBackgroundTaskQueue _taskQueue;
 
     public LeaveScheController(
         LeaveScheduleService leaveScheduleService,
         NotificationHubNotifier notifier,
-        EndpointSettings endpointSettings) : base(endpointSettings)
+        EndpointSettings endpointSettings,
+        IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _leaveScheduleService = leaveScheduleService;
         _notifier = notifier;
+        _taskQueue = taskQueue;
     }
 
     #region Command action
@@ -47,11 +51,20 @@ public class LeaveScheController : BaseController
 
     [HttpPost("bulk")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
+    [AuditLog(Tag = "BULK_CREATE_LEAVE_SCHEDULE", Description = "")]
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
     {
-        await _leaveScheduleService.CreateBulkAsync(requests, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully" });
-        return Ok("Leaving Schedule has been created successfully!");
+
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+            {
+                var qLeaveScheService = sp.GetRequiredService<LeaveScheduleService>();
+                await qLeaveScheService.CreateBulkAsync(requests, AccessToken);
+                var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+                await qNotifier.NotifyUserAsync(AccessToken,
+                 new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully" });
+            });
+
+        return Ok("Bulk create leave schedules has been queued successfully!");
 
     }
 

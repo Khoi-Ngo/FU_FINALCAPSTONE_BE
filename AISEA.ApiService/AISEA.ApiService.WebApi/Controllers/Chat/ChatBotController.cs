@@ -29,7 +29,8 @@ public class ChatBotController : BaseController
     [AuditLog(Tag = "SEND_CHATBOT_MESSAGE", Description = "")]
     public async Task<IActionResult> SendMsgAsync([FromBody] SendChatBotRequest request)
     {
-        var res = await _advisorySession1To1Service.SendMsgAsync(request, AccessToken);
+        var accessToken = AccessToken;
+        var res = await _advisorySession1To1Service.SendMsgAsync(request, accessToken);
         return Ok(res);
     }
 
@@ -40,7 +41,8 @@ public class ChatBotController : BaseController
     [AuditLog(Tag = "INIT_CHATBOT_CHAT_SESSION", Description = "")]
     public async Task<IActionResult> InitMsgAsync([FromBody] InitChatBotRequest request)
     {
-        var res = await _advisorySession1To1Service.InitMsgAsync(request, AccessToken);
+        var accessToken = AccessToken;
+        var res = await _advisorySession1To1Service.InitMsgAsync(request, accessToken);
         return Ok(res);
     }
 

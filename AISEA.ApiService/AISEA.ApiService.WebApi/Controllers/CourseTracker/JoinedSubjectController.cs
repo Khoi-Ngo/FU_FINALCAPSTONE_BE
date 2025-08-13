@@ -43,10 +43,12 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
     public async Task<IActionResult> ImportSubjectAsync([FromBody] SingleImportJoinedSubjectRequest request)
     {
-        // Assuming you have a service to handle the import logic
-        var (stakeHolderNoti, StakeholderUserId) = await _joinedSubjectService.ImportSubjectAsync(request, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        // Assuming you have a service to handle the import logic
+        var (stakeHolderNoti, StakeholderUserId) = await _joinedSubjectService.ImportSubjectAsync(request, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "The subject has been imported successfully" });
 
         await _notifier.NotifyUserAsync(StakeholderUserId, stakeHolderNoti);
@@ -63,11 +65,13 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
     public async Task<IActionResult> ImportMultipleSubjectsAsync([FromBody] ImportJoinedSubjectsForOneStudentRequest request)
     {
+        var accessToken = AccessToken;
+
         // Assuming you have a service to handle the import logic
-        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, AccessToken);
+        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, accessToken);
 
         //notify for the conductor
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
                new NotificationDTO { Title = "Successfully", Content = "The subjects have been imported successfully" });
 
         await _notifier.NotifyUserAsync(stakeHolderUserId, stakeHodlerNoti);
@@ -83,18 +87,20 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
     public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportJoinedSubjectsRequest request)
     {
+        var accessToken = AccessToken;
+
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
         {
             var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
-            List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)> res = await qJoinedSubjectService.ImportMultipleSubjectsAsync(request, AccessToken);
+            List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)> res = await qJoinedSubjectService.ImportMultipleSubjectsAsync(request, accessToken);
 
             var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
             await qNotifier.NotifyUsersAsync(res);
         });
 
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "Import action has been queued" });
 
         return Ok("Import action has been queued");
@@ -108,10 +114,12 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
-        // Assuming you have a service to handle the delete logic
-        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        // Assuming you have a service to handle the delete logic
+        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "The subject has been deleted successfully" });
 
         await _notifier.NotifyUserAsync(stakeHolderUserId, stakeHodlerNoti);
@@ -127,7 +135,9 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetAllBySelfPaged([FromQuery] PaginationRequest request)
     {
-        var res = await _joinedSubjectService.GetAllBySelfPagedAsync(request, AccessToken);
+        var accessToken = AccessToken;
+        
+        var res = await _joinedSubjectService.GetAllBySelfPagedAsync(request, accessToken);
         return Ok(res);
     }
 
@@ -139,7 +149,9 @@ public class JoinedSubjectController : BaseController
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     public async Task<IActionResult> GetAllBySelfLatestSemesterPaged([FromQuery] PaginationRequest request)
     {
-        var res = await _joinedSubjectService.GetAllBySelfLatestSemesterPagedAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _joinedSubjectService.GetAllBySelfLatestSemesterPagedAsync(request, accessToken);
         return Ok(res);
     }
 

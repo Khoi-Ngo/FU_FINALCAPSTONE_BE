@@ -35,9 +35,12 @@ public class ProfileController : BaseController
     [AuditLog(Tag = "CREATE_PROFILE_FOR_USER", Description = "")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
     {
-        await _studentProfileService.CreateAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken,
+        var accessToken = AccessToken;
+
+        await _studentProfileService.CreateAsync(request, accessToken);
+        await _notifier.NotifyUserAsync(accessToken,
          new NotificationDTO { Title = "Profile Created", Content = "The student profile has been created successfully." });
+
         return Ok("Student profile created successfully");
     }
 
@@ -51,8 +54,10 @@ public class ProfileController : BaseController
     [AuditLog(Tag = "CREATE_PROFILE_FOR_USER", Description = "")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
     {
-        await _staffProfileService.CreateAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken,
+        var accessToken = AccessToken;
+
+        await _staffProfileService.CreateAsync(request, accessToken);
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Profile Created", Content = "The staff profile has been created successfully." });
         return Ok("Staff profile created successfully");
     }

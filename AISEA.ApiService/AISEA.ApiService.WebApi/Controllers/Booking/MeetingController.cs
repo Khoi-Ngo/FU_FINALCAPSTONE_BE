@@ -43,9 +43,10 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "CREATE_MEETING", Description = "")]
     public async Task<IActionResult> CreateMeeting([FromBody] CreateMeetingRequest request)
     {
-        var (parterNoti, partnerUserId) = await _bookedMeetingService.CreateMeetingAsync(request, AccessToken);
+        var accessToken = AccessToken;
+        var (parterNoti, partnerUserId) = await _bookedMeetingService.CreateMeetingAsync(request, accessToken);
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The meeting has been created successfully.");
@@ -61,9 +62,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "STUDENT_CANCEL_PENDING_MEETING", Description = "")]
     public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {
-        await _bookedMeetingService.StuCancelPendingAsync(id, request, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+        await _bookedMeetingService.StuCancelPendingAsync(id, request, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
 
         return Ok("The meeting has been canceled successfully");
     }
@@ -77,9 +80,12 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "ADVISOR_CANCEL_MEETING", Description = "")]
     public async Task<IActionResult> AdvisorCancelMeeting([FromBody] NoteDTO request, long meetingId)
     {
-        var (parterNoti, partnerUserId) = await _bookedMeetingService.AdvisorCancelMeetingAsync(AccessToken, request, meetingId);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+
+        var (parterNoti, partnerUserId) = await _bookedMeetingService.AdvisorCancelMeetingAsync(accessToken, request, meetingId);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
 
@@ -97,9 +103,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "CONFIRM_MEETING", Description = "")]
     public async Task<IActionResult> ConfirmMeeting(long id)
     {
-        var (parterNoti, partnerUserId) = await _bookedMeetingService.ConfirmMeetingAsync(id, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+        var (parterNoti, partnerUserId) = await _bookedMeetingService.ConfirmMeetingAsync(id, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The meeting has been confirmed successfully.");
@@ -116,9 +124,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "STUDENT_CANCEL_CONFIRMED_MEETING", Description = "")]
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
-        var (parterNoti, partnerUserId, studentProfileId,numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+        var (parterNoti, partnerUserId, studentProfileId, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
@@ -128,7 +138,7 @@ public class MeetingController : BaseController
             await qStudentProfileService.IncreaseNumberOfBansAsync(studentProfileId, numberOfBan);
 
             var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-            await qNotifier.NotifyUserAsync(AccessToken,
+            await qNotifier.NotifyUserAsync(accessToken,
             new NotificationDTO { Title = "Warning", Content = $"Your ban point increased {numberOfBan}" });
         });
 
@@ -146,9 +156,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "COMPLETE_MEETING", Description = "")]
     public async Task<IActionResult> Complete(long id, [FromBody] InputCheckinRequest request)
     {
-        var (parterNoti, partnerUserId) = await _bookedMeetingService.CompleteAsync(AccessToken, id, request);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+        var (parterNoti, partnerUserId) = await _bookedMeetingService.CompleteAsync(accessToken, id, request);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The meeting has been checked in successfully");
@@ -162,9 +174,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "FEEDBACK_MEETING", Description = "")]
     public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request, long meetingId)
     {
-        await _bookedMeetingService.FeedbackAsync(AccessToken, request, meetingId);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Give feedback ok!" });
+        await _bookedMeetingService.FeedbackAsync(accessToken, request, meetingId);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Give feedback ok!" });
 
         return Ok("The feedback has been submitted successfully");
     }
@@ -179,9 +193,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "MARK_ADVISOR_MISSED_MEETING", Description = "")]
     public async Task<IActionResult> MarkAdvisorMissed(long id, [FromBody] NoteDTO request)
     {
-        var (parterNoti, partnerUserId) = await _bookedMeetingService.MarkAdvisorMissedAsync(AccessToken, id, request);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
+        var (parterNoti, partnerUserId) = await _bookedMeetingService.MarkAdvisorMissedAsync(accessToken, id, request);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
 
@@ -197,9 +213,11 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "ADD_REASON_OVERDUE_MEETING", Description = "")]
     public async Task<IActionResult> AddReasonForOverdue([FromBody] NoteDTO request, long meetingId)
     {
-        var (parterNoti, partnerUserId) = await _bookedMeetingService.AddReasonForOverdueAsync(AccessToken, request, meetingId);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Give reason successfully" });
+        var (parterNoti, partnerUserId) = await _bookedMeetingService.AddReasonForOverdueAsync(accessToken, request, meetingId);
+
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Give reason successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The reason for overdue has been added successfully");
@@ -242,7 +260,9 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "VIEW_MEETING", Description = "")]
     public async Task<IActionResult> GetAllByStudentSelf([FromQuery] PaginationRequest request)
     {
-        var res = await _bookedMeetingService.GetAllByStudentSelfAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _bookedMeetingService.GetAllByStudentSelfAsync(request, accessToken);
         return Ok(res);
     }
 
@@ -254,7 +274,9 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "VIEW_MEETING", Description = "")]
     public async Task<IActionResult> GetAllActiveByStudentSelf([FromQuery] PaginationRequest request)
     {
-        var res = await _bookedMeetingService.GetAllActiveByStudentSelfAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _bookedMeetingService.GetAllActiveByStudentSelfAsync(request, accessToken);
         return Ok(res);
     }
 
@@ -269,7 +291,9 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "VIEW_MEETING", Description = "")]
     public async Task<IActionResult> GetAllByAdvSelf([FromQuery] PaginationRequest request)
     {
-        var res = await _bookedMeetingService.GetAllByAdvSelfAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _bookedMeetingService.GetAllByAdvSelfAsync(request, accessToken);
         return Ok(res);
     }
 
@@ -281,7 +305,9 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "VIEW_MEETING", Description = "")]
     public async Task<IActionResult> GetAllActiveByAdvSelf([FromQuery] PaginationRequest request)
     {
-        var res = await _bookedMeetingService.GetAllActiveByAdvSelfAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _bookedMeetingService.GetAllActiveByAdvSelfAsync(request, accessToken);
         return Ok(res);
     }
 
@@ -299,7 +325,9 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "VIEW_MEETING", Description = "")]
     public async Task<IActionResult> GetDetailMeeting(long meetingId)
     {
-        var res = await _bookedMeetingService.GetDetailMeetingAsync(meetingId, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _bookedMeetingService.GetDetailMeetingAsync(meetingId, accessToken);
         return Ok(res);
     }
 
@@ -314,8 +342,10 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "DELETE_MEETING", Description = "")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
+        var accessToken = AccessToken;
+
         await _bookedMeetingService.DeleteAsync(id);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been deleted successfully" });
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been deleted successfully" });
         return Ok("The meeting has been deleted successfully !");
     }
 
@@ -339,7 +369,9 @@ public class MeetingController : BaseController
     [AuditLog(Tag = "VIEW_SELF_NUMBER_OF_BAN", Description = "")]
     public async Task<IActionResult> GetCurNumberOfBan()
     {
-        var res = await _bookedMeetingService.GetCurNumberOfBanAsync(AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _bookedMeetingService.GetCurNumberOfBanAsync(accessToken);
         return Ok(res);
     }
 

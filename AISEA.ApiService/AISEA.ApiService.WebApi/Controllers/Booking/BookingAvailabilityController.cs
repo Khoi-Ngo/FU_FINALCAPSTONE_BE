@@ -42,8 +42,10 @@ public class BookingAvailabilityController : BaseController
     [AuditLog(Tag = "CREATE_BOOKING_AVAILABILITY", Description = "")]
     public async Task<IActionResult> CreateBookingAvailability([FromBody] CreateBookingAvailabilityRequest request)
     {
-        await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been created successfully" });
+        var accessToken = AccessToken;
+
+        await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been created successfully" });
         return Ok("Booking availability has been created successfully!");
 
     }
@@ -56,16 +58,17 @@ public class BookingAvailabilityController : BaseController
     [AuditLog(Tag = "BULK_CREATE_BOOKING_AVAILABILITY", Description = "")]
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
+        var accessToken = AccessToken;
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
               {
                   var qBookingAvaiService = sp.GetRequiredService<BookingAvailabilityService>();
 
-                  await qBookingAvaiService.BulkCreateBookingAvailabilityAsync(request, AccessToken);
+                  await qBookingAvaiService.BulkCreateBookingAvailabilityAsync(request, accessToken);
 
                   var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
                   
-                  await qNotifier.NotifyUserAsync(AccessToken,
+                  await qNotifier.NotifyUserAsync(accessToken,
                   new NotificationDTO { Title = "Warning", Content = "Booking availabilities have been created successfully" });
               });
 
@@ -94,7 +97,9 @@ public class BookingAvailabilityController : BaseController
     [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY", Description = "")]
     public async Task<IActionResult> SelfGetBookingAvailabilities()
     {
-        var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(AccessToken);
+        var accessToken = AccessToken;
+
+        var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(accessToken);
         return Ok(result);
     }
 
@@ -119,8 +124,10 @@ public class BookingAvailabilityController : BaseController
     [AuditLog(Tag = "UPDATE_BOOKING_AVAILABILITY", Description = "")]
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
-        await _bookingAvailabilityService.UpdateAsync(id, request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been updated successfully" });
+        var accessToken = AccessToken;
+
+        await _bookingAvailabilityService.UpdateAsync(id, request, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been updated successfully" });
         return Ok("Booking availability has been updated successfully!");
     }
 
@@ -132,8 +139,10 @@ public class BookingAvailabilityController : BaseController
     [AuditLog(Tag = "DELETE_BOOKING_AVAILABILITY", Description = "")]
     public async Task<IActionResult> DeleteBookingAvailability(long id)
     {
-        await _bookingAvailabilityService.DeleteAsync(id, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been deleted" });
+        var accessToken = AccessToken;
+
+        await _bookingAvailabilityService.DeleteAsync(id, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been deleted" });
         return Ok("Booking availability has been deleted!");
     }
 

@@ -83,10 +83,14 @@ public class UserController : BaseController
     [AuditLog(Tag = "UPDATE_USER", Description = "")]
     public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
-        await _userService.UpdateUserAsync(id, request, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken,
+
+        await _userService.UpdateUserAsync(id, request, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "Update user successfully" });
+
         return Ok("Update user successfully");
 
     }
@@ -98,9 +102,11 @@ public class UserController : BaseController
     [AuditLog(Tag = "UPDATE_USER", Description = "")]
     public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
     {
-        await _userService.UpdateUserAsync(id, request, AccessToken);
+        var accessToken = AccessToken;
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _userService.UpdateUserAsync(id, request, accessToken);
+
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "Update user successfully" });
         return Ok("Update user successfully");
 
@@ -115,10 +121,13 @@ public class UserController : BaseController
     [AuditLog(Tag = "DISABLE_USER", Description = "")]
     public async Task<IActionResult> DisableUser(long id)
     {
+        var accessToken = AccessToken;
+
         await _userService.DisableUserAsync(id);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "Disable user successfully" });
+
         return Ok("Disable user successfully");
 
     }
@@ -239,10 +248,13 @@ public class UserController : BaseController
     [AuditLog(Tag = "CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
+        var accessToken = AccessToken;
+
         await _userService.CreateUserAsync(request);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
                 new NotificationDTO { Title = "Successfully", Content = "New user is created successfully" });
+
         return Ok("New user is created successfully");
 
     }
@@ -256,13 +268,17 @@ public class UserController : BaseController
     [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)
     {
+        var accessToken = AccessToken;
+
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
       {
           var qUserService = sp.GetRequiredService<UserService>();
-          await qUserService.CreateUsersAsync(requests);
           var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-          await qNotifier.NotifyUserAsync(AccessToken,
+
+          await qUserService.CreateUsersAsync(requests);
+
+          await qNotifier.NotifyUserAsync(accessToken,
            new NotificationDTO { Title = "Successfully", Content = "New users are bulk created successfully" });
       });
 
@@ -280,13 +296,16 @@ public class UserController : BaseController
     [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateStudents([FromBody] List<BulkCreateStudentRequest> requests)
     {
+        var accessToken = AccessToken;
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
    {
        var qUserService = sp.GetRequiredService<UserService>();
-       await qUserService.CreateUsersAsync(requests);
        var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-       await qNotifier.NotifyUserAsync(AccessToken,
+
+       await qUserService.CreateUsersAsync(requests);
+
+       await qNotifier.NotifyUserAsync(accessToken,
              new NotificationDTO { Title = "Successfully", Content = "New students are bulk created successfully" });
    });
 
@@ -301,13 +320,16 @@ public class UserController : BaseController
     [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateAdvisors([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
+        var accessToken = AccessToken;
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
 {
     var qUserService = sp.GetRequiredService<UserService>();
-    await qUserService.CreateUsersAsync(requests, EUserRole.ADVISOR);
     var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-    await qNotifier.NotifyUserAsync(AccessToken,
+
+    await qUserService.CreateUsersAsync(requests, EUserRole.ADVISOR);
+
+    await qNotifier.NotifyUserAsync(accessToken,
                   new NotificationDTO { Title = "Successfully", Content = "New advisors are bulk created successfully" });
 });
 
@@ -322,13 +344,16 @@ public class UserController : BaseController
     [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateAcademicStaffs([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
+        var accessToken = AccessToken;
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
 {
     var qUserService = sp.GetRequiredService<UserService>();
-    await qUserService.CreateUsersAsync(requests, EUserRole.ACADEMIC_STAFF);
     var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-    await qNotifier.NotifyUserAsync(AccessToken,
+
+    await qUserService.CreateUsersAsync(requests, EUserRole.ACADEMIC_STAFF);
+
+    await qNotifier.NotifyUserAsync(accessToken,
                   new NotificationDTO { Title = "Successfully", Content = "New academic staffs are bulk created successfully" });
 });
         return Ok("Bulk create academic staff has been queued successfully");
@@ -342,13 +367,14 @@ public class UserController : BaseController
     [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateAdmins([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
+        var accessToken = AccessToken;
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
 {
     var qUserService = sp.GetRequiredService<UserService>();
     await qUserService.CreateUsersAsync(requests, EUserRole.ADMIN);
     var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-    await qNotifier.NotifyUserAsync(AccessToken,
+    await qNotifier.NotifyUserAsync(accessToken,
               new NotificationDTO { Title = "Successfully", Content = "New admins are bulk created successfully" });
 });
 
@@ -363,12 +389,14 @@ public class UserController : BaseController
     [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateManagers([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
+        var accessToken = AccessToken;
+
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
 {
     var qUserService = sp.GetRequiredService<UserService>();
     await qUserService.CreateUsersAsync(requests, EUserRole.MANAGER);
     var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-    await qNotifier.NotifyUserAsync(AccessToken,
+    await qNotifier.NotifyUserAsync(accessToken,
           new NotificationDTO { Title = "Successfully", Content = "New managers are bulk created successfully" });
 });
 
@@ -386,9 +414,11 @@ public class UserController : BaseController
     [AuditLog(Tag = "RESET_NUMBER_OF_BAN", Description = "")]
     public async Task<IActionResult> ResetNumberOfBan(long studentProfileId)
     {
+        var accessToken = AccessToken;
+
         await _userService.ResetNumberOfBanAsync(studentProfileId);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
               new NotificationDTO { Title = "Successfully", Content = "The number of ban for the student profile id has been reset" });
         return Ok("The number of ban for the student profile id has been reset");
     }
@@ -401,9 +431,12 @@ public class UserController : BaseController
     [AuditLog(Tag = "UPDATE_USER_AVATAR", Description = "")]
     public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
     {
-        await _userService.UpdateAvatarAsync(AccessToken, request);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        var accessToken = AccessToken;
+
+        await _userService.UpdateAvatarAsync(accessToken, request);
+
+        await _notifier.NotifyUserAsync(accessToken,
               new NotificationDTO { Title = "Successfully", Content = "The avatar has been updated successfully" });
         return Ok("The avatar has been updated successfully");
     }
@@ -415,9 +448,11 @@ public class UserController : BaseController
     [AuditLog(Tag = "UPDATE_USER_AVATAR", Description = "")]
     public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
     {
+        var accessToken = AccessToken;
+
         await _userService.UpdateAvatarAsync(userId, request);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
               new NotificationDTO { Title = "Successfully", Content = "The avatar has been updated successfully" });
         return Ok("The avatar has been updated successfully");
     }

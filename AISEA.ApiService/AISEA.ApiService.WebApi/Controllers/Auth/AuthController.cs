@@ -32,7 +32,8 @@ public class AuthController : BaseController
         [FromHeader(Name = "RefreshToken")] string refreshToken)
     {
         //? The param never used due to this is just for swagger ui gen (API testing only)
-        var res = await _authService.RefreshAsync(AccessToken, RefreshToken);
+        var accessToken = AccessToken;
+        var res = await _authService.RefreshAsync(accessToken, RefreshToken);
         return Ok(res);
     }
 
@@ -97,8 +98,9 @@ public class AuthController : BaseController
     [AuditLog(Tag = "RESET_PASS", Description = "")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordFEIDRequest request)
     {
-        await _authService.ResetPasswordAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Ok", Content = "Reset password ok" });
+        var accessToken = AccessToken;
+        await _authService.ResetPasswordAsync(request, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Ok", Content = "Reset password ok" });
         return Ok("Reset password ok!");
 
     }
@@ -111,7 +113,8 @@ public class AuthController : BaseController
     [AuditLog(Tag = "LOGOUT", Description = "")]
     public async Task<IActionResult> Logout()
     {
-        await _authService.LogoutAsync(AccessToken);
+        var accessToken = AccessToken;
+        await _authService.LogoutAsync(accessToken);
         return Ok("Logged out successfully");
     }
 

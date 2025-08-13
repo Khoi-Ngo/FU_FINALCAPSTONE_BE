@@ -58,9 +58,11 @@ public class RoleController : BaseController
     [AuditLog(Tag = "CREATE_ROLE", Description = "The role has been created")]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest role)
     {
+        var accessToken = AccessToken;
+
         await _roleService.CreateRoleAsync(role);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
                       new NotificationDTO { Title = "Successfully", Content = "New role is created successfully" });
         return Ok("New role is created successfully");
     }
@@ -72,9 +74,11 @@ public class RoleController : BaseController
     [AuditLog(Tag = "UPDATE_ROLE", Description = "The role has been updated")]
     public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
     {
+        var accessToken = AccessToken;
+
         await _roleService.UpdateRoleAsync(id, role);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
               new NotificationDTO { Title = "Successfully", Content = "The role is updated successfully" });
         return Ok("The role is updated successfully");
     }

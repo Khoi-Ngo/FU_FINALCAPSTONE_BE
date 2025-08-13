@@ -42,8 +42,9 @@ public class LeaveScheController : BaseController
     [AuditLog(Tag = "CREATE_LEAVE_SCHEDULE", Description = "")]
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
-        await _leaveScheduleService.CreateAsync(request, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully." });
+        var accessToken = AccessToken;
+        await _leaveScheduleService.CreateAsync(request, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully." });
         return Ok("Leaving Schedule has been created successfully.");
 
 
@@ -54,13 +55,14 @@ public class LeaveScheController : BaseController
     [AuditLog(Tag = "BULK_CREATE_LEAVE_SCHEDULE", Description = "")]
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
     {
+        var accessToken = AccessToken;
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
             {
                 var qLeaveScheService = sp.GetRequiredService<LeaveScheduleService>();
-                await qLeaveScheService.CreateBulkAsync(requests, AccessToken);
+                await qLeaveScheService.CreateBulkAsync(requests, accessToken);
                 var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-                await qNotifier.NotifyUserAsync(AccessToken,
+                await qNotifier.NotifyUserAsync(accessToken,
                  new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully" });
             });
 
@@ -76,8 +78,10 @@ public class LeaveScheController : BaseController
     [AuditLog(Tag = "UPDATE_LEAVE_SCHEDULE", Description = "")]
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
-        await _leaveScheduleService.UpdateAsync(request, id, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been updated successfully" });
+        var accessToken = AccessToken;
+
+        await _leaveScheduleService.UpdateAsync(request, id, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been updated successfully" });
         return Ok("Leaving Schedule has been updated successfully!");
     }
 
@@ -89,8 +93,10 @@ public class LeaveScheController : BaseController
     [AuditLog(Tag = "DELETE_LEAVE_SCHEDULE", Description = "")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
-        await _leaveScheduleService.DeleteAsync(id, AccessToken);
-        await _notifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Successfully", Content = "Leave Schedule has been deleted" });
+        var accessToken = AccessToken;
+
+        await _leaveScheduleService.DeleteAsync(id, accessToken);
+        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Leave Schedule has been deleted" });
         return Ok("Leave Schedule has been deleted!");
 
     }
@@ -131,7 +137,9 @@ public class LeaveScheController : BaseController
     [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE", Description = "")]
     public async Task<IActionResult> GetAllForAStaffSimply([FromQuery] PaginationRequest request)
     {
-        var res = await _leaveScheduleService.GetAllSimplyAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _leaveScheduleService.GetAllSimplyAsync(request, accessToken);
         return Ok(res);
     }
 

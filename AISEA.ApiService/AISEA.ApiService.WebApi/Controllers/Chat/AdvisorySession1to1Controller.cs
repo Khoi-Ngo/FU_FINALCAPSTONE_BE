@@ -38,12 +38,13 @@ public class AdvisorySession1to1Controller : BaseController
     [AuditLog(Tag = "DELETE_CHAT_SESSION", Description = "")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
-        var sessionDeleted = await _advisorySession1To1Service.DeleteAsync(id, AccessToken);
+        var accessToken = AccessToken;
+        var sessionDeleted = await _advisorySession1To1Service.DeleteAsync(id, accessToken);
 
         // Notify student, staff, and session groups
         await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
 
-        await _notifier.NotifyUserAsync(AccessToken,
+        await _notifier.NotifyUserAsync(accessToken,
         new NotificationDTO { Title = "Successfully", Content = "The chat session got deleted successfully" });
 
         return Ok("The chat session got deleted successfully");
@@ -56,7 +57,9 @@ public class AdvisorySession1to1Controller : BaseController
     [AuditLog(Tag = "INIT_ADVISOR_CHAT_SESSION", Description = "")]
     public async Task<IActionResult> InitHumanChatSessionAsync([FromBody] InitHumanChatSessionRequest request)
     {
-        var (hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var (hubRes, studentProfileId) = await _advisorySession1To1Service.InitHumanChatSessionAsync(request, accessToken);
         //call hub context -> push
         await _advisorySessionHubNotifier.NotifySessionCreatedAsync(studentProfileId, hubRes);
         return Ok("The chat session got created successfully");
@@ -69,7 +72,9 @@ public class AdvisorySession1to1Controller : BaseController
     [AuditLog(Tag = "VIEW_CHATBOT_SESSION", Description = "")]
     public async Task<IActionResult> GetAsync([FromQuery] PaginationRequest request)
     {
-        var res = await _advisorySession1To1Service.GetBotSessionsAsync(request, AccessToken);
+        var accessToken = AccessToken;
+
+        var res = await _advisorySession1To1Service.GetBotSessionsAsync(request, accessToken);
         return Ok(res);
     }
 

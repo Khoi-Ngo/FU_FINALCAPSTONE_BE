@@ -1,10 +1,10 @@
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
-using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
-using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
+using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
@@ -27,11 +27,11 @@ public class JoinedSubjectService
         _jWTService = jWTService;
     }
 
-    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id, string accessToken)
+    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id)
     {
         try
         {
-            var subject = await _joinedSubjectRepository.GetByIdWStudentUserIdAsync(id);
+            var subject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
 
             _joinedSubjectRepository.RemoveAsync(subject);
 
@@ -273,46 +273,44 @@ public class JoinedSubjectService
         }).ToList();
     }
 
+    private bool IsValidAccessView(string accessToken, JoinedSubject joinedSubject)
+    {
+        if (_jWTService.GetRoleIdFromToken(accessToken) == (int)EUserRole.STUDENT)
+        {
+            return joinedSubject.StudentProfileId == _jWTService.GetProfileIdFromToken(accessToken);
+        }
+        return true;
+    }
 
     #endregion
 
 
     #region Response
 
-    public async Task<PagedResult<JoinedSubjectListItemResponse>> GetAllBySelfPagedAsync(PaginationRequest request, string accessToken)
+    public async Task<List<JoinedSubjectResponse>> GetAllBySelfAsync(string accessToken)
     {
-        var (joinedSubjects, totalCount) = await _joinedSubjectRepository.GetAllByStudentProfileIDPagedAsync(request.PageNumber, request.PageSize, _jWTService.GetProfileIdFromToken(accessToken));
-        return new PagedResult<JoinedSubjectListItemResponse>
-        {
-            Items = _mapper.Map<List<JoinedSubjectListItemResponse>>(joinedSubjects),
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
+        var res = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(_jWTService.GetProfileIdFromToken(accessToken));
+        return _mapper.Map<List<JoinedSubjectResponse>>(res);
     }
 
-    public async Task<PagedResult<JoinedSubjectListItemResponse>> GetAllBySelfLatestSemesterPagedAsync(PaginationRequest request, string accessToken)
+    public async Task<List<JoinedSubjectResponse>> GetAllBySelfLatestSemesterAsync(string accessToken)
     {
-        var (joinedSubjects, totalCount) = await _joinedSubjectRepository.GetAllBySelfLatestSemesterPagedAsync(request.PageNumber, request.PageSize, _jWTService.GetProfileIdFromToken(accessToken));
-        return new PagedResult<JoinedSubjectListItemResponse>
-        {
-            Items = _mapper.Map<List<JoinedSubjectListItemResponse>>(joinedSubjects),
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
+        var res = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDLatestSemesAsync(_jWTService.GetProfileIdFromToken(accessToken));
+        return _mapper.Map<List<JoinedSubjectResponse>>(res);
     }
 
-    public async Task<PagedResult<JoinedSubjectListItemResponse>> GetAllByStudentProfileIdPagedAsync(PaginationRequest request, long studentProfileId)
+    public async Task<List<JoinedSubjectResponse>> GetAllByStudentProfileIdAsync(long studentProfileId)
     {
-        var (joinedSubjects, totalCount) = await _joinedSubjectRepository.GetAllByStudentProfileIDPagedAsync(request.PageNumber, request.PageSize, studentProfileId);
-        return new PagedResult<JoinedSubjectListItemResponse>
-        {
-            Items = _mapper.Map<List<JoinedSubjectListItemResponse>>(joinedSubjects),
-            TotalCount = totalCount,
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize
-        };
+        var res = await _joinedSubjectRepository.GetAllByStudentProfileIDAsync(studentProfileId);
+        return _mapper.Map<List<JoinedSubjectResponse>>(res);
+    }
+
+    public async Task<JoinedSubjectResponse> GetByIdAsync(string accessToken, long id)
+    {
+        var res = await _joinedSubjectRepository.GetByIdAsync(id);
+        if (!IsValidAccessView(accessToken, res)) throw new InvalidAccessJoinedSubject("You have no permission to access");
+        return _mapper.Map<JoinedSubjectResponse>(res);
+
     }
 
 

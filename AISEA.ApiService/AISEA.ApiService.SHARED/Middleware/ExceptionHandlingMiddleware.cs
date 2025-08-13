@@ -209,6 +209,14 @@ public class ExceptionHandlingMiddleware
                     message = exception.Message
                 });
                 break;
+            case InvalidAccessJoinedSubject:
+                statusCode = (int)HttpStatusCode.Unauthorized;
+                result = JsonSerializer.Serialize(new
+                {
+                    status = statusCode,
+                    message = exception.Message
+                });
+                break;
 
             default:
                 logger.LogError(exception, "Unhandled exception");

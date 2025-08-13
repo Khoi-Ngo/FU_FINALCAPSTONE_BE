@@ -11,49 +11,35 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
     {
     }
 
-    public async Task<(object joinedSubjects, int totalCount)> GetAllBySelfLatestSemesterPagedAsync(
-     int pageNumber,
-     int pageSize,
-     long studentProfileId)
+    public async Task<IEnumerable<JoinedSubject>> GetAllByStudentProfileIDAsync(long studentProfileId)
+    {
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDAsync(long studentProfileId)
+    {
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
+    }
+
+    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDLatestSemesAsync(long studentProfileId)
     {
         var latestSemesterId = await _context.JoinedSubjects
-            .Where(js => js.StudentProfileId == studentProfileId)
-            .OrderByDescending(js => js.Semester.CreatedAt)
-            .Select(js => js.SemesterId)
-            .FirstOrDefaultAsync();
+           .Where(js => js.StudentProfileId == studentProfileId)
+           .OrderByDescending(js => js.Semester.CreatedAt)
+           .Select(js => js.SemesterId)
+           .FirstOrDefaultAsync();
 
         if (latestSemesterId == 0)
-            return (Array.Empty<JoinedSubject>(), 0);
+            return new List<JoinedSubject>();
 
-        var query = _context.JoinedSubjects
-            .Where(js => js.StudentProfileId == studentProfileId && js.SemesterId == latestSemesterId);
 
-        var totalCount = await query.CountAsync();
-        var joinedSubjects = await query
-            .OrderByDescending(js => js.CreatedAt)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
 
-        return (joinedSubjects, totalCount);
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId
+        && js.IsActive
+        && js.SemesterId == latestSemesterId).ToListAsync();
     }
 
-
-    public async Task<(object joinedSubjects, int totalCount)> GetAllByStudentProfileIDPagedAsync(int pageNumber, int pageSize, long studentProfileId)
-    {
-        var query = _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId);
-
-        var totalCount = await query.CountAsync();
-
-        var joinedSubjects = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        return (joinedSubjects, totalCount);
-    }
-
-    public async Task<JoinedSubject> GetByIdWStudentUserIdAsync(long id)
+    public async Task<JoinedSubject> GetByIdWStudentProfileAsync(long id)
     {
         return await _context.JoinedSubjects
             .Include(js => js.StudentProfile)

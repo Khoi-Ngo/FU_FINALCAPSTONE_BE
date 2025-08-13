@@ -1,5 +1,4 @@
 using AISEA.ApiService.DAL.Entities;
-using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
 using AutoMapper;
 
@@ -9,13 +8,10 @@ public class JoinedSubjectProfile : Profile
 {
     public JoinedSubjectProfile()
     {
-        // Single subject mapping
-        CreateMap<SingleImportJoinedSubjectRequest, JoinedSubject>();
-
-
-
 
         //RESPONSE
-        CreateMap<JoinedSubject, JoinedSubjectListItemResponse>();
+        CreateMap<JoinedSubject, JoinedSubjectResponse>()
+        .ForMember(dest => dest.SemesterName
+        , opt => opt.MapFrom(src => src.Semester.SemesterName));
     }
 }

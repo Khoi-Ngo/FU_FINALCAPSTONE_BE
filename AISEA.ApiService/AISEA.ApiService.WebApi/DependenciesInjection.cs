@@ -172,7 +172,13 @@ public static class DependenciesInjection
                     provider.GetRequiredService<IBackgroundTaskQueue>(),
                     provider.GetRequiredService<IServiceProvider>())
             );
+        //API Still Run even the BackGround Services crashed
 
+
+        services.Configure<HostOptions>(options =>
+        {
+            options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+        });
 
 
         return services;

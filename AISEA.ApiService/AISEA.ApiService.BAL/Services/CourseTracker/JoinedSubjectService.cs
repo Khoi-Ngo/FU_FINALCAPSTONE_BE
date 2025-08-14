@@ -167,14 +167,6 @@ public class JoinedSubjectService
             // }
 
 
-            //Check more than 2 subject code in the same semester
-            var checkSubjectCodes = studentJoinedSubjects.Where(j => j.SubjectCode == request.SubjectCode && j.SemesterId == request.SemesterId);
-            if (!checkSubjectCodes.IsNullOrEmpty() && checkSubjectCodes.Count() == _courseTrackSettings.MaxDuplicateSubjectCodePerStuSem)
-            {
-                failNoti.Content = "Student can only have 2 duplicate subject per semester";
-                return (failNoti, conductorUserId, false);
-            }
-
             //TODO: Check met the prerequisite
 
             ///get the subject code of the prerequisites
@@ -275,7 +267,8 @@ public class JoinedSubjectService
                 }
                 // Handle other unique constraint violations by checking their names here...
                 break;
-
+            case 50021:
+                return "Student cannot have more than 2 times imported for the same subject in the same semester";
 
             case 547:
                 return "Invalid joined subject data. Please check Profile Data and Semester Data." + ex.Message;

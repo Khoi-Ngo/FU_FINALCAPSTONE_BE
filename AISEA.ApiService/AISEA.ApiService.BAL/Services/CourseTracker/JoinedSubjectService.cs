@@ -27,22 +27,18 @@ public class JoinedSubjectService
     private readonly CourseTrackSettings _courseTrackSettings;
     private readonly ILogger<JoinedSubjectService> _logger;
 
-    public JoinedSubjectService(UserRepository userRepository
-    , JoinedSubjectRepository joinedSubjectRepository
-    , IMapper mapper
-    , IJWTService jWTService
-    , CourseTrackSettings courseTrackSettings
-    , SubjectVersionPrerequisiteRepository subjectVersionPrerequisiteRepository
-    , ILogger<JoinedSubjectService> logger)
+    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService, SubjectRepository subjectRepository, SubjectVersionPrerequisiteRepository subjectVersionPrerequisiteRepository, CourseTrackSettings courseTrackSettings, ILogger<JoinedSubjectService> logger)
     {
         _userRepository = userRepository;
         _joinedSubjectRepository = joinedSubjectRepository;
         _mapper = mapper;
         _jWTService = jWTService;
-        _courseTrackSettings = courseTrackSettings;
+        _subjectRepository = subjectRepository;
         _subjectVersionPrerequisiteRepository = subjectVersionPrerequisiteRepository;
+        _courseTrackSettings = courseTrackSettings;
         _logger = logger;
     }
+
 
 
     #region  IMPORT JOINED SUBJECT
@@ -77,7 +73,7 @@ public class JoinedSubjectService
         //init fail noti with unidentified exception
         var failNoti = new NotificationDTO
         {
-            Title = $"Fail import ${request.StudentUserName} with ${request.SubjectCode}",
+            Title = $"Fail import {request.StudentUserName} with {request.SubjectCode}",
             Content = "Unidentified error while importing subject"
         };
 

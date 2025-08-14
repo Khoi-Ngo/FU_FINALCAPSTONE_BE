@@ -20,5 +20,28 @@ namespace AISEA.ApiService.DAL.Repositories
                 .OrderBy(ss => ss.SessionNumber)
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Checks if a session number already exists within a syllabus
+        /// </summary>
+        public async Task<bool> ExistsSessionNumberAsync(long syllabusId, int sessionNumber)
+        {
+            return await _context.SyllabusSessions
+                .AnyAsync(ss => ss.SyllabusId == syllabusId && 
+                               ss.SessionNumber == sessionNumber && 
+                               !ss.IsDeleted);
+        }
+
+        /// <summary>
+        /// Checks if a session number already exists within a syllabus, excluding a specific session ID
+        /// </summary>
+        public async Task<bool> ExistsSessionNumberAsync(long syllabusId, int sessionNumber, long excludeSessionId)
+        {
+            return await _context.SyllabusSessions
+                .AnyAsync(ss => ss.SyllabusId == syllabusId && 
+                               ss.SessionNumber == sessionNumber && 
+                               ss.Id != excludeSessionId &&
+                               !ss.IsDeleted);
+        }
     }
 }

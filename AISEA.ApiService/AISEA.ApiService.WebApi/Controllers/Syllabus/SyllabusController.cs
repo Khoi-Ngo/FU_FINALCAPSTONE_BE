@@ -140,7 +140,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates a session for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("sessions")]
-        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF | (int)EUserRole.ADMIN)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
         public async Task<IActionResult> CreateSession([FromBody] CreateSyllabusSessionRequest request)
         {
             var sessionId = await _syllabusService.CreateSessionAsync(request);
@@ -151,7 +151,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Maps a session to a learning outcome (Academic Staff only)
         /// </summary>
         [HttpPost("sessions/{sessionId}/outcomes/{outcomeId}")]
-        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
         public async Task<IActionResult> MapSessionToOutcome(long sessionId, long outcomeId)
         {
             await _syllabusService.MapSessionToOutcomeAsync(sessionId, outcomeId);
@@ -206,7 +206,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         /// Creates multiple sessions for a syllabus (Academic Staff only)
         /// </summary>
         [HttpPost("sessions/bulk")]
-        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF | (int)EUserRole.ADMIN)] // Admin, Academic Staff
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
         public async Task<IActionResult> CreateSessions([FromBody] List<CreateSyllabusSessionRequest> requests)
         {
             var sessionId = await _syllabusService.CreateSyllabusSessionsAsync(requests);
@@ -225,10 +225,10 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
-        /// Deletes an assessment (Admin only)
+        /// Deletes an assessment (Academic Staff only)
         /// </summary>
         [HttpDelete("assessments/{id}")]
-        [PermissionAuthorize((int)EUserRole.MANAGER)] // Admin only
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
         public async Task<IActionResult> DeleteAssessment(long id)
         {
             await _syllabusService.DeleteAssessmentAsync(id);
@@ -247,7 +247,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
-        /// Deletes a learning material (Admin only)
+        /// Deletes a learning material (Academic Staff only)
         /// </summary>
         [HttpDelete("materials/{id}")]
         [PermissionAuthorize((int)EUserRole.MANAGER)] // Admin only
@@ -269,7 +269,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
-        /// Deletes a learning outcome (Admin only)
+        /// Deletes a learning outcome (Academic Staff only)
         /// </summary>
         [HttpDelete("outcomes/{id}")]
         [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff
@@ -291,7 +291,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
-        /// Deletes a session (Admin only)
+        /// Deletes a session (Academic Staff only)
         /// </summary>
         [HttpDelete("sessions/{id}")]
         [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)] // Academic Staff

@@ -119,52 +119,52 @@ public class JoinedSubjectService
                 return (failNoti, conductorUserId, false);
             }
 
-            var subjectVersion = subject.SubjectVersions.FirstOrDefault(sv => sv.VersionCode == request.SubjectVersionCode);
+            // var subjectVersion = subject.SubjectVersions.FirstOrDefault(sv => sv.VersionCode == request.SubjectVersionCode);
 
-            if (subjectVersion is null || !subjectVersion.IsActive || subject.IsDeleted)
-            {
-                failNoti.Content = "There is no valid subject version code for the subject code";
-                return (failNoti, conductorUserId, false);
-            }
+            // if (subjectVersion is null || !subjectVersion.IsActive || subject.IsDeleted)
+            // {
+            //     failNoti.Content = "There is no valid subject version code for the subject code";
+            //     return (failNoti, conductorUserId, false);
+            // }
 
-            if (!subject.ComboSubjects.IsNullOrEmpty())
-            {
-                //!subject in a combo
-                var combos = subject.ComboSubjects
-                                    .Where(cs => !cs.IsDeleted)
-                                    .Select(cs => cs.Combo)
-                                    .ToList();
+            // if (!subject.ComboSubjects.IsNullOrEmpty())
+            // {
+            //     //!subject in a combo
+            //     var combos = subject.ComboSubjects
+            //                         .Where(cs => !cs.IsDeleted)
+            //                         .Select(cs => cs.Combo)
+            //                         .ToList();
                                 
                 
-                var combo = combos.FirstOrDefault(c => !c.IsDeleted
-                && c.ApprovalStatus == EApprovalStatus.APPROVED
-                && c.ComboName == studentProfile.RegisteredComboCode);
+            //     var combo = combos.FirstOrDefault(c => !c.IsDeleted
+            //     && c.ApprovalStatus == EApprovalStatus.APPROVED
+            //     && c.ComboName == studentProfile.RegisteredComboCode);
 
 
-                if (combo == null)
-                {
-                    failNoti.Content = "The combo is not valid";
-                    return (failNoti, conductorUserId, false);
-                }
+            //     if (combo == null)
+            //     {
+            //         failNoti.Content = "The combo is not valid";
+            //         return (failNoti, conductorUserId, false);
+            //     }
 
-            }
+            // }
 
-            var curriculums = subjectVersion.CurriculumSubjects
-                                                .Where(cs => !cs.IsDeleted)
-                                                .Select(cs => cs.Curriculum)
-                                                .ToList();
-
-
-            var curriculum = curriculums.FirstOrDefault(cc => cc.CurriculumCode == studentProfile.CurriculumCode
-            && cc.ApprovalStatus == EApprovalStatus.APPROVED
-            && !cc.IsDeleted);
+            // var curriculums = subjectVersion.CurriculumSubjects
+            //                                     .Where(cs => !cs.IsDeleted)
+            //                                     .Select(cs => cs.Curriculum)
+            //                                     .ToList();
 
 
-            if (curriculum == null)
-            {
-                failNoti.Content = "The curriculum is not valid";
-                return (failNoti, conductorUserId, false);
-            }
+            // var curriculum = curriculums.FirstOrDefault(cc => cc.CurriculumCode == studentProfile.CurriculumCode
+            // && cc.ApprovalStatus == EApprovalStatus.APPROVED
+            // && !cc.IsDeleted);
+
+
+            // if (curriculum == null)
+            // {
+            //     failNoti.Content = "The curriculum is not valid";
+            //     return (failNoti, conductorUserId, false);
+            // }
 
 
             //Check more than 2 subject code in the same semester
@@ -183,7 +183,8 @@ public class JoinedSubjectService
 
 
 
-            await _joinedSubjectRepository.CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName, subject.SubjectName, subject.Credits));
+            await _joinedSubjectRepository.
+            CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName, subject.SubjectName, subject.Credits));
 
             return (new NotificationDTO
             {

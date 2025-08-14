@@ -257,6 +257,13 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
                 throw new NotFoundException("Syllabus not found.");
             }
 
+            // Check if session number already exists for this syllabus
+            var sessionNumberExists = await _sessionRepository.ExistsSessionNumberAsync(request.SyllabusId, request.SessionNumber);
+            if (sessionNumberExists)
+            {
+                throw new InvalidUserCreatedException($"Session number {request.SessionNumber} already exists for this syllabus. Session numbers must be unique within each syllabus.");
+            }
+
             var session = _mapper.Map<DAL.Entities.SyllabusSession>(request);
             session.CreatedAt = DateTime.UtcNow;
             
@@ -397,6 +404,9 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
         
         public async Task<bool> CreateSyllabusSessionsAsync(List<CreateSyllabusSessionRequest> requests)
         {
+            // Validate all requests first
+            var syllabusSessionNumbers = new Dictionary<long, HashSet<int>>();
+            
             foreach (var request in requests)
             {
                 var syllabus = await _syllabusRepository.GetByIdAsync(request.SyllabusId);
@@ -405,6 +415,31 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
                     throw new NotFoundException($"Syllabus with ID {request.SyllabusId} not found.");
                 }
 
+                // Track session numbers within this batch
+                if (!syllabusSessionNumbers.ContainsKey(request.SyllabusId))
+                {
+                    syllabusSessionNumbers[request.SyllabusId] = new HashSet<int>();
+                }
+                
+                // Check for duplicates within the batch
+                if (syllabusSessionNumbers[request.SyllabusId].Contains(request.SessionNumber))
+                {
+                    throw new InvalidUserCreatedException($"Duplicate session number {request.SessionNumber} found in the batch for syllabus ID {request.SyllabusId}.");
+                }
+                
+                syllabusSessionNumbers[request.SyllabusId].Add(request.SessionNumber);
+                
+                // Check if session number already exists in database
+                var sessionNumberExists = await _sessionRepository.ExistsSessionNumberAsync(request.SyllabusId, request.SessionNumber);
+                if (sessionNumberExists)
+                {
+                    throw new InvalidUserCreatedException($"Session number {request.SessionNumber} already exists for syllabus ID {request.SyllabusId}. Session numbers must be unique within each syllabus.");
+                }
+            }
+            
+            // If all validations pass, create the sessions
+            foreach (var request in requests)
+            {
                 var session = _mapper.Map<DAL.Entities.SyllabusSession>(request);
                 session.CreatedAt = DateTime.UtcNow;
                 
@@ -514,6 +549,13 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             if (session == null || session.IsDeleted)
             {
                 throw new NotFoundException("Session not found.");
+            }
+
+            // Check if the new session number already exists for this syllabus (excluding current session)
+            var sessionNumberExists = await _sessionRepository.ExistsSessionNumberAsync(session.SyllabusId, request.SessionNumber, id);
+            if (sessionNumberExists)
+            {
+                throw new InvalidUserCreatedException($"Session number {request.SessionNumber} already exists for this syllabus. Session numbers must be unique within each syllabus.");
             }
 
             _mapper.Map(request, session);

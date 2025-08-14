@@ -45,24 +45,5 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
             RuleFor(x => x.SemesterStudyBlockType)
             .IsInEnum().WithMessage("SemesterStudyBlockType must be a valid enum value.");
         }
-
-        private bool BeValidSemesterNameFormat(string semesterName)
-        {
-            if (string.IsNullOrWhiteSpace(semesterName))
-                return false;
-
-            var match = System.Text.RegularExpressions.Regex.Match(semesterName, @"^(Spring|Summer|Fall)(\d{4})$");
-
-            if (!match.Success)
-                return false;
-
-            var yearStr = match.Groups[2].Value;
-            if (int.TryParse(yearStr, out int year))
-            {
-                return year >= 2000 && year <= 2999;
-            }
-
-            return false;
-        }
     }
 }

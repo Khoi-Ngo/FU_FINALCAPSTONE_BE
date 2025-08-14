@@ -27,6 +27,7 @@ public class JoinedSubjectConfiguration : IEntityTypeConfiguration<JoinedSubject
             .HasForeignKey(d => d.SemesterId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("joinedsubject_semesterid_foreign");
+            
         builder.ToTable(t =>
         {
             t.HasTrigger("trg_JoinedSubject_SubjectCode_Limit");

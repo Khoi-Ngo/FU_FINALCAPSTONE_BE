@@ -1,11 +1,9 @@
 using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.SHARED.Const.Enums;
-using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.SystemProfile;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
-using AISEA.ApiService.WebApi.HubUtil;
 using AISEA.ApiService.WebApi.InterceptorAPI;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +15,10 @@ public class ProfileController : BaseController
 {
     private readonly StudentProfileService _studentProfileService;
     private readonly StaffProfileService _staffProfileService;
-    private readonly NotificationHubNotifier _notifier;
-    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService, NotificationHubNotifier notifier) : base(endpointSettings)
+    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService) : base(endpointSettings)
     {
         _staffProfileService = staffProfileService;
         _studentProfileService = studentProfileService;
-        _notifier = notifier;
     }
     //TODO: CRUD Combo or Program or Curriculum -> Need Worker Trigger to change data in JoinedSubject table
 
@@ -38,8 +34,6 @@ public class ProfileController : BaseController
         var accessToken = AccessToken;
 
         await _studentProfileService.CreateAsync(request, accessToken);
-        await _notifier.NotifyUserAsync(accessToken,
-         new NotificationDTO { Title = "Profile Created", Content = "The student profile has been created successfully." });
 
         return Ok("Student profile created successfully");
     }
@@ -57,8 +51,6 @@ public class ProfileController : BaseController
         var accessToken = AccessToken;
 
         await _staffProfileService.CreateAsync(request, accessToken);
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Profile Created", Content = "The staff profile has been created successfully." });
         return Ok("Staff profile created successfully");
     }
 

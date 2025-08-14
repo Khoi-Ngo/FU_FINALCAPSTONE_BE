@@ -46,7 +46,6 @@ public class MeetingController : BaseController
         var accessToken = AccessToken;
         var (parterNoti, partnerUserId) = await _bookedMeetingService.CreateMeetingAsync(request, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The meeting has been created successfully.");
@@ -66,7 +65,6 @@ public class MeetingController : BaseController
 
         await _bookedMeetingService.StuCancelPendingAsync(id, request, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
 
         return Ok("The meeting has been canceled successfully");
     }
@@ -85,7 +83,6 @@ public class MeetingController : BaseController
 
         var (parterNoti, partnerUserId) = await _bookedMeetingService.AdvisorCancelMeetingAsync(accessToken, request, meetingId);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
 
@@ -107,7 +104,6 @@ public class MeetingController : BaseController
 
         var (parterNoti, partnerUserId) = await _bookedMeetingService.ConfirmMeetingAsync(id, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The meeting has been confirmed successfully.");
@@ -128,7 +124,6 @@ public class MeetingController : BaseController
 
         var (parterNoti, partnerUserId, studentProfileId, numberOfBan) = await _bookedMeetingService.StuCancelTheConfirmedAsync(id, request, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
@@ -160,7 +155,6 @@ public class MeetingController : BaseController
 
         var (parterNoti, partnerUserId) = await _bookedMeetingService.CompleteAsync(accessToken, id, request);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The meeting has been checked in successfully");
@@ -177,8 +171,6 @@ public class MeetingController : BaseController
         var accessToken = AccessToken;
 
         await _bookedMeetingService.FeedbackAsync(accessToken, request, meetingId);
-
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Give feedback ok!" });
 
         return Ok("The feedback has been submitted successfully");
     }
@@ -197,7 +189,6 @@ public class MeetingController : BaseController
 
         var (parterNoti, partnerUserId) = await _bookedMeetingService.MarkAdvisorMissedAsync(accessToken, id, request);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "The meeting has been canceled successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
 
@@ -217,7 +208,6 @@ public class MeetingController : BaseController
 
         var (parterNoti, partnerUserId) = await _bookedMeetingService.AddReasonForOverdueAsync(accessToken, request, meetingId);
 
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Give reason successfully" });
         await _notifier.NotifyUserAsync(partnerUserId, new NotificationDTO { Title = parterNoti.Title, Content = parterNoti.Content });
 
         return Ok("The reason for overdue has been added successfully");

@@ -1,9 +1,5 @@
 using AISEA.ApiService.BAL.Services.Notification;
-using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.PropConfigs;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace AISEA.ApiService.WebApi.BgJob;
 

@@ -38,6 +38,33 @@ namespace AISEA.ApiService.DAL.Infrastructure
             }
         }
 
+        public async Task SendHtmlEmailAsync(string to, string subject, string htmlBody)
+        {
+            if (string.IsNullOrEmpty(to)) throw new ArgumentNullException(nameof(to));
+
+            var from = new EmailAddress(_mailSettings.From, _mailSettings.DisplayName);
+            var toAddress = new EmailAddress(to);
+
+            // Plain text fallback in case the client does not support HTML
+            var plainTextFallback = "Please view this email in an HTML-compatible email client.";
+
+            var msg = MailHelper.CreateSingleEmail(
+                from,
+                toAddress,
+                subject,
+                plainTextFallback,  // Plain text content
+                htmlBody            // HTML content
+            );
+
+            var response = await _sendGridClient.SendEmailAsync(msg);
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new Exception($"Failed to send HTML email: {response.StatusCode}");
+            }
+        }
+
+
         public async Task SendEmailWithAttachmentAsync(string to, string subject, string body, string attachmentPath)
         {
             if (string.IsNullOrEmpty(to)) throw new ArgumentNullException(nameof(to));

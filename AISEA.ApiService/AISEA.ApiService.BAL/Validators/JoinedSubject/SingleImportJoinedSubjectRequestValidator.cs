@@ -17,8 +17,6 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
 
     public class SingleImportJoinedSubjectRequestValidator : AbstractValidator<SingleImportJoinedSubjectRequest>
     {
-        private static readonly string[] ValidSemesterPrefixes = { "Spring", "Summer", "Fall" };
-
         public SingleImportJoinedSubjectRequestValidator()
         {
             // StudentUserName
@@ -36,30 +34,11 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
             // SemesterId must be positive
             RuleFor(x => x.SemesterId)
                 .GreaterThan(0).WithMessage("SemesterId must be a positive number.");
+
             //Semester Study Block Type
             RuleFor(x => x.SemesterStudyBlockType)
             .IsInEnum().WithMessage("SemesterStudyBlockType must be a valid enum value.");
         }
 
-        private bool BeValidSemesterNameFormat(string semesterName)
-        {
-            if (string.IsNullOrWhiteSpace(semesterName))
-                return false;
-
-            // Regex pattern: (Spring|Summer|Fall) followed by 4-digit year
-            var match = Regex.Match(semesterName, @"^(Spring|Summer|Fall)(\d{4})$");
-
-            if (!match.Success)
-                return false;
-
-
-            var yearStr = match.Groups[2].Value;
-            if (int.TryParse(yearStr, out int year))
-            {
-                return year >= 2000 && year <= 2999;
-            }
-
-            return false;
-        }
     }
 }

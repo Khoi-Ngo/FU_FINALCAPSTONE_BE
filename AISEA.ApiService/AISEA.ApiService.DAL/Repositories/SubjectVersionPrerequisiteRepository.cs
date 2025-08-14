@@ -14,7 +14,7 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<bool> ExistsAsync(long subjectVersionId, long prerequisiteSubjectVersionId)
         {
             return await _context.SubjectVersionPrerequisites
-                .AnyAsync(svp => svp.SubjectVersionId == subjectVersionId && 
+                .AnyAsync(svp => svp.SubjectVersionId == subjectVersionId &&
                                 svp.PrerequisiteSubjectVersionId == prerequisiteSubjectVersionId &&
                                 !svp.IsDeleted);
         }
@@ -44,10 +44,10 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task RemovePrerequisiteAsync(long subjectVersionId, long prerequisiteSubjectVersionId)
         {
             var prerequisite = await _context.SubjectVersionPrerequisites
-                .FirstOrDefaultAsync(svp => svp.SubjectVersionId == subjectVersionId && 
+                .FirstOrDefaultAsync(svp => svp.SubjectVersionId == subjectVersionId &&
                                            svp.PrerequisiteSubjectVersionId == prerequisiteSubjectVersionId &&
                                            !svp.IsDeleted);
-            
+
             if (prerequisite != null)
             {
                 prerequisite.IsDeleted = true;
@@ -57,6 +57,7 @@ namespace AISEA.ApiService.DAL.Repositories
             }
         }
 
+        //!
         public async Task<List<SubjectVersionPrerequisite>> GetPrerequisitesBySubjectIdAsync(long subjectId)
         {
             return await _context.SubjectVersionPrerequisites

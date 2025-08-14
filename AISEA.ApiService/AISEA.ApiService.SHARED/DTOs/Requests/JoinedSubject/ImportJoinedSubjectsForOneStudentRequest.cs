@@ -21,8 +21,8 @@ public class ImportJoinedSubjects_Data
         if (obj is ImportJoinedSubjects_Data other)
         {
             return string.Equals(SubjectCode, other.SubjectCode, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(SubjectVersionCode, other.SubjectVersionCode, StringComparison.OrdinalIgnoreCase)
-                && SemesterId == other.SemesterId;
+                && SemesterId == other.SemesterId
+                && SemesterStudyBlockType == other.SemesterStudyBlockType;
         }
         return false;
     }
@@ -31,8 +31,8 @@ public class ImportJoinedSubjects_Data
     {
         return HashCode.Combine(
             SubjectCode?.ToLowerInvariant(),
-            SubjectVersionCode?.ToLowerInvariant(),
-            SemesterId
+            SemesterId,
+            SemesterStudyBlockType
         );
     }
 }

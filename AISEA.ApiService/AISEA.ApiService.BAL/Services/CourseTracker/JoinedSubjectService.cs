@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
@@ -6,9 +7,12 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
+using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AISEA.ApiService.BAL.Services.CourseTracker;
 
@@ -18,260 +22,288 @@ public class JoinedSubjectService
     private readonly JoinedSubjectRepository _joinedSubjectRepository;
     private readonly IMapper _mapper;
     private readonly IJWTService _jWTService;
+    private readonly SubjectRepository _subjectRepository;
+    private readonly SubjectVersionPrerequisiteRepository _subjectVersionPrerequisiteRepository;
+    private readonly CourseTrackSettings _courseTrackSettings;
+    private readonly ILogger<JoinedSubjectService> _logger;
 
-    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService)
+    public JoinedSubjectService(UserRepository userRepository
+    , JoinedSubjectRepository joinedSubjectRepository
+    , IMapper mapper
+    , IJWTService jWTService
+    , CourseTrackSettings courseTrackSettings
+    , SubjectVersionPrerequisiteRepository subjectVersionPrerequisiteRepository
+    , ILogger<JoinedSubjectService> logger)
     {
         _userRepository = userRepository;
         _joinedSubjectRepository = joinedSubjectRepository;
         _mapper = mapper;
         _jWTService = jWTService;
+        _courseTrackSettings = courseTrackSettings;
+        _subjectVersionPrerequisiteRepository = subjectVersionPrerequisiteRepository;
+        _logger = logger;
     }
 
-    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id)
+
+    #region  IMPORT JOINED SUBJECT
+    public async Task<List<(long StakeholderUserId, NotificationDTO stakeHodlerNoti, bool isSuccess)>> ImportMultipleSubjectsAsync(ImportJoinedSubjectsForOneStudentRequest request, string accessToken)
     {
+
+        var notiList = new List<(long StakeholderUserId, NotificationDTO stakeHodlerNoti, bool isSuccess)>();
+
+        //convert to HashSet of single import request
+        foreach (var item in request.SubjectsData)
+        {
+            var singleImportRequest = new SingleImportJoinedSubjectRequest
+            {
+                StudentUserName = request.StudentUserName,
+                SubjectCode = item.SubjectCode,
+                SubjectVersionCode = item.SubjectVersionCode,
+                SemesterId = item.SemesterId,
+                SemesterStudyBlockType = item.SemesterStudyBlockType
+            };
+
+            var (stakeHolderNoti, stakeHolderUserId, isSuccess) = await ImportSubjectAsync(singleImportRequest, accessToken);
+            notiList.Add((stakeHolderUserId, stakeHolderNoti, isSuccess));
+        }
+
+        return notiList;
+
+    }
+
+    public async Task<(NotificationDTO stakeHolderNoti, long StakeholderUserId, bool isSuccess)> ImportSubjectAsync(SingleImportJoinedSubjectRequest request, string accessToken)
+    {
+
+        //init fail noti with unidentified exception
+        var failNoti = new NotificationDTO
+        {
+            Title = $"Fail import ${request.StudentUserName} with ${request.SubjectCode}",
+            Content = "Unidentified error while importing subject"
+        };
+
+        var conductorUserName = _jWTService.GetUsernameFromToken(accessToken);
+        var conductorUserId = _jWTService.GetUserIdFromToken(accessToken);
+
+
+        //get the student profile id from request.student user name
+        var studentUser = await _userRepository.GetUserWStudentProfileAsync(request.StudentUserName);
+        if (studentUser is null)
+        {
+            failNoti.Content = "Student user not found";
+            return (failNoti, conductorUserId, false);
+        }
+
+        var studentProfile = studentUser.StudentProfile;
+        if (studentProfile is null)
+        {
+            failNoti.Content = "Student profile not found";
+            return (failNoti, conductorUserId, false);
+        }
+
+
+        if (studentProfile.DoGraduate)
+        {
+            failNoti.Content = "Student must have not graduated yet";
+            return (failNoti, conductorUserId, false);
+        }
+
+        //validation student data
+
+        var studentJoinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(studentProfile.Id);
+
         try
         {
-            var subject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
 
-            _joinedSubjectRepository.RemoveAsync(subject);
+            //Check existed subject code
+            var subject = await _subjectRepository.GetApprovedNotDeleteByCodeAsync(request.SubjectCode);
 
-            return (new NotificationDTO
+            if (subject is null)
             {
-                Content = $"You have been removed from the subject: {subject.SubjectCode}.",
-                Title = "Subject Removal Notification"
-            }, subject.StudentProfile.UserId);
-        }
-        catch (DbUpdateException ex)
-        {
-            if (ex.InnerException is SqlException sqlEx)
-            {
-                HandleMeetingSqlException(sqlEx);
-
-            }
-            throw;
-        }
-        catch (SqlException ex)
-        {
-            HandleMeetingSqlException(ex);
-            throw;
-
-        }
-    }
-
-
-
-    public async Task<(NotificationDTO stakeHodlerNoti, long StakeholderUserId)> ImportMultipleSubjectsAsync(ImportJoinedSubjectsForOneStudentRequest request, string accessToken)
-    {
-        try
-        {
-            //get the student profile id from request.student user name
-            var studentUser = await _userRepository.GetUserWStudentProfileAsync(request.StudentUserName);
-            await _joinedSubjectRepository.BulkInsertAsync(MapToJoinedSubjects(request.SubjectsData, studentUser.StudentProfile.Id, _jWTService.GetUsernameFromToken(accessToken)));
-
-            return (new NotificationDTO
-            {
-                Content = $"You have been successfully enrolled in the subjects: {string.Join(", ", request.SubjectsData.Select(s => s.SubjectCode))}.",
-                Title = "Subject Enrollment Notification",
-            }, studentUser.Id);
-
-        }
-        catch (DbUpdateException ex)
-        {
-            if (ex.InnerException is SqlException sqlEx)
-            {
-                HandleMeetingSqlException(sqlEx);
-
-            }
-            throw;
-        }
-        catch (SqlException ex)
-        {
-            HandleMeetingSqlException(ex);
-            throw;
-
-        }
-    }
-
-    public async Task<List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)>> ImportMultipleSubjectsAsync(ImportJoinedSubjectsRequest request, string accessToken)
-    {
-        var createdByUserName = _jWTService.GetUsernameFromToken(accessToken);
-
-        var studentUsers = await _userRepository
-            .GetUsersWStudentProfilesAsync(request.UserNameToSubjectsMap.Keys.ToList());
-
-        var studentUserDict = studentUsers.ToDictionary(u => u.Username, u => u);
-
-        var notifications = new List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)>();
-
-        foreach (var kvp in request.UserNameToSubjectsMap)
-        {
-            if (!studentUserDict.TryGetValue(kvp.Key, out var studentUser))
-            {
-                // If student not found, mark all subjects for this user as failed
-                notifications.Add((
-                 stakeHolderUserId: studentUser.Id,
-                 stakeHolderNoti: new NotificationDTO
-                 {
-                     Title = "Subject Enrollment Failed",
-                     Content = $"Failed to enroll in subject: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}."
-                 }
-             ));
-                continue;
+                failNoti.Content = "There is no valid subject code";
+                return (failNoti, conductorUserId, false);
             }
 
-            var joinedSubjects = MapToJoinedSubjects(kvp.Value, studentUser.StudentProfile.Id, createdByUserName);
+            var subjectVersion = subject.SubjectVersions.FirstOrDefault(sv => sv.VersionCode == request.SubjectVersionCode);
 
-            try
+            if (subjectVersion is null || !subjectVersion.IsActive || subject.IsDeleted)
             {
-                await _joinedSubjectRepository.BulkInsertAsync(joinedSubjects);
-
-                notifications.Add((
-               stakeHolderUserId: studentUser.Id,
-               stakeHolderNoti: new NotificationDTO
-               {
-                   Content = $"You have been successfully enrolled in the subjects: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
-                   Title = "Subject Enrollment Notification"
-               }
-           ));
+                failNoti.Content = "There is no valid subject version code for the subject code";
+                return (failNoti, conductorUserId, false);
             }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx)
+
+            if (!subject.ComboSubjects.IsNullOrEmpty())
             {
+                //!subject in a combo
+                var combos = subject.ComboSubjects
+                                    .Select(cs => cs.Combo)
+                                    .ToList();
+                var combo = combos.FirstOrDefault(c => !c.IsDeleted
+                && c.ApprovalStatus == EApprovalStatus.APPROVED
+                && c.ComboName == studentProfile.RegisteredComboCode);
 
-
-                notifications.Add((
-                stakeHolderUserId: studentUser.Id,
-                stakeHolderNoti: new NotificationDTO
+                if (combo == null)
                 {
-                    Content = $"Failed to enroll in subject: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
-                    Title = "Subject Enrollment Failed"
+                    failNoti.Content = "The combo is not valid";
+                    return (failNoti, conductorUserId, false);
                 }
-            ));
 
-
-
-                HandleMeetingSqlException(sqlEx);
             }
-            catch (SqlException sqlEx)
+
+            var curriculums = subjectVersion.CurriculumSubjects
+                                                .Select(cs => cs.Curriculum)
+                                                .ToList();
+
+
+            var curriculum = curriculums.FirstOrDefault(cc => cc.CurriculumCode == studentProfile.CurriculumCode
+            && cc.ApprovalStatus == EApprovalStatus.APPROVED
+            && !cc.IsDeleted);
+
+            if (curriculum == null)
             {
-                notifications.Add((
-                stakeHolderUserId: studentUser.Id,
-                stakeHolderNoti: new NotificationDTO
-                {
-                    Content = $"Failed to enroll in subject: {string.Join(", ", kvp.Value.Select(s => s.SubjectCode))}.",
-                    Title = "Subject Enrollment Failed"
-                }
-            ));
-
-                HandleMeetingSqlException(sqlEx);
+                failNoti.Content = "The curriculum is not valid";
+                return (failNoti, conductorUserId, false);
             }
-        }
 
-        return notifications;
-    }
 
-    public async Task<(NotificationDTO stakeHolderNoti, long StakeholderUserId)> ImportSubjectAsync(SingleImportJoinedSubjectRequest request, string accessToken)
-    {
-        try
-        {
-            //get the student profile id from request.student user name
-            var studentUser = await _userRepository.GetUserWStudentProfileAsync(request.StudentUserName);
-            await _joinedSubjectRepository.CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, _jWTService.GetUsernameFromToken(accessToken)));
+            //Check more than 2 subject code in the same semester
+            var checkSubjectCodes = studentJoinedSubjects.Where(j => j.SubjectCode == request.SubjectCode && j.SemesterId == request.SemesterId);
+            if (!checkSubjectCodes.IsNullOrEmpty() && checkSubjectCodes.Count() == _courseTrackSettings.MaxDuplicateSubjectCodePerStuSem)
+            {
+                failNoti.Content = "Student can only have 2 duplicate subject per semester";
+                return (failNoti, conductorUserId, false);
+            }
+
+            //TODO: Check met the prerequisite
+
+            ///get the subject code of the prerequisites
+            ///Check all subject code queried existed in the Joined Subject of the Student or not (with status Passed and Completed)
+            ///If not then return notification fail with content "The prerequisites of the subject imported are not met completely"
+
+
+
+            await _joinedSubjectRepository.CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName,subject.SubjectName, subject.Credits));
 
             return (new NotificationDTO
             {
                 Content = $"You have been successfully enrolled in the subject: {request.SubjectCode}.",
                 Title = "Subject Enrollment Notification",
-            }, studentUser.Id);
+            }, studentUser.Id, true);
 
         }
         catch (DbUpdateException ex)
         {
             if (ex.InnerException is SqlException sqlEx)
             {
-                HandleMeetingSqlException(sqlEx);
-
+                failNoti.Content = HandleMeetingSqlExceptionImport(sqlEx);
+                return (failNoti, conductorUserId, false);
             }
-            throw;
         }
         catch (SqlException ex)
         {
-            HandleMeetingSqlException(ex);
-            throw;
+            failNoti.Content = HandleMeetingSqlExceptionImport(ex);
+            return (failNoti, conductorUserId, false);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while importing joined subject");
 
         }
 
+        return (failNoti, conductorUserId, false);
+
     }
 
+
+    public async Task<List<(long StakeholderUserId, NotificationDTO stakeHodlerNoti, bool isSuccess)>>
+    ImportMultipleSubjectsAsync(ImportJoinedSubjectsRequest request, string accessToken)
+    {
+        var results = new ConcurrentBag<(long StakeholderUserId, NotificationDTO stakeHodlerNoti, bool isSuccess)>();
+
+        var allRequests = request.UserNameToSubjectsMap
+            .SelectMany(kvp => kvp.Value.Select(item => new
+            {
+                UserName = kvp.Key,
+                Item = item
+            }))
+            .ToList();
+
+        await Parallel.ForEachAsync(allRequests, new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount / 2)
+
+        },
+        async (entry, token) =>
+        {
+            var singleImportRequest = new SingleImportJoinedSubjectRequest
+            {
+                StudentUserName = entry.UserName,
+                SubjectCode = entry.Item.SubjectCode,
+                SubjectVersionCode = entry.Item.SubjectVersionCode,
+                SemesterId = entry.Item.SemesterId,
+                SemesterStudyBlockType = entry.Item.SemesterStudyBlockType
+            };
+
+            var (stakeHolderNoti, stakeHolderUserId, isSuccess) =
+                await ImportSubjectAsync(singleImportRequest, accessToken);
+
+            results.Add((stakeHolderUserId, stakeHolderNoti, isSuccess));
+        });
+
+        return results.ToList();
+    }
+
+
+    #endregion
 
     #region Private methods
 
-    private void HandleMeetingSqlException(SqlException ex)
+
+    private string HandleMeetingSqlExceptionImport(SqlException ex)
     {
         switch (ex.Number)
         {
-            #region Importing
 
-            case 50013:
-                throw new InvalidOperationException("Import Exception, Import-Prerequisite not met" + ex.Message);
-            case 50015:
-                throw new InvalidOperationException("Import Exception, Invalid subject code" + ex.Message);
-            case 50016:
-                throw new InvalidOperationException("Import Exception, Invalid subject version code of subject code" + ex.Message);
-            case 50017:
-                throw new InvalidOperationException("Import Exception, Invalid combo code of student" + ex.Message);
-            case 50018:
-                throw new InvalidOperationException("Import Exception, Invalid curriculum code of student" + ex.Message);
-            case 50020:
-                throw new InvalidOperationException("Import Exception, Student must have not graduated" + ex.Message);
-            case 50021:
-                throw new InvalidOperationException("Import Exception, More than 2 subject code in the same semester" + ex.Message);
+            case 2627: // Unique constraint violation
+            case 2601: // Duplicated key row error
+                if (ex.Message.Contains("UX_JoinedSubject_Student_Semester_BlockType_Subject"))
+                {
+                    return "Import Exception, Duplicate pair Block Type - Subject Code in the same semester. " + ex.Message;
+                }
+                // Handle other unique constraint violations by checking their names here...
+                break;
 
-            #endregion
-
-            #region Deleting 
-
-            case 50022:
-                throw new InvalidOperationException("Delete Exception, Conflict Prerequisite" + ex.Message);
-            case 50023:
-                throw new InvalidOperationException("Delete Exception, The subject(s) having marks already" + ex.Message);
-
-            #endregion
 
             case 547:
-                throw new InvalidOperationException("Invalid joined subject data. Please check Profile Data and Semester Data." + ex.Message);
+                return "Invalid joined subject data. Please check Profile Data and Semester Data." + ex.Message;
+
 
         }
-        throw ex;
+        return "Unidentified the error, maybe the subject is on progress of development";
     }
 
 
-    private JoinedSubject MapToJoinedSubject(SingleImportJoinedSubjectRequest request, long studentProfileId, string createdByUserName)
-    {
-        var joinedSubject = _mapper.Map<JoinedSubject>(request);
-        joinedSubject.StudentProfileId = studentProfileId;
-        joinedSubject.CreatedByUserName = createdByUserName;
-        // joinedSubject.Name = $"{request.SubjectCode} ({request.SemesterStudyBlockType.ToString()})  {request.SubjectName}";
-        return joinedSubject;
-    }
 
-    private List<JoinedSubject> MapToJoinedSubjects(
-    HashSet<ImportJoinedSubjects_Data> subjectsData,
-    long studentProfileId,
-    string createdByUserName)
+    private JoinedSubject MapToJoinedSubject(SingleImportJoinedSubjectRequest request
+    , long studentProfileId
+    , string createdByUserName
+    , string subjectName
+    , int credits)
     {
-        //using this will enhance performance instead of AutoMapper
-        return subjectsData.Select(subject => new JoinedSubject
+        return new JoinedSubject
         {
-            SubjectCode = subject.SubjectCode,
-            SubjectVersionCode = subject.SubjectVersionCode,
             StudentProfileId = studentProfileId,
-            CreatedByUserName = createdByUserName,
-            // Name = $"{subject.SubjectCode} ({subject.SemesterStudyBlockType.ToString()})  {subject.SubjectName}",
-            CreatedAt = DateTime.Now,
-            IsPassed = false,
-            IsActive = true
-        }).ToList();
+
+            SubjectCode = request.SubjectCode,
+            SubjectVersionCode = request.SubjectVersionCode,
+            SemesterId = request.SemesterId,
+            SemesterStudyBlockType = request.SemesterStudyBlockType,
+            Name = $"{request.SubjectCode}{request.SemesterStudyBlockType.ToString()} + {subjectName}",
+            Credits = credits,
+            CreatedByUserName = createdByUserName
+        };
     }
+
 
     private bool IsValidAccessView(string accessToken, JoinedSubject joinedSubject)
     {
@@ -283,7 +315,6 @@ public class JoinedSubjectService
     }
 
     #endregion
-
 
     #region Response
 
@@ -315,4 +346,27 @@ public class JoinedSubjectService
 
 
     #endregion
+
+
+    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id)
+    {
+        var subject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
+
+        //TODO: Check prerequisites + check wether the student having coursegrade or not
+
+
+        _joinedSubjectRepository.RemoveAsync(subject);
+
+        return (new NotificationDTO
+        {
+            Content = $"You have been removed from the subject: {subject.SubjectCode}.",
+            Title = "Subject Removal Notification"
+        }, subject.StudentProfile.UserId);
+
+    }
+
+    public async Task RemoveAllNonUseAsync()
+    {
+        await _joinedSubjectRepository.RemoveAllNonUseAsync();
+    }
 }

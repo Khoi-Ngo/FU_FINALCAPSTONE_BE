@@ -1,14 +1,16 @@
 using AISEA.ApiService.BAL.Services.CourseTracker;
+using AISEA.ApiService.BAL.Services.Notification;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
-using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.HubUtil;
+using AISEA.ApiService.WebApi.InterceptorAPI;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AISEA.ApiService.WebApi.Controllers.CourseTracker;
 
@@ -16,6 +18,8 @@ namespace AISEA.ApiService.WebApi.Controllers.CourseTracker;
 [Route("api/[controller]")]
 public class JoinedSubjectController : BaseController
 {
+
+    //NOTE: no need to get all because all Staff can get via Student User || Student Profile
 
     #region Init
 
@@ -41,19 +45,21 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpPost("import")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "IMPORT_SUBJECT", Description = "")]
     public async Task<IActionResult> ImportSubjectAsync([FromBody] SingleImportJoinedSubjectRequest request)
     {
         var accessToken = AccessToken;
 
-        // Assuming you have a service to handle the import logic
-        var (stakeHolderNoti, StakeholderUserId) = await _joinedSubjectService.ImportSubjectAsync(request, accessToken);
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+      {
+          var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
+          var (stakeHolderNoti, StakeholderUserId, isSuccess) = await qJoinedSubjectService.ImportSubjectAsync(request, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "The subject has been imported successfully" });
+          var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+          await qNotifier.NotifyUserAsync(StakeholderUserId, stakeHolderNoti);
+      });
 
-        await _notifier.NotifyUserAsync(StakeholderUserId, stakeHolderNoti);
-
-        return Ok("Import successful");
+        return Ok("Import queued successful");
     }
 
 
@@ -63,21 +69,48 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpPost("import-multiple")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_IMPORT_SUBJECT", Description = "")]
     public async Task<IActionResult> ImportMultipleSubjectsAsync([FromBody] ImportJoinedSubjectsForOneStudentRequest request)
     {
         var accessToken = AccessToken;
 
-        // Assuming you have a service to handle the import logic
-        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.ImportMultipleSubjectsAsync(request, accessToken);
 
-        //notify for the conductor
-        await _notifier.NotifyUserAsync(accessToken,
-               new NotificationDTO { Title = "Successfully", Content = "The subjects have been imported successfully" });
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+    {
+        var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
+        List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti, bool isSuccess)> res
+        = await qJoinedSubjectService.ImportMultipleSubjectsAsync(request, accessToken);
 
-        await _notifier.NotifyUserAsync(stakeHolderUserId, stakeHodlerNoti);
 
-        return Ok("Import successful");
+        var successList = res
+            .Where(x => x.isSuccess)
+            .Select(x => (UserId: x.stakeHolderUserId, Notification: x.stakeHolderNoti))
+            .ToList();
+
+
+        //notify only success notification
+
+        var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
+        await qNotifier.NotifyUsersAsync(successList);
+
+        var failList = res
+            .Where(x => !x.isSuccess)
+            .Select(x => x.stakeHolderNoti)
+            .ToList();
+
+        if (failList.IsNullOrEmpty())
+        {
+            await qNotifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Fail import detected", Content = $"Fail import subjects detected, please check your email " });
+            var qNotificationService = sp.GetRequiredService<NotificationService>();
+            await qNotificationService.SendBulkNotificationDataAsMail(accessToken, failList);
+        }
+
+    });
+
+
+        return Ok("Import queued successful");
     }
+
 
     ///<summary>
     /// Import N joined subjects for N student
@@ -85,6 +118,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpPost("import-multiple-students")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "BULK_IMPORT_SUBJECT", Description = "")]
     public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportJoinedSubjectsRequest request)
     {
         var accessToken = AccessToken;
@@ -93,15 +127,33 @@ public class JoinedSubjectController : BaseController
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
         {
             var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
-            List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti)> res = await qJoinedSubjectService.ImportMultipleSubjectsAsync(request, accessToken);
+            List<(long stakeHolderUserId, NotificationDTO stakeHolderNoti, bool isSuccess)> res = await qJoinedSubjectService.ImportMultipleSubjectsAsync(request, accessToken);
+
+            var successList = res
+            .Where(x => x.isSuccess)
+            .Select(x => (UserId: x.stakeHolderUserId, Notification: x.stakeHolderNoti))
+            .ToList();
+
+
+            //notify only success notification
 
             var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-            await qNotifier.NotifyUsersAsync(res);
+            await qNotifier.NotifyUsersAsync(successList);
+
+            var failList = res
+                .Where(x => !x.isSuccess)
+                .Select(x => x.stakeHolderNoti)
+                .ToList();
+
+            if (failList.IsNullOrEmpty())
+            {
+                await qNotifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Fail import detected", Content = $"Fail import subjects detected, please check your email " });
+                var qNotificationService = sp.GetRequiredService<NotificationService>();
+                await qNotificationService.SendBulkNotificationDataAsMail(accessToken, failList);
+            }
+
         });
 
-
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "Import action has been queued" });
 
         return Ok("Import action has been queued");
     }
@@ -112,15 +164,11 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpDelete("{id}")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "DELETE_JOINED_SUBJECT", Description = "")]
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
-        var accessToken = AccessToken;
 
-        // Assuming you have a service to handle the delete logic
-        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id, accessToken);
-
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "The subject has been deleted successfully" });
+        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id);
 
         await _notifier.NotifyUserAsync(stakeHolderUserId, stakeHodlerNoti);
 
@@ -133,11 +181,12 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpGet("self")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> GetAllBySelfPaged([FromQuery] PaginationRequest request)
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    public async Task<IActionResult> GetAllBySelf()
     {
         var accessToken = AccessToken;
-        
-        var res = await _joinedSubjectService.GetAllBySelfPagedAsync(request, accessToken);
+
+        var res = await _joinedSubjectService.GetAllBySelfAsync(accessToken);
         return Ok(res);
     }
 
@@ -147,11 +196,12 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpGet("self/latest-semester")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> GetAllBySelfLatestSemesterPaged([FromQuery] PaginationRequest request)
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    public async Task<IActionResult> GetAllBySelfLatestSemester()
     {
         var accessToken = AccessToken;
 
-        var res = await _joinedSubjectService.GetAllBySelfLatestSemesterPagedAsync(request, accessToken);
+        var res = await _joinedSubjectService.GetAllBySelfLatestSemesterAsync(accessToken);
         return Ok(res);
     }
 
@@ -161,11 +211,28 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpGet("{studentProfileId}/all")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.MANAGER, (int)EUserRole.ADMIN)]
-    public async Task<IActionResult> GetAllByStudentProfileIdPaged([FromQuery] PaginationRequest request, long studentProfileId)
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    public async Task<IActionResult> GetAllByStudentProfileIdPaged(long studentProfileId)
     {
-        var res = await _joinedSubjectService.GetAllByStudentProfileIdPagedAsync(request, studentProfileId);
+        var res = await _joinedSubjectService.GetAllByStudentProfileIdAsync(studentProfileId);
         return Ok(res);
     }
+
+
+    ///<summary>
+    /// Get Single Item only
+    /// </summary>
+    [HttpGet("{id}")]
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    public async Task<IActionResult> GetById(long id)
+    {
+        var accessToken = AccessToken;
+
+        var res = await _joinedSubjectService.GetByIdAsync(accessToken, id);
+        return Ok(res);
+    }
+
+
 
 
 }

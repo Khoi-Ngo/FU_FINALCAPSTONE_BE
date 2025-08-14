@@ -8,7 +8,7 @@ public class BackgroundTaskQueue : IBackgroundTaskQueue
 {
     private readonly Channel<Func<IServiceProvider, CancellationToken, Task>> _queue;
 
-    public BackgroundTaskQueue(int capacity = 100)
+    public BackgroundTaskQueue(int capacity = 1000)
     {
         _queue = Channel.CreateBounded<Func<IServiceProvider, CancellationToken, Task>>(capacity);
     }

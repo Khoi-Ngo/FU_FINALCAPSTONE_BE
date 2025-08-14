@@ -1,3 +1,4 @@
+using System.Text;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
@@ -13,8 +14,11 @@ public class NotificationService
 {
     private readonly NotificationRepository _notificationRepository;
     private readonly IJWTService _jwtService;
+    private readonly IMailService _mailService;
     private readonly IMapper _mapper;
-    public NotificationService(NotificationRepository notificationRepository, IJWTService jwtService, IMapper mapper)
+    public NotificationService(NotificationRepository notificationRepository
+    , IJWTService jwtService
+    , IMapper mapper)
     {
         _notificationRepository = notificationRepository;
         _jwtService = jwtService;
@@ -72,5 +76,36 @@ public class NotificationService
         notification.UserId = userId;
         return notification;
     }
+
+    public async Task SendBulkNotificationDataAsMail(string accessToken, List<NotificationDTO> notificationDTOs)
+    {
+        var receiverMail = _jwtService.GetEmailFromToken(accessToken);
+        await _mailService.SendHtmlEmailAsync(receiverMail, "Import subject failed", BuildNotificationTable(notificationDTOs));
+    }
+
+    private string BuildNotificationTable(IEnumerable<NotificationDTO> notifications)
+    {
+        var sb = new StringBuilder(notifications.Count() * 150 + 200);
+        sb.Append("<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;'>");
+        sb.Append("<thead style='background-color:#f2f2f2;'>");
+        sb.Append("<tr><th>Title</th><th>Content</th><th>Link</th></tr>");
+        sb.Append("</thead><tbody>");
+
+        foreach (var n in notifications)
+        {
+            sb.Append("<tr>");
+            sb.Append("<td>").Append(System.Net.WebUtility.HtmlEncode(n.Title ?? "")).Append("</td>");
+            sb.Append("<td>").Append(System.Net.WebUtility.HtmlEncode(n.Content ?? "")).Append("</td>");
+            sb.Append("<td>");
+            if (!string.IsNullOrEmpty(n.Link))
+                sb.Append("<a href='").Append(System.Net.WebUtility.HtmlEncode(n.Link)).Append("'>Open</a>");
+            sb.Append("</td>");
+            sb.Append("</tr>");
+        }
+
+        sb.Append("</tbody></table>");
+        return sb.ToString();
+    }
+
 
 }

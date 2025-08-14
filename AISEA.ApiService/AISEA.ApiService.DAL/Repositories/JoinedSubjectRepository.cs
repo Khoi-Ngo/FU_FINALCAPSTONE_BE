@@ -45,4 +45,38 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
             .Include(js => js.StudentProfile)
             .FirstOrDefaultAsync(js => js.Id == id);
     }
+
+    public async Task RemoveAllNonUseAsync()
+    {
+        var latestSemesterId = await _context.Semesters
+       .OrderByDescending(s => s.Id)
+       .Select(s => s.Id)
+       .FirstOrDefaultAsync();
+
+        if (latestSemesterId == 0)
+            return;
+
+        const int batchSize = 5000; // Safe limit per deletion
+        int totalDeleted = 0;
+
+        while (true)
+        {
+            var oldSubjects = await _context.JoinedSubjects
+                .Where(js => js.SemesterId < latestSemesterId && !js.IsCompleted)
+                .OrderBy(js => js.Id)
+                .Take(batchSize)
+                .ToListAsync();
+
+            if (oldSubjects.Count == 0)
+                break; // No more to delete
+
+            _context.JoinedSubjects.RemoveRange(oldSubjects);
+            totalDeleted += oldSubjects.Count;
+
+            await _context.SaveChangesAsync();
+        }
+
+        Console.WriteLine($"{DateTime.UtcNow} Removed {totalDeleted} non-use joined subjects.");
+
+    }
 }

@@ -15,6 +15,8 @@ public class CourseTrackSettings
     public int AddSemesterNameIntervalDays { get; set; }
 
     #endregion
+    public int MaxDuplicateSubjectCodePerStuSem { get; set; }
+    public int RemoveNonUseJoinedSubjectIntervalDays { get; set; }
 
 
 }

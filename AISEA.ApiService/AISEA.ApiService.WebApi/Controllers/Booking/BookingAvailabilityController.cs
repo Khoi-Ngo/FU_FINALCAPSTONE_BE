@@ -18,19 +18,16 @@ namespace AISEA.ApiService.WebApi.Controllers.Booking;
 public class BookingAvailabilityController : BaseController
 {
     private readonly BookingAvailabilityService _bookingAvailabilityService;
-    private readonly NotificationHubNotifier _notifier;
     private readonly IBackgroundTaskQueue _taskQueue;
 
 
     public BookingAvailabilityController(
         BookingAvailabilityService bookingAvailabilityService
-    , NotificationHubNotifier notifier
     , EndpointSettings endpointSettings
     , IBackgroundTaskQueue taskQueue
     ) : base(endpointSettings)
     {
         _bookingAvailabilityService = bookingAvailabilityService;
-        _notifier = notifier;
         _taskQueue = taskQueue;
     }
 
@@ -45,7 +42,6 @@ public class BookingAvailabilityController : BaseController
         var accessToken = AccessToken;
 
         await _bookingAvailabilityService.CreateBookingAvailabilityAsync(request, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been created successfully" });
         return Ok("Booking availability has been created successfully!");
 
     }
@@ -67,7 +63,7 @@ public class BookingAvailabilityController : BaseController
                   await qBookingAvaiService.BulkCreateBookingAvailabilityAsync(request, accessToken);
 
                   var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
-                  
+
                   await qNotifier.NotifyUserAsync(accessToken,
                   new NotificationDTO { Title = "Warning", Content = "Booking availabilities have been created successfully" });
               });
@@ -127,7 +123,6 @@ public class BookingAvailabilityController : BaseController
         var accessToken = AccessToken;
 
         await _bookingAvailabilityService.UpdateAsync(id, request, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been updated successfully" });
         return Ok("Booking availability has been updated successfully!");
     }
 
@@ -142,7 +137,6 @@ public class BookingAvailabilityController : BaseController
         var accessToken = AccessToken;
 
         await _bookingAvailabilityService.DeleteAsync(id, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Booking availability has been deleted" });
         return Ok("Booking availability has been deleted!");
     }
 

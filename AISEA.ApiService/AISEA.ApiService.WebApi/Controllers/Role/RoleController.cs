@@ -1,11 +1,9 @@
 using AISEA.ApiService.BAL.Services.Role;
 using AISEA.ApiService.SHARED.Const.Enums;
-using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Role;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
-using AISEA.ApiService.WebApi.HubUtil;
 using AISEA.ApiService.WebApi.InterceptorAPI;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,15 +15,12 @@ namespace AISEA.ApiService.WebApi.Controllers.Role;
 public class RoleController : BaseController
 {
     private readonly RoleService _roleService;
-    private readonly NotificationHubNotifier _notifier;
 
     public RoleController(
         EndpointSettings endpointSettings,
-        RoleService roleService,
-        NotificationHubNotifier notifier) : base(endpointSettings)
+        RoleService roleService) : base(endpointSettings)
     {
         _roleService = roleService;
-        _notifier = notifier;
     }
 
 
@@ -58,12 +53,9 @@ public class RoleController : BaseController
     [AuditLog(Tag = "CREATE_ROLE", Description = "The role has been created")]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest role)
     {
-        var accessToken = AccessToken;
 
         await _roleService.CreateRoleAsync(role);
 
-        await _notifier.NotifyUserAsync(accessToken,
-                      new NotificationDTO { Title = "Successfully", Content = "New role is created successfully" });
         return Ok("New role is created successfully");
     }
 
@@ -74,12 +66,9 @@ public class RoleController : BaseController
     [AuditLog(Tag = "UPDATE_ROLE", Description = "The role has been updated")]
     public async Task<IActionResult> UpdateRole(long id, [FromBody] UpdateRoleRequest role)
     {
-        var accessToken = AccessToken;
 
         await _roleService.UpdateRoleAsync(id, role);
 
-        await _notifier.NotifyUserAsync(accessToken,
-              new NotificationDTO { Title = "Successfully", Content = "The role is updated successfully" });
         return Ok("The role is updated successfully");
     }
 

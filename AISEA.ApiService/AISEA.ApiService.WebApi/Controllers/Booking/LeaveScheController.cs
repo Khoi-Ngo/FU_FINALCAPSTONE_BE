@@ -19,17 +19,14 @@ namespace AISEA.ApiService.WebApi.Controllers.Booking;
 public class LeaveScheController : BaseController
 {
     private readonly LeaveScheduleService _leaveScheduleService;
-    private readonly NotificationHubNotifier _notifier;
     private readonly IBackgroundTaskQueue _taskQueue;
 
     public LeaveScheController(
         LeaveScheduleService leaveScheduleService,
-        NotificationHubNotifier notifier,
         EndpointSettings endpointSettings,
         IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _leaveScheduleService = leaveScheduleService;
-        _notifier = notifier;
         _taskQueue = taskQueue;
     }
 
@@ -44,7 +41,6 @@ public class LeaveScheController : BaseController
     {
         var accessToken = AccessToken;
         await _leaveScheduleService.CreateAsync(request, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been created successfully." });
         return Ok("Leaving Schedule has been created successfully.");
 
 
@@ -81,7 +77,6 @@ public class LeaveScheController : BaseController
         var accessToken = AccessToken;
 
         await _leaveScheduleService.UpdateAsync(request, id, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Leaving Schedule has been updated successfully" });
         return Ok("Leaving Schedule has been updated successfully!");
     }
 
@@ -96,7 +91,6 @@ public class LeaveScheController : BaseController
         var accessToken = AccessToken;
 
         await _leaveScheduleService.DeleteAsync(id, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Successfully", Content = "Leave Schedule has been deleted" });
         return Ok("Leave Schedule has been deleted!");
 
     }

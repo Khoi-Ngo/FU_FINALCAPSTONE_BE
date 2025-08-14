@@ -1,10 +1,7 @@
 using AISEA.ApiService.BAL.Services.Auth;
 using AISEA.ApiService.SHARED.DTOs.Requests.Auth;
-using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
-using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
-using AISEA.ApiService.WebApi.HubUtil;
 using AISEA.ApiService.WebApi.InterceptorAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +13,10 @@ namespace AISEA.ApiService.WebApi.Controllers.Auth;
 public class AuthController : BaseController
 {
     private readonly AuthService _authService;
-    private readonly NotificationHubNotifier _notifier;
 
-    public AuthController(EndpointSettings endpointSettings, AuthService authService, NotificationHubNotifier notificationHubNotifier) : base(endpointSettings)
+    public AuthController(EndpointSettings endpointSettings, AuthService authService) : base(endpointSettings)
     {
         _authService = authService;
-        _notifier = notificationHubNotifier;
     }
     /// <summary>
     /// Refreshes the access token and refresh token with expired (not blacklisted) Access Token and Valid Refresh Token.
@@ -100,7 +95,6 @@ public class AuthController : BaseController
     {
         var accessToken = AccessToken;
         await _authService.ResetPasswordAsync(request, accessToken);
-        await _notifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Ok", Content = "Reset password ok" });
         return Ok("Reset password ok!");
 
     }

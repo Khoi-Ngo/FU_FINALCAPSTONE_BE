@@ -88,8 +88,6 @@ public class UserController : BaseController
 
         await _userService.UpdateUserAsync(id, request, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "Update user successfully" });
 
         return Ok("Update user successfully");
 
@@ -106,8 +104,7 @@ public class UserController : BaseController
 
         await _userService.UpdateUserAsync(id, request, accessToken);
 
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "Update user successfully" });
+        
         return Ok("Update user successfully");
 
     }
@@ -121,12 +118,10 @@ public class UserController : BaseController
     [AuditLog(Tag = "DISABLE_USER", Description = "")]
     public async Task<IActionResult> DisableUser(long id)
     {
-        var accessToken = AccessToken;
 
         await _userService.DisableUserAsync(id);
 
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "Disable user successfully" });
+       
 
         return Ok("Disable user successfully");
 
@@ -248,12 +243,10 @@ public class UserController : BaseController
     [AuditLog(Tag = "CREATE_USER", Description = "")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
-        var accessToken = AccessToken;
 
         await _userService.CreateUserAsync(request);
 
-        await _notifier.NotifyUserAsync(accessToken,
-                new NotificationDTO { Title = "Successfully", Content = "New user is created successfully" });
+        
 
         return Ok("New user is created successfully");
 
@@ -414,12 +407,9 @@ public class UserController : BaseController
     [AuditLog(Tag = "RESET_NUMBER_OF_BAN", Description = "")]
     public async Task<IActionResult> ResetNumberOfBan(long studentProfileId)
     {
-        var accessToken = AccessToken;
 
         await _userService.ResetNumberOfBanAsync(studentProfileId);
 
-        await _notifier.NotifyUserAsync(accessToken,
-              new NotificationDTO { Title = "Successfully", Content = "The number of ban for the student profile id has been reset" });
         return Ok("The number of ban for the student profile id has been reset");
     }
 
@@ -436,8 +426,6 @@ public class UserController : BaseController
 
         await _userService.UpdateAvatarAsync(accessToken, request);
 
-        await _notifier.NotifyUserAsync(accessToken,
-              new NotificationDTO { Title = "Successfully", Content = "The avatar has been updated successfully" });
         return Ok("The avatar has been updated successfully");
     }
     /// <summary>
@@ -448,12 +436,9 @@ public class UserController : BaseController
     [AuditLog(Tag = "UPDATE_USER_AVATAR", Description = "")]
     public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
     {
-        var accessToken = AccessToken;
 
         await _userService.UpdateAvatarAsync(userId, request);
 
-        await _notifier.NotifyUserAsync(accessToken,
-              new NotificationDTO { Title = "Successfully", Content = "The avatar has been updated successfully" });
         return Ok("The avatar has been updated successfully");
     }
 

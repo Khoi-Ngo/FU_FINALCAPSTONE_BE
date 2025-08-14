@@ -10,7 +10,6 @@ using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.WebApi.HubUtil;
 using AISEA.ApiService.WebApi.BgJob;
 using AISEA.ApiService.WebApi.InterceptorAPI;
-using AISEA.ApiService.SHARED.Interfaces;
 
 namespace AISEA.ApiService.WebApi;
 
@@ -167,11 +166,16 @@ public static class DependenciesInjection
         services.AddHostedService<ResetNoOfBanBgService>();
         services.AddHostedService<StuMissedMeetingBgService>();
         services.AddHostedService<SemesterReferBgService>();
-        services.AddHostedService(provider =>
-                new QueuedHostedService(
-                    provider.GetRequiredService<IBackgroundTaskQueue>(),
-                    provider.GetRequiredService<IServiceProvider>())
-            );
+        services.AddHostedService<CleanNonUseJoinedSubjectBgService>();
+
+        // services.AddHostedService(provider =>
+        //         new QueuedHostedService(
+        //             provider.GetRequiredService<IBackgroundTaskQueue>(),
+        //             provider.GetRequiredService<IServiceProvider>())
+        //     );
+
+        services.AddHostedService<QueuedHostedService>();
+
         //API Still Run even the BackGround Services crashed
 
 

@@ -1,7 +1,6 @@
 using AISEA.ApiService.BAL.Services.Chat;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Chat;
-using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -19,16 +18,13 @@ public class AdvisorySession1to1Controller : BaseController
 {
     private readonly AdvisorySession1to1Service _advisorySession1To1Service;
     private readonly AdvisorySessionHubNotifier _advisorySessionHubNotifier;
-    private readonly NotificationHubNotifier _notifier;
 
     public AdvisorySession1to1Controller(EndpointSettings endpointSettings,
     AdvisorySession1to1Service advisorySession1To1Service,
-    AdvisorySessionHubNotifier advisorySessionHubNotifier,
-    NotificationHubNotifier notifier) : base(endpointSettings)
+    AdvisorySessionHubNotifier advisorySessionHubNotifier) : base(endpointSettings)
     {
         _advisorySession1To1Service = advisorySession1To1Service;
         _advisorySessionHubNotifier = advisorySessionHubNotifier;
-        _notifier = notifier;
     }
 
     /// <summary>
@@ -44,8 +40,6 @@ public class AdvisorySession1to1Controller : BaseController
         // Notify student, staff, and session groups
         await _advisorySessionHubNotifier.NotifySessionDeletedAsync(sessionDeleted.Id, sessionDeleted.StaffId, sessionDeleted.StudentId);
 
-        await _notifier.NotifyUserAsync(accessToken,
-        new NotificationDTO { Title = "Successfully", Content = "The chat session got deleted successfully" });
 
         return Ok("The chat session got deleted successfully");
     }

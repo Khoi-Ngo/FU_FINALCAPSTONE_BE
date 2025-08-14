@@ -21,24 +21,6 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
     }
 
-    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDLatestSemesAsync(long studentProfileId)
-    {
-        var latestSemesterId = await _context.JoinedSubjects
-           .Where(js => js.StudentProfileId == studentProfileId)
-           .OrderByDescending(js => js.Semester.CreatedAt)
-           .Select(js => js.SemesterId)
-           .FirstOrDefaultAsync();
-
-        if (latestSemesterId == 0)
-            return new List<JoinedSubject>();
-
-
-
-        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId
-        && js.IsActive
-        && js.SemesterId == latestSemesterId).ToListAsync();
-    }
-
     public async Task<JoinedSubject> GetByIdWStudentProfileAsync(long id)
     {
         return await _context.JoinedSubjects

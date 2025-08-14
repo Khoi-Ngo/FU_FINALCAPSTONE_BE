@@ -320,11 +320,6 @@ public class JoinedSubjectService
         return _mapper.Map<List<JoinedSubjectResponse>>(res);
     }
 
-    public async Task<List<JoinedSubjectResponse>> GetAllBySelfLatestSemesterAsync(string accessToken)
-    {
-        var res = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDLatestSemesAsync(_jWTService.GetProfileIdFromToken(accessToken));
-        return _mapper.Map<List<JoinedSubjectResponse>>(res);
-    }
 
     public async Task<List<JoinedSubjectResponse>> GetAllByStudentProfileIdAsync(long studentProfileId)
     {

@@ -191,20 +191,6 @@ public class JoinedSubjectController : BaseController
     }
 
 
-    ///<summary>
-    /// The student view all data by him self AND By the Latest Semester
-    /// </summary>
-    [HttpGet("self/latest-semester")]
-    [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
-    public async Task<IActionResult> GetAllBySelfLatestSemester()
-    {
-        var accessToken = AccessToken;
-
-        var res = await _joinedSubjectService.GetAllBySelfLatestSemesterAsync(accessToken);
-        return Ok(res);
-    }
-
 
     ///<summary>
     /// The ACADEMIC_STAFF || MANAGER | ADMIN View all by  student profile id 

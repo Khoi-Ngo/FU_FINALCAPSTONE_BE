@@ -13,12 +13,12 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
 
     public async Task<IEnumerable<JoinedSubject>> GetAllByStudentProfileIDAsync(long studentProfileId)
     {
-        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
+        return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
     }
 
     public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDAsync(long studentProfileId)
     {
-        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
+        return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
     }
 
     public async Task<JoinedSubject> GetByIdWStudentProfileAsync(long id)

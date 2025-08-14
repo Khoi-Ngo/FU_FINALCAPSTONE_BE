@@ -42,12 +42,13 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Where(s => subjectIds.Contains(s.Id) && !s.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<Subject?> GetApprovedNotDeleteByCodeAsync(string subjectCode)
+        public async Task<Subject> GetApprovedNotDeleteByCodeAsync(string subjectCode)
         {
             return await _context.Subjects
             .Include(s => s.SubjectVersions).ThenInclude(sv => sv.CurriculumSubjects).ThenInclude(csv => csv.Curriculum)
             .Include(s => s.ComboSubjects).ThenInclude(cb => cb.Combo)
-                .FirstOrDefaultAsync(s => s.SubjectCode == subjectCode
+                .FirstOrDefaultAsync(s =>
+                 s.SubjectCode == subjectCode
                 && !s.IsDeleted
                 && s.ApprovalStatus == SHARED.Const.Enums.EApprovalStatus.APPROVED);
         }

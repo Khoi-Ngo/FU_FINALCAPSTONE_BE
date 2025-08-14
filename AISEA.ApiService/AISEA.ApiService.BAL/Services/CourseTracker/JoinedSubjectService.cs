@@ -131,11 +131,15 @@ public class JoinedSubjectService
             {
                 //!subject in a combo
                 var combos = subject.ComboSubjects
+                                    .Where(cs => !cs.IsDeleted)
                                     .Select(cs => cs.Combo)
                                     .ToList();
+                                
+                
                 var combo = combos.FirstOrDefault(c => !c.IsDeleted
                 && c.ApprovalStatus == EApprovalStatus.APPROVED
                 && c.ComboName == studentProfile.RegisteredComboCode);
+
 
                 if (combo == null)
                 {
@@ -146,6 +150,7 @@ public class JoinedSubjectService
             }
 
             var curriculums = subjectVersion.CurriculumSubjects
+                                                .Where(cs => !cs.IsDeleted)
                                                 .Select(cs => cs.Curriculum)
                                                 .ToList();
 
@@ -153,6 +158,7 @@ public class JoinedSubjectService
             var curriculum = curriculums.FirstOrDefault(cc => cc.CurriculumCode == studentProfile.CurriculumCode
             && cc.ApprovalStatus == EApprovalStatus.APPROVED
             && !cc.IsDeleted);
+
 
             if (curriculum == null)
             {
@@ -177,7 +183,7 @@ public class JoinedSubjectService
 
 
 
-            await _joinedSubjectRepository.CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName,subject.SubjectName, subject.Credits));
+            await _joinedSubjectRepository.CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName, subject.SubjectName, subject.Credits));
 
             return (new NotificationDTO
             {

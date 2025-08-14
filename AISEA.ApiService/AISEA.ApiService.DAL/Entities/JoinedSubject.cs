@@ -34,4 +34,11 @@ public class JoinedSubject
 
     [InverseProperty("JoinedCourses")]
     public virtual Semester Semester { get; set; } = null!;
+
+    public virtual ICollection<SubjectMarkReport> SubjectMarkReports { get; set; } = new List<SubjectMarkReport>();
+
+    public virtual ICollection<JoinedSubjectCheckPoint> JoinedSubjectCheckPoints { get; set; } 
+    = new List<JoinedSubjectCheckPoint>();
+
+
 }

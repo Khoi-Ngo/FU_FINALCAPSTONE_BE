@@ -57,6 +57,14 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<SubjectVersion> SubjectVersions { get; set; }
     public virtual DbSet<JoinedSubject> JoinedSubjects { get; set; }
     public virtual DbSet<Semester> Semesters { get; set; }
+    public virtual DbSet<SubjectMarkReport> SubjectMarkReports { get; set; }
+    public virtual DbSet<JoinedSubjectCheckPoint> JoinedSubjectCheckPoints { get; set; }
+    public virtual DbSet<OptionalPersonalSubject> OptionalPersonalSubjects { get; set; }
+    public virtual DbSet<OptionalSubjectCheckPoint> OptionalSubjectCheckPoints { get; set; }
+    public virtual DbSet<StudyRoadMap> StudyRoadMaps { get; set; }
+    public virtual DbSet<StudyRoadMapNode> StudyRoadMapNodes { get; set; }
+
+    
 
 
 
@@ -92,8 +100,16 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new LeaveScheduleConfiguration());
         modelBuilder.ApplyConfiguration(new JoinedSubjectConfiguration());
         modelBuilder.ApplyConfiguration(new SemesterConfiguration());
+        modelBuilder.ApplyConfiguration(new SubjectMarkReportConfiguration());
+        modelBuilder.ApplyConfiguration(new JoinedSubjectCheckPointConfiguration());
+        modelBuilder.ApplyConfiguration(new OptionalPersonalSubjectConfiguration());
+        modelBuilder.ApplyConfiguration(new OptionalSubjectCheckpointConfiguration());
+        modelBuilder.ApplyConfiguration(new StudyRoadMapConfiguration());
+        modelBuilder.ApplyConfiguration(new StudyRoadMapNodeConfiguration());
 
-        OnModelCreatingPartial(modelBuilder);
+
+
+
         OnModelCreatingPartial(modelBuilder);
 
     }

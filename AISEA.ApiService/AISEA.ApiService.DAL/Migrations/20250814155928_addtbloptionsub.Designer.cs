@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250814155928_addtbloptionsub")]
+    partial class addtbloptionsub
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -672,9 +675,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("SemesterId")
                         .HasColumnType("bigint");
 
@@ -695,52 +695,6 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasDatabaseName("UX_OptionalPersonalSubject_Student_Semester_Subject");
 
                     b.ToTable("OptionalPersonalSubject");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.OptionalSubjectCheckPoint", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link3")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link4")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Link5")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("OptionalPersonalSubjectId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id")
-                        .HasName("optionalsubjectcheckpoint_id_primary");
-
-                    b.HasIndex("OptionalPersonalSubjectId");
-
-                    b.ToTable("OptionalSubjectCheckPoint");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Program", b =>
@@ -985,75 +939,6 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasDatabaseName("IX_StudentProfile_UserId");
 
                     b.ToTable("StudentProfile");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMap", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("StudentProfileId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id")
-                        .HasName("studyroadmap_id_primary");
-
-                    b.HasIndex("StudentProfileId")
-                        .IsUnique();
-
-                    b.ToTable("StudyRoadMap");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SemesterNumber")
-                        .HasColumnType("int");
-
-                    b.Property<long>("StudyRoadMapId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubjectCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("URL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id")
-                        .HasName("studyroadmapnode_id_primary");
-
-                    b.HasIndex("StudyRoadMapId");
-
-                    b.ToTable("StudyRoadMapNodes");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>
@@ -1770,18 +1655,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("StudentProfile");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.OptionalSubjectCheckPoint", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.OptionalPersonalSubject", "OptionalPersonalSubject")
-                        .WithMany("Checkpoints")
-                        .HasForeignKey("OptionalPersonalSubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("optionalsubjectcheckpoint_optionalpersonalsubjectid_foreign");
-
-                    b.Navigation("OptionalPersonalSubject");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SessionOutcomeMapping", b =>
                 {
                     b.HasOne("AISEA.ApiService.DAL.Entities.SyllabusLearningOutcome", "Outcome")
@@ -1831,30 +1704,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("Program");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMap", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
-                        .WithOne("StudyRoadMap")
-                        .HasForeignKey("AISEA.ApiService.DAL.Entities.StudyRoadMap", "StudentProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studyroadmap_studentprofileid_foreign");
-
-                    b.Navigation("StudentProfile");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudyRoadMap", "StudyRoadMap")
-                        .WithMany("Nodes")
-                        .HasForeignKey("StudyRoadMapId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studyroadmapnode_studyroadmapid_foreign");
-
-                    b.Navigation("StudyRoadMap");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectMarkReport", b =>
@@ -1990,11 +1839,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("SubjectMarkReports");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.OptionalPersonalSubject", b =>
-                {
-                    b.Navigation("Checkpoints");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Program", b =>
                 {
                     b.Navigation("Curricula");
@@ -2034,13 +1878,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("JoinedCourses");
 
                     b.Navigation("OptionalPersonalSubjects");
-
-                    b.Navigation("StudyRoadMap");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMap", b =>
-                {
-                    b.Navigation("Nodes");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>

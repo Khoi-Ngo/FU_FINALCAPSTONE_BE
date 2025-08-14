@@ -14,4 +14,8 @@ public class Semester
 
     [InverseProperty("Semester")]
     public virtual ICollection<JoinedSubject> JoinedCourses { get; set; } = new List<JoinedSubject>();
+
+    [InverseProperty("Semester")]
+    public virtual ICollection<OptionalPersonalSubject> OptionalPersonalSubjects { get; set; } = new List<OptionalPersonalSubject>();
+
 }

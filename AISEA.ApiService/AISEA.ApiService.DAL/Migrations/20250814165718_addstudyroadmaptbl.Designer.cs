@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250814165718_addstudyroadmaptbl")]
+    partial class addstudyroadmaptbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -672,9 +675,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("SemesterId")
                         .HasColumnType("bigint");
 
@@ -1013,47 +1013,6 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("StudyRoadMap");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SemesterNumber")
-                        .HasColumnType("int");
-
-                    b.Property<long>("StudyRoadMapId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubjectCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("URL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id")
-                        .HasName("studyroadmapnode_id_primary");
-
-                    b.HasIndex("StudyRoadMapId");
-
-                    b.ToTable("StudyRoadMapNodes");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>
@@ -1845,18 +1804,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("StudentProfile");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudyRoadMap", "StudyRoadMap")
-                        .WithMany("Nodes")
-                        .HasForeignKey("StudyRoadMapId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studyroadmapnode_studyroadmapid_foreign");
-
-                    b.Navigation("StudyRoadMap");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectMarkReport", b =>
                 {
                     b.HasOne("AISEA.ApiService.DAL.Entities.JoinedSubject", "JoinedSubject")
@@ -2036,11 +1983,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("OptionalPersonalSubjects");
 
                     b.Navigation("StudyRoadMap");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMap", b =>
-                {
-                    b.Navigation("Nodes");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>

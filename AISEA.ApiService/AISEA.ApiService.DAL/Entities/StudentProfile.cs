@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AISEA.ApiService.DAL.Entities;
+
 [Table("StudentProfile")]
 public partial class StudentProfile
 {
@@ -32,6 +33,13 @@ public partial class StudentProfile
 
     [InverseProperty("StudentProfile")]
     public virtual ICollection<JoinedSubject> JoinedCourses { get; set; } = new List<JoinedSubject>();
+
+    [InverseProperty("StudentProfile")]
+    public virtual ICollection<OptionalPersonalSubject> OptionalPersonalSubjects { get; set; } = new List<OptionalPersonalSubject>();
+
+    [InverseProperty(nameof(StudyRoadMap.StudentProfile))]
+    public virtual StudyRoadMap? StudyRoadMap { get; set; }
+
 
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;

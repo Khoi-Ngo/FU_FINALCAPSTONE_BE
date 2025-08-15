@@ -37,11 +37,14 @@ namespace AISEA.ApiService.BAL.Services.Combo
                 throw new InvalidUserCreatedException($"Combo with name '{request.ComboName}' already exists.");
             }
 
-            // Validate all subjects exist
-            var subjects = await _subjectRepository.GetByIdsAsync(request.SubjectIds);
-            if (subjects.Count != request.SubjectIds.Count)
+            // Validate all subjects exist (only if subjects are provided)
+            if (request.SubjectIds != null && request.SubjectIds.Any())
             {
-                throw new NotFoundException("One or more subjects not found.");
+                var subjects = await _subjectRepository.GetByIdsAsync(request.SubjectIds);
+                if (subjects.Count != request.SubjectIds.Count)
+                {
+                    throw new NotFoundException("One or more subjects not found.");
+                }
             }
 
             var combo = _mapper.Map<DAL.Entities.Combo>(request);
@@ -49,16 +52,19 @@ namespace AISEA.ApiService.BAL.Services.Combo
             
             await _comboRepository.CreateAsync(combo);
 
-            // Add subjects to combo
-            foreach (var subjectId in request.SubjectIds)
+            // Add subjects to combo (only if subjects are provided)
+            if (request.SubjectIds != null && request.SubjectIds.Any())
             {
-                var comboSubject = new ComboSubject
+                foreach (var subjectId in request.SubjectIds)
                 {
-                    ComboId = combo.Id,
-                    SubjectId = subjectId,
-                    CreatedAt = DateTime.UtcNow
-                };
-                await _comboSubjectRepository.CreateAsync(comboSubject);
+                    var comboSubject = new ComboSubject
+                    {
+                        ComboId = combo.Id,
+                        SubjectId = subjectId,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _comboSubjectRepository.CreateAsync(comboSubject);
+                }
             }
 
             return combo.Id;
@@ -212,17 +218,35 @@ namespace AISEA.ApiService.BAL.Services.Combo
                     throw new InvalidUserCreatedException($"Combo with name '{request.ComboName}' already exists.");
                 }
 
-                // Validate all subjects exist
-                var subjects = await _subjectRepository.GetByIdsAsync(request.SubjectIds);
-                if (subjects.Count != request.SubjectIds.Count)
+                // Validate all subjects exist (only if subjects are provided)
+                if (request.SubjectIds != null && request.SubjectIds.Any())
                 {
-                    throw new NotFoundException("One or more subjects not found.");
+                    var subjects = await _subjectRepository.GetByIdsAsync(request.SubjectIds);
+                    if (subjects.Count != request.SubjectIds.Count)
+                    {
+                        throw new NotFoundException("One or more subjects not found.");
+                    }
                 }
 
                 var combo = _mapper.Map<DAL.Entities.Combo>(request);
                 combo.CreatedAt = DateTime.UtcNow;
 
                 await _comboRepository.CreateAsync(combo);
+
+                // Add subjects to combo (only if subjects are provided)
+                if (request.SubjectIds != null && request.SubjectIds.Any())
+                {
+                    foreach (var subjectId in request.SubjectIds)
+                    {
+                        var comboSubject = new ComboSubject
+                        {
+                            ComboId = combo.Id,
+                            SubjectId = subjectId,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _comboSubjectRepository.CreateAsync(comboSubject);
+                    }
+                }
             }
             return true;
         }

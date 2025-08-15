@@ -16,8 +16,8 @@ namespace AISEA.ApiService.BAL.Validators.Combo
                 .When(x => !string.IsNullOrEmpty(x.ComboDescription));
 
             RuleFor(x => x.SubjectIds)
-                .NotEmpty().WithMessage("At least one subject must be selected.")
-                .Must(x => x.All(id => id > 0)).WithMessage("All subject IDs must be greater than 0.");
+                .Must(x => x.All(id => id > 0)).WithMessage("All subject IDs must be greater than 0.")
+                .When(x => x.SubjectIds != null && x.SubjectIds.Any());
         }
     }
 }

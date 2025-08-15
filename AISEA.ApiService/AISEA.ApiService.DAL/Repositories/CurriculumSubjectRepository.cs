@@ -49,5 +49,17 @@ namespace AISEA.ApiService.DAL.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<CurriculumSubject>> GetByCurriculumCodeAsync(string curriculumCode)
+        {
+            return await _context.CurriculumSubjects
+                .Include(cs => cs.Curriculum)
+                .Include(cs => cs.SubjectVersion)
+                    .ThenInclude(sv => sv.Subject)
+                .Where(cs => cs.Curriculum.CurriculumCode == curriculumCode && !cs.IsDeleted && !cs.Curriculum.IsDeleted)
+                .OrderBy(cs => cs.SemesterNumber)
+                .ThenBy(cs => cs.SubjectVersion.Subject.SubjectCode)
+                .ToListAsync();
+        }
     }
 }

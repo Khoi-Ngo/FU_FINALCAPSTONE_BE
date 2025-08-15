@@ -21,7 +21,7 @@ namespace AISEA.ApiService.BAL.Validators.Subject
                 .LessThanOrEqualTo(10).WithMessage("Credits must be less than or equal to 10.");
 
             RuleFor(x => x.Description)
-                .MaximumLength(1000).WithMessage("Description must be less than 1000 characters.")
+                .MaximumLength(5000).WithMessage("Description must be less than 5000 characters.")
                 .When(x => !string.IsNullOrEmpty(x.Description));
         }
     }

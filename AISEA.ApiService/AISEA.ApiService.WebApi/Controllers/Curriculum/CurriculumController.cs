@@ -114,5 +114,16 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
             await _curriculumService.RemoveSubjectFromCurriculumAsync(id, subjectVersionId);
             return Ok(new { Message = "Subject version removed from curriculum successfully." });
         }
+
+        /// <summary>
+        /// Gets all subjects in a curriculum by curriculum code - useful for staffs to view their curriculum subjects
+        /// </summary>
+        [HttpGet("by-code/{curriculumCode}/subjects")]
+        [PermissionAuthorize(2)]
+        public async Task<IActionResult> GetSubjectsByCurriculumCode(string curriculumCode)
+        {
+            var result = await _curriculumService.GetSubjectsByCurriculumCodeAsync(curriculumCode);
+            return Ok(result);
+        }
     }
 }

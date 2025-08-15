@@ -11,15 +11,18 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
     {
         private readonly SubjectVersionRepository _subjectVersionRepository;
         private readonly SubjectVersionPrerequisiteRepository _prerequisiteRepository;
+        private readonly SubjectRepository _subjectRepository;
         private readonly IMapper _mapper;
 
         public SubjectVersionPrerequisiteService(
             SubjectVersionRepository subjectVersionRepository,
             SubjectVersionPrerequisiteRepository prerequisiteRepository,
+            SubjectRepository subjectRepository,
             IMapper mapper)
         {
             _subjectVersionRepository = subjectVersionRepository;
             _prerequisiteRepository = prerequisiteRepository;
+            _subjectRepository = subjectRepository;
             _mapper = mapper;
         }
 
@@ -181,6 +184,45 @@ namespace AISEA.ApiService.BAL.Services.SubjectVersion
                     continue;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets all prerequisites for a subject based on its subject code
+        /// Returns unique prerequisites across all active versions of the subject
+        /// </summary>
+        public async Task<List<GetSubjectVersionResponse>> GetPrerequisitesBySubjectCodeAsync(string subjectCode)
+        {
+            var subject = await _subjectRepository.GetByCodeAsync(subjectCode);
+            if (subject == null || subject.IsDeleted)
+            {
+                throw new NotFoundException($"Subject with code '{subjectCode}' not found.");
+            }
+
+            var subjectVersions = await _subjectVersionRepository.GetBySubjectIdAsync(subject.Id, activeOnly: true);
+            if (!subjectVersions.Any())
+            {
+                return new List<GetSubjectVersionResponse>();
+            }
+
+            var allPrerequisites = new List<DAL.Entities.SubjectVersion>();
+            var uniqueSubjectCodes = new HashSet<string>();
+
+            // Get prerequisites from all active versions of the subject
+            foreach (var version in subjectVersions)
+            {
+                var versionPrerequisites = await _prerequisiteRepository.GetPrerequisitesBySubjectVersionIdAsync(version.Id);
+                
+                // Add unique prerequisites (avoid duplicates based on subject code)
+                foreach (var prerequisite in versionPrerequisites)
+                {
+                    if (uniqueSubjectCodes.Add(prerequisite.Subject.SubjectCode))
+                    {
+                        allPrerequisites.Add(prerequisite);
+                    }
+                }
+            }
+
+            return _mapper.Map<List<GetSubjectVersionResponse>>(allPrerequisites);
         }
     }
 }

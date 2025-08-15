@@ -217,5 +217,28 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
 
             await _curriculumSubjectRepository.RemoveSubjectFromCurriculumAsync(curriculumId, subjectVersionId);
         }
+
+        /// <summary>
+        /// Gets all subjects in a curriculum by curriculum code - useful for students to view their curriculum subjects
+        /// </summary>
+        public async Task<List<CurriculumSubjectResponse>> GetSubjectsByCurriculumCodeAsync(string curriculumCode)
+        {
+            var curriculumSubjects = await _curriculumSubjectRepository.GetByCurriculumCodeAsync(curriculumCode);
+            
+            if (!curriculumSubjects.Any())
+            {
+                // Check if curriculum exists but has no subjects, or if curriculum doesn't exist
+                var curriculum = await _curriculumRepository.GetByCodeAsync(curriculumCode);
+                if (curriculum == null || curriculum.IsDeleted)
+                {
+                    throw new NotFoundException($"Curriculum with code '{curriculumCode}' not found.");
+                }
+                
+                // Curriculum exists but has no subjects - return empty list
+                return new List<CurriculumSubjectResponse>();
+            }
+
+            return _mapper.Map<List<CurriculumSubjectResponse>>(curriculumSubjects);
+        }
     }
 }

@@ -123,5 +123,23 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectVersion
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Get all prerequisites for a subject based on its subject code
+        /// Returns unique prerequisites across all active versions of the subject
+        /// </summary>
+        [HttpGet("by-subject-code/{subjectCode}")]
+        public async Task<ActionResult<List<GetSubjectVersionResponse>>> GetPrerequisitesBySubjectCode(string subjectCode)
+        {
+            try
+            {
+                var prerequisites = await _prerequisiteService.GetPrerequisitesBySubjectCodeAsync(subjectCode);
+                return Ok(prerequisites);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
     }
 }

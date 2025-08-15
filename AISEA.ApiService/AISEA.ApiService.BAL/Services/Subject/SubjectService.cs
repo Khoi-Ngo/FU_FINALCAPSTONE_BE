@@ -109,7 +109,8 @@ namespace AISEA.ApiService.BAL.Services.Subject
                 var existingSubject = await _subjectRepository.GetByCodeAsync(request.SubjectCode);
                 if (existingSubject != null)
                 {
-                    throw new InvalidUserCreatedException($"Subject with code '{request.SubjectCode}' already exists.");
+                    // Skip existing subjects and continue with the next one
+                    continue;
                 }
 
                 var subject = _mapper.Map<DAL.Entities.Subject>(request);

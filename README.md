@@ -2,7 +2,7 @@
 
 This repository contains the backend services for the **AISEA** project, developed using **.NET 8.0**. The solution is split into two main components:
 
-- **AISEA.ApiService**: An ASP.NET Core Web API providing RESTful endpoints and some background job via worker service
+- **AISEA.ApiService**: An ASP.NET Core Web API providing RESTful endpoints and some background services via worker service
 
 
 

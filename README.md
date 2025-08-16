@@ -19,7 +19,6 @@ This repository contains the backend services for the **AISEA** project, develop
 
 ## Project Structure
 
-The backend is organized into two solutions under the `Back-end` directory:
 
 ```
 Back-end/

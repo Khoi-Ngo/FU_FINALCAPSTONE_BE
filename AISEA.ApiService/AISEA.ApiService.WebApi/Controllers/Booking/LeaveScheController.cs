@@ -175,6 +175,14 @@ public class LeaveScheController : BaseController
     }
 
     [AllowAnonymous]
+    [HttpGet("check-datetime-database-check")]
+    public async Task<IActionResult> CheckDateTimeDB()
+    {
+        var res = await _leaveScheduleService.CheckDateTimeDBAsync();
+        return Ok("haha");
+    }
+
+    [AllowAnonymous]
     [HttpGet("check-day-of-week-sql")]
     public async Task<IActionResult> CheckDayOfWeekSQL([FromQuery] DateTime? date = null)
     {

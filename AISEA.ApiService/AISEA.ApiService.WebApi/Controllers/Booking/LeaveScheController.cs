@@ -176,7 +176,7 @@ public class LeaveScheController : BaseController
 
     [AllowAnonymous]
     [HttpGet("check-datetime-database-check")]
-    public async Task<IActionResult> CheckDateTimeDB()
+    public async Task<IActionResult> CheckDateTimeDBHAHaaa()
     {
         var res = await _leaveScheduleService.CheckDateTimeDBAsync();
         return Ok("haha");

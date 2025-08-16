@@ -48,5 +48,5 @@ jobs:
             git pull
             docker-compose up --build -d
 
-            # echo "Connecting back-end-aisea-api-1 to aisea-network"
-            # docker network connect aisea-network back-end-aisea-api-1 || true
+             echo "Connecting fu_finalcapstone_be-aisea-api-1 to aisea-network"
+             docker network connect aisea-network fu_finalcapstone_be-aisea-api-1 || true

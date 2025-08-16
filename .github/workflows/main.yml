@@ -40,7 +40,7 @@ jobs:
             echo "Connecting sqlserver to aisea-network"
             docker network connect aisea-network sqlserver || true
 
-            cd /home/main_deploy_dir/Back-end
+            cd /home/folk-deploy/Back-end
 
 
             git fetch origin

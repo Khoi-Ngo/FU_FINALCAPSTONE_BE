@@ -64,6 +64,10 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public InvalidAccessJoinedSubject(string message) : base(message) { }
     }
+    public class InvalidAccessCheckpoint : Exception
+    {
+        public InvalidAccessCheckpoint(string message) : base(message) { }
+    }
     public class BookingAvaiOverlapEx : Exception
     {
         public BookingAvaiOverlapEx(string message) : base(message) { }

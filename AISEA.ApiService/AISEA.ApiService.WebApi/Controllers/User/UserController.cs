@@ -36,7 +36,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await _userService.GetAllUsersAsync();
@@ -48,7 +48,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("active")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveUsers()
     {
         var users = await _userService.GetAllActiveUsersAsync();
@@ -58,7 +58,7 @@ public class UserController : BaseController
     /// Retrieves a student by ID.
     /// </summary>
     [HttpGet("student/{id}")]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetStudentById(long id)
     {
         var student = await _userService.GetStudentByIdAsync(id);
@@ -69,7 +69,7 @@ public class UserController : BaseController
     /// Retrieves a staff by ID.
     /// </summary>
     [HttpGet("staff/{id}")]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetStaffById(long id)
     {
         var staff = await _userService.GetStaffByIdAsync(id);
@@ -80,7 +80,7 @@ public class UserController : BaseController
     /// Updates an existing student.
     /// </summary>
     [HttpPut("student/{id}")]
-    [AuditLog(Tag = "UPDATE_USER", Description = "")]
+    [AuditLog(Tag = "UPDATE_USER")]
     public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
         var accessToken = AccessToken;
@@ -97,7 +97,7 @@ public class UserController : BaseController
     /// Updates an existing staff.
     /// </summary>
     [HttpPut("staff/{id}")]
-    [AuditLog(Tag = "UPDATE_USER", Description = "")]
+    [AuditLog(Tag = "UPDATE_USER")]
     public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
     {
         var accessToken = AccessToken;
@@ -115,7 +115,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpDelete("{id}")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "DISABLE_USER", Description = "")]
+    [AuditLog(Tag = "DISABLE_USER")]
     public async Task<IActionResult> DisableUser(long id)
     {
 
@@ -131,7 +131,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllUsersPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllUsersPagedAsync(request);
@@ -143,7 +143,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("active/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveUsersPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllActiveUsersPagedAsync(request);
@@ -156,7 +156,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllStudentsPagedAsync(request);
@@ -168,7 +168,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("academic-staffs/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllAcademicStaffsPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.ACADEMIC_STAFF);
@@ -180,7 +180,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("admins/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllAdminsPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.ADMIN);
@@ -192,7 +192,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("managers/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllManagersPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.MANAGER);
@@ -204,7 +204,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("advisors/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllAdvisorsPaged([FromQuery] PaginationRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.ADVISOR);
@@ -240,7 +240,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "CREATE_USER", Description = "")]
+    [AuditLog(Tag = "CREATE_USER")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
 
@@ -258,7 +258,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_USER")]
     public async Task<IActionResult> CreateUsers([FromBody] List<CreateUserRequest> requests)
     {
         var accessToken = AccessToken;
@@ -286,7 +286,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("student-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_USER")]
     public async Task<IActionResult> CreateStudents([FromBody] List<BulkCreateStudentRequest> requests)
     {
         var accessToken = AccessToken;
@@ -310,7 +310,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("advisor-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_USER")]
     public async Task<IActionResult> CreateAdvisors([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         var accessToken = AccessToken;
@@ -334,7 +334,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("academic-staff-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_USER")]
     public async Task<IActionResult> CreateAcademicStaffs([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         var accessToken = AccessToken;
@@ -357,7 +357,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("admin-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_USER")]
     public async Task<IActionResult> CreateAdmins([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         var accessToken = AccessToken;
@@ -379,7 +379,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPost("manager-bulk")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_CREATE_USER", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_USER")]
     public async Task<IActionResult> CreateManagers([FromBody] List<BulkCreateStaffByRoleRequest> requests)
     {
         var accessToken = AccessToken;
@@ -404,7 +404,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPut("reset-noOfBan/{studentProfileId}")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "RESET_NUMBER_OF_BAN", Description = "")]
+    [AuditLog(Tag = "RESET_NUMBER_OF_BAN")]
     public async Task<IActionResult> ResetNumberOfBan(long studentProfileId)
     {
 
@@ -418,7 +418,7 @@ public class UserController : BaseController
     /// User can update the avatar the input is link firebase provided by front end
     /// </summary>
     [HttpPut("update-avatar")]
-    [AuditLog(Tag = "UPDATE_USER_AVATAR", Description = "")]
+    [AuditLog(Tag = "UPDATE_USER_AVATAR")]
     public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
     {
 
@@ -433,7 +433,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPut("staff-update-avatar/{userId}")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "UPDATE_USER_AVATAR", Description = "")]
+    [AuditLog(Tag = "UPDATE_USER_AVATAR")]
     public async Task<IActionResult> UpdateAvatarByAdmin([FromBody] UpdateAvatarRequest request, long userId)
     {
 
@@ -447,7 +447,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/{comboCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
     {
         var result = await _userService.GetAllStudentsByComboCodePagedAsync(request, comboCode);
@@ -458,7 +458,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/{programId}/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
     {
         var result = await _userService.GetAllStudentsByProgramIdPagedAsync(request, programId);
@@ -470,7 +470,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/{curriculumCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)
     {
         var result = await _userService.GetAllStudentsByCurriculumCodePagedAsync(request, curriculumCode);
@@ -484,7 +484,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/active/{comboCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
     {
         var result = await _userService.GetAllActiveStudentsByComboCodePagedAsync(request, comboCode);
@@ -495,7 +495,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/active/{programId}/paged")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
     {
         var result = await _userService.GetAllActiveStudentsByProgramIdPagedAsync(request, programId);
@@ -507,7 +507,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("student/active/{curriculumCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
-    [AuditLog(Tag = "VIEW_USER", Description = "")]
+    [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)
     {
         var result = await _userService.GetAllActiveStudentsByCurriculumCodePagedAsync(request, curriculumCode);

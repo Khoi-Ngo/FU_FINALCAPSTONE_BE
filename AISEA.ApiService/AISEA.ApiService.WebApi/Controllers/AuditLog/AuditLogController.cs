@@ -24,7 +24,7 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
         /// Get paged audit logs
         /// </summary>
         [HttpGet]
-        [AuditLog(Tag = "VIEW_AUDIT_LOGS", Description = "")]
+        [AuditLog(Tag = "VIEW_AUDIT_LOGS")]
         public async Task<IActionResult> GetAuditLogs([FromQuery] PaginationRequest request)
         {
             var result = await _auditLogService.GetPagedAsync(request);
@@ -35,7 +35,7 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
         /// Get Dictionary of audit logs (Dictionary<YearMonth, Dictionary<EAuditLogTag, List<AuditLog>>>)
         /// </summary>
         [HttpGet("all")]
-        [AuditLog(Tag = "VIEW_AUDIT_LOGS", Description = "")]
+        [AuditLog(Tag = "VIEW_AUDIT_LOGS")]
         public async Task<IActionResult> GetAllAuditLogs([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
         {
             var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(startDate, endDate);

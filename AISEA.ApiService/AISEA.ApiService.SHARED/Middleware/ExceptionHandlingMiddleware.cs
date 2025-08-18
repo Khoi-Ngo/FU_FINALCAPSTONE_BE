@@ -210,6 +210,7 @@ public class ExceptionHandlingMiddleware
                 });
                 break;
             case InvalidAccessJoinedSubject:
+            case InvalidAccessCheckpoint:
                 statusCode = (int)HttpStatusCode.Unauthorized;
                 result = JsonSerializer.Serialize(new
                 {

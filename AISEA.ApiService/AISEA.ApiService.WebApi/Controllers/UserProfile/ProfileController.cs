@@ -28,7 +28,7 @@ public class ProfileController : BaseController
     /// </summary>
     [HttpPost("student")]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "CREATE_PROFILE_FOR_USER", Description = "")]
+    [AuditLog(Tag = "CREATE_PROFILE_FOR_USER")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
     {
         var accessToken = AccessToken;
@@ -45,7 +45,7 @@ public class ProfileController : BaseController
     /// </summary>
     [HttpPost("staff")]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADVISOR, (int)EUserRole.MANAGER)]
-    [AuditLog(Tag = "CREATE_PROFILE_FOR_USER", Description = "")]
+    [AuditLog(Tag = "CREATE_PROFILE_FOR_USER")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
     {
         var accessToken = AccessToken;

@@ -36,7 +36,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "CREATE_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "CREATE_LEAVE_SCHEDULE")]
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] CreateLeaveScheRequest request)
     {
         var accessToken = AccessToken;
@@ -48,7 +48,7 @@ public class LeaveScheController : BaseController
 
     [HttpPost("bulk")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "BULK_CREATE_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_LEAVE_SCHEDULE")]
     public async Task<IActionResult> CreateLeaveScheduleAsync([FromBody] List<CreateLeaveScheRequest> requests)
     {
         var accessToken = AccessToken;
@@ -71,7 +71,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpPut("{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "UPDATE_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "UPDATE_LEAVE_SCHEDULE")]
     public async Task<IActionResult> UpdateLeaveScheAsync(long id, [FromBody] UpdateLeaveScheRequest request)
     {
         var accessToken = AccessToken;
@@ -85,7 +85,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpDelete("{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "DELETE_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "DELETE_LEAVE_SCHEDULE")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
         var accessToken = AccessToken;
@@ -104,7 +104,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpGet]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE")]
     public async Task<IActionResult> GetAllSimply([FromQuery] PaginationRequest request)
     {
         var result = await _leaveScheduleService.GetAllSimplyAsync(request);
@@ -116,7 +116,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpGet("{staffProfileId}")]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE")]
     public async Task<IActionResult> GetAllForAStaffAsync([FromQuery] PaginationRequest request, long staffProfileId)
     {
         var result = await _leaveScheduleService.GetAllSimplyAsync(request, staffProfileId);
@@ -128,7 +128,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpGet("self")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE")]
     public async Task<IActionResult> GetAllForAStaffSimply([FromQuery] PaginationRequest request)
     {
         var accessToken = AccessToken;
@@ -143,7 +143,7 @@ public class LeaveScheController : BaseController
     /// </summary>
     [HttpGet("simply-single/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE", Description = "")]
+    [AuditLog(Tag = "VIEW_LEAVE_SCHEDULE")]
     public async Task<IActionResult> GetByIdAsync(long id)
     {
         var res = await _leaveScheduleService.GetSimplyByIdAsync(id);

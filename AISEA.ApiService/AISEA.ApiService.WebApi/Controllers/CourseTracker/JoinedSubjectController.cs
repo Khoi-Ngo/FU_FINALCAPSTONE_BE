@@ -45,7 +45,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpPost("import")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "IMPORT_SUBJECT", Description = "")]
+    [AuditLog(Tag = "IMPORT_SUBJECT")]
     public async Task<IActionResult> ImportSubjectAsync([FromBody] SingleImportJoinedSubjectRequest request)
     {
         var accessToken = AccessToken;
@@ -69,7 +69,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpPost("import-multiple")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_IMPORT_SUBJECT", Description = "")]
+    [AuditLog(Tag = "BULK_IMPORT_SUBJECT")]
     public async Task<IActionResult> ImportMultipleSubjectsAsync([FromBody] ImportJoinedSubjectsForOneStudentRequest request)
     {
         var accessToken = AccessToken;
@@ -118,7 +118,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpPost("import-multiple-students")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "BULK_IMPORT_SUBJECT", Description = "")]
+    [AuditLog(Tag = "BULK_IMPORT_SUBJECT")]
     public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportJoinedSubjectsRequest request)
     {
         var accessToken = AccessToken;
@@ -164,7 +164,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpDelete("{id}")]
     [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "DELETE_JOINED_SUBJECT", Description = "")]
+    [AuditLog(Tag = "DELETE_JOINED_SUBJECT")]
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
 
@@ -181,7 +181,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpGet("self")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT")]
     public async Task<IActionResult> GetAllBySelf()
     {
         var accessToken = AccessToken;
@@ -197,7 +197,7 @@ public class JoinedSubjectController : BaseController
     /// </summary>
     [HttpGet("{studentProfileId}/all")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.MANAGER, (int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT")]
     public async Task<IActionResult> GetAllByStudentProfileIdPaged(long studentProfileId)
     {
         var res = await _joinedSubjectService.GetAllByStudentProfileIdAsync(studentProfileId);
@@ -209,7 +209,7 @@ public class JoinedSubjectController : BaseController
     /// Get Single Item only
     /// </summary>
     [HttpGet("{id}")]
-    [AuditLog(Tag = "VIEW_JOINED_SUBJECT", Description = "")]
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT")]
     public async Task<IActionResult> GetById(long id)
     {
         var accessToken = AccessToken;

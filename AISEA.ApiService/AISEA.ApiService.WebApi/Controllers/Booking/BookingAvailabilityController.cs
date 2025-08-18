@@ -36,7 +36,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "CREATE_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "CREATE_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> CreateBookingAvailability([FromBody] CreateBookingAvailabilityRequest request)
     {
         var accessToken = AccessToken;
@@ -51,7 +51,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpPost("bulk")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "BULK_CREATE_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "BULK_CREATE_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> BulkCreateBookingAvailability([FromBody] List<CreateBookingAvailabilityRequest> request)
     {
         var accessToken = AccessToken;
@@ -77,7 +77,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpGet("{staffProfileId}")]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> GetBookingAvailabilities(long staffProfileId)
     {
         var result = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(staffProfileId);
@@ -90,7 +90,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpGet("self")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> SelfGetBookingAvailabilities()
     {
         var accessToken = AccessToken;
@@ -105,7 +105,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpGet]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "VIEW_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> GetBookingAvailabilities([FromQuery] PaginationRequest request)
     {
         var res = await _bookingAvailabilityService.GetBookingAvailabilitiesAsync(request);
@@ -117,7 +117,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpPut("{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "UPDATE_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "UPDATE_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> UpdateBookingAvailability(long id, [FromBody] UpdateBookingAvailabilityRequest request)
     {
         var accessToken = AccessToken;
@@ -131,7 +131,7 @@ public class BookingAvailabilityController : BaseController
     /// </summary>
     [HttpDelete("{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "DELETE_BOOKING_AVAILABILITY", Description = "")]
+    [AuditLog(Tag = "DELETE_BOOKING_AVAILABILITY")]
     public async Task<IActionResult> DeleteBookingAvailability(long id)
     {
         var accessToken = AccessToken;

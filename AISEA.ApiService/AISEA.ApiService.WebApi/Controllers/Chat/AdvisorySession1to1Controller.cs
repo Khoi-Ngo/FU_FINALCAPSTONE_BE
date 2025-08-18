@@ -31,7 +31,7 @@ public class AdvisorySession1to1Controller : BaseController
     /// Delete Chat Session
     /// </summary>
     [HttpDelete("{id}")]
-    [AuditLog(Tag = "DELETE_CHAT_SESSION", Description = "")]
+    [AuditLog(Tag = "DELETE_CHAT_SESSION")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
         var accessToken = AccessToken;
@@ -48,7 +48,7 @@ public class AdvisorySession1to1Controller : BaseController
     /// Initialize the chat session with Staffs User
     /// </summary>
     [HttpPost("human")]
-    [AuditLog(Tag = "INIT_ADVISOR_CHAT_SESSION", Description = "")]
+    [AuditLog(Tag = "INIT_ADVISOR_CHAT_SESSION")]
     public async Task<IActionResult> InitHumanChatSessionAsync([FromBody] InitHumanChatSessionRequest request)
     {
         var accessToken = AccessToken;
@@ -63,7 +63,7 @@ public class AdvisorySession1to1Controller : BaseController
     /// Get AI CHATBOTSessions paginated
     /// </summary>
     [HttpGet]
-    [AuditLog(Tag = "VIEW_CHATBOT_SESSION", Description = "")]
+    [AuditLog(Tag = "VIEW_CHATBOT_SESSION")]
     public async Task<IActionResult> GetAsync([FromQuery] PaginationRequest request)
     {
         var accessToken = AccessToken;

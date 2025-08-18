@@ -51,6 +51,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<BookedMeetingService>();
             services.AddScoped<SemesterReferService>();
             services.AddScoped<JoinedSubjectService>();
+            services.AddScoped<JoinedSubjectCheckPointService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

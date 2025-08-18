@@ -40,7 +40,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPost]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "CREATE_MEETING", Description = "")]
+    [AuditLog(Tag = "CREATE_MEETING")]
     public async Task<IActionResult> CreateMeeting([FromBody] CreateMeetingRequest request)
     {
         var accessToken = AccessToken;
@@ -58,7 +58,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPost("stu-cancel-the-pending/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "STUDENT_CANCEL_PENDING_MEETING", Description = "")]
+    [AuditLog(Tag = "STUDENT_CANCEL_PENDING_MEETING")]
     public async Task<IActionResult> CancelPending([FromBody] NoteDTO request, long id)
     {
         var accessToken = AccessToken;
@@ -75,7 +75,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("adv-cancel/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "ADVISOR_CANCEL_MEETING", Description = "")]
+    [AuditLog(Tag = "ADVISOR_CANCEL_MEETING")]
     public async Task<IActionResult> AdvisorCancelMeeting([FromBody] NoteDTO request, long meetingId)
     {
         var accessToken = AccessToken;
@@ -97,7 +97,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("confirm/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "CONFIRM_MEETING", Description = "")]
+    [AuditLog(Tag = "CONFIRM_MEETING")]
     public async Task<IActionResult> ConfirmMeeting(long id)
     {
         var accessToken = AccessToken;
@@ -117,7 +117,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("stu-cancel-the-confirmed/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "STUDENT_CANCEL_CONFIRMED_MEETING", Description = "")]
+    [AuditLog(Tag = "STUDENT_CANCEL_CONFIRMED_MEETING")]
     public async Task<IActionResult> StuCancelTheConfirmed(long id, [FromBody] NoteDTO request)
     {
         var accessToken = AccessToken;
@@ -148,7 +148,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("complete/{id}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "COMPLETE_MEETING", Description = "")]
+    [AuditLog(Tag = "COMPLETE_MEETING")]
     public async Task<IActionResult> Complete(long id, [FromBody] InputCheckinRequest request)
     {
         var accessToken = AccessToken;
@@ -165,7 +165,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPost("feedback/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "FEEDBACK_MEETING", Description = "")]
+    [AuditLog(Tag = "FEEDBACK_MEETING")]
     public async Task<IActionResult> Feedback([FromBody] FeedbackRequest request, long meetingId)
     {
         var accessToken = AccessToken;
@@ -182,7 +182,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPut("mark-adv-missed/{id}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "MARK_ADVISOR_MISSED_MEETING", Description = "")]
+    [AuditLog(Tag = "MARK_ADVISOR_MISSED_MEETING")]
     public async Task<IActionResult> MarkAdvisorMissed(long id, [FromBody] NoteDTO request)
     {
         var accessToken = AccessToken;
@@ -201,7 +201,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpPost("reason-for-overdue/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "ADD_REASON_OVERDUE_MEETING", Description = "")]
+    [AuditLog(Tag = "ADD_REASON_OVERDUE_MEETING")]
     public async Task<IActionResult> AddReasonForOverdue([FromBody] NoteDTO request, long meetingId)
     {
         var accessToken = AccessToken;
@@ -219,7 +219,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
     {
         var res = await _bookedMeetingService.GetAllAsync(request);
@@ -233,7 +233,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all-of-one-adv/paged/{staffProfileId}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetAllByStaffProfileIdForStudentRole([FromQuery] PaginationRequest request, long staffProfileId)
     {
         var res = await _bookedMeetingService.GetAllByStaffProfileIdForStudentRoleAsync(request, staffProfileId);
@@ -247,7 +247,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all-stu-self/paged")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetAllByStudentSelf([FromQuery] PaginationRequest request)
     {
         var accessToken = AccessToken;
@@ -261,7 +261,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all-stu-self/active/paged")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetAllActiveByStudentSelf([FromQuery] PaginationRequest request)
     {
         var accessToken = AccessToken;
@@ -278,7 +278,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all-adv-self/paged")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetAllByAdvSelf([FromQuery] PaginationRequest request)
     {
         var accessToken = AccessToken;
@@ -292,7 +292,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("all-adv-self/active/paged")]
     [PermissionAuthorize((int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetAllActiveByAdvSelf([FromQuery] PaginationRequest request)
     {
         var accessToken = AccessToken;
@@ -312,7 +312,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("detail/{meetingId}")]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT, (int)EUserRole.ADVISOR)]
-    [AuditLog(Tag = "VIEW_MEETING", Description = "")]
+    [AuditLog(Tag = "VIEW_MEETING")]
     public async Task<IActionResult> GetDetailMeeting(long meetingId)
     {
         var accessToken = AccessToken;
@@ -329,7 +329,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpDelete("{id}")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
-    [AuditLog(Tag = "DELETE_MEETING", Description = "")]
+    [AuditLog(Tag = "DELETE_MEETING")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
         var accessToken = AccessToken;
@@ -356,7 +356,7 @@ public class MeetingController : BaseController
     /// </summary>
     [HttpGet("cur-number-of-ban")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    [AuditLog(Tag = "VIEW_SELF_NUMBER_OF_BAN", Description = "")]
+    [AuditLog(Tag = "VIEW_SELF_NUMBER_OF_BAN")]
     public async Task<IActionResult> GetCurNumberOfBan()
     {
         var accessToken = AccessToken;

@@ -13,7 +13,7 @@ namespace AISEA.ApiService.WebApi.InterceptorAPI;
 public class AuditLogAttribute : Attribute
 {
     public string Tag { get; set; }
-    public string Description { get; set; }
+    public string? Description { get; set; }
 }
 
 // The action filter that intercepts requests and queues audit logs in the background

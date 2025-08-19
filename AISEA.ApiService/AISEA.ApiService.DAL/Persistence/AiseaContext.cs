@@ -18,11 +18,10 @@ public partial class AiseaContext : DbContext
     public AiseaContext()
     {
     }
-    //e.g: "Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;"
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder
             .UseSqlServer(
-"Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;"
+                _sqlSettings.ConnectionString
             , sqlOptions =>
             {
 

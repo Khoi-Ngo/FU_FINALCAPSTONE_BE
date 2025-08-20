@@ -16,9 +16,7 @@ namespace AISEA.ApiService.BAL.Validators.Checkpoint
                 .MaximumLength(2000).WithMessage("Content cannot exceed 2000 characters.");
 
             RuleFor(x => x.Deadline)
-                .NotEmpty().WithMessage("Deadline is required.")
-                .Must(deadline => deadline >= DateTime.UtcNow)
-                .WithMessage("Deadline cannot be in the past.");
+                .NotEmpty().WithMessage("Deadline is required.");
         }
     }
 }

@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AISEA.ApiService.SHARED.DTOs.Requests.ChatBot;
-using AISEA.ApiService.SHARED.DTOs.Responses.ChatBot;
+using AISEA.ApiService.SHARED.DTOs.Requests.CheckPoint;
 
-namespace AISEA.ApiService.SHARED.Interfaces
+namespace AISEA.ApiService.SHARED.Interfaces;
+
+public interface IChatOpenAIService
 {
-    public interface IChatOpenAIService
-    {
-        Task<string> SendMsgAsync(string prompt);
-    }
+    Task<string> SendMsgAsync(string prompt);
+    Task<List<CommandCheckpointRequest>> GenerateCheckpoints(string userPrompt);
 }

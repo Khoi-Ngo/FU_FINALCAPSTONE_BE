@@ -265,7 +265,7 @@ public class AdvisorySession1to1Service
         var msg = message ?? "";
         var courseTrackJson = personelCourseTrackData != null ? JsonSerializer.Serialize(personelCourseTrackData) : "{}";
 
-        return ChatBotConst.GeneralMessageStructFromStudent
+        return CallAIConst.GeneralMessageStructFromStudent
             .Replace("{studentName}", studentName)
             .Replace("{studentJsonData}", studentJson)
             .Replace("{FPTUAcademicResourceJsonData}", resourceJson)

@@ -3,6 +3,7 @@ using System.Text.Json;
 using AISEA.ApiService.SHARED.DTOs.Requests.CheckPoint;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AISEA.ApiService.DAL.Infrastructure
@@ -11,15 +12,19 @@ namespace AISEA.ApiService.DAL.Infrastructure
     {
         private readonly ChatBotSettings _chatBotSettings;
         private readonly HttpClient _httpClient;
+        private readonly ILogger<ChatOpenAIService> _logger;
 
-        public ChatOpenAIService(ChatBotSettings chatBotSettings)
+        public ChatOpenAIService(ChatBotSettings chatBotSettings, ILogger<ChatOpenAIService> logger)
         {
             _chatBotSettings = chatBotSettings;
             _httpClient = new HttpClient();
+            _logger = logger;
         }
 
         public async Task<string> SendMsgAsync(string prompt)
         {
+            _logger.LogInformation("==== AI CHATBOT : OpenAI Request Prompt ====\n{Prompt}", prompt);
+
             var _apiKey = _chatBotSettings.ApiKey;
             var _apiUrl = _chatBotSettings.ApiUrl;
             var _model = _chatBotSettings.Model;
@@ -47,6 +52,9 @@ namespace AISEA.ApiService.DAL.Infrastructure
 
         public async Task<List<CommandCheckpointRequest>> GenerateCheckpoints(string userPrompt)
         {
+
+            _logger.LogInformation("==== GenerateCheckpoints : OpenAI Request Prompt ====\n{Prompt}", userPrompt);
+
             _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _chatBotSettings.ApiKey);
 

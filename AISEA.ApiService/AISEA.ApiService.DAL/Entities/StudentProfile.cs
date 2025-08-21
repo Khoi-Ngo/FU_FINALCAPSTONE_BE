@@ -34,9 +34,6 @@ public partial class StudentProfile
     [InverseProperty("StudentProfile")]
     public virtual ICollection<JoinedSubject> JoinedCourses { get; set; } = new List<JoinedSubject>();
 
-    [InverseProperty("StudentProfile")]
-    public virtual ICollection<OptionalPersonalSubject> OptionalPersonalSubjects { get; set; } = new List<OptionalPersonalSubject>();
-
     [InverseProperty(nameof(StudyRoadMap.StudentProfile))]
     public virtual StudyRoadMap? StudyRoadMap { get; set; }
 

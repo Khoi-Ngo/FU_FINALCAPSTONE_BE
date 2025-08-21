@@ -21,7 +21,8 @@ public partial class AiseaContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder
             .UseSqlServer(
-                _sqlSettings.ConnectionString
+                // _sqlSettings.ConnectionString
+                "Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;"
             , sqlOptions =>
             {
 
@@ -58,8 +59,6 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<Semester> Semesters { get; set; }
     public virtual DbSet<SubjectMarkReport> SubjectMarkReports { get; set; }
     public virtual DbSet<JoinedSubjectCheckPoint> JoinedSubjectCheckPoints { get; set; }
-    public virtual DbSet<OptionalPersonalSubject> OptionalPersonalSubjects { get; set; }
-    public virtual DbSet<OptionalSubjectCheckPoint> OptionalSubjectCheckPoints { get; set; }
     public virtual DbSet<StudyRoadMap> StudyRoadMaps { get; set; }
     public virtual DbSet<StudyRoadMapNode> StudyRoadMapNodes { get; set; }
 
@@ -101,8 +100,6 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new SemesterConfiguration());
         modelBuilder.ApplyConfiguration(new SubjectMarkReportConfiguration());
         modelBuilder.ApplyConfiguration(new JoinedSubjectCheckPointConfiguration());
-        modelBuilder.ApplyConfiguration(new OptionalPersonalSubjectConfiguration());
-        modelBuilder.ApplyConfiguration(new OptionalSubjectCheckpointConfiguration());
         modelBuilder.ApplyConfiguration(new StudyRoadMapConfiguration());
         modelBuilder.ApplyConfiguration(new StudyRoadMapNodeConfiguration());
 

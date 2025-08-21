@@ -13,20 +13,17 @@ public class CheckPointProfile : Profile
         //COMMAND
         CreateMap<CommandCheckpointRequest, JoinedSubjectCheckPoint>();
 
-        CreateMap<CommandCheckpointRequest, OptionalSubjectCheckPoint>();
 
 
         //LIST ITEM RESPONSE
         CreateMap<JoinedSubjectCheckPoint, CheckpointListItemResponse>();
 
-        CreateMap<OptionalSubjectCheckPoint, CheckpointListItemResponse>();
 
 
 
         //DETAIL RESPONSE
         CreateMap<JoinedSubjectCheckPoint, CheckpointDetailResponse>();
 
-        CreateMap<OptionalSubjectCheckPoint, CheckpointDetailResponse>();
 
 
     }

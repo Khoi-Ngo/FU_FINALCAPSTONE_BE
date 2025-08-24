@@ -95,14 +95,6 @@ public class JoinedSubjectService
             failNoti.Content = "Student profile not found";
             return (failNoti, conductorUserId, false);
         }
-
-
-        if (studentProfile.DoGraduate)
-        {
-            failNoti.Content = "Student must have not graduated yet";
-            return (failNoti, conductorUserId, false);
-        }
-
         //validation student data
 
         var studentJoinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(studentProfile.Id);

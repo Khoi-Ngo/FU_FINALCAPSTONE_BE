@@ -18,16 +18,13 @@ namespace AISEA.ApiService.WebApi.Controllers.User;
 public class UserController : BaseController
 {
     private readonly UserService _userService;
-    private readonly NotificationHubNotifier _notifier;
     private readonly IBackgroundTaskQueue _taskQueue;
 
     public UserController(EndpointSettings endpointSettings
     , UserService userService
-    , NotificationHubNotifier notificationHubNotifier,
-    IBackgroundTaskQueue taskQueue) : base(endpointSettings)
+   , IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _userService = userService;
-        _notifier = notificationHubNotifier;
         _taskQueue = taskQueue;
     }
 

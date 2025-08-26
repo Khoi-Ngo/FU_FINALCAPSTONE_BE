@@ -60,7 +60,7 @@ public class JoinedSubjectCheckPointService
         if (doReplaceAll) await _checkpointRepo.RemoveByJoinedSubjectIdAsync(joinedSubjectId);
         var checkPoints = _mapper.Map<List<JoinedSubjectCheckPoint>>(request, opt =>
         {
-            opt.Items["SubjectId"] = joinedSubjectId;
+            opt.Items["JoinedSubjectId"] = joinedSubjectId;
         });
         await _checkpointRepo.BulkInsertAsync(checkPoints);
     }

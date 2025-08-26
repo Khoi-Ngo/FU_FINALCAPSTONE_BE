@@ -13,7 +13,7 @@ public class CheckPointProfile : Profile
         CreateMap<CommandCheckpointRequest, JoinedSubjectCheckPoint>()
             .ForMember(dest => dest.JoinedSubjectId,
                 opt => opt.MapFrom((src, dest, _, context) => 
-                    (long)context.Items["SubjectId"]));
+                    (long)context.Items["JoinedSubjectId"]));
 
         // ENTITY → LIST RESPONSE
         CreateMap<JoinedSubjectCheckPoint, CheckpointListItemResponse>();

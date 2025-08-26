@@ -76,7 +76,7 @@ public class JoinedSubjectCheckPointService
 
     public async Task RemoveAsync(long id, string accessToken)
     {
-        var checkpoint = await _checkpointRepo.GetByIdWithJoinedSubjectAsync(id);
+        var checkpoint = await _checkpointRepo.GetByIdAsync(id);
         if (!IsValidAccessCheckpoint(accessToken, checkpoint)) throw new InvalidAccessCheckpoint("No permission for this checkpoint");
         await _checkpointRepo.RemoveAsync(checkpoint);
     }

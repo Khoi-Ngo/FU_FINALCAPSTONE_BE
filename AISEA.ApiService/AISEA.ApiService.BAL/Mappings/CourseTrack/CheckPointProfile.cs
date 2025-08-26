@@ -9,16 +9,19 @@ public class CheckPointProfile : Profile
 {
     public CheckPointProfile()
     {
-        // COMMAND → ENTITY
-        CreateMap<CommandCheckpointRequest, JoinedSubjectCheckPoint>()
-            .ForMember(dest => dest.JoinedSubjectId,
-                opt => opt.MapFrom((src, dest, _, context) => 
-                    (long)context.Items["JoinedSubjectId"]));
 
-        // ENTITY → LIST RESPONSE
+        //COMMAND
+        CreateMap<CommandCheckpointRequest, JoinedSubjectCheckPoint>();
+
+
+
+        //LIST ITEM RESPONSE
         CreateMap<JoinedSubjectCheckPoint, CheckpointListItemResponse>();
 
-        // ENTITY → DETAIL RESPONSE
+
+
+
+        //DETAIL RESPONSE
         CreateMap<JoinedSubjectCheckPoint, CheckpointDetailResponse>();
     }
 }

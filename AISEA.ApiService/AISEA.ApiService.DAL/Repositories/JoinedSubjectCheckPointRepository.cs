@@ -86,4 +86,8 @@ public class JoinedSubjectCheckPointRepository : GenericRepository<JoinedSubject
         }
     }
 
+
+
+    public new async Task<JoinedSubjectCheckPoint> GetByIdAsync(long id)
+    => await _context.JoinedSubjectCheckPoints.Include(c => c.JoinedSubject).FirstOrDefaultAsync(c => c.Id == id);
 }

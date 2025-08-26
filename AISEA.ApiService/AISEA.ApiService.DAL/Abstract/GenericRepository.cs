@@ -26,20 +26,13 @@ public class GenericRepository<T> where T : class
         var entityList = entities as List<T> ?? entities.ToList();
         if (!entityList.Any()) return 0;
 
-        try
+        await _context.BulkInsertAsync(entityList, new BulkConfig
         {
-            await _context.BulkInsertAsync(entityList, new BulkConfig
-            {
-                PreserveInsertOrder = true,
-                SetOutputIdentity = false,
-                BatchSize = 10000 // Adjust based on your needs
-            });
-            return entityList.Count;
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+            PreserveInsertOrder = true,
+            SetOutputIdentity = false,
+            BatchSize = 10000 // Adjust based on your needs
+        });
+        return entityList.Count;
     }
 
     public List<T> GetAll()

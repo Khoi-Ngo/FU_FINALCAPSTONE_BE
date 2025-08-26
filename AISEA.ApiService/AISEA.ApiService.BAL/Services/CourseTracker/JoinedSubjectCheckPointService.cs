@@ -47,7 +47,9 @@ public class JoinedSubjectCheckPointService
     {
         var joinedSubject = await _joinedSubjectRepo.GetByIdAsync(joinedSubjectId);
         if (!IsValidAccessJoinedSubject(accessToken, joinedSubject)) throw new InvalidAccessJoinedSubject("You cannot create checkpoint in this subject");
-        await _checkpointRepo.CreateAsync(_mapper.Map<JoinedSubjectCheckPoint>(request));
+        var insertedCheckpoint = _mapper.Map<JoinedSubjectCheckPoint>(request);
+        insertedCheckpoint.JoinedSubjectId = joinedSubjectId;
+        await _checkpointRepo.CreateAsync(insertedCheckpoint);
     }
 
 
@@ -56,7 +58,10 @@ public class JoinedSubjectCheckPointService
         var joinedSubject = await _joinedSubjectRepo.GetByIdAsync(joinedSubjectId);
         if (!IsValidAccessJoinedSubject(accessToken, joinedSubject)) throw new InvalidAccessJoinedSubject("You cannot create checkpoint in this subject");
         if (doReplaceAll) await _checkpointRepo.RemoveByJoinedSubjectIdAsync(joinedSubjectId);
-        List<JoinedSubjectCheckPoint> checkPoints = _mapper.Map<List<JoinedSubjectCheckPoint>>(request);
+        var checkPoints = _mapper.Map<List<JoinedSubjectCheckPoint>>(request, opt =>
+        {
+            opt.Items["SubjectId"] = joinedSubjectId;
+        });
         await _checkpointRepo.BulkInsertAsync(checkPoints);
     }
 
@@ -126,7 +131,7 @@ public class JoinedSubjectCheckPointService
 
 
 
-    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken,string studentMessage)
+    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage)
     {
         var studentSenderName = _jWTService.GetFirstNameFromToken(accessToken) + _jWTService.GetLastNameFromToken(accessToken);
         //query joined subject with mark report

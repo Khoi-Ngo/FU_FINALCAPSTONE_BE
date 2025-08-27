@@ -47,6 +47,15 @@ This repository contains the backend services for the **AISEA** project, develop
 
 ---
 
+
+## Architecture Overview
+
+### 3-Layer Architecture (Extended with SHARED Layer)
+
+![3-Layer Architecture](assets/01.png)
+
+---
+
 ## Project Structure
 
 ```
@@ -126,6 +135,15 @@ docker-compose down
 ## Access the API
 
 Open a browser or use a tool like Postman to access [http://localhost:5000](http://localhost:5000) (e.g., [http://localhost:5000/swagger](http://localhost:5000/swagger) if Swagger is enabled).
+
+---
+
+
+---
+
+## Backend Package Diagram
+
+![Backend Package Diagram](assets/BEPackageDiagram.png)
 
 ---
 

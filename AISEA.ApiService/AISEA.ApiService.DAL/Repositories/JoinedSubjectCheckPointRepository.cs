@@ -86,4 +86,78 @@ public class JoinedSubjectCheckPointRepository : GenericRepository<JoinedSubject
 
     public new async Task<JoinedSubjectCheckPoint> GetByIdAsync(long id)
     => await _context.JoinedSubjectCheckPoints.Include(c => c.JoinedSubject).FirstOrDefaultAsync(c => c.Id == id);
+
+
+    // generic helper
+    public async Task<List<(long userId, string email, List<JoinedSubjectCheckPoint>)>> GetRemindAsync(
+        int thresholdHours,
+        string flagPropertyName)
+    {
+        var now = DateTime.UtcNow;
+        var dueTime = now.AddHours(thresholdHours);
+
+        var query = _context.JoinedSubjectCheckPoints
+            .Where(cp =>
+                !cp.IsCompleted &&
+                cp.Deadline <= dueTime &&
+                !EF.Property<bool>(cp, flagPropertyName))
+            .Include(cp => cp.JoinedSubject)
+                .ThenInclude(js => js.StudentProfile)
+                .ThenInclude(sp => sp.User);
+
+        var results = await query
+            .GroupBy(cp => new
+            {
+                cp.JoinedSubject.StudentProfile.User.Id,
+                cp.JoinedSubject.StudentProfile.User.Email
+            })
+            .Select(g => new
+            {
+                UserId = g.Key.Id,
+                Email = g.Key.Email,
+                Checkpoints = g.ToList()
+            })
+            .ToListAsync();
+
+
+        return results.Select(r => (r.UserId, r.Email, r.Checkpoints)).ToList();
+    }
+
+
+    public async Task MarkRemind1SentAsync(IEnumerable<long> checkpointIds)
+    {
+        await _context.JoinedSubjectCheckPoints
+            .Where(cp => checkpointIds.Contains(cp.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(cp => cp.ReminderSentHours1, true));
+    }
+    public async Task MarkRemind2SentAsync(IEnumerable<long> checkpointIds)
+    {
+        await _context.JoinedSubjectCheckPoints
+            .Where(cp => checkpointIds.Contains(cp.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(cp => cp.ReminderSentHours2, true));
+    }
+    public async Task MarkRemind3SentAsync(IEnumerable<long> checkpointIds)
+    {
+        await _context.JoinedSubjectCheckPoints
+            .Where(cp => checkpointIds.Contains(cp.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(cp => cp.ReminderSentHours3, true));
+    }
+    public async Task MarkRemind4SentAsync(IEnumerable<long> checkpointIds)
+    {
+        await _context.JoinedSubjectCheckPoints
+            .Where(cp => checkpointIds.Contains(cp.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(cp => cp.ReminderSentHours4, true));
+    }
+     public async Task MarkRemind5SentAsync(IEnumerable<long> checkpointIds)
+    {
+        await _context.JoinedSubjectCheckPoints
+            .Where(cp => checkpointIds.Contains(cp.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(cp => cp.ReminderSentHours5, true));
+    }
+
 }

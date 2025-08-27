@@ -167,6 +167,12 @@ public static class DependenciesInjection
         services.AddHostedService<StuMissedMeetingBgService>();
         services.AddHostedService<SemesterReferBgService>();
         services.AddHostedService<CleanNonUseJoinedSubjectBgService>();
+        services.AddHostedService<ReminderCheckpointBgService1>();
+        services.AddHostedService<ReminderCheckpointBgService2>();
+        services.AddHostedService<ReminderCheckpointBgService3>();
+        services.AddHostedService<ReminderCheckpointBgService4>();
+        services.AddHostedService<ReminderCheckpointBgService5>();
+
 
         // services.AddHostedService(provider =>
         //         new QueuedHostedService(

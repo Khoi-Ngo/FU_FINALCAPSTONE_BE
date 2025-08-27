@@ -35,7 +35,6 @@ public class MeetingViewDetailResponse
     // Student Profile Details
     public long StudentProfileId { get; set; }
     public DateTimeOffset StudentEnrolledAt { get; set; }
-    public bool StudentDoGraduate { get; set; }
     public int StudentNumberOfBan { get; set; }
     public string? StudentCareerGoal { get; set; }
     public long? StudentProgramId { get; set; }

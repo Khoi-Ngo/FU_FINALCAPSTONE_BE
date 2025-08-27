@@ -30,7 +30,6 @@ public class MeetingProfile : Profile
             .ForMember(dest => dest.StaffStatus, opt => opt.MapFrom(src => src.StaffProfile.User.Status))
             .ForMember(dest => dest.StudentProfileId, opt => opt.MapFrom(src => src.StudentProfileId))
             .ForMember(dest => dest.StudentEnrolledAt, opt => opt.MapFrom(src => src.StudentProfile.EnrolledAt))
-            .ForMember(dest => dest.StudentDoGraduate, opt => opt.MapFrom(src => src.StudentProfile.DoGraduate))
             .ForMember(dest => dest.StudentNumberOfBan, opt => opt.MapFrom(src => src.StudentProfile.NumberOfBan))
             .ForMember(dest => dest.StudentCareerGoal, opt => opt.MapFrom(src => src.StudentProfile.CareerGoal))
             .ForMember(dest => dest.StudentProgramId, opt => opt.MapFrom(src => src.StudentProfile.ProgramId))

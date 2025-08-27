@@ -21,7 +21,6 @@ public class StudentDataListResponse
 {
     public long Id { get; set; }
     public DateTimeOffset EnrolledAt { get; set; }
-    public bool DoGraduate { get; set; }
     public string? CareerGoal { get; set; }
     public int NumberOfBan { get; set; }
     public long ProgramId { get; set; }

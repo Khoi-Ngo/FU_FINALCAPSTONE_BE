@@ -31,12 +31,16 @@ namespace AISEA.ApiService.WebApi.Controllers.Syllabus
         }
 
         /// <summary>
-        /// Gets paginated list of syllabi
+        /// Gets paginated list of syllabi with optional search by SubjectCode
         /// </summary>
+        /// <param name="request">Pagination parameters</param>
+        /// <param name="subjectCodeSearch">Search by SubjectCode</param>
         [HttpGet]
-        public async Task<IActionResult> GetSyllabi([FromQuery] PaginationRequest request)
+        public async Task<IActionResult> GetSyllabi(
+            [FromQuery] PaginationRequest request,
+            [FromQuery] string? subjectCodeSearch = null)
         {
-            var result = await _syllabusService.GetSyllabusPagedAsync(request);
+            var result = await _syllabusService.GetSyllabusPagedAsync(request, subjectCodeSearch);
             return Ok(result);
         }
 

@@ -69,10 +69,10 @@ namespace AISEA.ApiService.BAL.Services.Syllabus
             return syllabus.Id;
         }
 
-        public async Task<PagedResult<GetSyllabusResponse>> GetSyllabusPagedAsync(PaginationRequest request)
+        public async Task<PagedResult<GetSyllabusResponse>> GetSyllabusPagedAsync(PaginationRequest request, string? subjectCodeSearch = null)
         {
-            var (syllabi, totalCount) = await _syllabusRepository.GetPagedAsync(request.PageNumber, request.PageSize);
-            
+            var (syllabi, totalCount) = await _syllabusRepository.GetPagedAsync(request.PageNumber, request.PageSize, subjectCodeSearch);
+
             return new PagedResult<GetSyllabusResponse>
             {
                 Items = _mapper.Map<List<GetSyllabusResponse>>(syllabi),

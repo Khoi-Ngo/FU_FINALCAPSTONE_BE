@@ -38,10 +38,10 @@ namespace AISEA.ApiService.BAL.Services.Subject
             await _subjectRepository.CreateAsync(subject);
         }
 
-        public async Task<PagedResult<GetSubjectResponse>> GetSubjectsPagedAsync(PaginationRequest request, string? search = null)
+        public async Task<PagedResult<GetSubjectResponse>> GetSubjectsPagedAsync(PaginationRequest request, string? search = null, string? comboName = null, string? curriculumCode = null)
         {
-            var (subjects, totalCount) = await _subjectRepository.GetPagedAsync(request.PageNumber, request.PageSize, search);
-            
+            var (subjects, totalCount) = await _subjectRepository.GetPagedAsync(request.PageNumber, request.PageSize, search, comboName, curriculumCode);
+
             return new PagedResult<GetSubjectResponse>
             {
                 Items = _mapper.Map<List<GetSubjectResponse>>(subjects),

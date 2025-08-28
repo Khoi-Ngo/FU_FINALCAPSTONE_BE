@@ -40,12 +40,20 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         }
 
         /// <summary>
-        /// Gets paginated list of subjects with optional search
+        /// Gets paginated list of subjects with optional search and filters
         /// </summary>
+        /// <param name="request">Pagination parameters</param>
+        /// <param name="search">Search by SubjectCode or SubjectName</param>
+        /// <param name="comboName">Filter by Combo Name</param>
+        /// <param name="curriculumCode">Filter by Curriculum Code</param>
         [HttpGet]
-        public async Task<IActionResult> GetSubjects([FromQuery] PaginationRequest request, [FromQuery] string? search = null)
+        public async Task<IActionResult> GetSubjects(
+            [FromQuery] PaginationRequest request,
+            [FromQuery] string? search = null,
+            [FromQuery] string? comboName = null,
+            [FromQuery] string? curriculumCode = null)
         {
-            var result = await _subjectService.GetSubjectsPagedAsync(request, search);
+            var result = await _subjectService.GetSubjectsPagedAsync(request, search, comboName, curriculumCode);
             return Ok(result);
         }
 

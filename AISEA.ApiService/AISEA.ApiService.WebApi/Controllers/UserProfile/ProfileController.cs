@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+using AISEA.ApiService.BAL.Services.CourseTracker;
 using AISEA.ApiService.BAL.Services.SystemProfile;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.SystemProfile;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.InterceptorAPI;
@@ -15,12 +18,17 @@ public class ProfileController : BaseController
 {
     private readonly StudentProfileService _studentProfileService;
     private readonly StaffProfileService _staffProfileService;
-    public ProfileController(EndpointSettings endpointSettings, StudentProfileService studentProfileService, StaffProfileService staffProfileService) : base(endpointSettings)
+    private readonly IBackgroundTaskQueue _taskQueue;
+
+    public ProfileController(EndpointSettings endpointSettings
+    , StudentProfileService studentProfileService
+    , StaffProfileService staffProfileService
+    , IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _staffProfileService = staffProfileService;
         _studentProfileService = studentProfileService;
+        _taskQueue = taskQueue;
     }
-    //TODO: CRUD Combo or Program or Curriculum -> Need Worker Trigger to change data in JoinedSubject table
 
 
     /// <summary>
@@ -53,6 +61,33 @@ public class ProfileController : BaseController
         await _staffProfileService.CreateAsync(request, accessToken);
         return Ok("Staff profile created successfully");
     }
+
+
+    #region  UPDATE COMBO + UPDATE CURRICULUM CODE
+
+    [HttpPut("student-profile/{stuproID}")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [AuditLog(Tag = "UPDATE COMBO OR CURRICULUM")]
+    public async Task<IActionResult> UpdateComborCuri(
+    [FromBody] UpdateComboOrCurriRequest request,
+    [Range(1, long.MaxValue, ErrorMessage = "Student Profile ID must be greater than 0.")]
+    long stuproID)
+    {
+        var studentProfile = await _studentProfileService.UpdateComborCuriAsync(request, stuproID);
+        //trigger the worker run in background to deactivate joined subject not in the curriculum or combo code
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+    {
+        var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
+
+        await qJoinedSubjectService.DeActivateNonUseJoinedSubjectAsync(studentProfile);
+
+    });
+
+
+        return Ok("Update curriculum-combo successfully");
+    }
+
+    #endregion
 
 
 }

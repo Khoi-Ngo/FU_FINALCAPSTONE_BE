@@ -61,4 +61,12 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         Console.WriteLine($"{DateTime.UtcNow} Removed {totalDeleted} non-use joined subjects.");
 
     }
+
+
+    public async Task BulkUpdateAsync(IEnumerable<JoinedSubject> subjects)
+    {
+        _context.JoinedSubjects.UpdateRange(subjects);
+        await _context.SaveChangesAsync();
+    }
+
 }

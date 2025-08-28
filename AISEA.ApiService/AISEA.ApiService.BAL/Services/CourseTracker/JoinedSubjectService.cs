@@ -126,8 +126,8 @@ public class JoinedSubjectService
             //                         .Where(cs => !cs.IsDeleted)
             //                         .Select(cs => cs.Combo)
             //                         .ToList();
-                                
-                
+
+
             //     var combo = combos.FirstOrDefault(c => !c.IsDeleted
             //     && c.ApprovalStatus == EApprovalStatus.APPROVED
             //     && c.ComboName == studentProfile.RegisteredComboCode);
@@ -351,5 +351,41 @@ public class JoinedSubjectService
     public async Task RemoveAllNonUseAsync()
     {
         await _joinedSubjectRepository.RemoveAllNonUseAsync();
+    }
+
+    public async Task DeActivateNonUseJoinedSubjectAsync(StudentProfile studentProfile)
+    {
+        //get all joined subject basing on the student profile
+        var joinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(studentProfile.Id);
+
+        //get all subject code via curriculum code and combo -> Combo must be in the curriculum
+        var subjectsByCur = await _subjectRepository.GetAllViaCurriculumAsync(studentProfile.CurriculumCode);
+
+        //check + deactivate the subject not in curriculum & combo
+        foreach (var joinSubject in joinedSubjects)
+        {
+            var check = subjectsByCur.Find(s => s.SubjectCode == joinSubject.SubjectCode);
+            if (check is null)
+            {
+                //deactivate the joined subject
+                joinSubject.IsActive = false;
+                continue;
+            }
+            if (!check.Combos.IsNullOrEmpty()) // subject has combos
+            {
+                // if student's combo is not included -> deactivate
+                if (!check.Combos.Contains(studentProfile.RegisteredComboCode))
+                {
+                    joinSubject.IsActive = false;
+                    continue;
+                }
+            }
+
+        }
+
+        //bulk update
+        await _joinedSubjectRepository.BulkUpdateAsync(joinedSubjects);
+
+
     }
 }

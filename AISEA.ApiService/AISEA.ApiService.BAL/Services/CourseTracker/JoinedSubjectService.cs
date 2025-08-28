@@ -348,6 +348,7 @@ public class JoinedSubjectService
         foreach (var joinSubject in joinedSubjects)
         {
             var check = subjectsByCur.Find(s => s.SubjectCode == joinSubject.SubjectCode);
+            joinSubject.IsActive = true;
             if (check is null)
             {
                 //deactivate the joined subject

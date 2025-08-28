@@ -18,13 +18,27 @@ namespace AISEA.ApiService.DAL.Repositories
                 .FirstOrDefaultAsync(s => s.SubjectCode == subjectCode && !s.IsDeleted);
         }
 
-        public async Task<(IEnumerable<Subject> Subjects, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? search = null)
+        public async Task<(IEnumerable<Subject> Subjects, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? search = null, string? comboName = null, string? curriculumCode = null)
         {
             var query = _context.Subjects.Where(s => !s.IsDeleted);
 
+            // Search by SubjectCode or SubjectName
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(s => s.SubjectName.Contains(search) || s.SubjectCode.Contains(search));
+            }
+
+            // Filter by Combo Name
+            if (!string.IsNullOrEmpty(comboName))
+            {
+                query = query.Where(s => s.ComboSubjects.Any(cs => cs.Combo.ComboName.Contains(comboName) && !cs.Combo.IsDeleted));
+            }
+
+            // Filter by CurriculumCode
+            if (!string.IsNullOrEmpty(curriculumCode))
+            {
+                query = query.Where(s => s.SubjectVersions.Any(sv =>
+                    sv.CurriculumSubjects.Any(cs => cs.Curriculum.CurriculumCode.Contains(curriculumCode) && !cs.Curriculum.IsDeleted)));
             }
 
             var totalCount = await query.CountAsync();

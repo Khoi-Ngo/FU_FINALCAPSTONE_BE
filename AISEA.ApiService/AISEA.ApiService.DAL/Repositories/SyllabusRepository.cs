@@ -62,12 +62,18 @@ namespace AISEA.ApiService.DAL.Repositories
                 .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
         }
 
-        public async Task<(IEnumerable<Syllabus> Syllabi, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
+        public async Task<(IEnumerable<Syllabus> Syllabi, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string? subjectCodeSearch = null)
         {
             var query = _context.Syllabi
                 .Include(s => s.SubjectVersion)
                     .ThenInclude(sv => sv.Subject)
                 .Where(s => !s.IsDeleted);
+
+            // Search by SubjectCode
+            if (!string.IsNullOrEmpty(subjectCodeSearch))
+            {
+                query = query.Where(s => s.SubjectVersion.Subject.SubjectCode.Contains(subjectCodeSearch));
+            }
 
             var totalCount = await query.CountAsync();
             var syllabi = await query

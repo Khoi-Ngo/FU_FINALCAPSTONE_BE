@@ -69,7 +69,7 @@ public class ProfileController : BaseController
     /// Update the Curriculum or Combo of student
     /// </summary>
     [HttpPut("student-profile/{stuproID}")]
-    [PermissionAuthorize((int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)]
     [AuditLog(Tag = "UPDATE COMBO OR CURRICULUM")]
     public async Task<IActionResult> UpdateComborCuri(
     [FromBody] UpdateComboOrCurriRequest request,

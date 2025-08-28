@@ -110,17 +110,17 @@ public class ProfileController : BaseController
 
 
 
-    // /// <summary>
-    // /// STUDENT self view his own combo-subject
-    // /// </summary>
-    // [HttpGet("personal-combo-subject")]
-    // [PermissionAuthorize((int)EUserRole.STUDENT)]
-    // [AuditLog(Tag = "PERSONAL_VIEW_COMBO_SUBJECT")]
-    // public async Task<IActionResult> ViewPersonalCombo()
-    // {
-    //     var res = await _joinedSubjectService.ViewPersonalComboSubjectAsync(AccessToken);
-    //     return Ok(res);
-    // }
+    /// <summary>
+    /// STUDENT self view his own combo-subject
+    /// </summary>
+    [HttpGet("personal-combo-subject")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    [AuditLog(Tag = "PERSONAL_VIEW_COMBO_SUBJECT")]
+    public async Task<IActionResult> ViewPersonalCombo()
+    {
+        var res = await _joinedSubjectService.ViewPersonalComboSubjectAsync(AccessToken);
+        return Ok(res);
+    }
 
 
 

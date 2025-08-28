@@ -14,8 +14,8 @@ namespace AISEA.ApiService.DAL.Repositories
         }
         public async Task<List<SimpleSubjectResponse>> GetAllViaCurriculumNotIncludeComboAsync(string studentCurriculumCode)
         {
-            
-            
+
+
             var subjects = await _context.CurriculumSubjects
                 .Where(cs =>
                     cs.Curriculum != null &&
@@ -46,9 +46,46 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
 
-        public async Task<SimpleSubjectResponse> GetAllViaComboNameAsync(string studentComboName)
+        public async Task<List<SimpleSubjectResponse>> GetAllViaComboNameAsync(string studentComboName)
         {
-            throw new NotImplementedException();
+            var subjects = await _context.ComboSubjects
+                .Where(cs =>
+                    cs.Combo != null &&
+                    cs.Combo.ComboName == studentComboName &&
+
+                    !cs.IsDeleted &&
+
+                    cs.Combo.IsDeleted == false &&
+                    cs.Combo.ApprovalStatus == EApprovalStatus.APPROVED &&
+
+
+                    cs.Subject != null &&
+                    !cs.Subject.IsDeleted &&
+                    cs.Subject.ApprovalStatus == EApprovalStatus.APPROVED &&
+
+
+                    cs.Subject.SubjectVersions.Any(sv =>
+                        !sv.IsDeleted
+                        && sv.IsActive
+                        && _context.CurriculumSubjects.Any(currSub =>
+                            currSub.SubjectVersionId == sv.Id &&
+                            !currSub.IsDeleted)))
+
+
+                .Select(cs => new SimpleSubjectResponse
+                {
+                    Id = cs.Subject.Id,
+                    SubjectCode = cs.Subject.SubjectCode,
+                    SubjectName = cs.Subject.SubjectName,
+                    Credits = cs.Subject.Credits,
+                    SemesterNumber = _context.CurriculumSubjects
+                        .Where(currSub => currSub.SubjectVersion.SubjectId == cs.Subject.Id && !currSub.IsDeleted)
+                        .Select(currSub => currSub.SemesterNumber)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return subjects;
         }
 
 

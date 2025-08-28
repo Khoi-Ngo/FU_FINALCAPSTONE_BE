@@ -432,14 +432,14 @@ public class JoinedSubjectService
         return subjects;
     }
 
-    // public async Task<SimpleSubjectResponse> ViewPersonalComboSubjectAsync(string accessToken)
-    // {
-    //     var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
-    //     var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
-    //     var studentComboName = studentProfile.RegisteredComboCode;
+    public async Task<List<SimpleSubjectResponse>> ViewPersonalComboSubjectAsync(string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+        var studentComboName = studentProfile.RegisteredComboCode;
 
-    //     var subjects = await _subjectRepository.GetAllViaComboNameAsync(studentComboName);
+        var subjects = await _subjectRepository.GetAllViaComboNameAsync(studentComboName);
 
-    //     return subjects;
-    // }
+        return subjects;
+    }
 }

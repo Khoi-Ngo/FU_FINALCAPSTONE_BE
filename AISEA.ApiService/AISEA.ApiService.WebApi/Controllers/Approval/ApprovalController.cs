@@ -22,7 +22,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Approval
         /// Approve or reject a subject (Manager only)
         /// </summary>
         [HttpPut("subject/{subjectId}")]
-        [PermissionAuthorize(4)] // Manager only
         public async Task<IActionResult> ApproveOrRejectSubject(long subjectId, [FromBody] ApprovalRequest request)
         {
             await _approvalService.ApproveOrRejectSubjectAsync(subjectId, request, AccessToken);
@@ -33,7 +32,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Approval
         /// Approve or reject a curriculum (Manager only)
         /// </summary>
         [HttpPut("curriculum/{curriculumId}")]
-        [PermissionAuthorize(4)] // Manager only
         public async Task<IActionResult> ApproveOrRejectCurriculum(long curriculumId, [FromBody] ApprovalRequest request)
         {
             await _approvalService.ApproveOrRejectCurriculumAsync(curriculumId, request, AccessToken);
@@ -44,7 +42,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Approval
         /// Approve or reject a syllabus (Manager only)
         /// </summary>
         [HttpPut("syllabus/{syllabusId}")]
-        [PermissionAuthorize(4)] // Manager only
         public async Task<IActionResult> ApproveOrRejectSyllabus(long syllabusId, [FromBody] ApprovalRequest request)
         {
             await _approvalService.ApproveOrRejectSyllabusAsync(syllabusId, request, AccessToken);
@@ -55,7 +52,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Approval
         /// Approve or reject a combo (Manager only)
         /// </summary>
         [HttpPut("combo/{comboId}")]
-        [PermissionAuthorize(4)] // Manager only
         public async Task<IActionResult> ApproveOrRejectCombo(long comboId, [FromBody] ApprovalRequest request)
         {
             await _approvalService.ApproveOrRejectComboAsync(comboId, request, AccessToken);

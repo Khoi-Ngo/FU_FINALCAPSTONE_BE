@@ -18,7 +18,6 @@ namespace AISEA.ApiService.SHARED.DTOs.Requests.User
     public class StudentDataUpdateRequest
     {
         public DateTimeOffset EnrolledAt { get; set; }
-        public bool DoGraduate { get; set; }
         public string? CareerGoal { get; set; }
 
     }

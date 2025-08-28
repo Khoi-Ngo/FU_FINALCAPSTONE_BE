@@ -23,7 +23,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         /// Creates a new subject (Academic Staff only) - Requires Manager approval
         /// </summary>
         [HttpPost]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSubject([FromBody] CreateSubjectRequest request)
         {
             await _subjectService.CreateSubjectAsync(request, AccessToken);
@@ -34,7 +33,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         /// Creates multiple subjects in bulk (Academic Staff only) - Requires Manager approval
         /// </summary>
         [HttpPost("bulk")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSubjects([FromBody] List<CreateSubjectRequest> requests)
         {
             await _subjectService.CreateSubjectsAsync(requests, AccessToken);
@@ -65,7 +63,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         /// Updates an existing subject (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> UpdateSubject(long id, [FromBody] UpdateSubjectRequest request)
         {
             await _subjectService.UpdateSubjectAsync(id, request);
@@ -76,7 +73,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         /// Deletes a subject (Admin only)
         /// </summary>
         [HttpDelete("{id}")]
-        [PermissionAuthorize(1)] // Admin only
         public async Task<IActionResult> DeleteSubject(long id)
         {
             await _subjectService.DeleteSubjectAsync(id);

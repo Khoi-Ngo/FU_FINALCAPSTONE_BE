@@ -2,6 +2,7 @@ using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AISEA.ApiService.DAL.Repositories;
 
@@ -16,7 +17,7 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
     }
 
-    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDAsync(long studentProfileId)
+    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDWithSemesteDataAsync(long studentProfileId)
     {
         return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
     }
@@ -38,15 +39,13 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         if (latestSemesterId == 0)
             return;
 
-        const int batchSize = 5000; // Safe limit per deletion
         int totalDeleted = 0;
 
         while (true)
         {
             var oldSubjects = await _context.JoinedSubjects
-                .Where(js => js.SemesterId < latestSemesterId && !js.IsCompleted)
+                .Where(js => js.SemesterId < latestSemesterId && !js.SubjectMarkReports.Any())
                 .OrderBy(js => js.Id)
-                .Take(batchSize)
                 .ToListAsync();
 
             if (oldSubjects.Count == 0)
@@ -60,5 +59,25 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
 
         Console.WriteLine($"{DateTime.UtcNow} Removed {totalDeleted} non-use joined subjects.");
 
+    }
+
+
+    public async Task BulkUpdateAsync(IEnumerable<JoinedSubject> subjects)
+    {
+        _context.JoinedSubjects.UpdateRange(subjects);
+        await _context.SaveChangesAsync();
+    }
+
+
+    public async Task<IEnumerable<JoinedSubject>> GetAllByStudentProfileIDNoSemesterAsync(long studentProfileId)
+    {
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetAllPassedSubjectCodesAsync(long studentProfileId)
+    {
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId
+            && js.IsPassed
+        ).Select(js => js.SubjectCode).ToListAsync();
     }
 }

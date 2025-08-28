@@ -24,7 +24,6 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectVersion
         /// Creates a new subject version (Academic Staff only)
         /// </summary>
         [HttpPost]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateSubjectVersion([FromBody] CreateSubjectVersionRequest request)
         {
             await _subjectVersionService.CreateSubjectVersionAsync(request);
@@ -93,7 +92,6 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectVersion
         /// Updates an existing subject version (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> UpdateSubjectVersion(long id, [FromBody] UpdateSubjectVersionRequest request)
         {
             await _subjectVersionService.UpdateSubjectVersionAsync(id, request);
@@ -104,7 +102,6 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectVersion
         /// Deletes a subject version (Admin only)
         /// </summary>
         [HttpDelete("{id}")]
-        [PermissionAuthorize(1)] // Admin only
         public async Task<IActionResult> DeleteSubjectVersion(long id)
         {
             await _subjectVersionService.DeleteSubjectVersionAsync(id);
@@ -115,7 +112,6 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectVersion
         /// Sets a version as the default for its subject (Academic Staff only)
         /// </summary>
         [HttpPost("{id}/set-default")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> SetDefaultVersion(long id)
         {
             await _subjectVersionService.SetDefaultVersionAsync(id);
@@ -126,7 +122,6 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectVersion
         /// Toggles the active status of a version (Academic Staff only)
         /// </summary>
         [HttpPost("{id}/toggle-active")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> ToggleActiveStatus(long id)
         {
             await _subjectVersionService.ToggleActiveStatusAsync(id);

@@ -11,7 +11,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Role;
 
 [ApiController]
 [Route("api/[controller]")]
-[PermissionAuthorize((int)EUserRole.ADMIN)]
+// [PermissionAuthorize((int)EUserRole.ADMIN)]
 public class RoleController : BaseController
 {
     private readonly RoleService _roleService;

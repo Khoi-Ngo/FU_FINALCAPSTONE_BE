@@ -12,7 +12,6 @@ namespace AISEA.ApiService.BAL.Validators.JoinedSubject
     //// SemesterName must be existed in system as SemesterName (Trigger)
     //// StudentUserName must be existed and have student profile when inserting course -> Auto fail when insert database due to foreign key constraint
     //// SubjectCode && VersionCode must be associated with the ComboName and CurriculumCode and ProgramCode of student (Trigger)
-    //// The student must not be graduated (Trigger)
     //// The account of student must be active (Auto fail when query to get needed data before inserting)
 
     public class SingleImportJoinedSubjectRequestValidator : AbstractValidator<SingleImportJoinedSubjectRequest>

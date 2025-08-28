@@ -23,7 +23,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Creates a new subject combo (Academic Staff only)
         /// </summary>
         [HttpPost]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateCombo([FromBody] CreateComboRequest request)
         {
             var comboId = await _comboService.CreateComboAsync(request);
@@ -34,7 +33,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Creates multiple combos in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("bulk")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateCombos([FromBody] List<CreateComboRequest> requests)
         {
             await _comboService.CreateCombosAsync(requests);
@@ -65,7 +63,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Updates an existing combo (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> UpdateCombo(long id, [FromBody] UpdateComboRequest request)
         {
             await _comboService.UpdateComboAsync(id, request);
@@ -76,7 +73,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Deletes a combo (Admin only)
         /// </summary>
         [HttpDelete("{id}")]
-        [PermissionAuthorize(1)] // Admin only
         public async Task<IActionResult> DeleteCombo(long id)
         {
             await _comboService.DeleteComboAsync(id);
@@ -97,7 +93,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Adds a subject to a combo (Academic Staff only)
         /// </summary>
         [HttpPost("{id}/subjects/{subjectId}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> AddSubjectToCombo(long id, long subjectId)
         {
             await _comboService.AddSubjectToComboAsync(id, subjectId);
@@ -108,7 +103,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Combo
         /// Removes a subject from a combo (Academic Staff only)
         /// </summary>
         [HttpDelete("{id}/subjects/{subjectId}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> RemoveSubjectFromCombo(long id, long subjectId)
         {
             await _comboService.RemoveSubjectFromComboAsync(id, subjectId);

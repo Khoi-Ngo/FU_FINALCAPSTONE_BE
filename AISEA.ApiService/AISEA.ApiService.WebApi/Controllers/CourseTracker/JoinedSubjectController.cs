@@ -167,6 +167,7 @@ public class JoinedSubjectController : BaseController
     [AuditLog(Tag = "DELETE_JOINED_SUBJECT")]
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
+        var accessToken = AccessToken;
 
         var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id);
 
@@ -193,10 +194,10 @@ public class JoinedSubjectController : BaseController
 
 
     ///<summary>
-    /// The ACADEMIC_STAFF || MANAGER | ADMIN View all by  student profile id 
+    /// The ACADEMIC_STAFF || MANAGER | ADMIN | Advisor View all by  student profile id 
     /// </summary>
     [HttpGet("{studentProfileId}/all")]
-    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.MANAGER, (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.MANAGER, (int)EUserRole.ADMIN, (int)EUserRole.ADVISOR)]
     [AuditLog(Tag = "VIEW_JOINED_SUBJECT")]
     public async Task<IActionResult> GetAllByStudentProfileIdPaged(long studentProfileId)
     {

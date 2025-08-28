@@ -23,8 +23,5 @@ public class CheckPointProfile : Profile
 
         //DETAIL RESPONSE
         CreateMap<JoinedSubjectCheckPoint, CheckpointDetailResponse>();
-
-
-
     }
 }

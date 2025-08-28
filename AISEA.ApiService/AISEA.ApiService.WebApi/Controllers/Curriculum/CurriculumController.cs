@@ -23,7 +23,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Creates a new curriculum (Academic Staff only)
         /// </summary>
         [HttpPost]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateCurriculum([FromBody] CreateCurriculumRequest request)
         {
             var curriculumId = await _curriculumService.CreateCurriculumAsync(request, AccessToken);
@@ -34,7 +33,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Creates multiple curicula in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("bulk")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> CreateCurricula([FromBody] List<CreateCurriculumRequest> requests)
         {
             await _curriculumService.CreateCurriculaAsync(requests, AccessToken);
@@ -65,7 +63,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Updates an existing curriculum (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> UpdateCurriculum(long id, [FromBody] UpdateCurriculumRequest request)
         {
             await _curriculumService.UpdateCurriculumAsync(id, request);
@@ -76,7 +73,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Deletes a curriculum (Admin only) - only if no subjects are assigned
         /// </summary>
         [HttpDelete("{id}")]
-        [PermissionAuthorize(1)] // Admin only
         public async Task<IActionResult> DeleteCurriculum(long id)
         {
             await _curriculumService.DeleteCurriculumAsync(id);
@@ -97,7 +93,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Adds a subject to a curriculum (Academic Staff only)
         /// </summary>
         [HttpPost("{id}/subjects")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> AddSubjectToCurriculum(long id, [FromBody] AddSubjectToCurriculumRequest request)
         {
             await _curriculumService.AddSubjectToCurriculumAsync(id, request);
@@ -108,7 +103,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Removes a subject version from a curriculum (Academic Staff only)
         /// </summary>
         [HttpDelete("{id}/subjects/{subjectVersionId}")]
-        [PermissionAuthorize(1, 2)] // Admin, Academic Staff
         public async Task<IActionResult> RemoveSubjectFromCurriculum(long id, long subjectVersionId)
         {
             await _curriculumService.RemoveSubjectFromCurriculumAsync(id, subjectVersionId);
@@ -119,7 +113,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Curriculum
         /// Gets all subjects in a curriculum by curriculum code - useful for staffs to view their curriculum subjects
         /// </summary>
         [HttpGet("by-code/{curriculumCode}/subjects")]
-        [PermissionAuthorize(2)]
         public async Task<IActionResult> GetSubjectsByCurriculumCode(string curriculumCode)
         {
             var result = await _curriculumService.GetSubjectsByCurriculumCodeAsync(curriculumCode);

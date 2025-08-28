@@ -47,4 +47,17 @@ public class StudentProfileService
         studentProfile.NumberOfBan = studentProfile.NumberOfBan + numberOfBan;
         await _studentProfileRepository.UpdateAsync(studentProfile);
     }
+
+    public async Task<StudentProfile> UpdateComborCuriAsync(UpdateComboOrCurriRequest request, long stuproID)
+    {
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(stuproID);
+        studentProfile.CurriculumCode = request.CurriculumCode;
+        var comboChange = request.RegisteredComboCode;
+        if (!String.IsNullOrEmpty(comboChange))
+        {
+            studentProfile.RegisteredComboCode = comboChange;
+        }
+        await _studentProfileRepository.UpdateAsync(studentProfile);
+        return studentProfile;
+    }
 }

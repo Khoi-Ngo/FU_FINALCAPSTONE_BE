@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
@@ -42,16 +43,97 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Where(s => subjectIds.Contains(s.Id) && !s.IsDeleted)
                 .ToListAsync();
         }
-        public async Task<Subject> GetApprovedNotDeleteByCodeAsync(string subjectCode)
+
+        public async Task<List<CheckToDeactiveSubjectDTO>> GetAllViaCurriculumAsync(string curriculumCode)
         {
-            return await _context.Subjects
-            .Include(s => s.SubjectVersions).ThenInclude(sv => sv.CurriculumSubjects).ThenInclude(csv => csv.Curriculum)
-            .Include(s => s.ComboSubjects).ThenInclude(cb => cb.Combo)
-                .FirstOrDefaultAsync(s =>
-                 s.SubjectCode == subjectCode
-                && !s.IsDeleted
-                && s.ApprovalStatus == SHARED.Const.Enums.EApprovalStatus.APPROVED);
+            var result = await _context.Curricula
+                .Where(c => c.CurriculumCode == curriculumCode)
+                .SelectMany(c => c.CurriculumSubjects)
+                .Select(cs => cs.SubjectVersion.Subject)
+                .Select(s => new CheckToDeactiveSubjectDTO
+                {
+                    SubjectId = s.Id,
+                    SubjectCode = s.SubjectCode,
+                    SubjectName = s.SubjectName,
+                    Combos = s.ComboSubjects
+                        .Select(cs => cs.Combo.ComboName)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return result;
         }
+
+
+        public async Task<ImportableSubjectDTO> GetImportableByCodeAsync(string subjectCode)
+        {
+            var now = DateTime.Now;
+            return await _context.Subjects
+                .Where(s => s.SubjectCode == subjectCode
+                    && !s.IsDeleted
+                    && s.ApprovalStatus == SHARED.Const.Enums.EApprovalStatus.APPROVED)
+                .Select(s => new ImportableSubjectDTO
+                {
+                    SubjectCode = s.SubjectCode,
+                    SubjectName = s.SubjectName,
+                    Credits = s.Credits,
+                    Description = s.Description,
+
+
+                    // Prerequisite subject codes (filtered)
+                    
+                    PrerequisiteSubjectCodes = s.SubjectVersions
+                .Where(v => !v.IsDeleted
+                    && v.IsActive
+                    && v.EffectiveFrom <= now
+                    && (v.EffectiveTo == null || now <= v.EffectiveTo))
+                .SelectMany(v => v.Prerequisites)
+                .Where(p => !p.PrerequisiteSubjectVersion.IsDeleted
+                    && p.PrerequisiteSubjectVersion.IsActive
+                    && p.PrerequisiteSubjectVersion.EffectiveFrom <= now
+                    && (p.PrerequisiteSubjectVersion.EffectiveTo == null || now <= p.PrerequisiteSubjectVersion.EffectiveTo)
+                    && !p.PrerequisiteSubjectVersion.Subject.IsDeleted
+                    && p.PrerequisiteSubjectVersion.Subject.ApprovalStatus == SHARED.Const.Enums.EApprovalStatus.APPROVED)
+                .Select(p => p.PrerequisiteSubjectVersion.Subject.SubjectCode)
+                .Distinct()
+                .ToList(),
+
+                    // Versions (filtered)
+                    Versions = s.SubjectVersions
+                        .Where(v => !v.IsDeleted
+                            && v.IsActive
+                            && v.EffectiveFrom <= DateTime.Now
+                            && (v.EffectiveTo == null || DateTime.Now <= v.EffectiveTo))
+                        .Select(v => v.VersionCode)
+                        .Distinct()
+                        .ToList(),
+
+                    // Curricula (filtered)
+                    CurriculumCodes = s.SubjectVersions
+                        .Where(v => !v.IsDeleted
+                            && v.IsActive
+                            && v.EffectiveFrom <= DateTime.Now
+                            && (v.EffectiveTo == null || DateTime.Now <= v.EffectiveTo))
+                        .SelectMany(v => v.CurriculumSubjects)
+                        .Where(cs => !cs.Curriculum.IsDeleted
+                            && cs.Curriculum.ApprovalStatus == SHARED.Const.Enums.EApprovalStatus.APPROVED)
+                        .Select(cs => cs.Curriculum.CurriculumCode)
+                        .Distinct()
+                        .ToList(),
+
+                    // Combos (filtered)
+                    ComboNames = s.ComboSubjects
+                        .Where(cs => !cs.Combo.IsDeleted
+                            && cs.Combo.ApprovalStatus == SHARED.Const.Enums.EApprovalStatus.APPROVED)
+                        .Select(cs => cs.Combo.ComboName)
+                        .Distinct()
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+        }
+
+
+
 
     }
 }

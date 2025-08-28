@@ -30,5 +30,12 @@ namespace AISEA.ApiService.DAL.Entities
 
         // Navigation property
         public virtual JoinedSubject JoinedSubject { get; set; } = null!;
+
+
+        public bool ReminderSentHours1 { get; set; } = false;
+        public bool ReminderSentHours2 { get; set; } = false;
+        public bool ReminderSentHours3 { get; set; } = false;
+        public bool ReminderSentHours4 { get; set; } = false;
+        public bool ReminderSentHours5 { get; set; } = false;
     }
 }

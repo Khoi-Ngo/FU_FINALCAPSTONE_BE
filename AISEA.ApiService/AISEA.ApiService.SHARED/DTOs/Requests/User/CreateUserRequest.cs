@@ -17,7 +17,6 @@ public class CreateUserRequest
 }
 public class StudentProfileData
 {
-    public bool DoGraduate { get; set; } = false;
     public DateTimeOffset EnrolledAt { get; set; }
     public string? CareerGoal { get; set; }
     public required long ProgramId { get; set; }

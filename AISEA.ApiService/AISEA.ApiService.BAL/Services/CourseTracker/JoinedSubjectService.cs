@@ -5,9 +5,9 @@ using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
-using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +20,19 @@ public class JoinedSubjectService
 {
     private readonly UserRepository _userRepository;
     private readonly JoinedSubjectRepository _joinedSubjectRepository;
+    private readonly StudentProfileRepository _studentProfileRepository;
     private readonly IMapper _mapper;
     private readonly IJWTService _jWTService;
     private readonly SubjectRepository _subjectRepository;
     private readonly ILogger<JoinedSubjectService> _logger;
 
-    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService, SubjectRepository subjectRepository, ILogger<JoinedSubjectService> logger)
+    public JoinedSubjectService(UserRepository userRepository
+    , JoinedSubjectRepository joinedSubjectRepository
+    , IMapper mapper
+    , IJWTService jWTService
+    , SubjectRepository subjectRepository
+    , ILogger<JoinedSubjectService> logger
+    , StudentProfileRepository studentProfileRepository)
     {
         _userRepository = userRepository;
         _joinedSubjectRepository = joinedSubjectRepository;
@@ -33,6 +40,7 @@ public class JoinedSubjectService
         _jWTService = jWTService;
         _subjectRepository = subjectRepository;
         _logger = logger;
+        _studentProfileRepository = studentProfileRepository;
     }
 
 
@@ -411,4 +419,27 @@ public class JoinedSubjectService
     }
 
     #endregion
+
+
+    public async Task<List<SimpleSubjectResponse>> ViewPersonalCurriculumSubjectAsync(string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+        var studentCurriculumCode = studentProfile.CurriculumCode;
+
+        var subjects = await _subjectRepository.GetAllViaCurriculumNotIncludeComboAsync(studentCurriculumCode);
+
+        return subjects;
+    }
+
+    // public async Task<SimpleSubjectResponse> ViewPersonalComboSubjectAsync(string accessToken)
+    // {
+    //     var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+    //     var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+    //     var studentComboName = studentProfile.RegisteredComboCode;
+
+    //     var subjects = await _subjectRepository.GetAllViaComboNameAsync(studentComboName);
+
+    //     return subjects;
+    // }
 }

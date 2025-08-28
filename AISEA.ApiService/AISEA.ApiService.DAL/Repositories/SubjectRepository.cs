@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,45 @@ namespace AISEA.ApiService.DAL.Repositories
         public SubjectRepository(AiseaContext context) : base(context)
         {
         }
+        public async Task<List<SimpleSubjectResponse>> GetAllViaCurriculumNotIncludeComboAsync(string studentCurriculumCode)
+        {
+            
+            
+            var subjects = await _context.CurriculumSubjects
+                .Where(cs =>
+                    cs.Curriculum != null &&
+                    cs.Curriculum.CurriculumCode == studentCurriculumCode &&
+
+                    cs.SubjectVersion != null &&
+                    cs.SubjectVersion.Subject != null &&
+
+                    !cs.IsDeleted &&
+                    !cs.SubjectVersion.IsDeleted &&
+                    !cs.SubjectVersion.Subject.IsDeleted &&
+                    cs.SubjectVersion.Subject.ApprovalStatus == EApprovalStatus.APPROVED &&
+
+                    !_context.ComboSubjects.Any(cb =>
+                        cb.SubjectId == cs.SubjectVersion.Subject.Id &&
+                        !cb.IsDeleted))
+                .Select(cs => new SimpleSubjectResponse
+                {
+                    Id = cs.SubjectVersion.Subject.Id,
+                    SubjectCode = cs.SubjectVersion.Subject.SubjectCode,
+                    SubjectName = cs.SubjectVersion.Subject.SubjectName,
+                    Credits = cs.SubjectVersion.Subject.Credits,
+                    SemesterNumber = cs.SemesterNumber
+                })
+                .ToListAsync();
+
+            return subjects;
+        }
+
+
+        public async Task<SimpleSubjectResponse> GetAllViaComboNameAsync(string studentComboName)
+        {
+            throw new NotImplementedException();
+        }
+
 
         public async Task<Subject?> GetByCodeAsync(string subjectCode)
         {
@@ -81,7 +121,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
 
                     // Prerequisite subject codes (filtered)
-                    
+
                     PrerequisiteSubjectCodes = s.SubjectVersions
                 .Where(v => !v.IsDeleted
                     && v.IsActive
@@ -131,9 +171,6 @@ namespace AISEA.ApiService.DAL.Repositories
                 })
                 .FirstOrDefaultAsync();
         }
-
-
-
 
     }
 }

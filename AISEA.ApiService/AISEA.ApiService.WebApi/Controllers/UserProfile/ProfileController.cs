@@ -19,15 +19,18 @@ public class ProfileController : BaseController
     private readonly StudentProfileService _studentProfileService;
     private readonly StaffProfileService _staffProfileService;
     private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly JoinedSubjectService _joinedSubjectService;
 
     public ProfileController(EndpointSettings endpointSettings
     , StudentProfileService studentProfileService
     , StaffProfileService staffProfileService
-    , IBackgroundTaskQueue taskQueue) : base(endpointSettings)
+    , IBackgroundTaskQueue taskQueue
+    , JoinedSubjectService joinedSubjectService) : base(endpointSettings)
     {
         _staffProfileService = staffProfileService;
         _studentProfileService = studentProfileService;
         _taskQueue = taskQueue;
+        _joinedSubjectService = joinedSubjectService;
     }
 
 
@@ -70,7 +73,7 @@ public class ProfileController : BaseController
     /// </summary>
     [HttpPut("student-profile/{stuproID}")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)]
-    [AuditLog(Tag = "UPDATE COMBO OR CURRICULUM")]
+    [AuditLog(Tag = "UPDATE_COMBO_CURRICULUM")]
     public async Task<IActionResult> UpdateComborCuri(
     [FromBody] UpdateComboOrCurriRequest request,
     [Range(1, long.MaxValue, ErrorMessage = "Student Profile ID must be greater than 0.")]
@@ -91,6 +94,34 @@ public class ProfileController : BaseController
     }
 
     #endregion
+
+
+    /// <summary>
+    /// STUDENT self view his own curriculum-subject (no include subjects in combo)
+    /// </summary>
+    [HttpGet("personal-curriculum-subject")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    [AuditLog(Tag = "PERSONAL_VIEW_CURRICULUM_SUBJECT")]
+    public async Task<IActionResult> ViewPersonalCurriculum()
+    {
+        var res = await _joinedSubjectService.ViewPersonalCurriculumSubjectAsync(AccessToken);
+        return Ok(res);
+    }
+
+
+
+    // /// <summary>
+    // /// STUDENT self view his own combo-subject
+    // /// </summary>
+    // [HttpGet("personal-combo-subject")]
+    // [PermissionAuthorize((int)EUserRole.STUDENT)]
+    // [AuditLog(Tag = "PERSONAL_VIEW_COMBO_SUBJECT")]
+    // public async Task<IActionResult> ViewPersonalCombo()
+    // {
+    //     var res = await _joinedSubjectService.ViewPersonalComboSubjectAsync(AccessToken);
+    //     return Ok(res);
+    // }
+
 
 
 }

@@ -25,7 +25,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Program
         /// Creates a new program (Academic Staff only)
         /// </summary>
         [HttpPost]
-        [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> CreateProgram([FromBody] CreateProgramRequest request)
         {
             var programId = await _programService.CreateProgramAsync(request);
@@ -36,7 +35,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Program
         /// Creates multiple programs in bulk (Academic Staff only)
         /// </summary>
         [HttpPost("bulk")]
-        [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> CreatePrograms([FromBody] List<CreateProgramRequest> requests)
         {
             await _programService.CreateProgramsAsync(requests);
@@ -77,7 +75,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Program
         /// Updates an existing program (Academic Staff only)
         /// </summary>
         [HttpPut("{id}")]
-        [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF)]
         public async Task<IActionResult> UpdateProgram(long id, [FromBody] UpdateProgramRequest request)
         {
             await _programService.UpdateProgramAsync(id, request);
@@ -88,7 +85,6 @@ namespace AISEA.ApiService.WebApi.Controllers.Program
         /// Deletes a program (Admin only)
         /// </summary>
         [HttpDelete("{id}")]
-        [PermissionAuthorize((int)EUserRole.ADMIN)]
         public async Task<IActionResult> DeleteProgram(long id)
         {
             await _programService.DeleteProgramAsync(id);

@@ -168,12 +168,19 @@ public class JoinedSubjectController : BaseController
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
         var accessToken = AccessToken;
+        var removedJoinedSubjectId = id;
 
-        var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id);
+        _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
+               {
+                   var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
+                   var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
 
-        await _notifier.NotifyUserAsync(stakeHolderUserId, stakeHodlerNoti);
+                   var (stakeHolderNoti, stakeHolderUserId) = await qJoinedSubjectService.DeleteSubjectAsync(removedJoinedSubjectId, accessToken);
 
-        return Ok("Delete successful");
+                   await qNotifier.NotifyUserAsync(stakeHolderUserId, stakeHolderNoti);
+               });
+
+        return Ok("Delete job registered successful");
     }
 
 

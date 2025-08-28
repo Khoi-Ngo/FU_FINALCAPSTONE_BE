@@ -5,9 +5,9 @@ using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Requests.Noti;
 using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
+using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
-using AISEA.ApiService.SHARED.PropConfigs;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +20,19 @@ public class JoinedSubjectService
 {
     private readonly UserRepository _userRepository;
     private readonly JoinedSubjectRepository _joinedSubjectRepository;
+    private readonly StudentProfileRepository _studentProfileRepository;
     private readonly IMapper _mapper;
     private readonly IJWTService _jWTService;
     private readonly SubjectRepository _subjectRepository;
     private readonly ILogger<JoinedSubjectService> _logger;
 
-    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService, SubjectRepository subjectRepository, ILogger<JoinedSubjectService> logger)
+    public JoinedSubjectService(UserRepository userRepository
+    , JoinedSubjectRepository joinedSubjectRepository
+    , IMapper mapper
+    , IJWTService jWTService
+    , SubjectRepository subjectRepository
+    , ILogger<JoinedSubjectService> logger
+    , StudentProfileRepository studentProfileRepository)
     {
         _userRepository = userRepository;
         _joinedSubjectRepository = joinedSubjectRepository;
@@ -33,6 +40,7 @@ public class JoinedSubjectService
         _jWTService = jWTService;
         _subjectRepository = subjectRepository;
         _logger = logger;
+        _studentProfileRepository = studentProfileRepository;
     }
 
 
@@ -98,7 +106,7 @@ public class JoinedSubjectService
         {
 
             //Check existed subject code
-            var importableSubjectDTO = await _subjectRepository.GetImportableByCodeAsync(request.SubjectCode);
+            var importableSubjectDTO = await _subjectRepository.GetSubjectWCurNComNPreNVerAsync(request.SubjectCode);
 
             if (importableSubjectDTO is null || importableSubjectDTO.Versions.IsNullOrEmpty())
             {
@@ -312,23 +320,60 @@ public class JoinedSubjectService
     #endregion
 
     #region DELETE || DEACTIVATE
-    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id)
+    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id, string accessToken)
     {
-        var joinedSubject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
+        var conductorUserId = _jWTService.GetUserIdFromToken(accessToken);
+        var (removedJoinedSubject, otherJoinedSubjects) = await _joinedSubjectRepository.GetByIdToRemoveAsync(id);
 
-        //TODO: Check prerequisites + check wether the student having coursegrade or not
-
-
-
-
-        _joinedSubjectRepository.RemoveAsync(joinedSubject);
-
-        return (new NotificationDTO
+        if (!removedJoinedSubject.SubjectMarkReports.IsNullOrEmpty())
         {
-            Content = $"You have been removed from the subject: {joinedSubject.SubjectCode}.",
-            Title = "Subject Removal Notification"
-        }, joinedSubject.StudentProfile.UserId);
+            return (new NotificationDTO
+            {
+                Content = $"Cannot remove the subject: {removedJoinedSubject.SubjectCode}. The joined subject already has mark reports",
+                Title = "Subject Removal ERROR"
+            }, conductorUserId);
+        }
 
+        try
+        {
+            //the student is only assigned this subject code once -> constraint
+            if (otherJoinedSubjects.FirstOrDefault(js => js.SubjectCode == removedJoinedSubject.SubjectCode) is null)
+            {
+                //filter prerequisites
+                foreach (var otherJs in otherJoinedSubjects)
+                {
+                    //query the prerequisite subject codes of each other JS
+                    var checkSubject = await _subjectRepository.GetSubjectWCurNComNPreNVerAsync(otherJs.SubjectCode);
+
+                    if (!checkSubject.PrerequisiteSubjectCodes.IsNullOrEmpty() && checkSubject.PrerequisiteSubjectCodes.Contains(removedJoinedSubject.SubjectCode))
+                    {
+                        return (new NotificationDTO
+                        {
+                            Content = $"Cannot remove the subject: {removedJoinedSubject.SubjectCode}. Prerequisites exception",
+                            Title = "Subject Removal ERROR"
+                        }, conductorUserId);
+                    }
+                }
+
+            }
+
+            await _joinedSubjectRepository.RemoveAsync(removedJoinedSubject);
+            return (new NotificationDTO
+            {
+                Content = $"You have been removed from the subject: {removedJoinedSubject.SubjectCode}.",
+                Title = "Subject Removal Notification"
+            }, removedJoinedSubject.StudentProfile.UserId);
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return (new NotificationDTO
+            {
+                Content = $"Cannot remove the subject: {removedJoinedSubject.SubjectCode}. Undefined Error",
+                Title = "Subject Removal ERROR"
+            }, conductorUserId);
+        }
     }
 
     public async Task RemoveAllNonUseAsync()
@@ -348,6 +393,7 @@ public class JoinedSubjectService
         foreach (var joinSubject in joinedSubjects)
         {
             var check = subjectsByCur.Find(s => s.SubjectCode == joinSubject.SubjectCode);
+            joinSubject.IsActive = true;
             if (check is null)
             {
                 //deactivate the joined subject
@@ -373,4 +419,27 @@ public class JoinedSubjectService
     }
 
     #endregion
+
+
+    public async Task<List<SimpleSubjectResponse>> ViewPersonalCurriculumSubjectAsync(string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+        var studentCurriculumCode = studentProfile.CurriculumCode;
+
+        var subjects = await _subjectRepository.GetAllViaCurriculumNotIncludeComboAsync(studentCurriculumCode);
+
+        return subjects;
+    }
+
+    public async Task<List<SimpleSubjectResponse>> ViewPersonalComboSubjectAsync(string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
+        var studentComboName = studentProfile.RegisteredComboCode;
+
+        var subjects = await _subjectRepository.GetAllViaComboNameAsync(studentComboName);
+
+        return subjects;
+    }
 }

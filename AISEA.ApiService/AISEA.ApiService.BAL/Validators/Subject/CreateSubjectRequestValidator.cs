@@ -17,7 +17,7 @@ namespace AISEA.ApiService.BAL.Validators.Subject
                 .MaximumLength(255).WithMessage("Subject name must be less than 255 characters.");
 
             RuleFor(x => x.Credits)
-                .GreaterThan(0).WithMessage("Credits must be greater than 0.")
+                .GreaterThanOrEqualTo(0).WithMessage("Credits must be greater than or equal to 0.")
                 .LessThanOrEqualTo(10).WithMessage("Credits must be less than or equal to 10.");
 
             RuleFor(x => x.Description)

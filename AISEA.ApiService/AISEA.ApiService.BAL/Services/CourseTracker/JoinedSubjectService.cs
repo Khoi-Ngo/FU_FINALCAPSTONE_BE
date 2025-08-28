@@ -98,7 +98,7 @@ public class JoinedSubjectService
         {
 
             //Check existed subject code
-            var importableSubjectDTO = await _subjectRepository.GetImportableByCodeAsync(request.SubjectCode);
+            var importableSubjectDTO = await _subjectRepository.GetSubjectWCurNComNPreNVerAsync(request.SubjectCode);
 
             if (importableSubjectDTO is null || importableSubjectDTO.Versions.IsNullOrEmpty())
             {
@@ -312,23 +312,60 @@ public class JoinedSubjectService
     #endregion
 
     #region DELETE || DEACTIVATE
-    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id)
+    public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id, string accessToken)
     {
-        var joinedSubject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
+        var conductorUserId = _jWTService.GetUserIdFromToken(accessToken);
+        var (removedJoinedSubject, otherJoinedSubjects) = await _joinedSubjectRepository.GetByIdToRemoveAsync(id);
 
-        //TODO: Check prerequisites + check wether the student having coursegrade or not
-
-
-
-
-        _joinedSubjectRepository.RemoveAsync(joinedSubject);
-
-        return (new NotificationDTO
+        if (!removedJoinedSubject.SubjectMarkReports.IsNullOrEmpty())
         {
-            Content = $"You have been removed from the subject: {joinedSubject.SubjectCode}.",
-            Title = "Subject Removal Notification"
-        }, joinedSubject.StudentProfile.UserId);
+            return (new NotificationDTO
+            {
+                Content = $"Cannot remove the subject: {removedJoinedSubject.SubjectCode}. The joined subject already has mark reports",
+                Title = "Subject Removal ERROR"
+            }, conductorUserId);
+        }
 
+        try
+        {
+            //the student is only assigned this subject code once -> constraint
+            if (otherJoinedSubjects.FirstOrDefault(js => js.SubjectCode == removedJoinedSubject.SubjectCode) is null)
+            {
+                //filter prerequisites
+                foreach (var otherJs in otherJoinedSubjects)
+                {
+                    //query the prerequisite subject codes of each other JS
+                    var checkSubject = await _subjectRepository.GetSubjectWCurNComNPreNVerAsync(otherJs.SubjectCode);
+
+                    if (!checkSubject.PrerequisiteSubjectCodes.IsNullOrEmpty() && checkSubject.PrerequisiteSubjectCodes.Contains(removedJoinedSubject.SubjectCode))
+                    {
+                        return (new NotificationDTO
+                        {
+                            Content = $"Cannot remove the subject: {removedJoinedSubject.SubjectCode}. Prerequisites exception",
+                            Title = "Subject Removal ERROR"
+                        }, conductorUserId);
+                    }
+                }
+
+            }
+
+            await _joinedSubjectRepository.RemoveAsync(removedJoinedSubject);
+            return (new NotificationDTO
+            {
+                Content = $"You have been removed from the subject: {removedJoinedSubject.SubjectCode}.",
+                Title = "Subject Removal Notification"
+            }, removedJoinedSubject.StudentProfile.UserId);
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return (new NotificationDTO
+            {
+                Content = $"Cannot remove the subject: {removedJoinedSubject.SubjectCode}. Undefined Error",
+                Title = "Subject Removal ERROR"
+            }, conductorUserId);
+        }
     }
 
     public async Task RemoveAllNonUseAsync()

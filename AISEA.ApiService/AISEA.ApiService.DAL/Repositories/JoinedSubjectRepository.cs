@@ -22,11 +22,19 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
     }
 
-    public async Task<JoinedSubject> GetByIdWStudentProfileAsync(long id)
+    public async Task<(JoinedSubject removedJoinedSubject, IEnumerable<JoinedSubject> otherJoinedSubjects)> GetByIdToRemoveAsync(long id)
     {
-        return await _context.JoinedSubjects
+        var removedJoinedSubject = await _context.JoinedSubjects
+
             .Include(js => js.StudentProfile)
+            .Include(js => js.SubjectMarkReports)
             .FirstOrDefaultAsync(js => js.Id == id);
+
+        var otherJoinedSubjects = await _context.JoinedSubjects
+                    .Where(js => js.StudentProfileId == removedJoinedSubject.StudentProfileId
+                    && js.Id != id
+                    && js.IsActive).ToListAsync();
+        return (removedJoinedSubject, otherJoinedSubjects);
     }
 
     public async Task RemoveAllNonUseAsync()

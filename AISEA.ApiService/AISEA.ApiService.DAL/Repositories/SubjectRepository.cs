@@ -65,7 +65,7 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
 
-        public async Task<ImportableSubjectDTO> GetImportableByCodeAsync(string subjectCode)
+        public async Task<ImportableSubjectDTO> GetSubjectWCurNComNPreNVerAsync(string subjectCode)
         {
             var now = DateTime.Now;
             return await _context.Subjects

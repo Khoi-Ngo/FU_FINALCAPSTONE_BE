@@ -442,7 +442,7 @@ public class UserController : BaseController
     ///<summary>
     /// View all student by combo
     /// </summary>
-    [HttpGet("student/{comboCode}/paged")]
+    [HttpGet("student/comboFilter/{comboCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
@@ -453,7 +453,7 @@ public class UserController : BaseController
     ///<summary>
     /// View all student by program
     /// </summary>
-    [HttpGet("student/{programId}/paged")]
+    [HttpGet("student/programFilter/{programId}/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
@@ -465,7 +465,7 @@ public class UserController : BaseController
     ///<summary>
     /// View all student by curriculum chosen
     /// </summary>
-    [HttpGet("student/{curriculumCode}/paged")]
+    [HttpGet("student/curriculumFilter/{curriculumCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)
@@ -479,7 +479,7 @@ public class UserController : BaseController
     ///<summary>
     /// View all active student by combo
     /// </summary>
-    [HttpGet("student/active/{comboCode}/paged")]
+    [HttpGet("student/active/comboFilter/{comboCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
@@ -490,7 +490,7 @@ public class UserController : BaseController
     ///<summary>
     /// View all student by program
     /// </summary>
-    [HttpGet("student/active/{programId}/paged")]
+    [HttpGet("student/active/programFilter/{programId}/paged")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
@@ -502,7 +502,7 @@ public class UserController : BaseController
     ///<summary>
     /// View all student by curriculum chosen
     /// </summary>
-    [HttpGet("student/active/{curriculumCode}/paged")]
+    [HttpGet("student/active/curriculumFilter/{curriculumCode}/paged")]
     [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)

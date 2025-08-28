@@ -223,7 +223,7 @@ public class UserController : BaseController
     /// Retrieves all active Students from the system. (Support Booking Feature ~ Student Access only)
     /// </summary>
     [HttpGet("students/active/paged")]
-    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF)]
+    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADVISOR)]
     public async Task<IActionResult> GetAllActiveStudents([FromQuery] PaginationRequest request)
     {
         var students = await _userService.GetAllActiveStudentsAsync(request);
@@ -480,7 +480,7 @@ public class UserController : BaseController
     /// View all active student by combo
     /// </summary>
     [HttpGet("student/active/comboFilter/{comboCode}/paged")]
-    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ADVISOR)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByComboCodePaged([FromQuery] PaginationRequest request, string comboCode)
     {
@@ -491,7 +491,7 @@ public class UserController : BaseController
     /// View all student by program
     /// </summary>
     [HttpGet("student/active/programFilter/{programId}/paged")]
-    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ADVISOR)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByProgramIdPaged([FromQuery] PaginationRequest request, long programId)
     {
@@ -503,7 +503,7 @@ public class UserController : BaseController
     /// View all student by curriculum chosen
     /// </summary>
     [HttpGet("student/active/curriculumFilter/{curriculumCode}/paged")]
-    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
+    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ADVISOR)]
     [AuditLog(Tag = "VIEW_USER")]
     public async Task<IActionResult> GetAllActiveStudentsByCurriculumIdPaged([FromQuery] PaginationRequest request, string curriculumCode)
     {

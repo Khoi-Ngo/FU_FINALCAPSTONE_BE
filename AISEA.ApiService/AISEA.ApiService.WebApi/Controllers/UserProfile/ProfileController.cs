@@ -65,6 +65,9 @@ public class ProfileController : BaseController
 
     #region  UPDATE COMBO + UPDATE CURRICULUM CODE
 
+    /// <summary>
+    /// Update the Curriculum or Combo of student
+    /// </summary>
     [HttpPut("student-profile/{stuproID}")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "UPDATE COMBO OR CURRICULUM")]

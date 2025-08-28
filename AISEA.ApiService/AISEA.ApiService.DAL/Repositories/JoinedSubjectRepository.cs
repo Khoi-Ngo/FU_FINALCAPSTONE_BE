@@ -16,7 +16,7 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
     }
 
-    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDAsync(long studentProfileId)
+    public async Task<IEnumerable<JoinedSubject>> GetAllActiveByStudentProfileIDWithSemesteDataAsync(long studentProfileId)
     {
         return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentProfileId && js.IsActive).ToListAsync();
     }
@@ -68,5 +68,12 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         _context.JoinedSubjects.UpdateRange(subjects);
         await _context.SaveChangesAsync();
     }
+
+
+    public async Task<IEnumerable<JoinedSubject>> GetAllByStudentProfileIDNoSemesterAsync(long studentProfileId)
+    {
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
+    }
+
 
 }

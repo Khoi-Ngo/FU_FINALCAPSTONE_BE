@@ -97,7 +97,7 @@ public class JoinedSubjectService
         }
         //validation student data
 
-        var studentJoinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(studentProfile.Id);
+        var studentJoinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDWithSemesteDataAsync(studentProfile.Id);
 
         try
         {
@@ -308,7 +308,7 @@ public class JoinedSubjectService
 
     public async Task<List<JoinedSubjectResponse>> GetAllBySelfAsync(string accessToken)
     {
-        var res = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(_jWTService.GetProfileIdFromToken(accessToken));
+        var res = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDWithSemesteDataAsync(_jWTService.GetProfileIdFromToken(accessToken));
         return _mapper.Map<List<JoinedSubjectResponse>>(res);
     }
 
@@ -356,7 +356,7 @@ public class JoinedSubjectService
     public async Task DeActivateNonUseJoinedSubjectAsync(StudentProfile studentProfile)
     {
         //get all joined subject basing on the student profile
-        var joinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDAsync(studentProfile.Id);
+        var joinedSubjects = await _joinedSubjectRepository.GetAllByStudentProfileIDNoSemesterAsync(studentProfile.Id);
 
         //get all subject code via curriculum code and combo -> Combo must be in the curriculum
         var subjectsByCur = await _subjectRepository.GetAllViaCurriculumAsync(studentProfile.CurriculumCode);
@@ -386,6 +386,6 @@ public class JoinedSubjectService
         //bulk update
         await _joinedSubjectRepository.BulkUpdateAsync(joinedSubjects);
 
-
+        Console.WriteLine("DEACTIVATE SUBJECT AFTER UPDATE CURRICULUM OR COMBO OK");
     }
 }

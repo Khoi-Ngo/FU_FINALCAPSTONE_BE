@@ -2,6 +2,7 @@ using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AISEA.ApiService.DAL.Repositories;
 
@@ -38,15 +39,13 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         if (latestSemesterId == 0)
             return;
 
-        const int batchSize = 5000; // Safe limit per deletion
         int totalDeleted = 0;
 
         while (true)
         {
             var oldSubjects = await _context.JoinedSubjects
-                .Where(js => js.SemesterId < latestSemesterId && !js.IsCompleted)
+                .Where(js => js.SemesterId < latestSemesterId && !js.SubjectMarkReports.Any())
                 .OrderBy(js => js.Id)
-                .Take(batchSize)
                 .ToListAsync();
 
             if (oldSubjects.Count == 0)
@@ -75,5 +74,10 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId).ToListAsync();
     }
 
-
+    public async Task<IEnumerable<string>> GetAllPassedSubjectCodesAsync(long studentProfileId)
+    {
+        return await _context.JoinedSubjects.Where(js => js.StudentProfileId == studentProfileId
+            && js.IsPassed
+        ).Select(js => js.SubjectCode).ToListAsync();
+    }
 }

@@ -15,11 +15,11 @@ public class JoinedSubject
     public string? GithubRepositoryURL { get; set; }
     public string SubjectCode { get; set; }
     public string SubjectVersionCode { get; set; }
+    public string? SubjectDescription { get; set; }
     public string? Name { get; set; }
     public string CreatedByUserName { get; set; }
     public ESemesterStudyBlockType SemesterStudyBlockType { get; set; }
     public bool IsPassed { get; set; } = false;
-    public bool IsCompleted { get; set; } = false;
     public bool IsActive { get; set; } = true;// Case: Change Program~Curriculum, ChangeCombo ==> 
     public int? Credits { get; set; }
 

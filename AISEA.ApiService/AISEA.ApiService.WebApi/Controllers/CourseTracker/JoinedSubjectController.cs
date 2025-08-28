@@ -167,6 +167,7 @@ public class JoinedSubjectController : BaseController
     [AuditLog(Tag = "DELETE_JOINED_SUBJECT")]
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {
+        var accessToken = AccessToken;
 
         var (stakeHodlerNoti, stakeHolderUserId) = await _joinedSubjectService.DeleteSubjectAsync(id);
 

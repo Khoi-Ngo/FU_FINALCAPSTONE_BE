@@ -12,7 +12,6 @@ public class JoinedSubjectResponse
     public string? Name { get; set; }
     public string SemesterName { get; set; }
     public bool IsPassed { get; set; } = false;
-    public bool IsCompleted { get; set; } = false;
     public bool IsActive { get; set; } = true;
     public int? Credits { get; set; }
     public long StudentProfileId { get; set; }

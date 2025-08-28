@@ -23,19 +23,15 @@ public class JoinedSubjectService
     private readonly IMapper _mapper;
     private readonly IJWTService _jWTService;
     private readonly SubjectRepository _subjectRepository;
-    private readonly SubjectVersionPrerequisiteRepository _subjectVersionPrerequisiteRepository;
-    private readonly CourseTrackSettings _courseTrackSettings;
     private readonly ILogger<JoinedSubjectService> _logger;
 
-    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService, SubjectRepository subjectRepository, SubjectVersionPrerequisiteRepository subjectVersionPrerequisiteRepository, CourseTrackSettings courseTrackSettings, ILogger<JoinedSubjectService> logger)
+    public JoinedSubjectService(UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, IMapper mapper, IJWTService jWTService, SubjectRepository subjectRepository, ILogger<JoinedSubjectService> logger)
     {
         _userRepository = userRepository;
         _joinedSubjectRepository = joinedSubjectRepository;
         _mapper = mapper;
         _jWTService = jWTService;
         _subjectRepository = subjectRepository;
-        _subjectVersionPrerequisiteRepository = subjectVersionPrerequisiteRepository;
-        _courseTrackSettings = courseTrackSettings;
         _logger = logger;
     }
 
@@ -95,80 +91,57 @@ public class JoinedSubjectService
             failNoti.Content = "Student profile not found";
             return (failNoti, conductorUserId, false);
         }
-        //validation student data
 
-        var studentJoinedSubjects = await _joinedSubjectRepository.GetAllActiveByStudentProfileIDWithSemesteDataAsync(studentProfile.Id);
+        var passedAndCompletedSubjectCodes = await _joinedSubjectRepository.GetAllPassedSubjectCodesAsync(studentProfile.Id);
 
         try
         {
 
             //Check existed subject code
-            var subject = await _subjectRepository.GetApprovedNotDeleteByCodeAsync(request.SubjectCode);
+            var importableSubjectDTO = await _subjectRepository.GetImportableByCodeAsync(request.SubjectCode);
 
-            if (subject is null)
+            if (importableSubjectDTO is null || importableSubjectDTO.Versions.IsNullOrEmpty())
             {
-                failNoti.Content = "There is no valid subject code";
+                failNoti.Content = "There is no valid subject code - version";
                 return (failNoti, conductorUserId, false);
             }
 
-            // var subjectVersion = subject.SubjectVersions.FirstOrDefault(sv => sv.VersionCode == request.SubjectVersionCode);
 
-            // if (subjectVersion is null || !subjectVersion.IsActive || subject.IsDeleted)
-            // {
-            //     failNoti.Content = "There is no valid subject version code for the subject code";
-            //     return (failNoti, conductorUserId, false);
-            // }
-
-            // if (!subject.ComboSubjects.IsNullOrEmpty())
-            // {
-            //     //!subject in a combo
-            //     var combos = subject.ComboSubjects
-            //                         .Where(cs => !cs.IsDeleted)
-            //                         .Select(cs => cs.Combo)
-            //                         .ToList();
+            var curriculumOfStudent = studentProfile.CurriculumCode;
+            var comboCodeOfStudent = studentProfile.RegisteredComboCode;
 
 
-            //     var combo = combos.FirstOrDefault(c => !c.IsDeleted
-            //     && c.ApprovalStatus == EApprovalStatus.APPROVED
-            //     && c.ComboName == studentProfile.RegisteredComboCode);
+            //check fit curriculum
+            if (!importableSubjectDTO.CurriculumCodes.Contains(curriculumOfStudent))
+            {
+                failNoti.Content = "The curriculum is not valid";
+                return (failNoti, conductorUserId, false);
+            }
+
+            //check fit combo
+            if (!importableSubjectDTO.ComboNames.IsNullOrEmpty()
+            && !importableSubjectDTO.ComboNames.Contains(comboCodeOfStudent))
+            {
+                failNoti.Content = "The combo is not valid";
+                return (failNoti, conductorUserId, false);
+            }
+
+            //check prerequisites met
+            if (!importableSubjectDTO.PrerequisiteSubjectCodes.IsNullOrEmpty()
+            && !HasMetPrerequisites(passedAndCompletedSubjectCodes, importableSubjectDTO.PrerequisiteSubjectCodes))
+            {
+                failNoti.Content = "The prerequisites is not met yet";
+                return (failNoti, conductorUserId, false);
+            }
 
 
-            //     if (combo == null)
-            //     {
-            //         failNoti.Content = "The combo is not valid";
-            //         return (failNoti, conductorUserId, false);
-            //     }
-
-            // }
-
-            // var curriculums = subjectVersion.CurriculumSubjects
-            //                                     .Where(cs => !cs.IsDeleted)
-            //                                     .Select(cs => cs.Curriculum)
-            //                                     .ToList();
 
 
-            // var curriculum = curriculums.FirstOrDefault(cc => cc.CurriculumCode == studentProfile.CurriculumCode
-            // && cc.ApprovalStatus == EApprovalStatus.APPROVED
-            // && !cc.IsDeleted);
-
-
-            // if (curriculum == null)
-            // {
-            //     failNoti.Content = "The curriculum is not valid";
-            //     return (failNoti, conductorUserId, false);
-            // }
-
-
-            //TODO: Check met the prerequisite
-
-            ///get the subject code of the prerequisites
-            ///Check all subject code queried existed in the Joined Subject of the Student or not (with status Passed and Completed)
-            ///If not then return notification fail with content "The prerequisites of the subject imported are not met completely"
 
 
 
             await _joinedSubjectRepository.
-            CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName, subject.SubjectName, subject.Credits));
+            CreateAsync(MapToJoinedSubject(request, studentUser.StudentProfile.Id, conductorUserName, importableSubjectDTO.SubjectName, importableSubjectDTO.Credits, importableSubjectDTO.Description));
 
             return (new NotificationDTO
             {
@@ -276,7 +249,8 @@ public class JoinedSubjectService
     , long studentProfileId
     , string createdByUserName
     , string subjectName
-    , int credits)
+    , int credits
+    , string description)
     {
         return new JoinedSubject
         {
@@ -288,7 +262,8 @@ public class JoinedSubjectService
             SemesterStudyBlockType = request.SemesterStudyBlockType,
             Name = $"{request.SubjectCode}{request.SemesterStudyBlockType.ToString()} + {subjectName}",
             Credits = credits,
-            CreatedByUserName = createdByUserName
+            CreatedByUserName = createdByUserName,
+            SubjectDescription = description
         };
     }
 
@@ -301,6 +276,12 @@ public class JoinedSubjectService
         }
         return true;
     }
+
+    private bool HasMetPrerequisites(IEnumerable<string> studentPassedSubjects, IEnumerable<string> prerequisites)
+    {
+        return !prerequisites.Except(studentPassedSubjects).Any();
+    }
+
 
     #endregion
 
@@ -330,21 +311,23 @@ public class JoinedSubjectService
 
     #endregion
 
-
+    #region DELETE || DEACTIVATE
     public async Task<(NotificationDTO stakeHolderNoti, long stakeHolderUserId)> DeleteSubjectAsync(long id)
     {
-        var subject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
+        var joinedSubject = await _joinedSubjectRepository.GetByIdWStudentProfileAsync(id);
 
         //TODO: Check prerequisites + check wether the student having coursegrade or not
 
 
-        _joinedSubjectRepository.RemoveAsync(subject);
+
+
+        _joinedSubjectRepository.RemoveAsync(joinedSubject);
 
         return (new NotificationDTO
         {
-            Content = $"You have been removed from the subject: {subject.SubjectCode}.",
+            Content = $"You have been removed from the subject: {joinedSubject.SubjectCode}.",
             Title = "Subject Removal Notification"
-        }, subject.StudentProfile.UserId);
+        }, joinedSubject.StudentProfile.UserId);
 
     }
 
@@ -388,4 +371,6 @@ public class JoinedSubjectService
 
         Console.WriteLine("DEACTIVATE SUBJECT AFTER UPDATE CURRICULUM OR COMBO OK");
     }
+
+    #endregion
 }

@@ -223,5 +223,53 @@ namespace AISEA.ApiService.DAL.Repositories
                 .FirstOrDefaultAsync();
         }
 
+
+        public async Task<Subject?> GetByIdWithAllRelatedAsync(long id)
+        {
+            return await _context.Subjects
+                // Only look at the subject with the requested ID
+                .Where(s => s.Id == id)
+
+                // Load combos that this subject belongs to
+                .Include(s => s.ComboSubjects)
+                    .ThenInclude(cs => cs.Combo)
+
+                // Load subject versions → curriculum subjects → curriculum
+                .Include(s => s.SubjectVersions)
+                    .ThenInclude(sv => sv.CurriculumSubjects)
+                        .ThenInclude(cs => cs.Curriculum)
+
+                // Load prerequisites for each subject version 
+                // and also include the prerequisite subject itself
+                .Include(s => s.SubjectVersions)
+                    .ThenInclude(sv => sv.Prerequisites)
+                        .ThenInclude(p => p.PrerequisiteSubjectVersion)
+                            .ThenInclude(psv => psv.Subject)
+
+                // Load syllabi for each subject version
+                // and all related syllabus details
+                .Include(s => s.SubjectVersions)
+                    .ThenInclude(sv => sv.Syllabi)
+                        .ThenInclude(sy => sy.SyllabusAssessments)
+
+                .Include(s => s.SubjectVersions)
+                    .ThenInclude(sv => sv.Syllabi)
+                        .ThenInclude(sy => sy.SyllabusLearningMaterials)
+
+                .Include(s => s.SubjectVersions)
+                    .ThenInclude(sv => sv.Syllabi)
+                        .ThenInclude(sy => sy.SyllabusLearningOutcomes)
+
+                .Include(s => s.SubjectVersions)
+                    .ThenInclude(sv => sv.Syllabi)
+                        .ThenInclude(sy => sy.SyllabusSessions)
+
+                // Return the subject with all the related data loaded
+                .FirstOrDefaultAsync();
+        }
+
+
     }
+
+
 }

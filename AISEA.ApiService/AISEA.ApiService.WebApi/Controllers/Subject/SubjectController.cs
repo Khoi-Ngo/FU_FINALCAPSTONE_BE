@@ -87,5 +87,17 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
             return Ok(new { Message = "Subject deleted successfully." });
         }
 
+
+
+        /// <summary>
+        /// Gen the temporarily tip from AI for a subject
+        /// </summary>
+        [HttpGet("gen-tip/{id}")]
+        public async Task<IActionResult> GenTempTipForSubject(long id)
+        {
+            var res = await _subjectService.GenTempTipForSubjectAsync(id);
+            return Ok(res);
+        }
+
     }
 }

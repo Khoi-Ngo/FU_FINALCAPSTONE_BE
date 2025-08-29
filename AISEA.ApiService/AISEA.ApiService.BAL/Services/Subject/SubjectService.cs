@@ -1,4 +1,5 @@
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Const.Values;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Requests.Subject;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
@@ -6,6 +7,7 @@ using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AutoMapper;
+using Newtonsoft.Json;
 
 namespace AISEA.ApiService.BAL.Services.Subject
 {
@@ -14,12 +16,14 @@ namespace AISEA.ApiService.BAL.Services.Subject
         private readonly SubjectRepository _subjectRepository;
         private readonly IJWTService _jwtService;
         private readonly IMapper _mapper;
+        private readonly IChatOpenAIService _chatOpenAIService;
 
-        public SubjectService(SubjectRepository subjectRepository, IJWTService jwtService, IMapper mapper)
+        public SubjectService(SubjectRepository subjectRepository, IJWTService jwtService, IMapper mapper, IChatOpenAIService chatOpenAIService)
         {
             _subjectRepository = subjectRepository;
             _jwtService = jwtService;
             _mapper = mapper;
+            _chatOpenAIService = chatOpenAIService;
         }
 
         public async Task CreateSubjectAsync(CreateSubjectRequest request, string accessToken)
@@ -34,7 +38,7 @@ namespace AISEA.ApiService.BAL.Services.Subject
             var subject = _mapper.Map<DAL.Entities.Subject>(request);
             subject.CreatedBy = createdBy;
             subject.CreatedAt = DateTime.UtcNow;
-            
+
             await _subjectRepository.CreateAsync(subject);
         }
 
@@ -82,7 +86,7 @@ namespace AISEA.ApiService.BAL.Services.Subject
 
             _mapper.Map(request, subject);
             subject.UpdatedAt = DateTime.UtcNow;
-            
+
             await _subjectRepository.UpdateAsync(subject);
         }
 
@@ -96,14 +100,14 @@ namespace AISEA.ApiService.BAL.Services.Subject
 
             subject.IsDeleted = true;
             subject.DeletedAt = DateTime.UtcNow;
-            
+
             await _subjectRepository.UpdateAsync(subject);
         }
 
         public async Task<bool> CreateSubjectsAsync(List<CreateSubjectRequest> requests, string accessToken)
         {
             var createdBy = _jwtService.GetUsernameFromToken(accessToken);
-            
+
             foreach (var request in requests)
             {
                 var existingSubject = await _subjectRepository.GetByCodeAsync(request.SubjectCode);
@@ -122,5 +126,24 @@ namespace AISEA.ApiService.BAL.Services.Subject
 
             return true;
         }
+
+
+        public async Task<string> GenTempTipForSubjectAsync(long id)
+        {
+            var subject = await _subjectRepository.GetByIdWithAllRelatedAsync(id);
+            if (subject == null) return "Subject not found.";
+
+            var subjectJson = JsonConvert.SerializeObject(
+                subject,
+                Formatting.Indented,
+                new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+
+            var prompt = string.Format(CallAIConst.TemplatePromptFroTempGenTipForASubject, subjectJson);
+            return await _chatOpenAIService.SendMsgAsync(prompt);
+        }
+
     }
 }

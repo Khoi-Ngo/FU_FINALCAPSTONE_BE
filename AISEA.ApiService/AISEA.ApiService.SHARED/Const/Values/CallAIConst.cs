@@ -87,16 +87,25 @@ Your response must strictly adhere to the provided JSON schema and output only v
 }
 ```";
 
+    public static string TemplatePromptFroTempGenTipForASubject = @"
+You are an educational assistant. 
+Based on the subject data provided below, generate helpful and practical learning suggestions for a student who wants to study this subject effectively. 
 
+The suggestions should include:
+- Key focus areas for mastering the subject.  
+- How to use the prerequisites to prepare better.  
+- Study strategies that match the curriculum and syllabus structure.  
+- Recommended order of learning (if relevant).  
+- General study tips and motivation.
+- Referable links if any.
 
+Make the response concise, motivating, and actionable. 
+Do not repeat the raw data — instead, transform it into friendly advice.
 
+Here is the subject data (in JSON format):
 
-
-
-
-
-
-
+{0}
+";
 
 
 

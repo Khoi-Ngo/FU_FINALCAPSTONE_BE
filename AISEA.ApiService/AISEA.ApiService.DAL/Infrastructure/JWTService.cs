@@ -238,5 +238,16 @@ public class JWTService : IJWTService
             : throw new Exception("Email claim not found");
     }
 
+    /// <summary>
+    /// Get full name from active token.
+    /// </summary>
+    public string GetFullNameFromToken(string token)
+    {
+        var claims = GetAllClaimsFromToken(token);
+        var firstName = claims.TryGetValue(_jwtSettings.FirstName, out var fName) ? fName : "";
+        var lastName = claims.TryGetValue(_jwtSettings.LastName, out var lName) ? lName : "";
+        return $"{firstName} {lastName}".Trim();
+    }
+
 
 }

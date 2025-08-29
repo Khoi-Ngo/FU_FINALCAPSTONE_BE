@@ -43,7 +43,7 @@ Address the student's question directly using only the provided data. Do not inv
     public static string TemplatePromptForGenTodoForJoinedSubject = @"
 You are an AI assistant tasked with generating a list of personalized academic checkpoints for a student. 
 This request is to create actionable tasks so that the student, with the help of these checkpoints, can 
-successfully complete the enrolled subject.
+successfully complete the enrolled subject.You should focus on academic information not greeting such as dear student or something like that.
 
 Your response must strictly adhere to the provided JSON schema and output only valid JSON (no explanations, no extra text).
 

@@ -192,7 +192,7 @@ public class JoinedSubjectCheckPointService
 
     private async Task<JoinedSubject> GetJoinedSubjectData(long joinedSubjectId)
     {
-        var joinedSubject = await _joinedSubjectRepo.GetByIdWithCheckpointsAsync(joinedSubjectId);
+        var joinedSubject = await _joinedSubjectRepo.GetByIdWithCheckpointsAndPointsAsync(joinedSubjectId);
         return joinedSubject;
     }
     private async Task<object> GetSubjectResourceData(string subjectCode, string subjectVersion)

@@ -88,4 +88,14 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
             && js.IsPassed
         ).Select(js => js.SubjectCode).ToListAsync();
     }
+
+
+    //check valid to conduct post comment
+    public async Task<bool> IsValidToPostComment(long studentProfileId, string subjectCode)
+    {
+        var passedJoinedSubject = await _context.JoinedSubjects.FirstOrDefaultAsync(js => js.StudentProfileId == studentProfileId
+        && js.SubjectCode == subjectCode
+        && js.IsPassed);
+        return passedJoinedSubject is not null;
+    }
 }

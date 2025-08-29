@@ -1046,6 +1046,63 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.ToTable("Subject");
                 });
 
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectComment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("LikedByStudentIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("StudentProfileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SubjectId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UnlikedByStudentIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id")
+                        .HasName("subjectcomment_id_primary");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_SubjectComment_CreatedAt");
+
+                    b.HasIndex("StudentProfileId")
+                        .HasDatabaseName("IX_SubjectComment_StudentProfileId");
+
+                    b.HasIndex("SubjectId")
+                        .HasDatabaseName("IX_SubjectComment_SubjectId");
+
+                    b.HasIndex("StudentProfileId", "SubjectId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SubjectComment_Student_Subject_Unique");
+
+                    b.ToTable("SubjectComment");
+                });
+
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectMarkReport", b =>
                 {
                     b.Property<long>("Id")
@@ -1750,6 +1807,27 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasConstraintName("studyroadmapnode_studyroadmapid_foreign");
 
                     b.Navigation("StudyRoadMap");
+                });
+
+            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectComment", b =>
+                {
+                    b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
+                        .WithMany()
+                        .HasForeignKey("StudentProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("subjectcomment_studentprofileid_foreign");
+
+                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("subjectcomment_subjectid_foreign");
+
+                    b.Navigation("StudentProfile");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectMarkReport", b =>

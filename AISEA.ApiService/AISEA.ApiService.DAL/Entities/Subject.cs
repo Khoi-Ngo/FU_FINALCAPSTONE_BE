@@ -27,8 +27,6 @@ public partial class Subject
 
     public virtual ICollection<ComboSubject> ComboSubjects { get; set; } = new List<ComboSubject>();
 
-    public virtual ICollection<SubjectComment> Comments { get; set; } = new List<SubjectComment>();
-
     // public virtual ICollection<StudentEnrollment> StudentEnrollments { get; set; } = new List<StudentEnrollment>();
     
     // Approval properties

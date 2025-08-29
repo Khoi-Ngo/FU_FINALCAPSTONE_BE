@@ -37,10 +37,8 @@ public class JoinedSubject
 
     public virtual ICollection<SubjectMarkReport> SubjectMarkReports { get; set; } = new List<SubjectMarkReport>();
 
-    public virtual ICollection<JoinedSubjectCheckPoint> JoinedSubjectCheckPoints { get; set; }
+    public virtual ICollection<JoinedSubjectCheckPoint> JoinedSubjectCheckPoints { get; set; } 
     = new List<JoinedSubjectCheckPoint>();
-
-    public virtual SubjectComment? SubjectComment { get; set; }
 
 
 }

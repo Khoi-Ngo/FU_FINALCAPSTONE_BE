@@ -1046,117 +1046,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.ToTable("Subject");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectComment", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ApprovedBy")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsAnonymous")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("JoinedSubjectId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ModerationReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long>("StudentProfileId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("SubjectId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id")
-                        .HasName("subjectcomment_id_primary");
-
-                    b.HasIndex("IsApproved")
-                        .HasDatabaseName("IX_SubjectComment_IsApproved");
-
-                    b.HasIndex("JoinedSubjectId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_SubjectComment_JoinedSubjectId");
-
-                    b.HasIndex("StudentProfileId")
-                        .HasDatabaseName("IX_SubjectComment_StudentProfileId");
-
-                    b.HasIndex("SubjectId")
-                        .HasDatabaseName("IX_SubjectComment_SubjectId");
-
-                    b.HasIndex("StudentProfileId", "SubjectId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_SubjectComment_Student_Subject_Unique");
-
-                    b.ToTable("SubjectComment");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectCommentReaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("CommentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ReactionType")
-                        .HasColumnType("int");
-
-                    b.Property<long>("StudentProfileId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id")
-                        .HasName("subjectcommentreaction_id_primary");
-
-                    b.HasIndex("CommentId")
-                        .HasDatabaseName("IX_SubjectCommentReaction_CommentId");
-
-                    b.HasIndex("ReactionType")
-                        .HasDatabaseName("IX_SubjectCommentReaction_ReactionType");
-
-                    b.HasIndex("StudentProfileId")
-                        .HasDatabaseName("IX_SubjectCommentReaction_StudentProfileId");
-
-                    b.HasIndex("StudentProfileId", "CommentId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_SubjectCommentReaction_Student_Comment_Unique");
-
-                    b.ToTable("SubjectCommentReaction");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectMarkReport", b =>
                 {
                     b.Property<long>("Id")
@@ -1863,57 +1752,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("StudyRoadMap");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectComment", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.JoinedSubject", "JoinedSubject")
-                        .WithOne("SubjectComment")
-                        .HasForeignKey("AISEA.ApiService.DAL.Entities.SubjectComment", "JoinedSubjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subjectcomment_joinedsubjectid_foreign");
-
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
-                        .WithMany("SubjectComments")
-                        .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subjectcomment_studentprofileid_foreign");
-
-                    b.HasOne("AISEA.ApiService.DAL.Entities.Subject", "Subject")
-                        .WithMany("Comments")
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subjectcomment_subjectid_foreign");
-
-                    b.Navigation("JoinedSubject");
-
-                    b.Navigation("StudentProfile");
-
-                    b.Navigation("Subject");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectCommentReaction", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.SubjectComment", "Comment")
-                        .WithMany("Reactions")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("subjectcommentreaction_commentid_foreign");
-
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
-                        .WithMany()
-                        .HasForeignKey("StudentProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subjectcommentreaction_studentprofileid_foreign");
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("StudentProfile");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectMarkReport", b =>
                 {
                     b.HasOne("AISEA.ApiService.DAL.Entities.JoinedSubject", "JoinedSubject")
@@ -2044,8 +1882,6 @@ namespace AISEA.ApiService.DAL.Migrations
                 {
                     b.Navigation("JoinedSubjectCheckPoints");
 
-                    b.Navigation("SubjectComment");
-
                     b.Navigation("SubjectMarkReports");
                 });
 
@@ -2086,8 +1922,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("JoinedCourses");
 
                     b.Navigation("StudyRoadMap");
-
-                    b.Navigation("SubjectComments");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMap", b =>
@@ -2099,14 +1933,7 @@ namespace AISEA.ApiService.DAL.Migrations
                 {
                     b.Navigation("ComboSubjects");
 
-                    b.Navigation("Comments");
-
                     b.Navigation("SubjectVersions");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectComment", b =>
-                {
-                    b.Navigation("Reactions");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectVersion", b =>

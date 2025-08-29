@@ -18,14 +18,20 @@ namespace AISEA.ApiService.DAL.Repositories
 
             var subjects = await _context.CurriculumSubjects
                 .Where(cs =>
+                
                     cs.Curriculum != null &&
                     cs.Curriculum.CurriculumCode == studentCurriculumCode &&
+                    cs.Curriculum.ApprovalStatus ==  EApprovalStatus.APPROVED &&
+                    cs.Curriculum.IsDeleted == false &&
 
                     cs.SubjectVersion != null &&
                     cs.SubjectVersion.Subject != null &&
 
                     !cs.IsDeleted &&
+
+                    cs.SubjectVersion.IsActive&&
                     !cs.SubjectVersion.IsDeleted &&
+
                     !cs.SubjectVersion.Subject.IsDeleted &&
                     cs.SubjectVersion.Subject.ApprovalStatus == EApprovalStatus.APPROVED &&
 

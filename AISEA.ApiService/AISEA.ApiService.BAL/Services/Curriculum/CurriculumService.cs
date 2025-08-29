@@ -164,7 +164,7 @@ namespace AISEA.ApiService.BAL.Services.Curriculum
         public async Task AddSubjectToCurriculumAsync(long curriculumId, AddSubjectToCurriculumRequest request)
         {
             var curriculum = await _curriculumRepository.GetByIdAsync(curriculumId);
-            if (curriculum == null || curriculum.IsDeleted)
+            if (curriculum == null || curriculum.IsDeleted || curriculum.ApprovalStatus != SHARED.Const.Enums.EApprovalStatus.APPROVED)
             {
                 throw new NotFoundException("Curriculum not found.");
             }

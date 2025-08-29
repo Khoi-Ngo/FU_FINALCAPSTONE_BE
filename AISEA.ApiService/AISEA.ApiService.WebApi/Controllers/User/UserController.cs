@@ -78,6 +78,7 @@ public class UserController : BaseController
     /// </summary>
     [HttpPut("student/{id}")]
     [AuditLog(Tag = "UPDATE_USER")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> UpdateStudent(long id, [FromBody] UpdateStudentRequest request)
     {
         var accessToken = AccessToken;
@@ -95,13 +96,14 @@ public class UserController : BaseController
     /// </summary>
     [HttpPut("staff/{id}")]
     [AuditLog(Tag = "UPDATE_USER")]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
     public async Task<IActionResult> UpdateStaff(long id, [FromBody] UpdateStaffRequest request)
     {
         var accessToken = AccessToken;
 
         await _userService.UpdateUserAsync(id, request, accessToken);
 
-        
+
         return Ok("Update user successfully");
 
     }
@@ -412,21 +414,22 @@ public class UserController : BaseController
 
 
     /// <summary>
+    /// !Disable user self update profile
     /// User can update the avatar the input is link firebase provided by front end
     /// </summary>
-    [HttpPut("update-avatar")]
-    [AuditLog(Tag = "UPDATE_USER_AVATAR")]
-    public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
-    {
+    // [HttpPut("update-avatar")]
+    // [AuditLog(Tag = "UPDATE_USER_AVATAR")]
+    // public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarRequest request)
+    // {
 
-        var accessToken = AccessToken;
+    //     var accessToken = AccessToken;
 
-        await _userService.UpdateAvatarAsync(accessToken, request);
+    //     await _userService.UpdateAvatarAsync(accessToken, request);
 
-        return Ok("The avatar has been updated successfully");
-    }
+    //     return Ok("The avatar has been updated successfully");
+    // }
     /// <summary>
-    /// User can update the avatar the input is link firebase provided by front end
+    /// The ADMIN USER can update the avatar of user the input is link firebase provided by front end
     /// </summary>
     [HttpPut("staff-update-avatar/{userId}")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]

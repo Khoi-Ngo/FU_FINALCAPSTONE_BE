@@ -98,4 +98,9 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         && js.IsPassed);
         return passedJoinedSubject is not null;
     }
+
+    public async Task<JoinedSubject> GetByIdWithCheckpointsAndPointsAsync(long joinedSubjectId)
+    {
+        return await _context.JoinedSubjects.Include(js => js.JoinedSubjectCheckPoints).Include(js => js.SubjectMarkReports).FirstOrDefaultAsync(js => js.Id == joinedSubjectId);
+    }
 }

@@ -48,9 +48,10 @@ successfully complete the enrolled subject.
 Your response must strictly adhere to the provided JSON schema and output only valid JSON (no explanations, no extra text).
 
 ### Instructions:
-1. Use the provided **FLM Syllabus Data** to extract key modules, topics, and milestones.
-   - Syllabus data may include estimated study hours or pacing information. Use this to determine realistic checkpoints.
-2. Use the **Joined Subject Data** (including enrollment date and current progress) to distribute checkpoints in a logical timeline.
+1. Use the provided **Subject Resource Data** to extract key modules, topics, and milestones.
+   - Resource data may include estimated study hours or pacing information. Use this to determine realistic checkpoints.
+2. Use the **Joined Subject Data** (including enrollment date, current progress, existing checkpoints, and mark reports) 
+   to distribute checkpoints in a logical timeline and avoid duplicating progress already made.
 3. Use the **Student Data** to personalize the checkpoints (preferences, learning style, current progress, mark reports).
 4. Use the **Student Message** (if any) as extra guidance for adapting the pacing, depth, or style of the checkpoints.
 5. Each checkpoint must include:
@@ -63,7 +64,7 @@ Your response must strictly adhere to the provided JSON schema and output only v
 7. Do not output anything except JSON that matches the schema.
 
 ### Data Provided:
-- **FLM Syllabus Data**: {FLMSylabusData}
+- **Subject Resource Data**: {SubjectResourceData}
 - **Joined Subject Data**: {JoinedSubjectData}
 - **Student Data**: {StudentData}
 - **Student Name**: {StudentSenderName}

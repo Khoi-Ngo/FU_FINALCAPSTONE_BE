@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
@@ -145,20 +146,26 @@ public class JoinedSubjectCheckPointService
         var studentSenderName = _jWTService.GetFirstNameFromToken(accessToken) + _jWTService.GetLastNameFromToken(accessToken);
         //query joined subject with mark report
         var joinedSubjectData = await GetJoinedSubjectData(joinedSubjectId);
-        //query the FLM Resource data for the subject
-        // var flmSylabusData = await GetFlmSylabusData(joinedSubjectData.SubjectCode, joinedSubjectData.SubjectVersionCode);
+        //query the FLM Subject Resource data for the subject
+        var subjectResourceData = await GetSubjectResourceData(joinedSubjectData.SubjectCode, joinedSubjectData.SubjectVersionCode);
         //query student data
         var studentData = await GetStudentData(accessToken);
 
-        //Construct Prompt
-        var joinedSubjectJson = JsonSerializer.Serialize(joinedSubjectData, new JsonSerializerOptions { WriteIndented = true });
-        // var flmSylabusJson = JsonSerializer.Serialize(flmSylabusData, new JsonSerializerOptions { WriteIndented = true });
-        var studentJson = JsonSerializer.Serialize(studentData, new JsonSerializerOptions { WriteIndented = true });
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        };
+
+        var joinedSubjectJson = JsonSerializer.Serialize(joinedSubjectData, jsonOptions);
+        var subjectResourceDataJson = JsonSerializer.Serialize(subjectResourceData, jsonOptions);
+        var studentJson = JsonSerializer.Serialize(studentData, jsonOptions);
 
 
 
         var userPrompt = CallAIConst.TemplatePromptForGenTodoForJoinedSubject
-            // .Replace("{FLMSylabusData}", flmSylabusJson)
+            .Replace("{SubjectResourceData}", subjectResourceDataJson)
             .Replace("{JoinedSubjectData}", joinedSubjectJson)
             .Replace("{StudentMessage}", studentMessage)
             .Replace("{StudentData}", studentJson)
@@ -185,18 +192,15 @@ public class JoinedSubjectCheckPointService
 
     private async Task<JoinedSubject> GetJoinedSubjectData(long joinedSubjectId)
     {
-        //TODO: include mark report of this joined subject later + Get From redis
-        var joinedSubject = await _joinedSubjectRepo.GetByIdAsync(joinedSubjectId);
+        var joinedSubject = await _joinedSubjectRepo.GetByIdWithCheckpointsAsync(joinedSubjectId);
         return joinedSubject;
     }
-    private async Task<object> GetFlmSylabusData(string subjectCode, string subjectVersion)
+    private async Task<object> GetSubjectResourceData(string subjectCode, string subjectVersion)
     {
-        //TODO: Get from redis later
-        return "";
+        return await _subjectRepository.GetByCodeAndVersionWithAllRelatedAsync(subjectCode, subjectVersion);
     }
     private async Task<GetStudentDetailResponse> GetStudentData(string accessToken)
     {
-        //TODO: Get from redis later
         var userId = _jWTService.GetUserIdFromToken(accessToken);
 
         var student = await _userRepository.GetStudentByIdAsync(userId);

@@ -55,6 +55,8 @@ public static class DependenciesInjection
         services.AddScoped<SemesterRepository>();
         services.AddScoped<JoinedSubjectRepository>();
         services.AddScoped<JoinedSubjectCheckPointRepository>();
+        services.AddScoped<MarkReportRepository>();
+
 
         #endregion
 

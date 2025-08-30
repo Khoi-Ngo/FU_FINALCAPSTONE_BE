@@ -113,4 +113,12 @@ namespace AISEA.ApiService.SHARED.Exceptions
     {
         public LeaveScheduleConflictWithMeetingsEx(string message) : base(message) { }
     }
+
+    public class MarkReportWeightSumException : Exception
+    {
+        public MarkReportWeightSumException(string message) : base(message) { }
+    }
+
+
+    
 }

@@ -16,7 +16,11 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                    .OnDelete(DeleteBehavior.Cascade)
                    .HasConstraintName("subjectmarkreport_joinedsubjectid_foreign");
 
-            builder.ToTable("SubjectMarkReport");
+
+            builder.ToTable(t =>
+           {
+               t.HasTrigger("trg_CheckWeightSum_InsertUpdate");
+           });
         }
     }
 }

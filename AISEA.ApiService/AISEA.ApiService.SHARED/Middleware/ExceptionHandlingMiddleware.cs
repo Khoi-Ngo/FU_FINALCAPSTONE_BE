@@ -202,6 +202,7 @@ public class ExceptionHandlingMiddleware
             case NoMatchingBookingAvailabilityEx:
             case LeaveScheduleConflictWithMeetingsEx:
             case InvalidCurMeetingStatException:
+            case MarkReportWeightSumException:
                 statusCode = (int)HttpStatusCode.BadRequest;
                 result = JsonSerializer.Serialize(new
                 {

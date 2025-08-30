@@ -24,13 +24,13 @@ public class JoinedSubjectController : BaseController
     #region Init
 
     private readonly JoinedSubjectService _joinedSubjectService;
-    private readonly NotificationHubNotifier _notifier;
     private readonly IBackgroundTaskQueue _taskQueue;
 
-    public JoinedSubjectController(EndpointSettings endpointSettings, JoinedSubjectService joinedSubjectService, NotificationHubNotifier notifier, IBackgroundTaskQueue taskQueue) : base(endpointSettings)
+    public JoinedSubjectController(EndpointSettings endpointSettings
+    , JoinedSubjectService joinedSubjectService
+    , IBackgroundTaskQueue taskQueue) : base(endpointSettings)
     {
         _joinedSubjectService = joinedSubjectService;
-        _notifier = notifier;
         _taskQueue = taskQueue;
     }
 

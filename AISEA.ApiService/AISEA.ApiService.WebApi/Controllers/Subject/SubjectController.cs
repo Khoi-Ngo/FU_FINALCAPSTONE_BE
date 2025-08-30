@@ -4,6 +4,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Subject;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
+using AISEA.ApiService.WebApi.InterceptorAPI;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.Subject
@@ -93,6 +94,7 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
         /// Gen the temporarily tip from AI for a subject
         /// </summary>
         [HttpGet("gen-tip/{id}")]
+        [AuditLog(Tag = "GEN_TIP_FOR_SUBJECT")]
         public async Task<IActionResult> GenTempTipForSubject(long id)
         {
             var res = await _subjectService.GenTempTipForSubjectAsync(id);

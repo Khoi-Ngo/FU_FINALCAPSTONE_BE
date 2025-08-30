@@ -9,12 +9,12 @@ namespace AISEA.ApiService.DAL.Entities
         [Key]
         [Column("id")]
         public long Id { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string Category { get; set; }
         public double Weight { get; set; }
         public double MinScore { get; set; }
         public string? ScoreUpdatedBy { get; set; }
+        public double Score { get; set; }
 
         // Foreign Key
         [ForeignKey("JoinedSubject")]

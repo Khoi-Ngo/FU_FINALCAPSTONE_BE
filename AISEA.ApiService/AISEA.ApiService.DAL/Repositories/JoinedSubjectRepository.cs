@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.DTOs.Responses.MarkReport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -103,4 +104,31 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
     {
         return await _context.JoinedSubjects.Include(js => js.JoinedSubjectCheckPoints).Include(js => js.SubjectMarkReports).FirstOrDefaultAsync(js => js.Id == joinedSubjectId);
     }
+    public async Task<List<TranscriptItemResponse>> GetTranscriptAsync(long studentProfileId)
+    {
+        var joinedSubjects = await _context.JoinedSubjects
+            .Where(js => js.StudentProfileId == studentProfileId && js.IsActive)
+            .Include(js => js.SubjectMarkReports)
+            .ToListAsync();
+
+        var transcript = joinedSubjects
+            .Select(js => new TranscriptItemResponse
+            {
+                SubjectCode = js.SubjectCode,
+                SubjectVersionCode = js.SubjectVersionCode,
+                Name = js.Name,
+                IsPassed = js.IsPassed,
+                Credits = js.Credits,
+                AvgScore = js.SubjectMarkReports.Any()
+                    ? js.SubjectMarkReports.Sum(r => r.Score * r.Weight) / js.SubjectMarkReports.Sum(r => r.Weight)
+                    : 0.0
+            })
+            .GroupBy(t => new { t.SubjectCode, t.SubjectVersionCode }) // group duplicates
+            .Select(g => g.OrderByDescending(t => t.AvgScore).First()) // keep highest avg
+            .ToList();
+
+        return transcript;
+    }
+
+
 }

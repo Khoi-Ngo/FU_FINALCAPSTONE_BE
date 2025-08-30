@@ -4,7 +4,6 @@ using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
 using AISEA.ApiService.WebApi.InterceptorAPI;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AISEA.ApiService.WebApi.Controllers.CourseTracker
@@ -40,13 +39,50 @@ namespace AISEA.ApiService.WebApi.Controllers.CourseTracker
         /// View data
         /// </summary>
         [HttpGet]
-        [AllowAnonymous]
+        [PermissionAuthorize((int)EUserRole.STUDENT)]
+        [AuditLog(Tag = "VIEW_METRICS_GIT_REPO_JOINED_SUBJECT")]
         public async Task<IActionResult> View([FromQuery] string owner, [FromQuery] string repoName)
         {
             var res = await _gitRepoService.ViewGitRepoAsync(owner, repoName);
             return Ok(res);
         }
 
+
+        ///<summary>
+        /// View Current Self git account username
+        /// </summary>
+        [HttpGet("git-acc-username")]
+        [PermissionAuthorize((int)EUserRole.STUDENT)]
+        [AuditLog(Tag = "VIEW_GIT_ACCOUNT_USERNAME")]
+        public async Task<IActionResult> ViewCurGitUsername()
+        {
+            var res = await _gitRepoService.ViewCurGitUsernameASync(AccessToken);
+            return Ok(res);
+        }
+
+        ///<summary>
+        /// Self update git account username
+        /// </summary>
+        [HttpPut("git-acc-username")]
+        [PermissionAuthorize((int)EUserRole.STUDENT)]
+        [AuditLog(Tag = "UPDATE_GIT_ACCOUNT_USERNAME")]
+        public async Task<IActionResult> UpdateGitUsername([FromQuery] string updatedGitUsername)
+        {
+            await _gitRepoService.UpdateGitUsernameAsync(AccessToken, updatedGitUsername);
+            return Ok("Update successfully");
+        }
+
+        ///<summary>
+        /// View metrics data of 
+        /// </summary>
+        [HttpGet("git-acc/metrics")]
+        [PermissionAuthorize((int)EUserRole.STUDENT)]
+        [AuditLog(Tag = "VIEW_DATA_METRIC_GIT_ACCOUNT")]
+        public async Task<IActionResult> ViewDataMetricOfGitUsername([FromQuery] string gitAccountUsername)
+        {
+            var res = await _gitRepoService.ViewDataMetricOfGitUsernameAsync(gitAccountUsername);
+            return Ok(res);
+        }
 
 
 

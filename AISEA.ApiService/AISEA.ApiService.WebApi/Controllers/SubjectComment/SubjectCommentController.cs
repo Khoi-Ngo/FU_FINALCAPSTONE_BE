@@ -92,5 +92,21 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectComment
                 UserReaction = comment.UserReaction
             });
         }
+
+        /// <summary>
+        /// Delete a comment (Students can delete their own comments, Admins can delete any comment)
+        /// </summary>
+        [HttpDelete("{id}")]
+        [PermissionAuthorize((int)EUserRole.STUDENT, (int)EUserRole.ADMIN)]
+        [AuditLog(Tag = "DELETE_SUBJECT_COMMENT")]
+        public async Task<IActionResult> DeleteComment(long id)
+        {
+            var result = await _subjectCommentService.DeleteCommentAsync(id);
+            return Ok(new
+            {
+                Success = result,
+                Message = result ? "Comment deleted successfully" : "Failed to delete comment"
+            });
+        }
     }
 }

@@ -14,11 +14,13 @@ public class GitRepoService
 
     public GitRepoService(JoinedSubjectRepository joinedSubjectRepository
     , IJWTService jWTService
-    , IGitRepoService gitRepoService)
+    , IGitRepoService gitRepoService
+    , StudentProfileRepository studentProfileRepository)
     {
         _joinedSubjectRepository = joinedSubjectRepository;
         _jWTService = jWTService;
         _gitRepoService = gitRepoService;
+        _studentProfileRepository = studentProfileRepository;
     }
 
     public async Task<object> ViewGitRepoAsync(string owner, string repoName)

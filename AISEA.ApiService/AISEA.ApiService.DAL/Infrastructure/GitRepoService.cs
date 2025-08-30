@@ -321,53 +321,53 @@ public class GitRepoService : IGitRepoService
         }
     }
 
-    // public async Task<object> FilterAndAggregateToFocusMainDataOfRepo(string owner, string repoName)
-    // {
-    //     var fullData = await GetRepoDataAsync(owner, repoName);
-    //     if (fullData == null)
-    //     {
-    //         return null;
-    //     }
+    public async Task<object> FilterAndAggregateToFocusMainDataOfRepo(string owner, string repoName)
+    {
+        var fullData = await GetRepoDataAsync(owner, repoName);
+        if (fullData == null)
+        {
+            return null;
+        }
 
-    //     var repoData = (GitHubRepoData)fullData;
+        var repoData = (GitHubRepoData)fullData;
 
-    //     // Aggregate and filter to focused data
-    //     var focusedData = new FocusedRepoData
-    //     {
-    //         Name = repoData.Name,
-    //         Owner = repoData.Owner?.Login ?? owner,
-    //         Description = repoData.Description,
-    //         Url = repoData.Url,
-    //         StargazerCount = repoData.StargazerCount,
-    //         WatcherCount = repoData.WatcherCount,
-    //         ForkCount = repoData.ForkCount,
-    //         OpenIssuesCount = repoData.OpenIssuesCount,
-    //         OpenPullRequestsCount = repoData.OpenPullRequestsCount,
-    //         CreatedAt = repoData.CreatedAt,
-    //         PushedAt = repoData.PushedAt,
-    //         UpdatedAt = repoData.UpdatedAt,
-    //         PrimaryLanguage = repoData.PrimaryLanguage,
-    //         TopLanguages = repoData.Languages?.OrderByDescending(l => l.Size).Take(3).Select(l => l.Name).ToList() ?? new List<string>(),
-    //         Topics = repoData.Topics,
-    //         LicenseName = repoData.LicenseName,
-    //         ContributorCount = repoData.ContributorCount,
-    //         TopContributors = repoData.Contributors?.OrderByDescending(c => c.Total).Take(5).Select(c => new TopContributor
-    //         {
-    //             Login = c.Author?.Login ?? c.Name ?? "Anonymous",
-    //             Contributions = c.Total
-    //         }).ToList() ?? new List<TopContributor>(),
-    //         TotalCommits = repoData.TotalCommitCount,
-    //         TotalCommitsLastYear = repoData.CommitActivity?.Sum(w => w.Total) ?? 0,
-    //         AverageCommitsPerWeek = repoData.CommitActivity?.Any() == true ? (double)(repoData.CommitActivity.Sum(w => w.Total) / repoData.CommitActivity.Count) : 0,
-    //         TotalAdditions = repoData.CodeFrequency?.Sum(cf => cf.Additions) ?? 0,
-    //         TotalDeletions = repoData.CodeFrequency?.Sum(cf => cf.Deletions) ?? 0,
-    //         IsPrivate = repoData.IsPrivate,
-    //         IsFork = repoData.IsFork,
-    //         IsArchived = repoData.IsArchived
-    //     };
+        // Aggregate and filter to focused data
+        var focusedData = new FocusedRepoData
+        {
+            Name = repoData.Name,
+            Owner = repoData.Owner?.Login ?? owner,
+            Description = repoData.Description,
+            Url = repoData.Url,
+            StargazerCount = repoData.StargazerCount,
+            WatcherCount = repoData.WatcherCount,
+            ForkCount = repoData.ForkCount,
+            OpenIssuesCount = repoData.OpenIssuesCount,
+            OpenPullRequestsCount = repoData.OpenPullRequestsCount,
+            CreatedAt = repoData.CreatedAt,
+            PushedAt = repoData.PushedAt,
+            UpdatedAt = repoData.UpdatedAt,
+            PrimaryLanguage = repoData.PrimaryLanguage,
+            TopLanguages = repoData.Languages?.OrderByDescending(l => l.Size).Take(3).Select(l => l.Name).ToList() ?? new List<string>(),
+            Topics = repoData.Topics,
+            LicenseName = repoData.LicenseName,
+            ContributorCount = repoData.ContributorCount,
+            TopContributors = repoData.Contributors?.OrderByDescending(c => c.Total).Take(5).Select(c => new TopContributor
+            {
+                Login = c.Author?.Login ?? c.Name ?? "Anonymous",
+                Contributions = c.Total
+            }).ToList() ?? new List<TopContributor>(),
+            TotalCommits = repoData.TotalCommitCount,
+            TotalCommitsLastYear = repoData.CommitActivity?.Sum(w => w.Total) ?? 0,
+            AverageCommitsPerWeek = repoData.CommitActivity?.Any() == true ? (double)(repoData.CommitActivity.Sum(w => w.Total) / repoData.CommitActivity.Count) : 0,
+            TotalAdditions = repoData.CodeFrequency?.Sum(cf => cf.Additions) ?? 0,
+            TotalDeletions = repoData.CodeFrequency?.Sum(cf => cf.Deletions) ?? 0,
+            IsPrivate = repoData.IsPrivate,
+            IsFork = repoData.IsFork,
+            IsArchived = repoData.IsArchived
+        };
 
-    //     return focusedData;
-    // }
+        return focusedData;
+    }
 
 
 }
@@ -613,6 +613,11 @@ public class PrimaryLanguage
 }
 
 
+public class TopContributor
+{
+    public string Login { get; set; }
+    public int Contributions { get; set; }
+}
 
 public class FocusedRepoData
 {
@@ -642,10 +647,4 @@ public class FocusedRepoData
     public bool IsPrivate { get; set; }
     public bool IsFork { get; set; }
     public bool IsArchived { get; set; }
-}
-
-public class TopContributor
-{
-    public string Login { get; set; }
-    public int Contributions { get; set; }
 }

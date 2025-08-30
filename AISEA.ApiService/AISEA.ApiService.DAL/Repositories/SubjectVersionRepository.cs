@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.DTOs.Requests.MarkReport;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
@@ -15,8 +16,8 @@ namespace AISEA.ApiService.DAL.Repositories
         {
             return await _context.SubjectVersions
                 .Include(sv => sv.Subject)
-                .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId && 
-                                          sv.VersionCode == versionCode && 
+                .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId &&
+                                          sv.VersionCode == versionCode &&
                                           !sv.IsDeleted);
         }
 
@@ -24,7 +25,7 @@ namespace AISEA.ApiService.DAL.Repositories
             int pageNumber, int pageSize, long? subjectId = null, string? search = null, bool? isActive = null)
         {
             var query = _context.SubjectVersions
-                .Include(sv => sv.Subject)  
+                .Include(sv => sv.Subject)
                 .Where(sv => !sv.IsDeleted);
 
             if (subjectId.HasValue)
@@ -39,7 +40,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(sv => sv.VersionName.Contains(search) || 
+                query = query.Where(sv => sv.VersionName.Contains(search) ||
                                          sv.VersionCode.Contains(search) ||
                                          sv.Subject.SubjectName.Contains(search) ||
                                          sv.Subject.SubjectCode.Contains(search));
@@ -75,19 +76,19 @@ namespace AISEA.ApiService.DAL.Repositories
         {
             return await _context.SubjectVersions
                 .Include(sv => sv.Subject)
-                .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId && 
-                                          sv.IsDefault && 
-                                          sv.IsActive && 
+                .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId &&
+                                          sv.IsDefault &&
+                                          sv.IsActive &&
                                           !sv.IsDeleted);
         }
 
         public async Task<List<SubjectVersion>> GetActiveVersionsAsync(DateTime? asOfDate = null)
         {
             var targetDate = asOfDate ?? DateTime.UtcNow;
-            
+
             return await _context.SubjectVersions
                 .Include(sv => sv.Subject)
-                .Where(sv => sv.IsActive && 
+                .Where(sv => sv.IsActive &&
                             !sv.IsDeleted &&
                             sv.EffectiveFrom <= targetDate &&
                             (sv.EffectiveTo == null || sv.EffectiveTo >= targetDate))
@@ -105,17 +106,17 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<bool> HasOtherActiveVersionsAsync(long subjectId, long excludeVersionId)
         {
             return await _context.SubjectVersions
-                .AnyAsync(sv => sv.SubjectId == subjectId && 
-                               sv.Id != excludeVersionId && 
-                               sv.IsActive && 
+                .AnyAsync(sv => sv.SubjectId == subjectId &&
+                               sv.Id != excludeVersionId &&
+                               sv.IsActive &&
                                !sv.IsDeleted);
         }
 
         public async Task<bool> ExistsAsync(long subjectId, string versionCode, long? excludeId = null)
         {
             var query = _context.SubjectVersions
-                .Where(sv => sv.SubjectId == subjectId && 
-                            sv.VersionCode == versionCode && 
+                .Where(sv => sv.SubjectId == subjectId &&
+                            sv.VersionCode == versionCode &&
                             !sv.IsDeleted);
 
             if (excludeId.HasValue)
@@ -151,9 +152,9 @@ namespace AISEA.ApiService.DAL.Repositories
                 if (isDefault)
                 {
                     var currentDefault = await _context.SubjectVersions
-                        .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId && 
-                                                  sv.IsDefault && 
-                                                  sv.IsActive && 
+                        .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId &&
+                                                  sv.IsDefault &&
+                                                  sv.IsActive &&
                                                   !sv.IsDeleted);
                     if (currentDefault != null)
                     {
@@ -187,9 +188,9 @@ namespace AISEA.ApiService.DAL.Repositories
                 if (setAsDefault && !versionToUpdate.IsDefault)
                 {
                     var currentDefault = await _context.SubjectVersions
-                        .FirstOrDefaultAsync(sv => sv.SubjectId == versionToUpdate.SubjectId && 
-                                                  sv.IsDefault && 
-                                                  sv.IsActive && 
+                        .FirstOrDefaultAsync(sv => sv.SubjectId == versionToUpdate.SubjectId &&
+                                                  sv.IsDefault &&
+                                                  sv.IsActive &&
                                                   !sv.IsDeleted);
                     if (currentDefault != null)
                     {
@@ -222,17 +223,17 @@ namespace AISEA.ApiService.DAL.Repositories
                 // Get the version to set as default
                 var versionToSetAsDefault = await _context.SubjectVersions
                     .FirstOrDefaultAsync(sv => sv.Id == versionId && !sv.IsDeleted);
-                
+
                 if (versionToSetAsDefault == null)
                     throw new InvalidOperationException("Subject version not found.");
 
                 // Clear current default
                 var currentDefault = await _context.SubjectVersions
-                    .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId && 
-                                              sv.IsDefault && 
-                                              sv.IsActive && 
+                    .FirstOrDefaultAsync(sv => sv.SubjectId == subjectId &&
+                                              sv.IsDefault &&
+                                              sv.IsActive &&
                                               !sv.IsDeleted);
-                
+
                 if (currentDefault != null && currentDefault.Id != versionId)
                 {
                     currentDefault.IsDefault = false;
@@ -254,5 +255,27 @@ namespace AISEA.ApiService.DAL.Repositories
                 throw;
             }
         }
+
+        public async Task<List<CommandMarkRpRequest>> ViewTemplateImportMarkAsync(string subjectCode, string subjectVersionCode)
+        {
+            var result = await _context.SubjectVersions
+                .Where(sv => sv.Subject.SubjectCode == subjectCode
+                             && sv.VersionCode == subjectVersionCode
+                             && !sv.IsDeleted)
+                .SelectMany(sv => sv.Syllabi) // navigate into syllabi
+                .SelectMany(s => s.SyllabusAssessments) // navigate into syllabus assessments
+                .Where(sa => !sa.IsDeleted) // ignore deleted assessments
+                .Select(sa => new CommandMarkRpRequest
+                {
+                    Category = sa.Category,
+                    Weight = (double)sa.Weight,
+                    MinScore = string.IsNullOrEmpty(sa.CompletionCriteria) ? 0 : double.Parse(sa.CompletionCriteria),
+                    Score = 0 // default score is ignored
+                })
+                .ToListAsync();
+
+            return result;
+        }
+
     }
 }

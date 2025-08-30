@@ -111,5 +111,19 @@ namespace AISEA.ApiService.WebApi.Controllers.CourseTracker
 
 
 
+        ///<summary>
+        /// Get template for importing the mark reports
+        /// </summary>
+        [HttpGet("view-template-import")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)]
+        [AuditLog(Tag = "VIEW_TEMPLATE_IMPORT_MARK_REPORT")]
+        public async Task<IActionResult> ViewTemplateImport([FromQuery] string subjectCode, [FromQuery] string subjectVersionCode)
+        {
+            var res = await _markReportService.ViewTemplateImportMarkAsync(subjectCode, subjectVersionCode);
+            return Ok(res);
+        }
+
+
+
     }
 }

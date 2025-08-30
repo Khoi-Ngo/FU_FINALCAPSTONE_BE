@@ -16,13 +16,15 @@ public class MarkReportService
     private readonly IJWTService _jWTService;
     private readonly IMapper _mapper;
     private readonly JoinedSubjectRepository _joinedSubjectRepository;
+    private readonly SubjectVersionRepository _subjectVersionRepository;
 
-    public MarkReportService(MarkReportRepository markReportRepository, IJWTService jWTService, IMapper mapper, JoinedSubjectRepository joinedSubjectRepository)
+    public MarkReportService(MarkReportRepository markReportRepository, IJWTService jWTService, IMapper mapper, JoinedSubjectRepository joinedSubjectRepository, SubjectVersionRepository subjectVersionRepository)
     {
         _markReportRepository = markReportRepository;
         _jWTService = jWTService;
         _mapper = mapper;
         _joinedSubjectRepository = joinedSubjectRepository;
+        _subjectVersionRepository = subjectVersionRepository;
     }
 
     public async Task<long> DeleteAsync(long id)
@@ -130,4 +132,8 @@ public class MarkReportService
         return await _joinedSubjectRepository.GetTranscriptAsync(studentProfileId);
     }
 
+    public async Task<List<CommandMarkRpRequest>> ViewTemplateImportMarkAsync(string subjectCode, string subjectVersionCode)
+    {
+        return await _subjectVersionRepository.ViewTemplateImportMarkAsync(subjectCode, subjectVersionCode);
+    }
 }

@@ -7,6 +7,7 @@ using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
 using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace AISEA.ApiService.BAL.Services.SubjectComment
 {
@@ -16,41 +17,71 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
         private readonly SubjectRepository _subjectRepository;
         private readonly JoinedSubjectRepository _joinedSubjectRepository;
         private readonly IJWTService _jwtService;
+        private readonly IChatOpenAIService _chatOpenAIService;
         private readonly IMapper _mapper;
+        private readonly ILogger<SubjectCommentService> _logger;
 
         public SubjectCommentService(
             SubjectCommentRepository commentRepository,
             SubjectRepository subjectRepository,
             JoinedSubjectRepository joinedSubjectRepository,
             IJWTService jwtService,
-            IMapper mapper)
+            IChatOpenAIService chatOpenAIService,
+            IMapper mapper,
+            ILogger<SubjectCommentService> logger)
         {
             _commentRepository = commentRepository;
             _subjectRepository = subjectRepository;
             _joinedSubjectRepository = joinedSubjectRepository;
             _jwtService = jwtService;
+            _chatOpenAIService = chatOpenAIService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<long> CreateCommentAsync(CreateSubjectCommentRequest request, string accessToken)
         {
             var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
 
-            // 1. Validate subject exists
+            // 1. Validate content using OpenAI moderation
+            _logger.LogInformation("Validating comment content for student {StudentId}", studentProfileId);
+            try
+            {
+                var (isValid, reason) = await _chatOpenAIService.ValidateCommentAsync(request.Content);
+                if (!isValid)
+                {
+                    _logger.LogWarning("Comment content validation failed for student {StudentId}: {Reason}", studentProfileId, reason);
+                    throw new InvalidUserCreatedException(reason ?? "Content contains inappropriate language");
+                }
+                _logger.LogInformation("Comment content validation passed for student {StudentId}", studentProfileId);
+            }
+            catch (InvalidUserCreatedException)
+            {
+                // Re-throw validation failures
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during content validation for student {StudentId}", studentProfileId);
+                // SECURITY: Do not create comments if validation fails - fail safe
+                throw new InvalidUserCreatedException("Content validation failed due to a system error. Please try again later or contact support if the problem persists.");
+            }
+
+            // 2. Validate subject exists
             var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
             if (subject == null || subject.IsDeleted)
             {
                 throw new NotFoundException("Subject not found.");
             }
 
-            // 2. Validate student has completed the subject
+            // 3. Validate student has completed the subject
             var canComment = await _joinedSubjectRepository.IsValidToPostComment(studentProfileId, subject.SubjectCode);
             if (!canComment)
             {
                 throw new InvalidUserCreatedException("You can only comment on subjects you have completed and passed.");
             }
 
-            // 3. Check if student already commented on this subject
+            // 4. Check if student already commented on this subject
             var existingComment = await _commentRepository.GetByStudentAndSubjectAsync(studentProfileId, request.SubjectId);
             if (existingComment != null)
             {
@@ -194,6 +225,22 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
                 UserReaction = comment.GetUserReaction(studentProfileId),
                 Action = action
             };
+        }
+
+        public async Task<bool> DeleteCommentAsync(long commentId)
+        {
+            // Get the comment
+            var comment = await _commentRepository.GetByIdAsync(commentId);
+            if (comment == null)
+            {
+                throw new NotFoundException("Comment not found.");
+            }
+
+            _logger.LogInformation("Deleting comment {CommentId}", commentId);
+
+            // Perform hard delete
+            await _commentRepository.RemoveAsync(comment);
+            return true;
         }
     }
 }

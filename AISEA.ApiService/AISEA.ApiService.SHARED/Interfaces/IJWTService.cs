@@ -16,5 +16,4 @@ public interface IJWTService
     long GetProfileIdFromToken(string token);
     long GetUserIdFromToken(string token);
     string GetEmailFromToken(string token);
-    string GetFullNameFromToken(string token);
 }

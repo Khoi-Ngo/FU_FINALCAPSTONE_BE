@@ -19,6 +19,7 @@ using AISEA.ApiService.BAL.Services.AuditLog;
 using AISEA.ApiService.BAL.Services.Approval;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.BAL.Services.CourseTracker;
+using AISEA.ApiService.BAL.Services.SubjectComment;
 using AISEA.ApiService.SHARED.Filters;
 
 namespace AISEA.ApiService.BAL
@@ -53,7 +54,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<JoinedSubjectService>();
             services.AddScoped<JoinedSubjectCheckPointService>();
             services.AddScoped<MarkReportService>();
-
+            services.AddScoped<SubjectCommentService>();
 
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

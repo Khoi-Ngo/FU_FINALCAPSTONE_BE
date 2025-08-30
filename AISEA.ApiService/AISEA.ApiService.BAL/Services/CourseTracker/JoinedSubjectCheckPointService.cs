@@ -26,8 +26,10 @@ public class JoinedSubjectCheckPointService
     private readonly UserRepository _userRepository;
     private readonly SubjectRepository _subjectRepository;
     private readonly IChatOpenAIService _chatOpenAIService;
+    private readonly IGitRepoService _gitRepoService;
 
-    public JoinedSubjectCheckPointService(IJWTService jWTService, JoinedSubjectRepository joinedSubjectRepo, JoinedSubjectCheckPointRepository checkpointRepo, IMapper mapper, UserRepository userRepository, SubjectRepository subjectRepository, IChatOpenAIService chatOpenAIService)
+    public JoinedSubjectCheckPointService(IJWTService jWTService, JoinedSubjectRepository joinedSubjectRepo, JoinedSubjectCheckPointRepository checkpointRepo, IMapper mapper, UserRepository userRepository, SubjectRepository subjectRepository, IChatOpenAIService chatOpenAIService
+    , IGitRepoService gitRepoService)
     {
         _jWTService = jWTService;
         _joinedSubjectRepo = joinedSubjectRepo;
@@ -36,6 +38,7 @@ public class JoinedSubjectCheckPointService
         _userRepository = userRepository;
         _subjectRepository = subjectRepository;
         _chatOpenAIService = chatOpenAIService;
+        _gitRepoService = gitRepoService;
     }
 
 
@@ -141,7 +144,7 @@ public class JoinedSubjectCheckPointService
 
 
 
-    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage)
+    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage, string ownerGitRepo, string gitRepoName)
     {
         var studentSenderName = _jWTService.GetFirstNameFromToken(accessToken) + _jWTService.GetLastNameFromToken(accessToken);
         //query joined subject with mark report
@@ -150,7 +153,7 @@ public class JoinedSubjectCheckPointService
         var subjectResourceData = await GetSubjectResourceData(joinedSubjectData.SubjectCode, joinedSubjectData.SubjectVersionCode);
         //query student data
         var studentData = await GetStudentData(accessToken);
-
+        var includedGitRepoData = await _gitRepoService.FilterAndAggregateToFocusMainDataOfRepo(ownerGitRepo, gitRepoName);
 
         var jsonOptions = new JsonSerializerOptions
         {
@@ -161,6 +164,7 @@ public class JoinedSubjectCheckPointService
         var joinedSubjectJson = JsonSerializer.Serialize(joinedSubjectData, jsonOptions);
         var subjectResourceDataJson = JsonSerializer.Serialize(subjectResourceData, jsonOptions);
         var studentJson = JsonSerializer.Serialize(studentData, jsonOptions);
+        var includedGitRepoDataJson = JsonSerializer.Serialize(includedGitRepoData, jsonOptions);
 
 
 
@@ -170,6 +174,7 @@ public class JoinedSubjectCheckPointService
             .Replace("{StudentMessage}", studentMessage)
             .Replace("{StudentData}", studentJson)
             .Replace("{StudentSenderName}", studentSenderName)
+            .Replace("{includedGitRepoDataJson}", includedGitRepoDataJson)
             .Replace("{EnrolledDateTime}", joinedSubjectData.CreatedAt.ToString("o")) // ISO 8601 format
             .Replace("{CurrentDateTime}", DateTime.UtcNow.ToString("o"));
         //call OpenAI then return the result

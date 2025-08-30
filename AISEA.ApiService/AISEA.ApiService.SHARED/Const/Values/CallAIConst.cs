@@ -62,6 +62,10 @@ Your response must strictly adhere to the provided JSON schema and output only v
    - Optional: up to five `Link` fields (`Link1` to `Link5`) pointing to useful references (use widely available online resources relevant to the subject).
 6. Ensure deadlines are sequential and future-oriented, relative to today ({CurrentDateTime}).
 7. Do not output anything except JSON that matches the schema.
+8. Use the **GitHub Repository Metrics** to prioritize checkpoints: 
+   - Highlight areas where practical coding practice is needed based on contributions, pull requests, issues, or starred repositories. 
+   - Suggest checkpoints that help improve weak areas or reinforce skills indicated by the repository activity.
+
 
 ### Data Provided:
 - **Subject Resource Data**: {SubjectResourceData}
@@ -71,6 +75,8 @@ Your response must strictly adhere to the provided JSON schema and output only v
 - **Student Message**: {StudentMessage}
 - **Enrolled DateTime**: {EnrolledDateTime}
 - **Current Date and Time**: {CurrentDateTime}
+- **GitHub Repository Metrics**: {includedGitRepoDataJson}
+
 
 ### Example Checkpoint Structure:
 ```json

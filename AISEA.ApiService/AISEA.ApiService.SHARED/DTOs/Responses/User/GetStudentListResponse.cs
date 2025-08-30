@@ -26,7 +26,6 @@ public class StudentDataListResponse
     public long ProgramId { get; set; }
     public string RegisteredComboCode { get; set; }
     public string CurriculumCode { get; set; }
-    public string? GitAccountUsername { get; set; }
 
 
 }

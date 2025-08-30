@@ -149,10 +149,11 @@ public class JoinedSubjectCheckPointController : BaseController
     [HttpGet("gen/{joinedSubjectId}")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
     [AuditLog(Tag = "AI_GENERATE_CHECKPOINT")]
-    public async Task<IActionResult> GenerateCheckpoints(long joinedSubjectId, [FromQuery] string studentMessage)
+    public async Task<IActionResult> GenerateCheckpoints(long joinedSubjectId, [FromQuery] string studentMessage
+    , [FromQuery] string ownerGitRepo, [FromQuery] string gitRepoName)
     {
         var accessToken = AccessToken;
-        var res = await _joinedSubjectCheckPointService.GenerateCheckpointsAsync(joinedSubjectId, accessToken, studentMessage);
+        var res = await _joinedSubjectCheckPointService.GenerateCheckpointsAsync(joinedSubjectId, accessToken, studentMessage, ownerGitRepo, gitRepoName);
         return Ok(res);
     }
 

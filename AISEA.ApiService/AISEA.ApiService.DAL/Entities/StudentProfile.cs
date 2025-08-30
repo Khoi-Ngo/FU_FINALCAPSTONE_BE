@@ -9,7 +9,6 @@ public partial class StudentProfile
     [Key]
     [Column("id")]
     public long Id { get; set; }
-    public string? GitAccountUsername { get; set; }
     public long UserId { get; set; }
     public DateTimeOffset EnrolledAt { get; set; }
     public int NumberOfBan { get; set; } = 0;

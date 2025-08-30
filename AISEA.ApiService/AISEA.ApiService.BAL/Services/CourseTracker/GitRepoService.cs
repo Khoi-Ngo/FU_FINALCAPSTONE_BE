@@ -41,24 +41,4 @@ public class GitRepoService
     private bool IsValidAccessJoinedSubject(string accessToken, JoinedSubject joinedSubject)
     => joinedSubject.StudentProfileId == _jWTService.GetProfileIdFromToken(accessToken);
 
-    public async Task<string?> ViewCurGitUsernameASync(string accessToken)
-    {
-        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
-        return studentProfile.GitAccountUsername;
-    }
-
-    public async Task UpdateGitUsernameAsync(string accessToken, string updatedGitUsername)
-    {
-        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
-        var studentProfile = await _studentProfileRepository.GetByIdAsync(studentProfileId);
-        studentProfile.GitAccountUsername = updatedGitUsername;
-        _studentProfileRepository.UpdateAsync(studentProfile);
-    }
-
-    public async Task<object> ViewDataMetricOfGitUsernameAsync(string gitAccountUsername)
-    {
-        return await _gitRepoService.ViewDataMetricOfGitUsernameAsync(gitAccountUsername);
-
-    }
 }

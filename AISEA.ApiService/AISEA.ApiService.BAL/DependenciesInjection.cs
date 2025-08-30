@@ -55,7 +55,9 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<JoinedSubjectCheckPointService>();
             services.AddScoped<MarkReportService>();
             services.AddScoped<SubjectCommentService>();
+            services.AddScoped<GitRepoService>();
 
+            
             //adding business logic mappings profiles
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

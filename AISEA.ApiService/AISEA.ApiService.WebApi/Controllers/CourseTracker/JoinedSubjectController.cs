@@ -220,9 +220,8 @@ public class JoinedSubjectController : BaseController
     [AuditLog(Tag = "VIEW_JOINED_SUBJECT")]
     public async Task<IActionResult> GetById(long id)
     {
-        var accessToken = AccessToken;
 
-        var res = await _joinedSubjectService.GetByIdAsync(accessToken, id);
+        var res = await _joinedSubjectService.GetByIdAsync(AccessToken, id);
         return Ok(res);
     }
 

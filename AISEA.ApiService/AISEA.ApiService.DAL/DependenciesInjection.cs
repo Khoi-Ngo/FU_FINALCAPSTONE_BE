@@ -92,7 +92,7 @@ public static class DependenciesInjection
         services.AddScoped<IChatOpenAIService, ChatOpenAIService>();
         services.AddScoped<IHolidayService, HolidayService>();
         services.AddHttpClient<IHolidayService, HolidayService>();
-
+        services.AddScoped<IGitRepoService, GitRepoService>();
 
 
         services.Configure<JsonSerializerOptions>(options =>
@@ -104,7 +104,7 @@ public static class DependenciesInjection
 
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
-    
+
 
         return services;
     }

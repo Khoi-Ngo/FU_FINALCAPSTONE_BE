@@ -119,6 +119,20 @@ public class MarkReportService
                     break;
                 }
             }
+
+            if (isPassed)
+            {
+                var totalWeight = reports.Sum(r => r.Weight);
+                if (totalWeight == 100)
+                {
+                    double weightedAverage = reports.Sum(r => r.Score * r.Weight) / totalWeight;
+
+                    if (weightedAverage < 5.0)
+                    {
+                        isPassed = false;
+                    }
+                }
+            }
         }
 
         joinedSubject.IsPassed = isPassed;

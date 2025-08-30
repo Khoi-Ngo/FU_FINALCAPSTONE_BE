@@ -17,7 +17,7 @@ public class CourseTrackSettings
     #endregion
     public int MaxDuplicateSubjectCodePerStuSem { get; set; }
     public int RemoveNonUseJoinedSubjectIntervalDays { get; set; }
-    
+
     #region Deadline Reminder Thresholds
     public int DeadlineReminderThresholdHours1 { get; set; }
     public int DeadlineReminderThresholdHours2 { get; set; }
@@ -26,4 +26,5 @@ public class CourseTrackSettings
     public int DeadlineReminderThresholdHours5 { get; set; }
     #endregion
     public int ReminderIntervalMins { get; set; }
+    public string PersonalDevGitHubToken { get; set; }
 }

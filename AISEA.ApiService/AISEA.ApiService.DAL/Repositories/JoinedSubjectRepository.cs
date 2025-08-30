@@ -45,15 +45,18 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
        .Select(s => s.Id)
        .FirstOrDefaultAsync();
 
-        if (latestSemesterId == 0)
+        if (latestSemesterId <= 1)
+        {
+            // No cleanup possible if we only have 0 or 1 semesters
             return;
-
+        }
         int totalDeleted = 0;
+        var cleanupThresholdSemesterId = latestSemesterId - 1;
 
         while (true)
         {
             var oldSubjects = await _context.JoinedSubjects
-                .Where(js => js.SemesterId < latestSemesterId && !js.SubjectMarkReports.Any())
+                .Where(js => js.SemesterId < cleanupThresholdSemesterId && !js.IsPassed && !js.SubjectMarkReports.Any())
                 .OrderBy(js => js.Id)
                 .ToListAsync();
 

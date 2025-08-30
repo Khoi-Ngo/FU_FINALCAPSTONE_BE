@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace AISEA.ApiService.BAL.Validators.MarkReport;
 
-public class CreateMarkReportRequestValidator : AbstractValidator<CreateMarkReportRequest>
+public class CreateMarkReportRequestValidator : AbstractValidator<CommandMarkRpRequest>
 {
     public CreateMarkReportRequestValidator()
     {

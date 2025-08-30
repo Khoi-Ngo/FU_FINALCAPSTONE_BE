@@ -1,6 +1,6 @@
 namespace AISEA.ApiService.SHARED.DTOs.Requests.MarkReport
 {
-    public class CreateMarkReportRequest
+    public class CommandMarkRpRequest
     {
         public string Category { get; set; }
         public double Weight { get; set; }

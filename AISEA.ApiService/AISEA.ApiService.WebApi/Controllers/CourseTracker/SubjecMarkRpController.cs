@@ -32,14 +32,14 @@ namespace AISEA.ApiService.WebApi.Controllers.CourseTracker
         [HttpPost("{joinedSubjectID}")]
         [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)]
         [AuditLog(Tag = "IMPORT_MARK_REPORT")]
-        public async Task<IActionResult> Import([FromBody] List<CreateMarkReportRequest> request, long joinedSubjectID)
+        public async Task<IActionResult> Import([FromBody] List<CommandMarkRpRequest> request, long joinedSubjectID)
         {
             await _markReportService.ImportAsync(request, joinedSubjectID, AccessToken);
 
             _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
 {
     var qMarkReportService = sp.GetRequiredService<MarkReportService>();
-    await qMarkReportService.UpdateStatusCompleteOrPassedAsync(joinedSubjectID);
+    await qMarkReportService.UpdateStatusPassedAsync(joinedSubjectID);
 });
 
             return Ok("Import successfully");
@@ -53,17 +53,36 @@ namespace AISEA.ApiService.WebApi.Controllers.CourseTracker
         [HttpDelete("{id}")]
         [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)]
         [AuditLog(Tag = "DELETE_MARK_REPORT")]
-        public async Task<IActionResult> DeleteAsync(long id)
+        public async Task<IActionResult> Delete(long id)
         {
 
             var needCheckJoinedSubjectID = await _markReportService.DeleteAsync(id);
             _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
         {
             var qMarkReportService = sp.GetRequiredService<MarkReportService>();
-            await qMarkReportService.UpdateStatusCompleteOrPassedAsync(needCheckJoinedSubjectID);
+            await qMarkReportService.UpdateStatusPassedAsync(needCheckJoinedSubjectID);
         });
             return Ok("Delete successfully");
         }
+
+        ///<summary>
+        /// UPDATE single mark report
+        /// </summary>
+        [HttpPut("{id}")]
+        [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF)]
+        [AuditLog(Tag = "UPDATE_MARK_REPORT")]
+        public async Task<IActionResult> Update(long id, [FromBody] CommandMarkRpRequest request)
+        {
+
+            var needCheckJoinedSubjectID = await _markReportService.UpdateAsync(id, request);
+            _taskQueue.QueueBackgroundWorkItem((Func<IServiceProvider, CancellationToken, Task>)(async (sp, token) =>
+        {
+            var qMarkReportService = sp.GetRequiredService<MarkReportService>();
+            await qMarkReportService.UpdateStatusPassedAsync(needCheckJoinedSubjectID);
+        }));
+            return Ok("Update successfully");
+        }
+
 
 
         ///<summary>

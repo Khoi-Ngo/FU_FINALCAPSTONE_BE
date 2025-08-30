@@ -32,7 +32,16 @@ public class MarkReportService
         return markReport.JoinedSubjectId;
     }
 
-    public async Task ImportAsync(List<CreateMarkReportRequest> requests, long joinedSubjectID, string accessToken)
+
+    public async Task<long> UpdateAsync(long id, CommandMarkRpRequest request)
+    {
+        var markReport = await _markReportRepository.GetByIdAsync(id);
+        markReport = _mapper.Map(request, markReport);
+        await _markReportRepository.UpdateAsync(markReport);
+        return markReport.JoinedSubjectId;
+    }
+
+    public async Task ImportAsync(List<CommandMarkRpRequest> requests, long joinedSubjectID, string accessToken)
     {
         try
         {
@@ -71,7 +80,7 @@ public class MarkReportService
         var subjectMarkReports = await _markReportRepository.GetByJoinedSubjectAsync(joinedSubjectId);
         return _mapper.Map<List<MarkReportResponse>>(subjectMarkReports);
     }
-    private SubjectMarkReport MapToSubjectMarkReport(string importerEmail, CreateMarkReportRequest request, long joinedSubjectID)
+    private SubjectMarkReport MapToSubjectMarkReport(string importerEmail, CommandMarkRpRequest request, long joinedSubjectID)
     {
         var subjectMarkReport = _mapper.Map<SubjectMarkReport>(request);
         subjectMarkReport.ScoreUpdatedBy = importerEmail;
@@ -79,7 +88,7 @@ public class MarkReportService
         return subjectMarkReport;
     }
 
-    public async Task UpdateStatusCompleteOrPassedAsync(long needCheckJoinedSubjectID)
+    public async Task UpdateStatusPassedAsync(long needCheckJoinedSubjectID)
     {
         var joinedSubject = await _joinedSubjectRepository
             .GetByIdWithCheckpointsAndPointsAsync(needCheckJoinedSubjectID);
@@ -120,4 +129,5 @@ public class MarkReportService
         var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
         return await _joinedSubjectRepository.GetTranscriptAsync(studentProfileId);
     }
+
 }

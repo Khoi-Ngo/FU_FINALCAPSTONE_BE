@@ -9,7 +9,7 @@ public class MarkReportProfile : Profile
 {
     public MarkReportProfile()
     {
-        CreateMap<CreateMarkReportRequest, SubjectMarkReport>();
+        CreateMap<CommandMarkRpRequest, SubjectMarkReport>();
         CreateMap<SubjectMarkReport, MarkReportResponse>();
     }
 }

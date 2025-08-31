@@ -222,11 +222,13 @@ public class UserController : BaseController
     }
 
     /// <summary>
-    /// Retrieves all active Students from the system. (Support Booking Feature ~ Student Access only)
+    /// Retrieves all active Students from the system with search functionality (Support Booking Feature ~ Student Access only)
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of active students</returns>
     [HttpGet("students/active/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADVISOR)]
-    public async Task<IActionResult> GetAllActiveStudents([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllActiveStudents([FromQuery] GetActiveStudentsRequest request)
     {
         var students = await _userService.GetAllActiveStudentsAsync(request);
         return Ok(students);

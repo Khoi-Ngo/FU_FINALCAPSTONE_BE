@@ -242,9 +242,9 @@ namespace AISEA.ApiService.BAL.Services.User
             await _userRepository.UpdateAsync(user);
         }
 
-        public async Task<PagedResult<GetStudentListResponse>> GetAllActiveStudentsAsync(PaginationRequest request)
+        public async Task<PagedResult<GetStudentListResponse>> GetAllActiveStudentsAsync(GetActiveStudentsRequest request)
         {
-            var (users, totalCount) = await _userRepository.GetActiveStudentsPagedAsync(request.PageNumber, request.PageSize);
+            var (users, totalCount) = await _userRepository.GetActiveStudentsPagedAsync(request.PageNumber, request.PageSize, request.Search);
             return new PagedResult<GetStudentListResponse>
             {
                 Items = _mapper.Map<List<GetStudentListResponse>>(users),

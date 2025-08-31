@@ -154,14 +154,28 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<(object users, int totalCount)> GetActiveStudentsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(object users, int totalCount)> GetActiveStudentsPagedAsync(int pageNumber, int pageSize, string? search = null)
         {
             var query = _context.Users
-              .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE)
-              .Include(u => u.Role)
-              .Include(u => u.StudentProfile);
+              .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE);
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Email.Contains(search) ||
+                    (u.FirstName + " " + u.LastName).Contains(search) ||
+                    u.FirstName.Contains(search) ||
+                    u.LastName.Contains(search));
+            }
+
+            query = query.Include(u => u.Role)
+                         .Include(u => u.StudentProfile);
+
             var totalCount = await query.CountAsync();
             var users = await query
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

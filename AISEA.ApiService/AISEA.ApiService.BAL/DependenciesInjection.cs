@@ -20,6 +20,7 @@ using AISEA.ApiService.BAL.Services.Approval;
 using AISEA.ApiService.BAL.Services.Booking;
 using AISEA.ApiService.BAL.Services.CourseTracker;
 using AISEA.ApiService.BAL.Services.SubjectComment;
+using AISEA.ApiService.BAL.Services.Dashboard;
 using AISEA.ApiService.SHARED.Filters;
 
 namespace AISEA.ApiService.BAL
@@ -56,6 +57,7 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<MarkReportService>();
             services.AddScoped<SubjectCommentService>();
             services.AddScoped<GitRepoService>();
+            services.AddScoped<FLMDashboardService>();
 
             
             //adding business logic mappings profiles

@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.DTOs.Responses.JoinedSubject;
 using AISEA.ApiService.SHARED.DTOs.Responses.MarkReport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -154,5 +155,45 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return transcript;
     }
 
+    public async Task<List<JoinedSubjectStatusDto>> GetMapJoinedSubjectStatusByStudentProfileIDAsync(long studentProfileID)
+    {
+        var query = from js in _context.JoinedSubjects
+                    where js.StudentProfileId == studentProfileID
+                    select new
+                    {
+                        js.Id,
+                        js.IsPassed,
+                        TotalWeight = js.SubjectMarkReports.Sum(r => (double?)r.Weight) ?? 0,
+                        AvgScore = js.SubjectMarkReports.Any() ? js.SubjectMarkReports.Average(r => (double?)r.Score) ?? 0 : 0,
+                        AnyBelowMin = js.SubjectMarkReports.Any(r => r.Score < r.MinScore),
+                        HasReports = js.SubjectMarkReports.Any()
+                    };
+
+        var data = await query.ToListAsync();
+
+        var result = new List<JoinedSubjectStatusDto>();
+
+        foreach (var js in data)
+        {
+            string status;
+
+            if (js.IsPassed)
+                status = "PASSED";
+            else if (!js.HasReports)
+                status = "IN-PROGRESS";
+            else if (Math.Abs(js.TotalWeight - 100) > 0.001)
+                status = "IN-PROGRESS";
+            else
+                status = (js.AvgScore >= 5 && !js.AnyBelowMin) ? "PASSED" : "NOT PASSED";
+
+            result.Add(new JoinedSubjectStatusDto
+            {
+                JoinedSubjectId = js.Id,
+                Status = status
+            });
+        }
+
+        return result;
+    }
 
 }

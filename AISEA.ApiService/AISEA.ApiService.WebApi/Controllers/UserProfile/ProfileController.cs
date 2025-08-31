@@ -38,7 +38,7 @@ public class ProfileController : BaseController
     /// Create student profile with existed user in the system
     /// </summary>
     [HttpPost("student")]
-    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.STUDENT)]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "CREATE_PROFILE_FOR_USER")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateStudentProfileRequest request)
     {
@@ -55,7 +55,7 @@ public class ProfileController : BaseController
     /// Create staff profile with existed user in the system
     /// </summary>
     [HttpPost("staff")]
-    [PermissionAuthorize((int)EUserRole.ADMIN, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADVISOR, (int)EUserRole.MANAGER)]
+    [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "CREATE_PROFILE_FOR_USER")]
     public async Task<IActionResult> CreateAsync([FromBody] CreateStaffProfileRequest request)
     {

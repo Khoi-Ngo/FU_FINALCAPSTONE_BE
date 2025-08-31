@@ -22,7 +22,6 @@ public class SemesterReferController : BaseController
     /// Get All Semesters
     /// </summary>
     [HttpGet]
-    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
     public async Task<IActionResult> GetAllAsyncPaged([FromQuery] PaginationRequest request)
     {
         var result = await _semesterReferService.GetAllAsyncPaged(request);
@@ -33,7 +32,6 @@ public class SemesterReferController : BaseController
     /// Get All Block Types
     /// </summary>
     [HttpGet("block-types")]
-    [PermissionAuthorize((int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN, (int)EUserRole.MANAGER)]
     public async Task<IActionResult> GetAllBlockTypesAsync([FromQuery] PaginationRequest request)
     {
         var allBlockTypes = Enum.GetValues(typeof(ESemesterStudyBlockType))

@@ -44,7 +44,7 @@ public class JoinedSubjectController : BaseController
     /// 1 Student - 1 Joined subject
     /// </summary>
     [HttpPost("import")]
-    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF)]
     [AuditLog(Tag = "IMPORT_SUBJECT")]
     public async Task<IActionResult> ImportSubjectAsync([FromBody] SingleImportJoinedSubjectRequest request)
     {
@@ -68,7 +68,7 @@ public class JoinedSubjectController : BaseController
     /// 1 Student - N Joined Subjects
     /// </summary>
     [HttpPost("import-multiple")]
-    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF)]
     [AuditLog(Tag = "BULK_IMPORT_SUBJECT")]
     public async Task<IActionResult> ImportMultipleSubjectsAsync([FromBody] ImportJoinedSubjectsForOneStudentRequest request)
     {
@@ -117,7 +117,7 @@ public class JoinedSubjectController : BaseController
     /// N Student - N Joined Subject
     /// </summary>
     [HttpPost("import-multiple-students")]
-    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF)]
     [AuditLog(Tag = "BULK_IMPORT_SUBJECT")]
     public async Task<IActionResult> ImportMultipleStudentsAsync([FromBody] ImportJoinedSubjectsRequest request)
     {
@@ -163,7 +163,7 @@ public class JoinedSubjectController : BaseController
     /// Delete a joined subject for a student
     /// </summary>
     [HttpDelete("{id}")]
-    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF, (int)EUserRole.ADMIN)]
+    [PermissionAuthorize((int)EUserRole.MANAGER, (int)EUserRole.ACADEMIC_STAFF)]
     [AuditLog(Tag = "DELETE_JOINED_SUBJECT")]
     public async Task<IActionResult> DeleteSubjectAsync(long id)
     {

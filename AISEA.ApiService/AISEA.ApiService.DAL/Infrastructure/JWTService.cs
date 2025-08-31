@@ -15,9 +15,9 @@ public class JWTService : IJWTService
     private readonly JwtSettings _jwtSettings;
 
     public JWTService(
-        IOptions<JwtSettings> jwtSettings)
+        JwtSettings jwtSettings)
     {
-        _jwtSettings = jwtSettings.Value;
+        _jwtSettings = jwtSettings;
     }
     #endregion
 

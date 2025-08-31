@@ -62,7 +62,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
         public async Task BlacklistAccessTokenAsync(string accessToken)
         {
             var key = $"{_authTokenSettings.KeyPrefExpireAccessToken}:{accessToken}";
-            await _redisRepository.SetValueAsync(key, accessToken, TimeSpan.FromMilliseconds(_authTokenSettings.ExpireAccTokenMilli));
+            await _redisRepository.SetValueAsync(key, accessToken, TimeSpan.FromMinutes(_authTokenSettings.ExpireAccTokenMinute));
         }
 
     }

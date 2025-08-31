@@ -41,12 +41,15 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectComment
 
 
         /// <summary>
-        /// Get comments for a specific subject (Public)
+        /// Get comments for a specific subject with sorting options (Public)
         /// </summary>
+        /// <param name="subjectId">Subject ID</param>
+        /// <param name="request">Pagination and sorting parameters</param>
+        /// <returns>Paginated list of comments</returns>
         [HttpGet("subject/{subjectId}")]
         public async Task<IActionResult> GetSubjectComments(
             long subjectId,
-            [FromQuery] PaginationRequest request)
+            [FromQuery] GetSubjectCommentsRequest request)
         {
             var result = await _subjectCommentService.GetSubjectCommentsAsync(
                 subjectId, request, AccessToken);

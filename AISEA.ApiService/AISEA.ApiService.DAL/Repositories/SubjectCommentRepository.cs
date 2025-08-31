@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
@@ -28,7 +29,7 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
         public async Task<(IEnumerable<SubjectComment> Comments, int TotalCount)> GetPagedBySubjectAsync(
-            long subjectId, int pageNumber, int pageSize)
+            long subjectId, int pageNumber, int pageSize, ECommentSortBy sortBy = ECommentSortBy.Date, ESortDirection sortDirection = ESortDirection.Desc)
         {
             var query = _context.SubjectComments
                 .Include(c => c.StudentProfile)
@@ -36,8 +37,24 @@ namespace AISEA.ApiService.DAL.Repositories
                 .Where(c => c.SubjectId == subjectId);
 
             var totalCount = await query.CountAsync();
+
+            // Apply sorting based on parameters
+            query = sortBy switch
+            {
+                ECommentSortBy.Date => sortDirection == ESortDirection.Desc
+                    ? query.OrderByDescending(c => c.CreatedAt)
+                    : query.OrderBy(c => c.CreatedAt),
+
+                ECommentSortBy.LikeCount => sortDirection == ESortDirection.Desc
+                    ? query.OrderByDescending(c => c.LikedByStudentIds != null ? c.LikedByStudentIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Length : 0)
+                           .ThenByDescending(c => c.CreatedAt) // Secondary sort by date
+                    : query.OrderBy(c => c.LikedByStudentIds != null ? c.LikedByStudentIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Length : 0)
+                           .ThenByDescending(c => c.CreatedAt), // Secondary sort by date
+
+                _ => query.OrderByDescending(c => c.CreatedAt)
+            };
+
             var comments = await query
-                .OrderByDescending(c => c.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

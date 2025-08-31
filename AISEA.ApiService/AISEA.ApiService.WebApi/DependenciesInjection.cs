@@ -145,6 +145,8 @@ public static class DependenciesInjection
         {
             opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+            // Configure enums to be serialized as strings
+            opt.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         })
         .ConfigureApiBehaviorOptions(opt =>
         {

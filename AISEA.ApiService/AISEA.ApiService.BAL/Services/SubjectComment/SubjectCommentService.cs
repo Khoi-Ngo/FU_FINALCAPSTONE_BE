@@ -136,10 +136,10 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
         }
 
         public async Task<PagedResult<SubjectCommentResponse>> GetSubjectCommentsAsync(
-            long subjectId, PaginationRequest request, string? accessToken = null)
+            long subjectId, GetSubjectCommentsRequest request, string? accessToken = null)
         {
             var (comments, totalCount) = await _commentRepository.GetPagedBySubjectAsync(
-                subjectId, request.PageNumber, request.PageSize);
+                subjectId, request.PageNumber, request.PageSize, request.SortBy, request.SortDirection);
 
             long? currentStudentId = null;
             if (!string.IsNullOrEmpty(accessToken))

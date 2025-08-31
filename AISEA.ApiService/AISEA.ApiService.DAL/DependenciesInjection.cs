@@ -57,6 +57,7 @@ public static class DependenciesInjection
         services.AddScoped<JoinedSubjectCheckPointRepository>();
         services.AddScoped<MarkReportRepository>();
         services.AddScoped<SubjectCommentRepository>();
+        services.AddScoped<FLMDashboardRepository>();
 
         #endregion
 

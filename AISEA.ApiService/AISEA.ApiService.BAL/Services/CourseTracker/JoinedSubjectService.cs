@@ -301,6 +301,35 @@ public class JoinedSubjectService
         return _mapper.Map<List<JoinedSubjectResponse>>(res);
     }
 
+    public async Task<JoinedSubjectSyllabusResponse> GetJoinedSubjectSyllabusAsync(long joinedSubjectId, string accessToken)
+    {
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
+
+        var (joinedSubject, syllabusId) = await _joinedSubjectRepository.GetJoinedSubjectWithSyllabusIdAsync(joinedSubjectId, studentProfileId);
+
+        if (joinedSubject == null)
+        {
+            throw new NotFoundException("Joined subject not found or you don't have access to it.");
+        }
+
+        // Get subject name
+        var subject = await _subjectRepository.GetByCodeAsync(joinedSubject.SubjectCode);
+        var subjectName = subject?.SubjectName ?? "Unknown Subject";
+
+        return new JoinedSubjectSyllabusResponse
+        {
+            JoinedSubjectId = joinedSubject.Id,
+            SubjectCode = joinedSubject.SubjectCode,
+            SubjectVersionCode = joinedSubject.SubjectVersionCode,
+            SubjectName = subjectName,
+            SyllabusId = syllabusId,
+            HasSyllabus = syllabusId.HasValue,
+            Message = syllabusId.HasValue
+                ? "Syllabus found successfully"
+                : "No syllabus available for this subject version"
+        };
+    }
+
 
     public async Task<List<JoinedSubjectResponse>> GetAllByStudentProfileIdAsync(long studentProfileId)
     {

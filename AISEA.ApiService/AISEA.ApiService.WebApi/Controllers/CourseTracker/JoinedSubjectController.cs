@@ -198,6 +198,21 @@ public class JoinedSubjectController : BaseController
         return Ok(res);
     }
 
+    /// <summary>
+    /// Get syllabus ID for a specific joined subject (Students only - own subjects)
+    /// </summary>
+    /// <param name="joinedSubjectId">The ID of the joined subject</param>
+    /// <returns>Joined subject info with syllabus ID if available</returns>
+    [HttpGet("{joinedSubjectId}/syllabus")]
+    [PermissionAuthorize((int)EUserRole.STUDENT)]
+    [AuditLog(Tag = "VIEW_JOINED_SUBJECT_SYLLABUS")]
+    public async Task<IActionResult> GetJoinedSubjectSyllabus(long joinedSubjectId)
+    {
+        var accessToken = AccessToken;
+        var result = await _joinedSubjectService.GetJoinedSubjectSyllabusAsync(joinedSubjectId, accessToken);
+        return Ok(result);
+    }
+
 
 
     ///<summary>

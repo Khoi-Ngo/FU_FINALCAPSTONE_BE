@@ -107,6 +107,27 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
     {
         return await _context.JoinedSubjects.Include(js => js.JoinedSubjectCheckPoints).Include(js => js.SubjectMarkReports).FirstOrDefaultAsync(js => js.Id == joinedSubjectId);
     }
+
+    public async Task<(JoinedSubject? joinedSubject, long? syllabusId)> GetJoinedSubjectWithSyllabusIdAsync(long joinedSubjectId, long studentProfileId)
+    {
+        var joinedSubject = await _context.JoinedSubjects
+            .FirstOrDefaultAsync(js => js.Id == joinedSubjectId && js.StudentProfileId == studentProfileId);
+
+        if (joinedSubject == null)
+            return (null, null);
+
+        // Find the syllabus ID based on SubjectCode and SubjectVersionCode
+        var syllabusId = await _context.Subjects
+            .Where(s => s.SubjectCode == joinedSubject.SubjectCode)
+            .SelectMany(s => s.SubjectVersions)
+            .Where(sv => sv.VersionCode == joinedSubject.SubjectVersionCode)
+            .SelectMany(sv => sv.Syllabi)
+            .Where(sy => !sy.IsDeleted)
+            .Select(sy => sy.Id)
+            .FirstOrDefaultAsync();
+
+        return (joinedSubject, syllabusId == 0 ? null : syllabusId);
+    }
     public async Task<List<TranscriptItemResponse>> GetTranscriptAsync(long studentProfileId)
     {
         var joinedSubjects = await _context.JoinedSubjects

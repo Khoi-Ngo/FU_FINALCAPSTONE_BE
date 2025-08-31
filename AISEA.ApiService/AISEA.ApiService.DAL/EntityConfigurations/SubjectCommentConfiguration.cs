@@ -11,9 +11,9 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
             builder.HasKey(e => e.Id).HasName("subjectcomment_id_primary");
 
             // Composite unique constraint: One comment per student per subject
-            builder.HasIndex(e => new { e.StudentProfileId, e.SubjectId })
-                .IsUnique()
-                .HasDatabaseName("IX_SubjectComment_Student_Subject_Unique");
+            // builder.HasIndex(e => new { e.StudentProfileId, e.SubjectId })
+            //     .IsUnique()
+            //     .HasDatabaseName("IX_SubjectComment_Student_Subject_Unique");
 
             // Index for performance
             builder.HasIndex(e => e.SubjectId).HasDatabaseName("IX_SubjectComment_SubjectId");

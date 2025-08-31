@@ -251,6 +251,17 @@ public class JoinedSubjectController : BaseController
     }
 
 
+    ///<summary>
+    /// Get progress-checkpoints of all joined subject per student profile
+    /// </summary>
+    [HttpGet("map-complete-checkpoint-percentage/{studentProfileID}")]
+    public async Task<IActionResult> GetMapJoinedSubjectProgressCheckpointByStudentProfileID(long studentProfileID)
+    {
+        var res = await _joinedSubjectService.GetMapJoinedSubjectProgressCheckpointByStudentProfileIDAsync(studentProfileID);
+        return Ok(res);
+    }
+
+
 
 
 }

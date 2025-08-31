@@ -196,4 +196,27 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return result;
     }
 
+    public async Task<List<JoinedSubjectCheckpointProgressDto>> GetMapJoinedSubjectProgressCheckpointByStudentProfileIDAsync(long studentProfileID)
+    {
+        var data = await _context.JoinedSubjects
+            .Where(js => js.StudentProfileId == studentProfileID)
+            .Select(js => new
+            {
+                js.Id,
+                TotalCheckpoints = js.JoinedSubjectCheckPoints.Count(),
+                CompletedCheckpoints = js.JoinedSubjectCheckPoints.Count(cp => cp.IsCompleted)
+            })
+            .ToListAsync();
+
+        var result = data.Select(js => new JoinedSubjectCheckpointProgressDto
+        {
+            JoinedSubjectId = js.Id,
+            CompletedPercentage = js.TotalCheckpoints == 0
+                ? 0
+                : Math.Round((js.CompletedCheckpoints * 100.0) / js.TotalCheckpoints, 2)
+        }).ToList();
+
+        return result;
+    }
+
 }

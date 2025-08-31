@@ -154,7 +154,7 @@ namespace AISEA.ApiService.DAL.Repositories
             return (users, totalCount);
         }
 
-        public async Task<(object users, int totalCount)> GetActiveStudentsPagedAsync(int pageNumber, int pageSize, string? search = null)
+        public async Task<(object users, int totalCount)> GetActiveStudentsPagedAsync(int pageNumber, int pageSize, string? search = "")
         {
             var query = _context.Users
               .Where(u => u.RoleId == (int)EUserRole.STUDENT && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE);

@@ -17,7 +17,6 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
         private readonly SubjectRepository _subjectRepository;
         private readonly JoinedSubjectRepository _joinedSubjectRepository;
         private readonly IJWTService _jwtService;
-        private readonly IChatOpenAIService _chatOpenAIService;
         private readonly IMapper _mapper;
         private readonly ILogger<SubjectCommentService> _logger;
 
@@ -26,7 +25,6 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
             SubjectRepository subjectRepository,
             JoinedSubjectRepository joinedSubjectRepository,
             IJWTService jwtService,
-            IChatOpenAIService chatOpenAIService,
             IMapper mapper,
             ILogger<SubjectCommentService> logger)
         {
@@ -34,7 +32,6 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
             _subjectRepository = subjectRepository;
             _joinedSubjectRepository = joinedSubjectRepository;
             _jwtService = jwtService;
-            _chatOpenAIService = chatOpenAIService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -43,69 +40,26 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
         {
             var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
 
-            // 1. Validate content using OpenAI moderation
-            _logger.LogInformation("Validating comment content for student {StudentId}", studentProfileId);
-            try
-            {
-                var (isValid, reason) = await _chatOpenAIService.ValidateCommentAsync(request.Content);
-                if (!isValid)
-                {
-                    _logger.LogWarning("Comment content validation failed for student {StudentId}: {Reason}", studentProfileId, reason);
-                    throw new InvalidUserCreatedException(reason ?? "Content contains inappropriate language");
-                }
-                _logger.LogInformation("Comment content validation passed for student {StudentId}", studentProfileId);
-            }
-            catch (InvalidUserCreatedException)
-            {
-                // Re-throw validation failures
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during content validation for student {StudentId}", studentProfileId);
-                // SECURITY: Do not create comments if validation fails - fail safe
-                throw new InvalidUserCreatedException("Content validation failed due to a system error. Please try again later or contact support if the problem persists.");
-            }
-
-            // 2. Validate subject exists
             var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
-            if (subject == null || subject.IsDeleted)
-            {
-                throw new NotFoundException("Subject not found.");
-            }
-
-            // 3. Validate student has completed the subject
             var canComment = await _joinedSubjectRepository.IsValidToPostComment(studentProfileId, subject.SubjectCode);
             if (!canComment)
             {
                 throw new InvalidUserCreatedException("You can only comment on subjects you have completed and passed.");
             }
 
-            // 4. Check if student already commented on this subject
-            var existingComment = await _commentRepository.GetByStudentAndSubjectAsync(studentProfileId, request.SubjectId);
-            if (existingComment != null)
-            {
-                throw new InvalidUserCreatedException("You have already commented on this subject.");
-            }
-
-            // 5. Create comment
             var comment = _mapper.Map<DAL.Entities.SubjectComment>(request);
             comment.StudentProfileId = studentProfileId;
             comment.Email = _jwtService.GetEmailFromToken(accessToken);
-            
+
             // Construct full name from first and last name
             var firstName = _jwtService.GetFirstNameFromToken(accessToken);
             var lastName = _jwtService.GetLastNameFromToken(accessToken);
             comment.FullName = $"{firstName} {lastName}".Trim();
-            
-            comment.CreatedAt = DateTime.UtcNow;
+
 
             await _commentRepository.CreateAsync(comment);
             return comment.Id;
         }
-
-
-
 
 
         public async Task<SubjectCommentResponse> GetCommentByIdAsync(long id, string? accessToken = null)
@@ -115,22 +69,10 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
             {
                 throw new NotFoundException("Comment not found.");
             }
-
             var response = _mapper.Map<SubjectCommentResponse>(comment);
 
-            // Set user reaction if authenticated
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                try
-                {
-                    var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
-                    response.UserReaction = comment.GetUserReaction(studentProfileId);
-                }
-                catch
-                {
-                    // Ignore if token is invalid
-                }
-            }
+            var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
+            response.UserReaction = comment.GetUserReaction(studentProfileId);
 
             return response;
         }
@@ -141,18 +83,7 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
             var (comments, totalCount) = await _commentRepository.GetPagedBySubjectAsync(
                 subjectId, request.PageNumber, request.PageSize, request.SortBy, request.SortDirection);
 
-            long? currentStudentId = null;
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                try
-                {
-                    currentStudentId = _jwtService.GetProfileIdFromToken(accessToken);
-                }
-                catch
-                {
-                    // Ignore if token is invalid
-                }
-            }
+            long? currentStudentId = (long?)_jwtService.GetProfileIdFromToken(accessToken);
 
             var responses = comments.Select(comment =>
             {
@@ -227,20 +158,10 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
             };
         }
 
-        public async Task<bool> DeleteCommentAsync(long commentId)
+        public async Task DeleteCommentAsync(long commentId)
         {
-            // Get the comment
             var comment = await _commentRepository.GetByIdAsync(commentId);
-            if (comment == null)
-            {
-                throw new NotFoundException("Comment not found.");
-            }
-
-            _logger.LogInformation("Deleting comment {CommentId}", commentId);
-
-            // Perform hard delete
             await _commentRepository.RemoveAsync(comment);
-            return true;
         }
     }
 }

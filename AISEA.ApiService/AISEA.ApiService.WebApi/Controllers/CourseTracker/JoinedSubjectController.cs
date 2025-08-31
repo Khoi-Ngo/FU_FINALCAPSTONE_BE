@@ -208,8 +208,7 @@ public class JoinedSubjectController : BaseController
     [AuditLog(Tag = "VIEW_JOINED_SUBJECT_SYLLABUS")]
     public async Task<IActionResult> GetJoinedSubjectSyllabus(long joinedSubjectId)
     {
-        var accessToken = AccessToken;
-        var result = await _joinedSubjectService.GetJoinedSubjectSyllabusAsync(joinedSubjectId, accessToken);
+        var result = await _joinedSubjectService.GetJoinedSubjectSyllabusAsync(joinedSubjectId, AccessToken);
         return Ok(result);
     }
 

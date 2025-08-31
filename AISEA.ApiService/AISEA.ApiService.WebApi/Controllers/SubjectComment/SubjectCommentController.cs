@@ -104,12 +104,8 @@ namespace AISEA.ApiService.WebApi.Controllers.SubjectComment
         [AuditLog(Tag = "DELETE_SUBJECT_COMMENT")]
         public async Task<IActionResult> DeleteComment(long id)
         {
-            var result = await _subjectCommentService.DeleteCommentAsync(id);
-            return Ok(new
-            {
-                Success = result,
-                Message = result ? "Comment deleted successfully" : "Failed to delete comment"
-            });
+            await _subjectCommentService.DeleteCommentAsync(id);
+            return Ok("Comment deleted successfully");
         }
     }
 }

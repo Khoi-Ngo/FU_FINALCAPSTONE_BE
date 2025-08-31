@@ -23,7 +23,8 @@ public class NotificationRepository : GenericRepository<Notification>
                 Title = n.Title,
                 Content = n.Content,
                 Link = n.Link,
-                CreatedAt = n.CreatedAt
+                CreatedAt = n.CreatedAt,
+                IsRead = n.IsRead
             });
 
         var totalCount = await query.CountAsync();

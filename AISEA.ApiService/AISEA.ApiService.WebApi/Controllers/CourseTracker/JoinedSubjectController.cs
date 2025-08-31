@@ -53,7 +53,7 @@ public class JoinedSubjectController : BaseController
         _taskQueue.QueueBackgroundWorkItem(async (sp, token) =>
       {
           var qJoinedSubjectService = sp.GetRequiredService<JoinedSubjectService>();
-          var (stakeHolderNoti, StakeholderUserId, isSuccess) = await qJoinedSubjectService.ImportSubjectAsync(request, accessToken);
+          var (stakeHolderNoti, StakeholderUserId,  isSuccess) = await qJoinedSubjectService.ImportSubjectAsync(request, accessToken);
 
           var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
           await qNotifier.NotifyUserAsync(StakeholderUserId, stakeHolderNoti);

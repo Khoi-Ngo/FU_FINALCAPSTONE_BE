@@ -476,4 +476,9 @@ public class JoinedSubjectService
     {
         return await _joinedSubjectRepository.GetMapJoinedSubjectStatusByStudentProfileIDAsync(studentProfileID);
     }
+
+    public async Task<object> GetMapJoinedSubjectProgressCheckpointByStudentProfileIDAsync(long studentProfileID)
+    {
+        return await _joinedSubjectRepository.GetMapJoinedSubjectProgressCheckpointByStudentProfileIDAsync(studentProfileID);
+    }
 }

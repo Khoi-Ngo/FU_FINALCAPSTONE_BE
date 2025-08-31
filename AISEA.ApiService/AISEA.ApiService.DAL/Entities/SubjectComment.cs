@@ -10,6 +10,7 @@ namespace AISEA.ApiService.DAL.Entities
         [Key]
         [Column("id")]
         public long Id { get; set; }
+        public bool IsScannedToValidate { get; set; } = false;
 
         // Foreign Keys (NO JoinedSubjectId)
         public long SubjectId { get; set; }

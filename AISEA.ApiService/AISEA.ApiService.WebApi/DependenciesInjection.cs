@@ -174,6 +174,8 @@ public static class DependenciesInjection
         services.AddHostedService<ReminderCheckpointBgService3>();
         services.AddHostedService<ReminderCheckpointBgService4>();
         services.AddHostedService<ReminderCheckpointBgService5>();
+        services.AddHostedService<CommentValidatorBgService>();
+
 
 
         // services.AddHostedService(provider =>

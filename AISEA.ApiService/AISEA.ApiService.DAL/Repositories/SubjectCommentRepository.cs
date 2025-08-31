@@ -73,6 +73,26 @@ namespace AISEA.ApiService.DAL.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<SubjectComment>> GetAllToValidateAsync()
+        {
+            return await _context.SubjectComments
+                .Where(c => !c.IsScannedToValidate)
+                .OrderBy(c => c.CreatedAt)
+                .Take(100)
+                .ToListAsync();
+        }
+        public async Task RemoveRangeAsync(IEnumerable<SubjectComment> comments)
+        {
+            _context.SubjectComments.RemoveRange(comments);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<SubjectComment> comments)
+        {
+            _context.SubjectComments.UpdateRange(comments);
+            await _context.SaveChangesAsync();
+        }
+
 
     }
 }

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using AISEA.ApiService.SHARED.DTOs.Requests.CheckPoint;
+using AISEA.ApiService.SHARED.DTOs.Responses.SubjectComment;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
 {
     public class ChatOpenAIService : IChatOpenAIService
     {
+        #region Init class
         private readonly ChatBotSettings _chatBotSettings;
         private readonly HttpClient _httpClient;
         private readonly ILogger<ChatOpenAIService> _logger;
@@ -20,7 +22,9 @@ namespace AISEA.ApiService.DAL.Infrastructure
             _httpClient = new HttpClient();
             _logger = logger;
         }
+        #endregion
 
+        #region ChatBot
         public async Task<string> SendMsgAsync(string prompt)
         {
             _logger.LogInformation("==== AI CHATBOT : OpenAI Request Prompt ====\n{Prompt}", prompt);
@@ -49,7 +53,9 @@ namespace AISEA.ApiService.DAL.Infrastructure
             return data?.choices?[0]?.message?.content?.ToString()?.Trim() ?? "No response received.";
 
         }
+        #endregion
 
+        #region Checkpoints generation
         public async Task<List<CommandCheckpointRequest>> GenerateCheckpoints(string userPrompt)
         {
 
@@ -146,6 +152,81 @@ namespace AISEA.ApiService.DAL.Infrastructure
             public List<CommandCheckpointRequest> Checkpoints { get; set; }
         }
 
+        #endregion
+
+        public async Task<CommentVerificationResult> VerifyCommentAsync(string content)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _chatBotSettings.ApiKey);
+
+            var request = new
+            {
+                model = _chatBotSettings.Model,
+                messages = new object[]
+                {
+            new { role = "system", content = "You are a strict API that only outputs JSON matching the schema." },
+            new { role = "user", content = $"Check if this comment violates community rules (spam, rude, offensive, etc.). Comment: \"{content}\"" }
+                },
+                response_format = new
+                {
+                    type = "json_schema",
+                    json_schema = new
+                    {
+                        name = "comment_verification",
+                        schema = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                IsBad = new { type = "boolean" },
+                                Reason = new { type = "string" }
+                            },
+                            required = new[] { "IsBad", "Reason" }
+                        }
+                    }
+                }
+            };
+
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    _chatBotSettings.ApiUrl,
+                    new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
+
+                response.EnsureSuccessStatusCode();
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(jsonResponse);
+                if (doc.RootElement.GetProperty("choices")[0]
+                      .GetProperty("message")
+                      .TryGetProperty("content", out var contentElement))
+                {
+                    var contentStr = contentElement.GetString();
+                    if (!string.IsNullOrWhiteSpace(contentStr))
+                    {
+                        try
+                        {
+                            return System.Text.Json.JsonSerializer.Deserialize<CommentVerificationResult>(
+                                contentStr,
+                                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                                ?? new CommentVerificationResult { IsBad = false, Reason = "Null parse" };
+                        }
+                        catch
+                        {
+                            return new CommentVerificationResult { IsBad = false, Reason = "Invalid JSON" };
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // swallow and return safe default
+            }
+
+            return new CommentVerificationResult { IsBad = false, Reason = "Error or empty response" };
+        }
+
+        #region Validate the comment with the reason
         public async Task<(bool isValid, string? reason)> ValidateCommentAsync(string content)
         {
             try
@@ -158,28 +239,28 @@ namespace AISEA.ApiService.DAL.Infrastructure
 
                 var moderationRequest = new { input = content };
                 var moderationJson = new StringContent(
-                    JsonConvert.SerializeObject(moderationRequest), 
-                    Encoding.UTF8, 
+                    JsonConvert.SerializeObject(moderationRequest),
+                    Encoding.UTF8,
                     "application/json");
 
                 var moderationResponse = await _httpClient.PostAsync(
-                    "https://api.openai.com/v1/moderations", 
+                    "https://api.openai.com/v1/moderations",
                     moderationJson);
 
                 if (moderationResponse.IsSuccessStatusCode)
                 {
                     var moderationResult = await moderationResponse.Content.ReadAsStringAsync();
                     var moderationData = JsonConvert.DeserializeObject<dynamic>(moderationResult);
-                    
+
                     if (moderationData?.results?[0]?.flagged == true)
                     {
                         // Get detailed category information
                         var categories = moderationData.results[0].categories;
                         var flaggedCategories = new List<string>();
-                        
+
                         // Convert dynamic to dictionary for safe property access
                         var categoryDict = JsonConvert.DeserializeObject<Dictionary<string, bool>>(categories.ToString());
-                        
+
                         if (categoryDict != null)
                         {
                             if (categoryDict.ContainsKey("hate") && categoryDict["hate"]) flaggedCategories.Add("hate speech");
@@ -188,14 +269,14 @@ namespace AISEA.ApiService.DAL.Infrastructure
                             if (categoryDict.ContainsKey("sexual") && categoryDict["sexual"]) flaggedCategories.Add("sexual content");
                             if (categoryDict.ContainsKey("self-harm") && categoryDict["self-harm"]) flaggedCategories.Add("self-harm");
                         }
-                        
-                        var reason = flaggedCategories.Any() 
+
+                        var reason = flaggedCategories.Any()
                             ? $"Detect by OPENAI: Content contains inappropriate {string.Join(", ", flaggedCategories)}"
                             : "Detect by OPENAI:Content contains inappropriate language";
-                            
-                        _logger.LogWarning("Comment flagged by OpenAI moderation: {Content}. Categories: {Categories}", 
+
+                        _logger.LogWarning("Comment flagged by OpenAI moderation: {Content}. Categories: {Categories}",
                             content, string.Join(", ", flaggedCategories));
-                            
+
                         return (false, reason);
                     }
                 }
@@ -267,7 +348,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
             // Strong profanity check (educational appropriate)
             var strongProfanity = new[]
             {
-                "fuck", "fucking", "shit", "bitch", "bastard", "asshole", "ass hole", 
+                "fuck", "fucking", "shit", "bitch", "bastard", "asshole", "ass hole",
                 "damn it", "goddamn", "god damn", "son of a bitch", "piece of shit"
             };
 
@@ -337,5 +418,7 @@ namespace AISEA.ApiService.DAL.Infrastructure
 
             return (true, null);
         }
+
+        #endregion
     }
 }

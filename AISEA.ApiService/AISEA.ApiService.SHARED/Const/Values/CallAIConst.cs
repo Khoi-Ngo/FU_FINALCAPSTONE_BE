@@ -56,7 +56,7 @@ Your response must strictly adhere to the provided JSON schema and output only v
 4. Use the **Student Message** (if any) as extra guidance for adapting the pacing, depth, or style of the checkpoints.
 5. Each checkpoint must include:
    - `Title` (short, descriptive)
-   - `Content` (clear instructions, address the student directly: '{StudentSenderName}')
+   - `Content` (clear instructions)
    - `Deadline` (ISO 8601 format, scheduled realistically based on {EnrolledDateTime} and syllabus pacing)
    - Optional: `Note`
    - Optional: up to five `Link` fields (`Link1` to `Link5`) pointing to useful references (use widely available online resources relevant to the subject).
@@ -71,7 +71,6 @@ Your response must strictly adhere to the provided JSON schema and output only v
 - **Subject Resource Data**: {SubjectResourceData}
 - **Joined Subject Data**: {JoinedSubjectData}
 - **Student Data**: {StudentData}
-- **Student Name**: {StudentSenderName}
 - **Student Message**: {StudentMessage}
 - **Enrolled DateTime**: {EnrolledDateTime}
 - **Current Date and Time**: {CurrentDateTime}

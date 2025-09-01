@@ -144,16 +144,14 @@ public class JoinedSubjectCheckPointService
 
 
 
-    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage, string ownerGitRepo, string gitRepoName)
+    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage, string? ownerGitRepo, string? gitRepoName)
     {
-        var studentSenderName = _jWTService.GetFirstNameFromToken(accessToken) + _jWTService.GetLastNameFromToken(accessToken);
         //query joined subject with mark report
         var joinedSubjectData = await GetJoinedSubjectData(joinedSubjectId);
         //query the FLM Subject Resource data for the subject
         var subjectResourceData = await GetSubjectResourceData(joinedSubjectData.SubjectCode, joinedSubjectData.SubjectVersionCode);
         //query student data
         var studentData = await GetStudentData(accessToken);
-        var includedGitRepoData = await _gitRepoService.FilterAndAggregateToFocusMainDataOfRepo(ownerGitRepo, gitRepoName);
 
         var jsonOptions = new JsonSerializerOptions
         {
@@ -164,6 +162,18 @@ public class JoinedSubjectCheckPointService
         var joinedSubjectJson = JsonSerializer.Serialize(joinedSubjectData, jsonOptions);
         var subjectResourceDataJson = JsonSerializer.Serialize(subjectResourceData, jsonOptions);
         var studentJson = JsonSerializer.Serialize(studentData, jsonOptions);
+
+
+
+        object includedGitRepoData;
+        if (!string.IsNullOrWhiteSpace(ownerGitRepo) && !string.IsNullOrWhiteSpace(gitRepoName))
+        {
+            includedGitRepoData = await _gitRepoService.FilterAndAggregateToFocusMainDataOfRepo(ownerGitRepo, gitRepoName);
+        }
+        else
+        {
+            includedGitRepoData = new { }; // empty object
+        }
         var includedGitRepoDataJson = JsonSerializer.Serialize(includedGitRepoData, jsonOptions);
 
 
@@ -173,11 +183,11 @@ public class JoinedSubjectCheckPointService
             .Replace("{JoinedSubjectData}", joinedSubjectJson)
             .Replace("{StudentMessage}", studentMessage)
             .Replace("{StudentData}", studentJson)
-            .Replace("{StudentSenderName}", studentSenderName)
             .Replace("{includedGitRepoDataJson}", includedGitRepoDataJson)
             .Replace("{EnrolledDateTime}", joinedSubjectData.CreatedAt.ToString("o")) // ISO 8601 format
             .Replace("{CurrentDateTime}", DateTime.UtcNow.ToString("o"));
-        //call OpenAI then return the result
+
+
         var res = await _chatOpenAIService.GenerateCheckpoints(userPrompt);
         return res;
     }

@@ -22,6 +22,7 @@ using AISEA.ApiService.BAL.Services.CourseTracker;
 using AISEA.ApiService.BAL.Services.SubjectComment;
 using AISEA.ApiService.BAL.Services.Dashboard;
 using AISEA.ApiService.SHARED.Filters;
+using AISEA.ApiService.BAL.Services.StudyRoadmap;
 
 namespace AISEA.ApiService.BAL
 {
@@ -58,6 +59,8 @@ namespace AISEA.ApiService.BAL
             services.AddScoped<SubjectCommentService>();
             services.AddScoped<GitRepoService>();
             services.AddScoped<FLMDashboardService>();
+            services.AddScoped<RoadmapService>();
+
 
             
             //adding business logic mappings profiles

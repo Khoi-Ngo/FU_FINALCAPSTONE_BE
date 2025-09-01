@@ -62,6 +62,8 @@ public partial class AiseaContext : DbContext
     public virtual DbSet<StudyRoadMap> StudyRoadMaps { get; set; }
     public virtual DbSet<StudyRoadMapNode> StudyRoadMapNodes { get; set; }
     public virtual DbSet<SubjectComment> SubjectComments { get; set; }
+    public virtual DbSet<StudyRoadMapNodeLink> StudyRoadMapNodeLinks { get; set; }
+
 
 
 
@@ -104,6 +106,8 @@ public partial class AiseaContext : DbContext
         modelBuilder.ApplyConfiguration(new StudyRoadMapConfiguration());
         modelBuilder.ApplyConfiguration(new StudyRoadMapNodeConfiguration());
         modelBuilder.ApplyConfiguration(new SubjectCommentConfiguration());
+        modelBuilder.ApplyConfiguration(new StudyRoadMapNodeLinkConfiguration());
+
 
 
 

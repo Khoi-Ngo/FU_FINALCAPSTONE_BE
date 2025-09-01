@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250901064802_prepareroadmap")]
+    partial class prepareroadmap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1179,7 +1182,7 @@ namespace AISEA.ApiService.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("EffectiveFrom")
                         .HasColumnType("datetime2");

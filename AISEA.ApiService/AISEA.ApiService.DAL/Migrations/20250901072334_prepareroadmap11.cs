@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AISEA.ApiService.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class prepareroadmap : Migration
+    public partial class prepareroadmap11 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

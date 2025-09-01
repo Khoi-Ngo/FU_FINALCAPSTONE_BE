@@ -262,6 +262,17 @@ public class JoinedSubjectController : BaseController
     }
 
 
+    ///<summary>
+    /// Get all joined subject by subject codes and student profile id (Navigation page for roadmap feature to course tracking)
+    /// </summary>
+    [HttpGet("node-to-joined-subject/{studentprofileid}")]
+    public async Task<IActionResult> GetJoinedSubjectsByNodeSubjectCode([FromQuery] string subjectCode, long studentprofileid)
+    {
+        var res = await _joinedSubjectService.GetJoinedSubjectsByNodeSubjectCodeAsync(subjectCode, studentprofileid);
+        return Ok(res);
+    }
+
+
 
 
 }

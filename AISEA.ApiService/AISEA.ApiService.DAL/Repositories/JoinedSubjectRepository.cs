@@ -219,4 +219,10 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
         return result;
     }
 
+    public async Task<IEnumerable<JoinedSubject>> GetJoinedSubjectsByNodeSubjectCodeAsync(string subjectCode, long studentprofileid)
+    {
+        return await _context.JoinedSubjects.Include(js => js.Semester).Where(js => js.StudentProfileId == studentprofileid && subjectCode == js.SubjectCode).ToListAsync();
+
+    }
+
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    [Migration("20250901064802_prepareroadmap")]
-    partial class prepareroadmap
+    [Migration("20250901072334_prepareroadmap11")]
+    partial class prepareroadmap11
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

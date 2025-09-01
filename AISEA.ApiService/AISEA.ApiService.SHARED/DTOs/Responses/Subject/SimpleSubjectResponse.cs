@@ -7,4 +7,5 @@ public class SimpleSubjectResponse
     public string SubjectName { get; set; }
     public int Credits { get; set; }
     public int SemesterNumber { get; set; }
+    public string Description { get; set; } = "N/A";
 }

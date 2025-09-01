@@ -44,7 +44,8 @@ namespace AISEA.ApiService.DAL.Repositories
                     SubjectCode = cs.SubjectVersion.Subject.SubjectCode,
                     SubjectName = cs.SubjectVersion.Subject.SubjectName,
                     Credits = cs.SubjectVersion.Subject.Credits,
-                    SemesterNumber = cs.SemesterNumber
+                    SemesterNumber = cs.SemesterNumber,
+                    Description = cs.SubjectVersion.Subject.Description
                 })
                 .ToListAsync();
 

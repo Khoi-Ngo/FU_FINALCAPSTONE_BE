@@ -1,16 +1,41 @@
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Interfaces;
 
 namespace AISEA.ApiService.BAL.Services.StudyRoadmap;
 
 public class RoadmapService
 {
     private readonly RoadmapRepository _roadmapRepository;
+    private readonly IChatOpenAIService _chatOpenAIService;
+    private readonly UserRepository _userRepository;
+    private readonly StudentProfileRepository _studentProfileRepository;
+    private readonly JoinedSubjectRepository _joinedSubjectRepository;
+    private readonly CurriculumRepository _curriculumRepository;
 
-    public RoadmapService(RoadmapRepository roadmapRepository)
+    public RoadmapService(RoadmapRepository roadmapRepository, IChatOpenAIService chatOpenAIService, UserRepository userRepository, StudentProfileRepository studentProfileRepository, JoinedSubjectRepository joinedSubjectRepository, CurriculumRepository curriculumRepository)
     {
         _roadmapRepository = roadmapRepository;
+        _chatOpenAIService = chatOpenAIService;
+        _userRepository = userRepository;
+        _studentProfileRepository = studentProfileRepository;
+        _joinedSubjectRepository = joinedSubjectRepository;
+        _curriculumRepository = curriculumRepository;
     }
+
+
+
+    #region AI FEATURE
+    public async Task<List<CreateNodeDto>> GenNodeAsync(string accessToken, string studentMessage)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
+
+    public async Task<long> GetRoadmapIdAsync(long studentProfileId)
+    => await _roadmapRepository.GetIDByStudentProfileIDAsync(studentProfileId);
+
 
     public async Task<RoadmapDto> CreateRoadmapAsync(long studentId, string name)
     {
@@ -174,6 +199,8 @@ public class RoadmapService
                 }).ToList()
         };
     }
+
+
     #endregion
 }
 

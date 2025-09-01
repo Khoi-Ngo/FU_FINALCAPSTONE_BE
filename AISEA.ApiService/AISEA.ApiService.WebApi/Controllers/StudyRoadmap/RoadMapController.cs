@@ -166,6 +166,34 @@ namespace AISEA.ApiService.WebApi.Controllers.StudyRoadmap
             return Ok(new { message = "Links inserted successfully.", insertedCount = linkTuples.Count });
         }
 
+
+
+        /// <summary>
+        /// Use AI to gen nodes
+        /// </summary>
+        [HttpGet("ai-gen-node")]
+        [AuditLog(Tag = "AI_GENERATE_STUDY_ROADMAP_NODE")]
+        [PermissionAuthorize((int)EUserRole.STUDENT)]
+        public async Task<IActionResult> GenNode([FromQuery] string studentMessage)
+        {
+            var res = await _roadmapService.GenNodeAsync(AccessToken, studentMessage);
+            return Ok(res);
+        }
+
+
+
+        /// <summary>
+        /// Get roadmap id by student profile id -1 if no existed
+        /// </summary>
+        [HttpGet("get-roadmap-id/{studentProfileId}")]
+        public async Task<IActionResult> GetRoadmapIDByStudentProfileID(long studentProfileId)
+        {
+            var res = await _roadmapService.GetRoadmapIdAsync(studentProfileId);
+            return Ok(res);
+        }
+
+
+
     }
 
 

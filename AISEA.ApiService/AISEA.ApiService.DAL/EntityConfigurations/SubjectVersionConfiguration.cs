@@ -25,7 +25,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
                 .HasMaxLength(255);
 
             builder.Property(e => e.Description)
-                .HasColumnType("text");
+                .HasColumnType("nvarchar(max)");
 
             builder.Property(e => e.EffectiveFrom)
                 .IsRequired();

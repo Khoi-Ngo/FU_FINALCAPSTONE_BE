@@ -20,7 +20,7 @@ namespace AISEA.ApiService.DAL.Entities
         public string VersionCode { get; set; } = null!;// Ví dụ: "1.0", "2.0", "2024.1"
         [StringLength(255)]
         public string VersionName { get; set; } = null!;// Ví dụ: "Phiên bản 2024", "Cập nhật mới"
-        [Column(TypeName = "text")]
+        [Column(TypeName = "nvarchar(max)")]
         public string? Description { get; set; }
         public bool IsActive { get; set; } = true; // Phiên bản có đang được sử dụng không
         public bool IsDefault { get; set; } = false; // Phiên bản mặc định cho môn học

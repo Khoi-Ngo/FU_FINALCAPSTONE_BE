@@ -162,7 +162,8 @@ public class BookedMeetingService
 
             if (pendingMeeting.Status != EBookingStatus.PENDING) throw new InvalidCurMeetingStatException("Cannot execute command on the meeting if the status of meeting is not current " + EBookingStatus.PENDING.ToString());
 
-            if (DateTime.Now > pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
+            //!Disable the realtime check
+            // if (DateTime.Now > pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
 
             if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
 
@@ -200,9 +201,9 @@ public class BookedMeetingService
 
             if (!IsValidAccess(completedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessBookingAvailability("Deny access to the meeting");
 
-
+            //!Disable the realtime check
             if (!(completedMeeting.Status == EBookingStatus.CONFIRMED
-            && DateTime.Now > completedMeeting.StartDateTime
+            // && DateTime.Now > completedMeeting.StartDateTime
             && request.CheckInCode == completedMeeting.CheckInCode
             )) throw new InvalidOperationException("Too soon to complete this meeting or the status/ checkin code of this meeting not true");
 
@@ -248,12 +249,13 @@ public class BookedMeetingService
             if (confirmedMeeting.Status != EBookingStatus.PENDING)
                 throw new InvalidOperationException("The status of this meeting not true");
 
+            //!Disable realtime validation
+            // var daysGap = GetTheTimeGap(confirmedMeeting.StartDateTime, DateTime.Now).TotalDays;
 
-            var daysGap = GetTheTimeGap(confirmedMeeting.StartDateTime, DateTime.Now).TotalDays;
-
-            if (DateTime.Now >= confirmedMeeting.StartDateTime
-            || daysGap < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
-                throw new InvalidOperationException("Too late to confirm this meeting");
+            // if (DateTime.Now >= confirmedMeeting.StartDateTime
+            // || daysGap < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays
+            // )
+            //     throw new InvalidOperationException("Too late to confirm this meeting");
 
 
 
@@ -387,8 +389,9 @@ public class BookedMeetingService
                 throw new InvalidOperationException("The status is not true for processing the action");
 
             //check the gap if too late then deny => overdue(FU admin internally observe then giving real-life penalties)
-            if (DateTime.Now >= canceledMeeting.StartDateTime || GetTheTimeGap(canceledMeeting.StartDateTime, DateTime.Now).TotalDays < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
-                throw new InvalidOperationException("Too late to cancel the meeting, this will be shifted to OVERDUE soon");
+            //! Disable realtime check
+            // if (DateTime.Now >= canceledMeeting.StartDateTime || GetTheTimeGap(canceledMeeting.StartDateTime, DateTime.Now).TotalDays < _bookingSettings.MinTimeAdvConfirmOrCancelMeetingDays)
+            //     throw new InvalidOperationException("Too late to cancel the meeting, this will be shifted to OVERDUE soon");
 
             //save to the database
             canceledMeeting.Note = request.Note;
@@ -433,7 +436,8 @@ public class BookedMeetingService
                 throw new InvalidAccessMeeting("No permission to give feedback for this meeting");
 
             //validate the time + the status ACTIVE but END OF PHASE
-            if (DateTime.Now <= meeting.EndDateTime) throw new InvalidOperationException("You cannot give the feedback when the meeting is not over");
+            //!Disable realtime check
+            // if (DateTime.Now <= meeting.EndDateTime) throw new InvalidOperationException("You cannot give the feedback when the meeting is not over");
 
             if (meeting.Status != EBookingStatus.COMPLETED && meeting.Status != EBookingStatus.STUDENT_MISSED && meeting.Status != EBookingStatus.ADVISOR_MISSED)
                 throw new InvalidOperationException("Cannot give the feedback when the stat of the meeting not comes to the end stat YET");
@@ -474,9 +478,10 @@ public class BookedMeetingService
                 throw new InvalidOperationException("Cannot report the Advisor missed this meeting when the stat of the meeting is NOT CONFIRMED");
 
             //check the time after start = _bookingSettings.MinLateTimeMinOfAdv
-            if (!(DateTime.Now > confirmedMeeting.StartDateTime
-            && GetTheTimeGap(DateTime.Now, confirmedMeeting.StartDateTime).TotalMinutes >= _bookingSettings.MaxLateTimeForAdvToMeetingMins))
-                throw new InvalidOperationException($"Not appropriate time for reporting Advisor missing the meeting, make sure the current time a head of StartTime about ${_bookingSettings.MaxLateTimeForAdvToMeetingMins} minutes");
+            //!Disable the realtime check
+            // if (!(DateTime.Now > confirmedMeeting.StartDateTime
+            // && GetTheTimeGap(DateTime.Now, confirmedMeeting.StartDateTime).TotalMinutes >= _bookingSettings.MaxLateTimeForAdvToMeetingMins))
+            //     throw new InvalidOperationException($"Not appropriate time for reporting Advisor missing the meeting, make sure the current time a head of StartTime about ${_bookingSettings.MaxLateTimeForAdvToMeetingMins} minutes");
 
             confirmedMeeting.Note = request.Note;
             confirmedMeeting.Status = EBookingStatus.ADVISOR_MISSED;
@@ -521,10 +526,11 @@ public class BookedMeetingService
             if (canceledMeeting.Status != EBookingStatus.CONFIRMED) throw new InvalidOperationException("Cannot process with NON-CONFIRMED meeting");
 
             // -Validate the time, the time gap btw Current - StartTime must be >= Min TimeGap allowing to Cancel
-            var dayGaps = GetTheTimeGap(DateTime.Now, canceledMeeting.StartDateTime).TotalDays;
+            //!Disable the realtime check
+            // var dayGaps = GetTheTimeGap(DateTime.Now, canceledMeeting.StartDateTime).TotalDays;
 
-            if (DateTime.Now >= canceledMeeting.StartDateTime || dayGaps < _bookingSettings.MinTimeStudentCancelTheConfirmMeetingDays)
-                throw new InvalidOperationException("Too late to cancel the confirm meeting");
+            // if (DateTime.Now >= canceledMeeting.StartDateTime || dayGaps < _bookingSettings.MinTimeStudentCancelTheConfirmMeetingDays)
+            //     throw new InvalidOperationException("Too late to cancel the confirm meeting");
 
             /*
                     -If cancel -> Number of Ban + 2 if cannot due to too late to do then later the Meeting will be set as StudentMissed and Number of Ban + 3

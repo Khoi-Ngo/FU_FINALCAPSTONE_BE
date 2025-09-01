@@ -65,25 +65,28 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
         public async Task<SubjectCommentResponse> GetCommentByIdAsync(long id, string? accessToken = null)
         {
             var comment = await _commentRepository.GetByIdWithDetailsAsync(id);
-            if (comment == null)
-            {
-                throw new NotFoundException("Comment not found.");
-            }
+
             var response = _mapper.Map<SubjectCommentResponse>(comment);
 
-            var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
-            response.UserReaction = comment.GetUserReaction(studentProfileId);
+            if (_jwtService.GetRoleIdFromToken(accessToken) == (int)EUserRole.STUDENT)
+            {
+                var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
+                response.UserReaction = comment.GetUserReaction(studentProfileId);
+            }
 
             return response;
         }
 
         public async Task<PagedResult<SubjectCommentResponse>> GetSubjectCommentsAsync(
-            long subjectId, GetSubjectCommentsRequest request, string? accessToken = null)
+        long subjectId, GetSubjectCommentsRequest request, string? accessToken = null)
         {
             var (comments, totalCount) = await _commentRepository.GetPagedBySubjectAsync(
                 subjectId, request.PageNumber, request.PageSize, request.SortBy, request.SortDirection);
 
-            long? currentStudentId = (long?)_jwtService.GetProfileIdFromToken(accessToken);
+            var roleId = _jwtService.GetRoleIdFromToken(accessToken);
+            long? currentStudentId = roleId == (int)EUserRole.STUDENT
+                ? (long?)_jwtService.GetProfileIdFromToken(accessToken)
+                : null;
 
             var responses = comments.Select(comment =>
             {

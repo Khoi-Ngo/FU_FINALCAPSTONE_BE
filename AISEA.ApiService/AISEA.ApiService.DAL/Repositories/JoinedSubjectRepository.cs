@@ -148,8 +148,8 @@ public class JoinedSubjectRepository : GenericRepository<JoinedSubject>
                     ? js.SubjectMarkReports.Sum(r => r.Score * r.Weight) / js.SubjectMarkReports.Sum(r => r.Weight)
                     : 0.0
             })
-            .GroupBy(t => new { t.SubjectCode, t.SubjectVersionCode }) // group duplicates
-            .Select(g => g.OrderByDescending(t => t.AvgScore).First()) // keep highest avg
+            .GroupBy(t => new { t.SubjectCode, t.SubjectVersionCode })
+            .Select(g => g.OrderByDescending(t => t.AvgScore).First())
             .ToList();
 
         return transcript;

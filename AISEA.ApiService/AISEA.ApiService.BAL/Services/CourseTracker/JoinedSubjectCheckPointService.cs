@@ -146,7 +146,6 @@ public class JoinedSubjectCheckPointService
 
     public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage, string ownerGitRepo, string gitRepoName)
     {
-        var studentSenderName = _jWTService.GetFirstNameFromToken(accessToken) + _jWTService.GetLastNameFromToken(accessToken);
         //query joined subject with mark report
         var joinedSubjectData = await GetJoinedSubjectData(joinedSubjectId);
         //query the FLM Subject Resource data for the subject
@@ -173,11 +172,11 @@ public class JoinedSubjectCheckPointService
             .Replace("{JoinedSubjectData}", joinedSubjectJson)
             .Replace("{StudentMessage}", studentMessage)
             .Replace("{StudentData}", studentJson)
-            .Replace("{StudentSenderName}", studentSenderName)
             .Replace("{includedGitRepoDataJson}", includedGitRepoDataJson)
             .Replace("{EnrolledDateTime}", joinedSubjectData.CreatedAt.ToString("o")) // ISO 8601 format
             .Replace("{CurrentDateTime}", DateTime.UtcNow.ToString("o"));
-        //call OpenAI then return the result
+
+
         var res = await _chatOpenAIService.GenerateCheckpoints(userPrompt);
         return res;
     }

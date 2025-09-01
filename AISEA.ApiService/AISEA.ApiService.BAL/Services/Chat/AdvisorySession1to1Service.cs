@@ -267,9 +267,11 @@ public class AdvisorySession1to1Service
 
         return CallAIConst.GeneralMessageStructFromStudent
             .Replace("{studentName}", studentName)
-            .Replace("{studentJsonData}", studentJson)
-            .Replace("{FPTUAcademicResourceJsonData}", resourceJson)
             .Replace("{message}", msg)
+            .Replace("{studentJsonData}", studentJson)
+
+            
+            .Replace("{FPTUAcademicResourceJsonData}", resourceJson)
             .Replace("{personalRoadMapData}", personalRoadMapJson)
             .Replace("{detailedPersonalAcademicPerformance}", detailedPerformanceJson)
             .Replace("{systemFeedbackMeetingData}", systemFeedbackJson)

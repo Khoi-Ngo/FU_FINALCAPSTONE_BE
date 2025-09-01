@@ -201,7 +201,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
         public async Task<long> GetIDByStudentProfileIDAsync(long studentProfileId)
         {
-            var roadmap = _context.StudyRoadMaps.FirstOrDefaultAsync(r => r.StudentProfileId == studentProfileId);
+            var roadmap = await _context.StudyRoadMaps.FirstOrDefaultAsync(r => r.StudentProfileId == studentProfileId);
 
             if (roadmap is null) return -1;
             return roadmap.Id;

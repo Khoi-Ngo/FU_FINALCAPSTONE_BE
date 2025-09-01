@@ -1,4 +1,5 @@
 using AISEA.ApiService.SHARED.Const.Enums;
+using System.Text.Json.Serialization;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Subject
 {
@@ -15,6 +16,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Subject
         
         // Approval workflow fields
         public string? CreatedBy { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EApprovalStatus ApprovalStatus { get; set; }
         public string? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }

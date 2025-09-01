@@ -144,7 +144,7 @@ public class JoinedSubjectCheckPointService
 
 
 
-    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage, string ownerGitRepo, string gitRepoName)
+    public async Task<List<CommandCheckpointRequest>> GenerateCheckpointsAsync(long joinedSubjectId, string accessToken, string studentMessage, string? ownerGitRepo, string? gitRepoName)
     {
         //query joined subject with mark report
         var joinedSubjectData = await GetJoinedSubjectData(joinedSubjectId);
@@ -152,7 +152,6 @@ public class JoinedSubjectCheckPointService
         var subjectResourceData = await GetSubjectResourceData(joinedSubjectData.SubjectCode, joinedSubjectData.SubjectVersionCode);
         //query student data
         var studentData = await GetStudentData(accessToken);
-        var includedGitRepoData = await _gitRepoService.FilterAndAggregateToFocusMainDataOfRepo(ownerGitRepo, gitRepoName);
 
         var jsonOptions = new JsonSerializerOptions
         {
@@ -163,6 +162,18 @@ public class JoinedSubjectCheckPointService
         var joinedSubjectJson = JsonSerializer.Serialize(joinedSubjectData, jsonOptions);
         var subjectResourceDataJson = JsonSerializer.Serialize(subjectResourceData, jsonOptions);
         var studentJson = JsonSerializer.Serialize(studentData, jsonOptions);
+
+
+
+        object includedGitRepoData;
+        if (!string.IsNullOrWhiteSpace(ownerGitRepo) && !string.IsNullOrWhiteSpace(gitRepoName))
+        {
+            includedGitRepoData = await _gitRepoService.FilterAndAggregateToFocusMainDataOfRepo(ownerGitRepo, gitRepoName);
+        }
+        else
+        {
+            includedGitRepoData = new { }; // empty object
+        }
         var includedGitRepoDataJson = JsonSerializer.Serialize(includedGitRepoData, jsonOptions);
 
 

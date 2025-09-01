@@ -151,71 +151,83 @@ public class UserController : BaseController
 
 
     /// <summary>
-    /// Retrieves paginated  STUDENT users from the system.
+    /// Retrieves paginated STUDENT users from the system with search functionality.
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of students</returns>
     [HttpGet("student/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
-    public async Task<IActionResult> GetAllStudentsPaged([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllStudentsPaged([FromQuery] GetUsersWithSearchRequest request)
     {
         var result = await _userService.GetAllStudentsPagedAsync(request);
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves paginated  academic staff users from the system.
+    /// Retrieves paginated academic staff users from the system with search functionality.
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of academic staff</returns>
     [HttpGet("academic-staffs/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
-    public async Task<IActionResult> GetAllAcademicStaffsPaged([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllAcademicStaffsPaged([FromQuery] GetUsersWithSearchRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.ACADEMIC_STAFF);
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves paginated  admin users from the system.
+    /// Retrieves paginated admin users from the system with search functionality.
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of admin users</returns>
     [HttpGet("admins/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
-    public async Task<IActionResult> GetAllAdminsPaged([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllAdminsPaged([FromQuery] GetUsersWithSearchRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.ADMIN);
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves paginated  manager users from the system.
+    /// Retrieves paginated manager users from the system with search functionality.
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of manager users</returns>
     [HttpGet("managers/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
-    public async Task<IActionResult> GetAllManagersPaged([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllManagersPaged([FromQuery] GetUsersWithSearchRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.MANAGER);
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves paginated  advisor users from the system.
+    /// Retrieves paginated advisor users from the system with search functionality.
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of advisor users</returns>
     [HttpGet("advisors/paged")]
     [PermissionAuthorize((int)EUserRole.ADMIN)]
     [AuditLog(Tag = "VIEW_USER")]
-    public async Task<IActionResult> GetAllAdvisorsPaged([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllAdvisorsPaged([FromQuery] GetUsersWithSearchRequest request)
     {
         var result = await _userService.GetAllStaffsPagedAsync(request, EUserRole.ADVISOR);
         return Ok(result);
     }
 
     /// <summary>
-    /// Retrieves all active Advisors from the system. (Support Booking Feature ~ Student Access only)
+    /// Retrieves all active Advisors from the system with search functionality. (Support Booking Feature ~ Student Access only)
     /// </summary>
+    /// <param name="request">Pagination and search parameters</param>
+    /// <returns>Paginated list of active advisors</returns>
     [HttpGet("advisors/active/paged")]
     [PermissionAuthorize((int)EUserRole.STUDENT)]
-    public async Task<IActionResult> GetAllActiveAdvisors([FromQuery] PaginationRequest request)
+    public async Task<IActionResult> GetAllActiveAdvisors([FromQuery] GetUsersWithSearchRequest request)
     {
         var advisors = await _userService.GetAllActiveAdvisorsAsync(request);
         return Ok(advisors);

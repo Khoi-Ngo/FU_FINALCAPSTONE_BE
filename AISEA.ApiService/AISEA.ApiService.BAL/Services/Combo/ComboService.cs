@@ -1,5 +1,6 @@
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Const.Enums;
 using AISEA.ApiService.SHARED.DTOs.Requests.Combo;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.Combo;
@@ -102,6 +103,12 @@ namespace AISEA.ApiService.BAL.Services.Combo
                 throw new NotFoundException("Combo not found.");
             }
 
+            // Validate that combo is not approved before allowing updates
+            if (combo.ApprovalStatus == EApprovalStatus.APPROVED)
+            {
+                throw new InvalidUserCreatedException($"Cannot update combo '{combo.ComboName}'. Approved combos cannot be modified. Current status: {combo.ApprovalStatus}.");
+            }
+
             // Check if combo name is unique (excluding current combo)
             if (combo.ComboName != request.ComboName)
             {
@@ -141,6 +148,12 @@ namespace AISEA.ApiService.BAL.Services.Combo
             if (combo == null || combo.IsDeleted)
             {
                 throw new NotFoundException("Combo not found.");
+            }
+
+            // Validate that combo is approved before allowing subject addition
+            if (combo.ApprovalStatus != EApprovalStatus.APPROVED)
+            {
+                throw new InvalidUserCreatedException($"Cannot add subjects to combo '{combo.ComboName}'. Only approved combos can have subjects added to them. Current status: {combo.ApprovalStatus}.");
             }
 
             var subject = await _subjectRepository.GetByIdAsync(subjectId);
@@ -196,6 +209,12 @@ namespace AISEA.ApiService.BAL.Services.Combo
             if (combo == null || combo.IsDeleted)
             {
                 throw new NotFoundException("Combo not found.");
+            }
+
+            // Validate that combo is approved before allowing subject removal
+            if (combo.ApprovalStatus != EApprovalStatus.APPROVED)
+            {
+                throw new InvalidUserCreatedException($"Cannot remove subjects from combo '{combo.ComboName}'. Only approved combos can have subjects modified. Current status: {combo.ApprovalStatus}.");
             }
 
             var exists = await _comboSubjectRepository.ExistsAsync(comboId, subjectId);

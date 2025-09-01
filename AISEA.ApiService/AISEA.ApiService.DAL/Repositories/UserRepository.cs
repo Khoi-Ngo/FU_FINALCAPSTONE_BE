@@ -102,28 +102,56 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
 
-        public async Task<(List<User> users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetStudentsPagedAsync(int pageNumber, int pageSize, string? search = "")
         {
             var query = _context.Users
-                .Where(u => u.RoleId == (int)EUserRole.STUDENT)
-                .Include(u => u.Role)
-                .Include(u => u.StudentProfile);
+                .Where(u => u.RoleId == (int)EUserRole.STUDENT);
+
+            query = query.Include(u => u.Role)
+                         .Include(u => u.StudentProfile);
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Email.Contains(search) ||
+                    (u.FirstName + " " + u.LastName).Contains(search) ||
+                    u.FirstName.Contains(search) ||
+                    u.LastName.Contains(search));
+            }
+
             var totalCount = await query.CountAsync();
             var users = await query
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
             return (users, totalCount);
         }
 
-        public async Task<(List<User> users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize, EUserRole staffRole)
+        public async Task<(List<User> users, int totalCount)> GetStaffsPagedAsync(int pageNumber, int pageSize, EUserRole staffRole, string? search = "")
         {
             var query = _context.Users
-                .Where(u => u.RoleId == (int)staffRole)
-                .Include(u => u.Role)
-                .Include(u => u.StaffProfile);
+                .Where(u => u.RoleId == (int)staffRole);
+
+            query = query.Include(u => u.Role)
+                         .Include(u => u.StaffProfile);
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Email.Contains(search) ||
+                    (u.FirstName + " " + u.LastName).Contains(search) ||
+                    u.FirstName.Contains(search) ||
+                    u.LastName.Contains(search));
+            }
+
             var totalCount = await query.CountAsync();
             var users = await query
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -140,14 +168,28 @@ namespace AISEA.ApiService.DAL.Repositories
 
         }
 
-        public async Task<(List<User> users, int totalCount)> GetActiveAdvisorsPagedAsync(int pageNumber, int pageSize)
+        public async Task<(List<User> users, int totalCount)> GetActiveAdvisorsPagedAsync(int pageNumber, int pageSize, string? search = "")
         {
             var query = _context.Users
-                .Where(u => u.RoleId == (int)EUserRole.ADVISOR && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE)
-                .Include(u => u.Role)
-                .Include(u => u.StaffProfile);
+                .Where(u => u.RoleId == (int)EUserRole.ADVISOR && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE);
+
+            query = query.Include(u => u.Role)
+                         .Include(u => u.StaffProfile);
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Email.Contains(search) ||
+                    (u.FirstName + " " + u.LastName).Contains(search) ||
+                    u.FirstName.Contains(search) ||
+                    u.LastName.Contains(search));
+            }
+
             var totalCount = await query.CountAsync();
             var users = await query
+                .OrderBy(u => u.FirstName)
+                .ThenBy(u => u.LastName)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

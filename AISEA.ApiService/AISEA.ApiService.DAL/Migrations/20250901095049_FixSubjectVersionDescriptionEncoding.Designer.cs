@@ -4,6 +4,7 @@ using AISEA.ApiService.DAL.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AISEA.ApiService.DAL.Migrations
 {
     [DbContext(typeof(AiseaContext))]
-    partial class AiseaContextModelSnapshot : ModelSnapshot
+    [Migration("20250901095049_FixSubjectVersionDescriptionEncoding")]
+    partial class FixSubjectVersionDescriptionEncoding
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -924,6 +927,9 @@ namespace AISEA.ApiService.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -950,12 +956,13 @@ namespace AISEA.ApiService.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsInternalSubjectData")
-                        .HasColumnType("bit");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SemesterNumber")
+                    b.Property<int>("SemesterNumber")
                         .HasColumnType("int");
 
                     b.Property<long>("StudyRoadMapId")
@@ -965,7 +972,11 @@ namespace AISEA.ApiService.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SubjectName")
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URL")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id")
@@ -974,31 +985,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.HasIndex("StudyRoadMapId");
 
                     b.ToTable("StudyRoadMapNodes");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNodeLink", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("FromNodeId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ToNodeId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id")
-                        .HasName("studyroadmapnodelink_id_primary");
-
-                    b.HasIndex("FromNodeId");
-
-                    b.HasIndex("ToNodeId");
-
-                    b.ToTable("StudyRoadMapNodeLinks");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>
@@ -1833,27 +1819,6 @@ namespace AISEA.ApiService.DAL.Migrations
                     b.Navigation("StudyRoadMap");
                 });
 
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNodeLink", b =>
-                {
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", "FromNode")
-                        .WithMany("Dependents")
-                        .HasForeignKey("FromNodeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("studyroadmapnodelink_fromnodeid_foreign");
-
-                    b.HasOne("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", "ToNode")
-                        .WithMany("Prerequisites")
-                        .HasForeignKey("ToNodeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("studyroadmapnodelink_tonodeid_foreign");
-
-                    b.Navigation("FromNode");
-
-                    b.Navigation("ToNode");
-                });
-
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.SubjectComment", b =>
                 {
                     b.HasOne("AISEA.ApiService.DAL.Entities.StudentProfile", "StudentProfile")
@@ -2050,13 +2015,6 @@ namespace AISEA.ApiService.DAL.Migrations
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMap", b =>
                 {
                     b.Navigation("Nodes");
-                });
-
-            modelBuilder.Entity("AISEA.ApiService.DAL.Entities.StudyRoadMapNode", b =>
-                {
-                    b.Navigation("Dependents");
-
-                    b.Navigation("Prerequisites");
                 });
 
             modelBuilder.Entity("AISEA.ApiService.DAL.Entities.Subject", b =>

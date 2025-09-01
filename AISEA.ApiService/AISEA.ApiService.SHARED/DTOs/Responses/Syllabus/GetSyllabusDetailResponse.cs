@@ -1,5 +1,6 @@
-using AISEA.ApiService.SHARED.DTOs.Responses.SubjectVersion;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Responses.SubjectVersion;
+using System.Text.Json.Serialization;
 
 namespace AISEA.ApiService.SHARED.DTOs.Responses.Syllabus
 {
@@ -19,6 +20,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Responses.Syllabus
         
         // Approval workflow fields
         public string? CreatedBy { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EApprovalStatus ApprovalStatus { get; set; }
         public string? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }

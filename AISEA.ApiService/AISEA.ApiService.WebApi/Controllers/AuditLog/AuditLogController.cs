@@ -41,5 +41,16 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
             var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(startDate, endDate);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get analytics data for audit logs (for charts and tables)
+        /// </summary>
+        [HttpGet("analytics")]
+        [AuditLog(Tag = "VIEW_AUDIT_LOG_ANALYTICS")]
+        public async Task<IActionResult> GetAuditLogAnalytics([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] string interval = "daily")
+        {
+            var result = await _auditLogService.GetAnalyticsAsync(startDate, endDate, interval);
+            return Ok(result);
+        }
     }
 }

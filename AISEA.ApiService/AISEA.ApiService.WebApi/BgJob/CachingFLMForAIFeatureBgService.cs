@@ -25,7 +25,7 @@ public class CachingFLMForAIFeatureBgService : BackgroundService
                     var redisRepo = scope.ServiceProvider.GetRequiredService<IRedisRepository>();
                     var curRepo = scope.ServiceProvider.GetRequiredService<CurriculumRepository>();
 
-                    var curriculums = await curRepo.GetAllWComSubAsync();
+                    var curriculums = await curRepo.GetAllAcademicDataAsync();
 
                     var cacheKey = CacheKeyForAIFeature.PrefixToGetAllDataOfFLMCurComSub;
 

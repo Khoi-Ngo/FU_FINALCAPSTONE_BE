@@ -315,7 +315,7 @@ public class AdvisorySession1to1Service
         try
         {
             var cacheKey = CacheKeyForAIFeature.PrefixToGetAllDataOfFLMCurComSub;
-            var res = await _redisRepository.GetValueAsync<List<DAL.Entities.Curriculum>>(cacheKey);
+            var res = await _redisRepository.GetValueAsync<AcademicDataDto>(cacheKey);
             return JsonSerializer.Serialize(res, jsonOptions);
         }
         catch (Exception e)

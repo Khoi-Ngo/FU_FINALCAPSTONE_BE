@@ -31,26 +31,34 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get Dictionary of audit logs (Dictionary<YearMonth, Dictionary<EAuditLogTag, List<AuditLog>>>)
-        /// </summary>
         [HttpGet("all")]
         [AuditLog(Tag = "VIEW_AUDIT_LOGS")]
-        public async Task<IActionResult> GetAllAuditLogs([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        public async Task<IActionResult> GetAllAuditLogs(
+     [FromQuery] DateTime? startDate,
+     [FromQuery] DateTime? endDate)
         {
-            var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(startDate, endDate);
+            // default = last 30 days
+            var from = startDate ?? DateTime.UtcNow.AddDays(-30);
+            var to = endDate ?? DateTime.UtcNow;
+
+            var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(from, to);
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get analytics data for audit logs (for charts and tables)
-        /// </summary>
         [HttpGet("analytics")]
         [AuditLog(Tag = "VIEW_AUDIT_LOG_ANALYTICS")]
-        public async Task<IActionResult> GetAuditLogAnalytics([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] string interval = "daily")
+        public async Task<IActionResult> GetAuditLogAnalytics(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string interval = "daily")
         {
-            var result = await _auditLogService.GetAnalyticsAsync(startDate, endDate, interval);
+            // default = last 30 days
+            var from = startDate ?? DateTime.UtcNow.AddDays(-30);
+            var to = endDate ?? DateTime.UtcNow;
+
+            var result = await _auditLogService.GetAnalyticsAsync(from, to, interval);
             return Ok(result);
         }
+
     }
 }

@@ -38,7 +38,7 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
      [FromQuery] DateTime? endDate)
         {
             // default = last 30 days
-            var from = startDate ?? DateTime.UtcNow.AddDays(-30);
+            var from = startDate ?? DateTime.UtcNow.AddDays(-5);
             var to = endDate ?? DateTime.UtcNow;
 
             var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(from, to);
@@ -53,7 +53,7 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
             [FromQuery] string interval = "daily")
         {
             // default = last 30 days
-            var from = startDate ?? DateTime.UtcNow.AddDays(-30);
+            var from = startDate ?? DateTime.UtcNow.AddDays(-5);
             var to = endDate ?? DateTime.UtcNow;
 
             var result = await _auditLogService.GetAnalyticsAsync(from, to, interval);

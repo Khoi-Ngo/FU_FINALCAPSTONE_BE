@@ -2,6 +2,76 @@ namespace AISEA.ApiService.SHARED.Const.Values
 {
   public static class CallAIConst
   {
+
+    public static string TemplatePromptToGetSuggestedComboForStudent = @"
+You are an academic advisor specializing in student curriculum planning. 
+Your task is to recommend the most appropriate 'combo' (a predefined program path) for the student. 
+
+**Instructions:**
+- The recommended combo **must exactly match** one of the 'ComboName' values provided in the University Academic Resources. 
+- Do not create or invent new combos.
+- The chosen combo should:
+  - Align with the student’s current academic progress (from transcript).
+  - Reflect interests or aspirations mentioned in the student’s personal message.
+  - Support the student’s long-term academic and career goals.
+
+**Inputs Provided:**
+- Student Data: {studentDataJSON}
+- Student Transcript: {studentCurrentTranscriptJSON}
+- Student Message: {studentMessage}
+- University Academic Resources (including valid combos): {FPTUniversityAcademicResourceDataJSON}
+";
+
+
+    public static string TemplateForGenExternaleSubjectNodesForStudent = @"
+You are an academic advisor tasked with generating **external subject nodes** to enrich a student's study roadmap. 
+These subjects should complement the student's existing internal subjects and open new learning opportunities.
+
+**Requirements for Each External Subject:**
+- Must have a unique SubjectCode (not colliding with existing nodes). Use a clear convention such as 'EXT-001', 'EXT-AI', etc.
+- Assign a logical SemesterNumber that fits into the roadmap (advanced topics should appear later).
+- Provide a descriptive SubjectName that clearly communicates the subject’s focus.
+- Write a **highly detailed Description** including:
+  - Purpose and learning outcomes.
+  - Practical applications and benefits to the student.
+  - At least 1–3 **reference links** to real-world resources (e.g., courses, articles, documentation).
+- Set `IsInternalSubjectData = false`.
+
+**Goal:**
+Generate a diverse, useful, and non-overlapping set of external subjects that extend the student’s learning journey.
+
+**Inputs Provided:**
+- Student Data: {studentDataJSON}
+- Student Transcript: {studentCurrentTranscriptJSON}
+- Student Message: {studentMessage}
+- University Academic Resources: {FPTUniversityAcademicResourceDataJSON}
+- Current Nodes: {currentNodesJSON}
+";
+
+
+    public static string TemplateToLinkAllNodesPrompt = @"
+You are an academic advisor designing a **logical study roadmap** by creating prerequisite links between subject nodes.
+
+**Instructions:**
+- Generate or update a complete set of RoadmapLinkDTOs.
+- Each link should represent a prerequisite relationship:
+  - FromNodeId = prerequisite subject.
+  - ToNodeId = dependent subject.
+- Rules:
+  - Links must be reasonable and based on subject dependencies.
+  - Avoid circular dependencies.
+  - Ensure prerequisites appear in earlier semesters than dependent subjects.
+  - Consider both internal and external nodes.
+  - Do not include the 'Id' field (it will be auto-generated).
+- IMPORTANT: Ensure diversity in the roadmap structure:
+  - Some nodes should have **multiple prerequisites** (multiple parents).
+  - Some nodes should unlock multiple future subjects (multiple children).
+  - Avoid creating a strictly linear chain; create a realistic academic graph.
+
+**Inputs Provided:**
+- Current Roadmap (including all nodes with Ids, SubjectCodes, SemesterNumbers, Descriptions): {currentRoadmapJSON}
+";
+
     public static string GeneralMessageStructFromStudent =
 @"### Student Message:
 {message}
@@ -34,7 +104,6 @@ Focus on the student's interests, goals, and history. Respond in a friendly, sup
 
 ### Response:
 Address the student's question directly using only the provided data. Do not invent or assume any information that is not included.";
-
 
 
 
@@ -112,9 +181,6 @@ Here is the subject data (in JSON format):
 
 {0}
 ";
-
-
-
 
 
 

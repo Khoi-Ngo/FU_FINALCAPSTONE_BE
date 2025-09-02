@@ -71,5 +71,78 @@ namespace AISEA.ApiService.DAL.Repositories
             return await _context.CurriculumSubjects
                 .AnyAsync(cs => cs.CurriculumId == curriculumId && !cs.IsDeleted);
         }
+
+        public async Task<object> GetByCodeWithAllDataAsync(string curriculumCode)
+        {
+            return await _context.Curricula
+                .Include(c => c.Program)
+                .Include(c => c.CurriculumSubjects)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Subject)
+                            .ThenInclude(s => s.ComboSubjects)
+                                .ThenInclude(cs => cs.Combo)
+                .Include(c => c.CurriculumSubjects)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Syllabi)
+                            .ThenInclude(s => s.SyllabusAssessments)
+                .Include(c => c.CurriculumSubjects)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Syllabi)
+                            .ThenInclude(s => s.SyllabusLearningMaterials)
+                .Include(c => c.CurriculumSubjects)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Syllabi)
+                            .ThenInclude(s => s.SyllabusLearningOutcomes)
+                .Include(c => c.CurriculumSubjects)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Syllabi)
+                            .ThenInclude(s => s.SyllabusSessions)
+                                .ThenInclude(ss => ss.SessionOutcomeMappings)
+                                    .ThenInclude(som => som.Outcome)
+                .Include(c => c.CurriculumSubjects)
+                    .ThenInclude(cs => cs.SubjectVersion)
+                        .ThenInclude(sv => sv.Prerequisites)
+                            .ThenInclude(pr => pr.PrerequisiteSubjectVersion)
+                                .ThenInclude(psv => psv.Subject)
+                .Where(c => c.CurriculumCode == curriculumCode && !c.IsDeleted)
+                .Select(c => new
+                {
+                    Curriculum = c,
+                    Program = c.Program,
+                    Subjects = c.CurriculumSubjects.Select(cs => new
+                    {
+                        cs.SemesterNumber,
+                        cs.IsMandatory,
+                        SubjectVersion = cs.SubjectVersion,
+                        Subject = cs.SubjectVersion.Subject,
+                        Combos = cs.SubjectVersion.Subject.ComboSubjects.Select(cs => new
+                        {
+                            Combo = cs.Combo,
+                            cs.CreatedAt,
+                            cs.UpdatedAt,
+                            cs.DeletedAt,
+                            cs.IsDeleted
+                        }),
+                        Syllabi = cs.SubjectVersion.Syllabi.Select(s => new
+                        {
+                            Syllabus = s,
+                            Assessments = s.SyllabusAssessments,
+                            LearningMaterials = s.SyllabusLearningMaterials,
+                            LearningOutcomes = s.SyllabusLearningOutcomes,
+                            Sessions = s.SyllabusSessions.Select(ss => new
+                            {
+                                Session = ss,
+                                Outcomes = ss.SessionOutcomeMappings.Select(som => som.Outcome)
+                            })
+                        }),
+                        Prerequisites = cs.SubjectVersion.Prerequisites.Select(pr => new
+                        {
+                            PrerequisiteSubjectVersion = pr.PrerequisiteSubjectVersion,
+                            PrerequisiteSubject = pr.PrerequisiteSubjectVersion.Subject
+                        })
+                    })
+                })
+                .FirstOrDefaultAsync();
+        }
     }
 }

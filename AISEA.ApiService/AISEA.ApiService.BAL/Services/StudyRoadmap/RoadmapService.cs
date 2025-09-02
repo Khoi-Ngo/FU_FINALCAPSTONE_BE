@@ -1,5 +1,9 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
+using AISEA.ApiService.SHARED.Const.Values;
+using AISEA.ApiService.SHARED.DTOs.Roadmap;
 using AISEA.ApiService.SHARED.Interfaces;
 
 namespace AISEA.ApiService.BAL.Services.StudyRoadmap;
@@ -9,27 +13,149 @@ public class RoadmapService
     private readonly RoadmapRepository _roadmapRepository;
     private readonly IChatOpenAIService _chatOpenAIService;
     private readonly UserRepository _userRepository;
-    private readonly StudentProfileRepository _studentProfileRepository;
     private readonly JoinedSubjectRepository _joinedSubjectRepository;
     private readonly CurriculumRepository _curriculumRepository;
+    private readonly IJWTService _jWTService;
+    private readonly SubjectRepository _subjectRepository;
 
-    public RoadmapService(RoadmapRepository roadmapRepository, IChatOpenAIService chatOpenAIService, UserRepository userRepository, StudentProfileRepository studentProfileRepository, JoinedSubjectRepository joinedSubjectRepository, CurriculumRepository curriculumRepository)
+    public RoadmapService(RoadmapRepository roadmapRepository, IChatOpenAIService chatOpenAIService, UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, CurriculumRepository curriculumRepository, IJWTService jWTService, SubjectRepository subjectRepository)
     {
         _roadmapRepository = roadmapRepository;
         _chatOpenAIService = chatOpenAIService;
         _userRepository = userRepository;
-        _studentProfileRepository = studentProfileRepository;
         _joinedSubjectRepository = joinedSubjectRepository;
         _curriculumRepository = curriculumRepository;
+        _jWTService = jWTService;
+        _subjectRepository = subjectRepository;
     }
+
 
 
 
     #region AI FEATURE
+    //TODO: Caching the FLM Resource for whole Curriculum
     public async Task<List<CreateNodeDto>> GenNodeAsync(string accessToken, string studentMessage)
     {
-        throw new NotImplementedException();
+        var studentData = await _userRepository.GetStudentByIdAsync(_jWTService.GetUserIdFromToken(accessToken));
+
+        var studentPersonalSubjectsInCurriculum = await _subjectRepository.GetAllViaCurriculumNotIncludeComboAsync(studentData.StudentProfile.CurriculumCode);
+
+        // var FPTUniversityAcademicResourceData = await _curriculumRepository.GetByCodeWithAllDataAsync(studentData.StudentProfile.CurriculumCode);
+
+        var studentCurrentTranscript = await _joinedSubjectRepository.GetTranscriptAsync(studentData.StudentProfile.Id);
+
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        };
+
+        var studentDataJSON = JsonSerializer.Serialize(studentData, jsonOptions);
+        // var FPTUniversityAcademicResourceDataJSON = JsonSerializer.Serialize(FPTUniversityAcademicResourceData, jsonOptions);
+        var studentCurrentTranscriptJSON = JsonSerializer.Serialize(studentCurrentTranscript, jsonOptions);
+
+
+
+        var comboOfStudent = studentData.StudentProfile.RegisteredComboCode;
+        if (string.IsNullOrEmpty(studentData.StudentProfile.RegisteredComboCode))
+        {
+            //call Open AI to choose the appropriate combo for student
+            var promptToGetSuggestedCombo = CallAIConst.TemplatePromptToGetSuggestedComboForStudent
+            .Replace("{studentCurrentTranscriptJSON}", studentCurrentTranscriptJSON)
+            .Replace("{studentMessage}", studentMessage)
+            .Replace("{studentDataJSON}", studentDataJSON)
+            // .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
+            ;
+            comboOfStudent = await _chatOpenAIService.GetSuggestedComboForStudent(promptToGetSuggestedCombo);
+
+        }
+
+        var studentPersonalSubjectsInCombo = await _subjectRepository.GetAllViaComboNameAsync(comboOfStudent);
+
+
+
+
+
+        var nodes = new List<CreateNodeDto>();
+        var usedSubjectCodes = new HashSet<string>();
+
+        // Add curriculum subjects
+        foreach (var subject in studentPersonalSubjectsInCurriculum)
+        {
+
+            if (!usedSubjectCodes.Contains(subject.SubjectCode))
+            {
+                nodes.Add(new CreateNodeDto
+                {
+                    SubjectCode = subject.SubjectCode,
+                    SemesterNumber = subject.SemesterNumber,
+                    SubjectName = subject.SubjectName,
+                    Description = subject.Description,
+                    IsInternalSubjectData = true
+                });
+                usedSubjectCodes.Add(subject.SubjectCode);
+            }
+        }
+
+        // Add combo subjects
+        foreach (var comboSubject in studentPersonalSubjectsInCombo)
+        {
+
+            if (!usedSubjectCodes.Contains(comboSubject.SubjectCode))
+            {
+                nodes.Add(new CreateNodeDto
+                {
+                    SubjectCode = comboSubject.SubjectCode,
+                    SemesterNumber = comboSubject.SemesterNumber,
+                    SubjectName = comboSubject.SubjectName,
+                    Description = comboSubject.Description,
+                    IsInternalSubjectData = true
+                });
+                usedSubjectCodes.Add(comboSubject.SubjectCode);
+            }
+        }
+
+        //get the JSON data of current nodes
+        var currentNodesJSON = JsonSerializer.Serialize(nodes, jsonOptions);
+
+
+        var promptToGetExternalSubjectNodes = CallAIConst.TemplateForGenExternaleSubjectNodesForStudent
+            .Replace("{studentCurrentTranscriptJSON}", studentCurrentTranscriptJSON)
+            .Replace("{studentMessage}", studentMessage)
+            .Replace("{studentDataJSON}", studentDataJSON)
+            // .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
+            .Replace("{currentNodesJSON}", currentNodesJSON)
+            ;
+
+        var externalSubjectNodes = await _chatOpenAIService.GenExternalSubjectNodesInStudyRoadmap(promptToGetExternalSubjectNodes);
+
+
+
+        nodes.AddRange(externalSubjectNodes);
+        return nodes;
+
     }
+
+    public async Task<List<RoadmapLinkDto>> GenLinkAsync(RoadmapDto currentRoadmap)
+    {
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        };
+
+        var currentRoadmapJSON = JsonSerializer.Serialize(currentRoadmap, jsonOptions);
+
+        var promptToGetSuggestedLinkForCurrentRoadmap = CallAIConst.TemplateToLinkAllNodesPrompt
+         .Replace("{currentRoadmapJSON}", currentRoadmapJSON)
+         ;
+
+        return await _chatOpenAIService.GetTheCompleteLinkedNodes(promptToGetSuggestedLinkForCurrentRoadmap);
+    }
+
+
 
     #endregion
 
@@ -131,11 +257,11 @@ public class RoadmapService
         return await _roadmapRepository.ReplaceNodesInRoadmapAsync(roadmapId, nodes);
     }
 
-
-
-    public async Task<bool> BulkInsertLinksAsync(List<(long FromNodeId, long ToNodeId)> links)
+    public async Task<bool> BulkInsertLinksAsync(List<RoadmapLinkDto> links)
     {
-        return await _roadmapRepository.AddLinksToRoadmapAsync(links);
+        var linkTuples = links.Select(l => (FromNodeId: l.FromNodeId, ToNodeId: l.ToNodeId)).ToList();
+
+        return await _roadmapRepository.AddLinksToRoadmapAsync(linkTuples);
     }
 
 
@@ -205,43 +331,3 @@ public class RoadmapService
 }
 
 
-
-public class RoadmapDto
-{
-    public long Id { get; set; }
-    public string Name { get; set; }
-    public long StudentProfileId { get; set; }
-    public List<RoadmapNodeDto> Nodes { get; set; } = new();
-    public List<RoadmapLinkDto> Links { get; set; } = new();
-}
-
-public class RoadmapNodeDto
-{
-    public long Id { get; set; }
-    public string SubjectCode { get; set; }
-    public int? SemesterNumber { get; set; }
-    public string? SubjectName { get; set; }
-    public string? Description { get; set; }
-
-    public List<long> PrerequisiteIds { get; set; } = new();
-    public List<long> DependentIds { get; set; } = new();
-
-    // Outgoing links from this node (frontend can use directly)
-    public List<RoadmapLinkDto> OutgoingLinks { get; set; } = new();
-}
-
-public class RoadmapLinkDto
-{
-    public long Id { get; set; }
-    public long FromNodeId { get; set; }
-    public long ToNodeId { get; set; }
-}
-
-public class CreateNodeDto
-{
-    public string SubjectCode { get; set; }
-    public int? SemesterNumber { get; set; }
-    public string? SubjectName { get; set; }
-    public string? Description { get; set; }
-    public bool IsInternalSubjectData { get; set; }
-}

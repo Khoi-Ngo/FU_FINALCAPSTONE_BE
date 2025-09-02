@@ -1,6 +1,7 @@
 using AISEA.ApiService.BAL.Services.StudyRoadmap;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.SHARED.Const.Enums;
+using AISEA.ApiService.SHARED.DTOs.Roadmap;
 using AISEA.ApiService.SHARED.Filters;
 using AISEA.ApiService.SHARED.PropConfigs;
 using AISEA.ApiService.WebApi.Base;
@@ -160,10 +161,9 @@ namespace AISEA.ApiService.WebApi.Controllers.StudyRoadmap
             if (links == null || !links.Any())
                 return BadRequest("Links list cannot be empty.");
 
-            var linkTuples = links.Select(l => (FromNodeId: l.FromNodeId, ToNodeId: l.ToNodeId)).ToList();
-            var result = await _roadmapService.BulkInsertLinksAsync(linkTuples);
+            var result = await _roadmapService.BulkInsertLinksAsync(links);
 
-            return Ok(new { message = "Links inserted successfully.", insertedCount = linkTuples.Count });
+            return Ok(new { message = "Links inserted successfully." });
         }
 
 
@@ -172,13 +172,26 @@ namespace AISEA.ApiService.WebApi.Controllers.StudyRoadmap
         /// Use AI to gen nodes
         /// </summary>
         [HttpGet("ai-gen-node")]
-        [AuditLog(Tag = "AI_GENERATE_STUDY_ROADMAP_NODE")]
+        [AuditLog(Tag = "AI_GENERATE_STUDY_ROADMAP")]
         [PermissionAuthorize((int)EUserRole.STUDENT)]
         public async Task<IActionResult> GenNode([FromQuery] string studentMessage)
         {
             var res = await _roadmapService.GenNodeAsync(AccessToken, studentMessage);
             return Ok(res);
         }
+
+        /// <summary>
+        /// Use AI to gen links
+        /// </summary>
+        [HttpPost("ai-gen-link")]
+        [AuditLog(Tag = "AI_GENERATE_STUDY_ROADMAP")]
+        [PermissionAuthorize((int)EUserRole.STUDENT)]
+        public async Task<IActionResult> GenLink([FromBody] RoadmapDto currentRoadmap)
+        {
+            var res = await _roadmapService.GenLinkAsync(currentRoadmap);
+            return Ok(res);
+        }
+
 
 
 

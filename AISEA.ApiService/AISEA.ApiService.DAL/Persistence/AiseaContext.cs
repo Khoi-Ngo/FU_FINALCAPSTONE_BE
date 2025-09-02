@@ -19,15 +19,27 @@ public partial class AiseaContext : DbContext
     {
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder
-            .UseSqlServer(
-                // _sqlSettings.ConnectionString
-                "Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;"
-            , sqlOptions =>
-            {
+    {
+        if (!optionsBuilder.IsConfigured && _sqlSettings != null)
+        {
+            optionsBuilder.UseSqlServer(
+                _sqlSettings.ConnectionString,
+                sqlOptions =>
+                {
+                    // Set 5-minute timeout
+                    sqlOptions.CommandTimeout((int)TimeSpan.FromMinutes(5).TotalSeconds);
 
-            });
+                    // Enable retries for transient failures
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(10),
+                        errorNumbersToAdd: null);
+                });
+
+        }
+    }
     #endregion
+    // "Server=jkh8ing8.online,1433;Database=AISEA;User Id=sa;Password=NewYourStrong!Passw0rd;TrustServerCertificate=True;"
 
     #region DbSets
     public virtual DbSet<AdvisorySession1to1> AdvisorySessions1to1 { get; set; }

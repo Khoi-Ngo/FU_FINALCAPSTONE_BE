@@ -262,7 +262,6 @@ public class AdvisorySession1to1Service
         // Fetch all required JSON context data
         var studentJsonData = await GetStudentDataJSON(studentUserId, jsonOptions);
         var transcriptJsonData = await GetTranscriptJSON(studentProfileId, jsonOptions);
-        var personalRoadMapData = await GetStudentStudyRoadmap(studentProfileId, jsonOptions);
         var personalCurSubjectsJsonData = await GetPersonalCurSubjects(studentProfileId, jsonOptions);
         var personalComboSubjectsJsonData = await GetPersonalComboSubjects(studentProfileId, jsonOptions);
         var flmJsonData = await GetFLMJSON(jsonOptions);
@@ -273,7 +272,6 @@ public class AdvisorySession1to1Service
             .Replace("{message}", message ?? "")
             .Replace("{studentJsonData}", studentJsonData ?? "{}")
             .Replace("{transcriptJsonData}", transcriptJsonData ?? "{}")
-            .Replace("{personalRoadMapData}", personalRoadMapData ?? "{}")
             .Replace("{personalCurSubjectsJsonData}", personalCurSubjectsJsonData ?? "{}")
             .Replace("{personalComboSubjectsJsonData}", personalComboSubjectsJsonData ?? "{}")
             .Replace("{flmJsonData}", flmJsonData ?? "{}");
@@ -358,21 +356,6 @@ public class AdvisorySession1to1Service
         }
     }
 
-    private async Task<string> GetStudentStudyRoadmap(long studentProfileId, JsonSerializerOptions jsonOptions)
-    {
-
-        try
-        {
-            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetRoadmapDataByStudentProfileID}{studentProfileId}";
-            var res = await _redisRepository.GetValueAsync<List<SimpleSubjectResponse>>(cacheKey);
-            return JsonSerializer.Serialize(res, jsonOptions);
-
-        }
-        catch (Exception e)
-        {
-            return "{}";
-        }
-    }
 
     #endregion
 

@@ -56,7 +56,7 @@ public class CachingForAIFeatureBgService : BackgroundService
                             var cachedKeystudentPersonalSubjectsInCurriculum = $"{CacheKeyForAIFeature.PrefixToGetPersonalCurByStudentProfileID}{studentData.StudentProfile.Id}";
                             var cachedKeystudentPersonalSubjectsInCombo = $"{CacheKeyForAIFeature.PrefixToGetPersonalComboByStudentProfileID}{studentData.StudentProfile.Id}";
                             var cachedKeystudentCurrentTranscript = $"{CacheKeyForAIFeature.PrefixToGetStudentTranscriptByStudentProfileID}{studentData.StudentProfile.Id}";
-                            var cachedKeyroadmapDto = $"{CacheKeyForAIFeature.PrefixToGetRoadmapDataByStudentProfileID}{studentData.StudentProfile.Id}";
+                            // var cachedKeyroadmapDto = $"{CacheKeyForAIFeature.PrefixToGetRoadmapDataByStudentProfileID}{studentData.StudentProfile.Id}";
 
 
 
@@ -64,7 +64,7 @@ public class CachingForAIFeatureBgService : BackgroundService
                             await redisRepo.SetValueAsync(cachedKeystudentPersonalSubjectsInCurriculum, studentPersonalSubjectsInCurriculum, TimeSpan.FromDays(3));
                             await redisRepo.SetValueAsync(cachedKeystudentPersonalSubjectsInCombo, studentPersonalSubjectsInCombo, TimeSpan.FromDays(3));
                             await redisRepo.SetValueAsync(cachedKeystudentCurrentTranscript, studentCurrentTranscript, TimeSpan.FromDays(3));
-                            await redisRepo.SetValueAsync(cachedKeyroadmapDto, roadmapDto, TimeSpan.FromDays(3));
+                            // await redisRepo.SetValueAsync(cachedKeyroadmapDto, roadmapDto, TimeSpan.FromDays(3));
 
 
                         }

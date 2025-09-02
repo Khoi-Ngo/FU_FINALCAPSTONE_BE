@@ -465,8 +465,7 @@ public class ChatOpenAIService : IChatOpenAIService
 
         var _apiKey = _chatBotSettings.ApiKey;
         var _apiUrl = _chatBotSettings.ApiUrl;
-        var _model = _chatBotSettings.Model;
-
+        var _model = "gpt-4o";
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiKey);
 
         var requestBody = new

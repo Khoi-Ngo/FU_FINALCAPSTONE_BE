@@ -171,7 +171,9 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<(List<User> users, int totalCount)> GetActiveAdvisorsPagedAsync(int pageNumber, int pageSize, string? search = "")
         {
             var query = _context.Users
-                .Where(u => u.RoleId == (int)EUserRole.ADVISOR && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE);
+                .Where(u => u.RoleId == (int)EUserRole.ADVISOR && u.IsDeleted == false & u.Status == EUserStatus.ACTIVE
+                    && u.Username != "AISEABot"
+                );
 
             query = query.Include(u => u.Role)
                          .Include(u => u.StaffProfile);

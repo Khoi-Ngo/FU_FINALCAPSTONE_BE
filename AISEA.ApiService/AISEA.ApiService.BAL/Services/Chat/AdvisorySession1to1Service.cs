@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Enums;
@@ -8,8 +9,11 @@ using AISEA.ApiService.SHARED.DTOs.Requests.ChatBot;
 using AISEA.ApiService.SHARED.DTOs.Requests.Pagin;
 using AISEA.ApiService.SHARED.DTOs.Responses.AdvisorySession1to1;
 using AISEA.ApiService.SHARED.DTOs.Responses.ChatBot;
+using AISEA.ApiService.SHARED.DTOs.Responses.MarkReport;
 using AISEA.ApiService.SHARED.DTOs.Responses.Message;
 using AISEA.ApiService.SHARED.DTOs.Responses.Pagin;
+using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
+using AISEA.ApiService.SHARED.DTOs.Roadmap;
 using AISEA.ApiService.SHARED.Exceptions;
 using AISEA.ApiService.SHARED.Interfaces;
 using AISEA.ApiService.SHARED.PropConfigs;
@@ -242,51 +246,147 @@ public class AdvisorySession1to1Service
         return await _messageRepository.GetMessagesAsync(chatSessionId, request.PageNumber, request.PageSize);
     }
 
-    private string ConstructPrompt(
+    private async Task<string> ConstructPrompt(
+        long studentUserId,
+        long studentProfileId,
         string studentName,
-        string? message = null,
-        object? studentJsonData = null,
-        object? fPTUAcademicResourceJsonData = null,
-        object? personalRoadMapData = null,
-        object? detailedPersonalAcademicPerformance = null,
-        object? systemFeedbackMeetingData = null,
-        object? personelCourseTrackData = null)
+        string message = "",
+        JsonSerializerOptions jsonOptions = null)
+    {
+        jsonOptions ??= new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        };
+
+        // Fetch all required JSON context data
+        var studentJsonData = await GetStudentDataJSON(studentUserId, jsonOptions);
+        var transcriptJsonData = await GetTranscriptJSON(studentProfileId, jsonOptions);
+        var personalRoadMapData = await GetStudentStudyRoadmap(studentProfileId, jsonOptions);
+        var personalCurSubjectsJsonData = await GetPersonalCurSubjects(studentProfileId, jsonOptions);
+        var personalComboSubjectsJsonData = await GetPersonalComboSubjects(studentProfileId, jsonOptions);
+        var flmJsonData = await GetFLMJSON(jsonOptions);
+
+        // Replace placeholders in the prompt template
+        return CallAIConst.GeneralMessageStructFromStudent
+            .Replace("{studentName}", studentName ?? "Unknown Student")
+            .Replace("{message}", message ?? "")
+            .Replace("{studentJsonData}", studentJsonData ?? "{}")
+            .Replace("{transcriptJsonData}", transcriptJsonData ?? "{}")
+            .Replace("{personalRoadMapData}", personalRoadMapData ?? "{}")
+            .Replace("{personalCurSubjectsJsonData}", personalCurSubjectsJsonData ?? "{}")
+            .Replace("{personalComboSubjectsJsonData}", personalComboSubjectsJsonData ?? "{}")
+            .Replace("{flmJsonData}", flmJsonData ?? "{}");
+    }
+
+
+
+    #region AI FEATURE CACHING HANDLING
+
+    private async Task<string> GetTranscriptJSON(long studentProfileId, JsonSerializerOptions jsonOptions)
+    {
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetStudentTranscriptByStudentProfileID}{studentProfileId}";
+            var res = await _redisRepository.GetValueAsync<List<TranscriptItemResponse>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+    private async Task<string> GetStudentDataJSON(long studentUserId, JsonSerializerOptions jsonOptions)
+    {
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetStudentDataByUserID}{studentUserId}";
+            var res = await _redisRepository.GetValueAsync<DAL.Entities.User>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+    private async Task<string> GetFLMJSON(JsonSerializerOptions jsonOptions)
     {
 
-        ///TODO:Prompt Construct NOTEs
-        /// Existed messages in the same session
-        /// HAVE TO FILL ALL DATA VIA REDIS/RDB LATER, The FLM data should be queried by personal meaning that no need to query all
-
-        var studentJson = studentJsonData != null ? JsonSerializer.Serialize(studentJsonData) : "{}";
-        var resourceJson = fPTUAcademicResourceJsonData != null ? JsonSerializer.Serialize(fPTUAcademicResourceJsonData) : "{}";
-        var personalRoadMapJson = personalRoadMapData != null ? JsonSerializer.Serialize(personalRoadMapData) : "{}";
-        var detailedPerformanceJson = detailedPersonalAcademicPerformance != null ? JsonSerializer.Serialize(detailedPersonalAcademicPerformance) : "{}";
-        var systemFeedbackJson = systemFeedbackMeetingData != null ? JsonSerializer.Serialize(systemFeedbackMeetingData) : "{}";
-        var msg = message ?? "";
-        var courseTrackJson = personelCourseTrackData != null ? JsonSerializer.Serialize(personelCourseTrackData) : "{}";
-
-        return CallAIConst.GeneralMessageStructFromStudent
-            .Replace("{studentName}", studentName)
-            .Replace("{message}", msg)
-            .Replace("{studentJsonData}", studentJson)
-
-            
-            .Replace("{FPTUAcademicResourceJsonData}", resourceJson)
-            .Replace("{personalRoadMapData}", personalRoadMapJson)
-            .Replace("{detailedPersonalAcademicPerformance}", detailedPerformanceJson)
-            .Replace("{systemFeedbackMeetingData}", systemFeedbackJson)
-            .Replace("{personelCourseTrackData}", courseTrackJson);
-
+        try
+        {
+            var cacheKey = CacheKeyForAIFeature.PrefixToGetAllDataOfFLMCurComSub;
+            var res = await _redisRepository.GetValueAsync<List<DAL.Entities.Curriculum>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
     }
+
+    private async Task<string> GetPersonalComboSubjects(long studentProfileId, JsonSerializerOptions jsonOptions)
+    {
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetPersonalComboByStudentProfileID}{studentProfileId}";
+            var res = await _redisRepository.GetValueAsync<List<SimpleSubjectResponse>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+    private async Task<string> GetPersonalCurSubjects(long studentProfileId, JsonSerializerOptions jsonOptions)
+    {
+
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetPersonalCurByStudentProfileID}{studentProfileId}";
+            var res = await _redisRepository.GetValueAsync<List<SimpleSubjectResponse>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+
+        }
+        catch (Exception e)
+        {
+            return "{}";
+
+        }
+    }
+
+    private async Task<string> GetStudentStudyRoadmap(long studentProfileId, JsonSerializerOptions jsonOptions)
+    {
+
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetRoadmapDataByStudentProfileID}{studentProfileId}";
+            var res = await _redisRepository.GetValueAsync<List<SimpleSubjectResponse>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+    #endregion
+
 
 
     public async Task<GetChatBotResponse> SendMsgAsync(SendChatBotRequest request, string accessToken)
     {
         var userId = GetUserIdFromToken(accessToken);
         var studentName = _jWTService.GetFirstNameFromToken(accessToken) + " " + _jWTService.GetLastNameFromToken(accessToken);
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
 
         await CreateMessageAsync(request.Message, userId, request.ChatSessionId);
-        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(studentName, request.Message));
+        var prompt = await ConstructPrompt(userId, studentProfileId, studentName, request.Message);
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(prompt);
         aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, request.ChatSessionId);
         return new GetChatBotResponse { Message = aiResponse };
@@ -294,18 +394,19 @@ public class AdvisorySession1to1Service
 
     public async Task<InitChatBotResponse> InitMsgAsync(InitChatBotRequest request, string accessToken)
     {
-        var profileId = _jWTService.GetProfileIdFromToken(accessToken);
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
         var userId = _jWTService.GetUserIdFromToken(accessToken);
         var studentName = _jWTService.GetFirstNameFromToken(accessToken) + " " + _jWTService.GetLastNameFromToken(accessToken);
 
         var chatSession = await CreateSessionAsync(
-            profileId,
+            studentProfileId,
             EAdvisorySession1to1Type.BOT,
             _staffUserSettings.SystemBotUser.StaffId,
             System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(Advisory1to1Util.GenerateChatBotSessionTitle(request.Message))));
 
         await CreateMessageAsync(request.Message, userId, chatSession.Id);
-        var aiResponse = await _chatOpenAIService.SendMsgAsync(ConstructPrompt(studentName, request.Message));
+        var prompt = await ConstructPrompt(userId, studentProfileId, studentName, request.Message);
+        var aiResponse = await _chatOpenAIService.SendMsgAsync(prompt);
         aiResponse = System.Text.Encoding.UTF8.GetString(System.Text.Encoding.UTF8.GetBytes(aiResponse));
         await CreateMessageAsync(aiResponse, _staffUserSettings.SystemBotUser.Id, chatSession.Id);
         return new InitChatBotResponse { Message = aiResponse, ChatSessionId = chatSession.Id };

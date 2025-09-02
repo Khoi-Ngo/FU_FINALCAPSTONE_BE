@@ -387,6 +387,7 @@ public class RoadmapService
             SemesterNumber = node.SemesterNumber,
             SubjectName = node.SubjectName,
             Description = node.Description,
+            IsInternalSubjectData = node.IsInternalSubjectData,
             PrerequisiteIds = node.Prerequisites.Select(p => p.FromNodeId).ToList(),
             DependentIds = node.Dependents.Select(d => d.ToNodeId).ToList(),
             OutgoingLinks = node.Dependents

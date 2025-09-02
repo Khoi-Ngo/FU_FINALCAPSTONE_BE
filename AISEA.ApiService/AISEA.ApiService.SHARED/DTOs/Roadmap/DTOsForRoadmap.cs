@@ -17,6 +17,7 @@ namespace AISEA.ApiService.SHARED.DTOs.Roadmap
         public int? SemesterNumber { get; set; }
         public string? SubjectName { get; set; }
         public string? Description { get; set; }
+        public bool IsInternalSubjectData { get; set; }
 
         public List<long> PrerequisiteIds { get; set; } = new();
         public List<long> DependentIds { get; set; } = new();

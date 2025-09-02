@@ -52,46 +52,6 @@ namespace AISEA.ApiService.DAL.Repositories
             };
         }
 
-        public async Task<Dictionary<string, Dictionary<string, List<AuditLogDTO>>>> GetCountGroupedByMonthAndYearAsync(DateTime? startDate = null, DateTime? endDate = null)
-        {
-            var query = _context.AuditLogs.AsQueryable();
-
-            if (startDate.HasValue)
-                query = query.Where(a => a.CreatedAt >= startDate.Value);
-
-            if (endDate.HasValue)
-                query = query.Where(a => a.CreatedAt <= endDate.Value);
-
-            var logs = await query.ToListAsync();
-
-            var dict = logs
-                .GroupBy(a => new { a.CreatedAt.Year, a.CreatedAt.Month })
-                .ToDictionary(
-                    g => $"{g.Key.Month:D2}/{g.Key.Year}",
-                    g => g.GroupBy(a => a.Tag.ToString())
-                          .ToDictionary(
-                              tg => tg.Key,
-                              tg => tg.Select(a => new AuditLogDTO
-                              {
-                                  Id = a.Id,
-                                  Tag = a.Tag.ToString(),
-                                  CreatedAt = a.CreatedAt,
-                                  Description = a.Description,
-                                  IsSuccessAction = a.IsSuccessAction,
-                                  UserName = a.UserName,
-                                  FirstName = a.FirstName,
-                                  LastName = a.LastName,
-                                  RoleId = a.RoleId,
-                                  Email = a.Email,
-                                  IPAddress = a.IPAddress,
-                                  UserAgent = a.UserAgent,
-                                  UserId = a.UserId
-                              }).ToList()
-                          )
-                );
-
-            return dict;
-        }
 
         public async Task<AuditLogAnalyticsDTO> GetAnalyticsAsync(DateTime? startDate, DateTime? endDate, string interval)
         {

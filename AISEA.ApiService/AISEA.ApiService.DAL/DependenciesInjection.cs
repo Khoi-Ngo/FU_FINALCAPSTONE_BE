@@ -63,9 +63,6 @@ public static class DependenciesInjection
 
         services.AddScoped<FLMDashboardRepository>();
 
-        services.AddScoped<MeetingForDashboardRepo>();
-        services.AddScoped<LeaveScheForDashboardRepo>();
-        services.AddScoped<BookingAvaiForDashboardRepo>();
         services.AddScoped<UserForDashboardRepo>();
         services.AddScoped<JoinedSubjectForDashboardRepo>();
 

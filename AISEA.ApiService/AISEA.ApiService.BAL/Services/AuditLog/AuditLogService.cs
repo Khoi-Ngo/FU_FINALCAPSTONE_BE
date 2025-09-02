@@ -22,14 +22,6 @@ namespace AISEA.ApiService.BAL.Services.AuditLog
         }
 
         /// <summary>
-        /// Retrieves the count as dictionary Dictionary<MonthYear, Dictionary<Tag, Count>> of audit log entries grouped by month and year.
-        /// </summary>
-        public async Task<Dictionary<string, Dictionary<string, List<AuditLogDTO>>>> GetCountGroupedByMonthAndYearAsync(DateTime? startDate = null, DateTime? endDate = null)
-        {
-            return await _auditLogRepository.GetCountGroupedByMonthAndYearAsync(startDate, endDate);
-        }
-
-        /// <summary>
         /// Retrieves analytics data for audit logs, including time series, tag distribution, and user activity.
         /// </summary>
         public async Task<AuditLogAnalyticsDTO> GetAnalyticsAsync(DateTime? startDate, DateTime? endDate, string interval)

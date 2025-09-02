@@ -9,90 +9,24 @@ namespace AISEA.ApiService.WebApi.Controllers.DASHBOARD
     [Route("api/[controller]")]
     public class DashboardController : BaseController
     {
-        private readonly MeetingForDashboardRepo _meetingForDashboardRepo;
-        private readonly BookingAvaiForDashboardRepo _bookingAvaiForDashboardRepo;
-        private readonly LeaveScheForDashboardRepo _leaveScheForDashboardRepo;
         private readonly JoinedSubjectForDashboardRepo _joinedSubjectForDashboardRepo;
         private readonly UserForDashboardRepo _userForDashboardRepo;
 
         public DashboardController(
             EndpointSettings endpointSettings,
-            MeetingForDashboardRepo meetingForDashboardRepo,
-            BookingAvaiForDashboardRepo bookingAvaiForDashboardRepo,
-            LeaveScheForDashboardRepo leaveScheForDashboardRepo,
             JoinedSubjectForDashboardRepo joinedSubjectForDashboardRepo,
             UserForDashboardRepo userForDashboardRepo)
             : base(endpointSettings)
         {
-            _meetingForDashboardRepo = meetingForDashboardRepo;
-            _bookingAvaiForDashboardRepo = bookingAvaiForDashboardRepo;
-            _leaveScheForDashboardRepo = leaveScheForDashboardRepo;
             _joinedSubjectForDashboardRepo = joinedSubjectForDashboardRepo;
             _userForDashboardRepo = userForDashboardRepo;
         }
 
-        #region MeetingForDashboardRepo Endpoints
-
-        /// <summary>
-        /// Retrieves the count of meetings grouped by status for a pie chart. Admin only.
-        /// </summary>
-        [HttpGet("meetings/by-status")]
-        public async Task<IActionResult> GetMeetingsByStatusAsync()
-        {
-            var result = await _meetingForDashboardRepo.GetMeetingsByStatusAsync();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves the number of meetings handled per staff. Admin only.
-        /// </summary>
-        [HttpGet("meetings/staff-load")]
-        public async Task<IActionResult> GetStaffMeetingLoadAsync()
-        {
-            var result = await _meetingForDashboardRepo.GetStaffMeetingLoadAsync();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves meeting trends over the past months. Admin only.
-        /// </summary>
-        [HttpGet("meetings/trend")]
-        public async Task<IActionResult> GetMeetingTrendAsync([FromQuery] int monthsBack = 12)
-        {
-            var result = await _meetingForDashboardRepo.GetMeetingTrendAsync(monthsBack);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves meeting load for a specific staff member. Staff only.
-        /// </summary>
-        [HttpGet("meetings/staff/{staffProfileId}/load")]
-        public async Task<IActionResult> GetOwnMeetingLoadAsync(long staffProfileId)
-        {
-            var result = await _meetingForDashboardRepo.GetOwnMeetingLoadAsync(staffProfileId);
-            return Ok(result);
-        }
-
-
-
-        /// <summary>
-        /// Retrieves meeting participation for a specific student. Student only.
-        /// </summary>
-        [HttpGet("meetings/student/{studentProfileId}/participation")]
-        public async Task<IActionResult> GetStudentMeetingParticipationAsync(long studentProfileId)
-        {
-            var result = await _meetingForDashboardRepo.GetStudentMeetingParticipationAsync(studentProfileId);
-            return Ok(result);
-        }
-
-
-
-        #endregion
 
         #region UserForDashboardRepo Endpoints
 
         /// <summary>
-        /// User count by status (Pie Chart - Admin)
+        /// User count by status (Pie Chart - Admin).
         /// </summary>
         [HttpGet("users/by-status")]
         public async Task<IActionResult> GetUserCountByStatusAsync()
@@ -102,137 +36,17 @@ namespace AISEA.ApiService.WebApi.Controllers.DASHBOARD
         }
 
         /// <summary>
-        /// User registration trend over time (Line Chart - Admin)
+        /// User count by role (Pie/Bar Chart - Admin).
         /// </summary>
-        [HttpGet("users/registration-trend")]
-        public async Task<IActionResult> GetUserRegistrationTrendAsync([FromQuery] int monthsBack = 12)
+        [HttpGet("users/by-role")]
+        public async Task<IActionResult> GetUserCountByRoleAsync()
         {
-            var result = await _userForDashboardRepo.GetUserRegistrationTrendAsync(monthsBack);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Student enrollment by program (Bar Chart - Admin)
-        /// </summary>
-        [HttpGet("users/students/by-program")]
-        public async Task<IActionResult> GetStudentCountByProgramAsync()
-        {
-            var result = await _userForDashboardRepo.GetStudentCountByProgramAsync();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Staff distribution by department (Pie Chart - Admin)
-        /// </summary>
-        [HttpGet("users/staff/by-department")]
-        public async Task<IActionResult> GetStaffCountByDepartmentAsync()
-        {
-            var result = await _userForDashboardRepo.GetStaffCountByDepartmentAsync();
+            var result = await _userForDashboardRepo.GetUserCountByRoleAsync();
             return Ok(result);
         }
 
         #endregion
 
-        #region LeaveScheForDashboardRepo Endpoints
-
-        /// <summary>
-        /// Retrieves leave distribution by department (Admin only).
-        /// </summary>
-        [HttpGet("admin/leaves/by-department")]
-        public async Task<IActionResult> GetLeaveByDepartmentAsync()
-        {
-            var result = await _leaveScheForDashboardRepo.GetLeaveByDepartmentAsync();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves leave distribution by campus (Admin only).
-        /// </summary>
-        [HttpGet("admin/leaves/by-campus")]
-        public async Task<IActionResult> GetLeaveByCampusAsync()
-        {
-            var result = await _leaveScheForDashboardRepo.GetLeaveByCampusAsync();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves total leave duration for a specific staff (Staff only).
-        /// </summary>
-        [HttpGet("staff/{staffProfileId}/leaves/duration")]
-        public async Task<IActionResult> GetOwnLeaveDurationAsync(long staffProfileId)
-        {
-            var result = await _leaveScheForDashboardRepo.GetStaffLeaveDurationAsync(staffProfileId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves leave trend over time for a specific staff (Staff only).
-        /// </summary>
-        [HttpGet("staff/{staffProfileId}/leaves/trend")]
-        public async Task<IActionResult> GetOwnLeaveTrendAsync(long staffProfileId, [FromQuery] int monthsBack = 12)
-        {
-            var result = await _leaveScheForDashboardRepo.GetLeaveTrendAsync(monthsBack, staffProfileId);
-            return Ok(result);
-        }
-
-        #endregion
-
-        #region BookingAvaiForDashboardRepo Endpoints
-
-
-        /// <summary>
-        /// Retrieves availability slots grouped by department (pie chart).
-        /// Admin only.
-        /// </summary>
-        [HttpGet("admin/availability/by-department")]
-        public async Task<IActionResult> GetAvailabilityByDepartmentAsync()
-        {
-            var result = await _bookingAvaiForDashboardRepo.GetAvailabilityByDepartmentAsync();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves availability slots grouped by campus (bar chart).
-        /// Admin only.
-        /// </summary>
-        [HttpGet("admin/availability/by-campus")]
-        public async Task<IActionResult> GetAvailabilityByCampusAsync()
-        {
-            var result = await _bookingAvaiForDashboardRepo.GetAvailabilityByCampusAsync();
-            return Ok(result);
-        }
-
-        // ------------------------
-        // STAFF ENDPOINTS
-        // ------------------------
-
-        /// <summary>
-        /// Retrieves availability slots grouped by day of week (pie chart).
-        /// Staff-specific.
-        /// </summary>
-        [HttpGet("staff/{staffProfileId}/availability/by-day")]
-        public async Task<IActionResult> GetStaffAvailabilityByDayAsync(long staffProfileId)
-        {
-            var result = await _bookingAvaiForDashboardRepo.GetStaffAvailabilityByDayAsync(staffProfileId);
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Retrieves total availability hours for a staff (bar chart).
-        /// Staff-specific.
-        /// </summary>
-        [HttpGet("staff/{staffProfileId}/availability/hours")]
-        public async Task<IActionResult> GetStaffAvailabilityHoursAsync(long staffProfileId)
-        {
-            var result = await _bookingAvaiForDashboardRepo.GetStaffAvailabilityHoursAsync(staffProfileId);
-            return Ok(result);
-        }
-
-        #endregion
-
-
-
-        #region JoinedSubjectForDashboardRepo Endpoints
         /// <summary>
         /// Retrieves semester performance trend for a specific student, including subjects attempted/passed, credits, and average final score.
         /// </summary>
@@ -271,17 +85,6 @@ namespace AISEA.ApiService.WebApi.Controllers.DASHBOARD
             return Ok(result);
         }
 
-        /// <summary>
-        /// Retrieves final score distribution for a specific student, bucketed into configurable ranges (default: 0-50, 50-65, 65-80, 80-90, 90-100).
-        /// </summary>
-        /// <param name="studentProfileId">Required: The ID of the student profile to query.</param>
-        /// <returns>A list of StudentScoreBucketDto containing bucket labels and counts.</returns>
-        [HttpGet("subjects/student-score-distribution")]
-        public async Task<IActionResult> GetStudentScoreDistributionAsync([FromQuery] long studentProfileId)
-        {
-            var result = await _joinedSubjectForDashboardRepo.GetStudentScoreDistributionAsync(studentProfileId);
-            return Ok(result);
-        }
 
         /// <summary>
         /// Retrieves pass rate by semester across all students for admin observation.
@@ -328,7 +131,6 @@ namespace AISEA.ApiService.WebApi.Controllers.DASHBOARD
             var result = await _joinedSubjectForDashboardRepo.GetStudentRiskSummaryAsync(lowScoreThreshold, minOverdueCheckpoints);
             return Ok(result);
         }
-        #endregion
 
 
     }

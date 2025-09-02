@@ -31,18 +31,18 @@ namespace AISEA.ApiService.WebApi.Controllers.AuditLog
             return Ok(result);
         }
 
-        [HttpGet("all")]
-        [AuditLog(Tag = "VIEW_AUDIT_LOGS")]
-        public async Task<IActionResult> GetAllAuditLogs(
-     [FromQuery] DateTime? startDate,
-     [FromQuery] DateTime? endDate)
-        {
-            var from = startDate ?? DateTime.UtcNow.AddDays(-1);
-            var to = endDate ?? DateTime.UtcNow;
+    //     [HttpGet("all")]
+    //     [AuditLog(Tag = "VIEW_AUDIT_LOGS")]
+    //     public async Task<IActionResult> GetAllAuditLogs(
+    //  [FromQuery] DateTime? startDate,
+    //  [FromQuery] DateTime? endDate)
+    //     {
+    //         var from = startDate ?? DateTime.UtcNow.AddDays(-1);
+    //         var to = endDate ?? DateTime.UtcNow;
 
-            var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(from, to);
-            return Ok(result);
-        }
+    //         var result = await _auditLogService.GetCountGroupedByMonthAndYearAsync(from, to);
+    //         return Ok(result);
+    //     }
 
         [HttpGet("analytics")]
         [AuditLog(Tag = "VIEW_AUDIT_LOG_ANALYTICS")]

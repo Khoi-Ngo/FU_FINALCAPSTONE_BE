@@ -31,7 +31,7 @@
 
 
 
-# AISEA Backend - FPT University Capstone SU25
+# AISEA Backend - FPT University Capstone Summer 2025
 
 This repository contains the backend services for the **AISEA** project, developed using **.NET 8.0**.
 

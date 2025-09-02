@@ -91,13 +91,13 @@ namespace AISEA.ApiService.WebApi.Controllers.Subject
 
 
         /// <summary>
-        /// Gen the temporarily tip from AI for a subject
+        /// Gen the temporarily tip from AI for a syllabus
         /// </summary>
-        [HttpGet("gen-tip/{id}")]
+        [HttpGet("gen-tip/{sylaid}")]
         [AuditLog(Tag = "GEN_TIP_FOR_SUBJECT")]
-        public async Task<IActionResult> GenTempTipForSubject(long id)
+        public async Task<IActionResult> GenTempTipForSubject(long sylaid)
         {
-            var res = await _subjectService.GenTempTipForSubjectAsync(id);
+            var res = await _subjectService.GenTempTipForSubjectAsync(sylaid);
             return Ok(res);
         }
 

@@ -130,18 +130,18 @@ namespace AISEA.ApiService.BAL.Services.Subject
 
         public async Task<string> GenTempTipForSubjectAsync(long id)
         {
-            var subject = await _subjectRepository.GetByIdWithAllRelatedAsync(id);
-            if (subject == null) return "Subject not found.";
+            var syla = await _subjectRepository.GetSylaByIdWithAllRelatedAsync(id);
+            if (syla == null) return "syla not found.";
 
-            var subjectJson = JsonConvert.SerializeObject(
-                subject,
+            var sylaJSON = JsonConvert.SerializeObject(
+                syla,
                 Formatting.Indented,
                 new JsonSerializerSettings
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
 
-            var prompt = string.Format(CallAIConst.TemplatePromptFroTempGenTipForASubject, subjectJson);
+            var prompt = string.Format(CallAIConst.TemplatePromptFroTempGenTipForASubject, syla);
             return await _chatOpenAIService.SendMsgAsync(prompt);
         }
 

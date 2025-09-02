@@ -307,5 +307,19 @@ namespace AISEA.ApiService.DAL.Repositories
                 .ToListAsync();
             return (users, totalCount);
         }
+
+        public async Task<List<long>> GetAllActiveStudentUserIDsAsync()
+        {
+            var studentIds = await _context.Users
+                .Where(u => u.RoleId == (int)EUserRole.STUDENT
+                            && u.Status == EUserStatus.ACTIVE
+                            && !u.IsDeleted)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            return studentIds;
+        }
+
+ 
     }
 }

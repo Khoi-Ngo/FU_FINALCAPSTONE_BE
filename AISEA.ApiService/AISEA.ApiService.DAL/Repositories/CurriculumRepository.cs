@@ -1,6 +1,7 @@
 using AISEA.ApiService.DAL.Abstract;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Persistence;
+using AISEA.ApiService.SHARED.Const.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AISEA.ApiService.DAL.Repositories
@@ -57,7 +58,7 @@ namespace AISEA.ApiService.DAL.Repositories
         public async Task<bool> IsCodeUniqueAsync(string curriculumCode, long? excludeId = null)
         {
             var query = _context.Curricula.Where(c => c.CurriculumCode == curriculumCode && !c.IsDeleted);
-            
+
             if (excludeId.HasValue)
             {
                 query = query.Where(c => c.Id != excludeId.Value);
@@ -72,77 +73,17 @@ namespace AISEA.ApiService.DAL.Repositories
                 .AnyAsync(cs => cs.CurriculumId == curriculumId && !cs.IsDeleted);
         }
 
-        public async Task<object> GetByCodeWithAllDataAsync(string curriculumCode)
+        public async Task<List<Curriculum>> GetAllWComSubAsync()
         {
             return await _context.Curricula
-                .Include(c => c.Program)
-                .Include(c => c.CurriculumSubjects)
-                    .ThenInclude(cs => cs.SubjectVersion)
-                        .ThenInclude(sv => sv.Subject)
-                            .ThenInclude(s => s.ComboSubjects)
-                                .ThenInclude(cs => cs.Combo)
-                .Include(c => c.CurriculumSubjects)
-                    .ThenInclude(cs => cs.SubjectVersion)
-                        .ThenInclude(sv => sv.Syllabi)
-                            .ThenInclude(s => s.SyllabusAssessments)
-                .Include(c => c.CurriculumSubjects)
-                    .ThenInclude(cs => cs.SubjectVersion)
-                        .ThenInclude(sv => sv.Syllabi)
-                            .ThenInclude(s => s.SyllabusLearningMaterials)
-                .Include(c => c.CurriculumSubjects)
-                    .ThenInclude(cs => cs.SubjectVersion)
-                        .ThenInclude(sv => sv.Syllabi)
-                            .ThenInclude(s => s.SyllabusLearningOutcomes)
-                .Include(c => c.CurriculumSubjects)
-                    .ThenInclude(cs => cs.SubjectVersion)
-                        .ThenInclude(sv => sv.Syllabi)
-                            .ThenInclude(s => s.SyllabusSessions)
-                                .ThenInclude(ss => ss.SessionOutcomeMappings)
-                                    .ThenInclude(som => som.Outcome)
-                .Include(c => c.CurriculumSubjects)
-                    .ThenInclude(cs => cs.SubjectVersion)
-                        .ThenInclude(sv => sv.Prerequisites)
-                            .ThenInclude(pr => pr.PrerequisiteSubjectVersion)
-                                .ThenInclude(psv => psv.Subject)
-                .Where(c => c.CurriculumCode == curriculumCode && !c.IsDeleted)
-                .Select(c => new
-                {
-                    Curriculum = c,
-                    Program = c.Program,
-                    Subjects = c.CurriculumSubjects.Select(cs => new
-                    {
-                        cs.SemesterNumber,
-                        cs.IsMandatory,
-                        SubjectVersion = cs.SubjectVersion,
-                        Subject = cs.SubjectVersion.Subject,
-                        Combos = cs.SubjectVersion.Subject.ComboSubjects.Select(cs => new
-                        {
-                            Combo = cs.Combo,
-                            cs.CreatedAt,
-                            cs.UpdatedAt,
-                            cs.DeletedAt,
-                            cs.IsDeleted
-                        }),
-                        Syllabi = cs.SubjectVersion.Syllabi.Select(s => new
-                        {
-                            Syllabus = s,
-                            Assessments = s.SyllabusAssessments,
-                            LearningMaterials = s.SyllabusLearningMaterials,
-                            LearningOutcomes = s.SyllabusLearningOutcomes,
-                            Sessions = s.SyllabusSessions.Select(ss => new
-                            {
-                                Session = ss,
-                                Outcomes = ss.SessionOutcomeMappings.Select(som => som.Outcome)
-                            })
-                        }),
-                        Prerequisites = cs.SubjectVersion.Prerequisites.Select(pr => new
-                        {
-                            PrerequisiteSubjectVersion = pr.PrerequisiteSubjectVersion,
-                            PrerequisiteSubject = pr.PrerequisiteSubjectVersion.Subject
-                        })
-                    })
-                })
-                .FirstOrDefaultAsync();
+              .Where(c => !c.IsDeleted && c.ApprovalStatus == EApprovalStatus.APPROVED)
+              .Include(c => c.CurriculumSubjects)
+                  .ThenInclude(cs => cs.SubjectVersion)
+                  .ThenInclude(sv => sv.Subject)
+                .ThenInclude(s => s.ComboSubjects)
+                .ThenInclude(cbs => cbs.Combo)
+              .Where(c => c.CurriculumSubjects.Any(cs => !cs.IsDeleted && cs.SubjectVersion.IsActive && !cs.SubjectVersion.IsDeleted))
+              .ToListAsync();
         }
     }
 }

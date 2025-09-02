@@ -173,6 +173,10 @@ public static class DependenciesInjection
         services.AddHostedService<ReminderCheckpointBgService4>();
         services.AddHostedService<ReminderCheckpointBgService5>();
         services.AddHostedService<CommentValidatorBgService>();
+        services.AddHostedService<CachingForAIFeatureBgService>();
+        services.AddHostedService<CachingFLMForAIFeatureBgService>();
+
+
 
 
 

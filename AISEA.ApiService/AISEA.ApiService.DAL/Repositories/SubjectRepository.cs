@@ -53,7 +53,7 @@ namespace AISEA.ApiService.DAL.Repositories
         }
 
 
-        public async Task<List<SimpleSubjectResponse>> GetAllViaComboNameAsync(string studentComboName)
+        public async Task<List<SimpleSubjectResponse>> GetAllViaComboNameAsync(string studentComboName = "")
         {
             var subjects = await _context.ComboSubjects
                 .Where(cs =>

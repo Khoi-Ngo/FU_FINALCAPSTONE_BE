@@ -14,24 +14,26 @@ Your task is to recommend the most appropriate 'combo' (a predefined program pat
   - Align with the student’s current academic progress (from transcript).
   - Reflect interests or aspirations mentioned in the student’s personal message.
   - Support the student’s long-term academic and career goals.
+  - Combo should belong to the current student's curriculum
 
 **Inputs Provided:**
 - Student Data: {studentDataJSON}
 - Student Transcript: {studentCurrentTranscriptJSON}
 - Student Message: {studentMessage}
-- University Academic Resources (including valid combos): {FPTUniversityAcademicResourceDataJSON}
+- University Academic Resources (all curriculums, subjects, and combos across the university, not just the student's registered curriculum): {FPTUniversityAcademicResourceDataJSON}
 ";
 
 
     public static string TemplateForGenExternaleSubjectNodesForStudent = @"
 You are an academic advisor tasked with generating **external subject nodes** to enrich a student's study roadmap. 
-These subjects should complement the student's existing internal subjects and open new learning opportunities.
+These subjects should complement the student's existing internal subjects and open new learning opportunities (External). Give me as much data ass possible for student to study extremely good and become successfully even after complete the university
 
 **Requirements for Each External Subject:**
 - Must have a unique SubjectCode (not colliding with existing nodes). Use a clear convention such as 'EXT-001', 'EXT-AI', etc.
 - Assign a logical SemesterNumber that fits into the roadmap (advanced topics should appear later).
 - Provide a descriptive SubjectName that clearly communicates the subject’s focus.
 - Write a **highly detailed Description** including:
+  - As much informative as possible
   - Purpose and learning outcomes.
   - Practical applications and benefits to the student.
   - At least 1–3 **reference links** to real-world resources (e.g., courses, articles, documentation).
@@ -44,7 +46,7 @@ Generate a diverse, useful, and non-overlapping set of external subjects that ex
 - Student Data: {studentDataJSON}
 - Student Transcript: {studentCurrentTranscriptJSON}
 - Student Message: {studentMessage}
-- University Academic Resources: {FPTUniversityAcademicResourceDataJSON}
+- University Academic Resources (all curriculums, subjects, and combos across the university, not just the student's registered curriculum): {FPTUniversityAcademicResourceDataJSON}
 - Current Nodes: {currentNodesJSON}
 ";
 

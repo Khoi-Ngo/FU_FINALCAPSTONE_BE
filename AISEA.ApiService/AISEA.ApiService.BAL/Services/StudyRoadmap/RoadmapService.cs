@@ -3,8 +3,11 @@ using System.Text.Json.Serialization;
 using AISEA.ApiService.DAL.Entities;
 using AISEA.ApiService.DAL.Repositories;
 using AISEA.ApiService.SHARED.Const.Values;
+using AISEA.ApiService.SHARED.DTOs.Responses.MarkReport;
+using AISEA.ApiService.SHARED.DTOs.Responses.Subject;
 using AISEA.ApiService.SHARED.DTOs.Roadmap;
 using AISEA.ApiService.SHARED.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AISEA.ApiService.BAL.Services.StudyRoadmap;
 
@@ -12,71 +15,61 @@ public class RoadmapService
 {
     private readonly RoadmapRepository _roadmapRepository;
     private readonly IChatOpenAIService _chatOpenAIService;
-    private readonly UserRepository _userRepository;
-    private readonly JoinedSubjectRepository _joinedSubjectRepository;
-    private readonly CurriculumRepository _curriculumRepository;
     private readonly IJWTService _jWTService;
     private readonly SubjectRepository _subjectRepository;
+    private readonly IRedisRepository _redisRepository;
 
-    public RoadmapService(RoadmapRepository roadmapRepository, IChatOpenAIService chatOpenAIService, UserRepository userRepository, JoinedSubjectRepository joinedSubjectRepository, CurriculumRepository curriculumRepository, IJWTService jWTService, SubjectRepository subjectRepository)
+    public RoadmapService(RoadmapRepository roadmapRepository, IChatOpenAIService chatOpenAIService, IJWTService jWTService, SubjectRepository subjectRepository, IRedisRepository redisRepository)
     {
         _roadmapRepository = roadmapRepository;
         _chatOpenAIService = chatOpenAIService;
-        _userRepository = userRepository;
-        _joinedSubjectRepository = joinedSubjectRepository;
-        _curriculumRepository = curriculumRepository;
         _jWTService = jWTService;
         _subjectRepository = subjectRepository;
+        _redisRepository = redisRepository;
     }
 
 
 
 
+
+
     #region AI FEATURE
-    //TODO: Caching the FLM Resource for whole Curriculum
     public async Task<List<CreateNodeDto>> GenNodeAsync(string accessToken, string studentMessage)
     {
-        var studentData = await _userRepository.GetStudentByIdAsync(_jWTService.GetUserIdFromToken(accessToken));
 
-        var studentPersonalSubjectsInCurriculum = await _subjectRepository.GetAllViaCurriculumNotIncludeComboAsync(studentData.StudentProfile.CurriculumCode);
-
-        // var FPTUniversityAcademicResourceData = await _curriculumRepository.GetByCodeWithAllDataAsync(studentData.StudentProfile.CurriculumCode);
-
-        var studentCurrentTranscript = await _joinedSubjectRepository.GetTranscriptAsync(studentData.StudentProfile.Id);
-
+        var studentUserId = _jWTService.GetUserIdFromToken(accessToken);
+        var studentProfileId = _jWTService.GetProfileIdFromToken(accessToken);
 
         var jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         };
+        var studentPersonalSubjectsInCurriculum = await GetPersonalCurSubjects(studentProfileId);
+        var studentDataJSON = await GetStudentDataJSON(studentUserId, jsonOptions);
+        var FPTUniversityAcademicResourceDataJSON = await GetFLMJSON(jsonOptions);
+        var studentCurrentTranscriptJSON = await GetTranscriptJSON(studentProfileId, jsonOptions);
+        var studentPersonalSubjectsInCombo = await GetPersonalComboSubjects(studentProfileId);
 
-        var studentDataJSON = JsonSerializer.Serialize(studentData, jsonOptions);
-        // var FPTUniversityAcademicResourceDataJSON = JsonSerializer.Serialize(FPTUniversityAcademicResourceData, jsonOptions);
-        var studentCurrentTranscriptJSON = JsonSerializer.Serialize(studentCurrentTranscript, jsonOptions);
-
-
-
-        var comboOfStudent = studentData.StudentProfile.RegisteredComboCode;
-        if (string.IsNullOrEmpty(studentData.StudentProfile.RegisteredComboCode))
+        if (studentPersonalSubjectsInCombo.IsNullOrEmpty() && !studentPersonalSubjectsInCurriculum.IsNullOrEmpty())
         {
+            //case student  have no combo yet
             //call Open AI to choose the appropriate combo for student
             var promptToGetSuggestedCombo = CallAIConst.TemplatePromptToGetSuggestedComboForStudent
             .Replace("{studentCurrentTranscriptJSON}", studentCurrentTranscriptJSON)
             .Replace("{studentMessage}", studentMessage)
             .Replace("{studentDataJSON}", studentDataJSON)
-            // .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
+            .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
             ;
-            comboOfStudent = await _chatOpenAIService.GetSuggestedComboForStudent(promptToGetSuggestedCombo);
+
+            var comboOfStudent = await _chatOpenAIService.GetSuggestedComboForStudent(promptToGetSuggestedCombo);
+            studentPersonalSubjectsInCombo = await _subjectRepository.GetAllViaComboNameAsync(comboOfStudent);
 
         }
 
-        var studentPersonalSubjectsInCombo = await _subjectRepository.GetAllViaComboNameAsync(comboOfStudent);
 
 
-
-
-
+        #region Init node list and add internal
         var nodes = new List<CreateNodeDto>();
         var usedSubjectCodes = new HashSet<string>();
 
@@ -115,6 +108,7 @@ public class RoadmapService
                 usedSubjectCodes.Add(comboSubject.SubjectCode);
             }
         }
+        #endregion
 
         //get the JSON data of current nodes
         var currentNodesJSON = JsonSerializer.Serialize(nodes, jsonOptions);
@@ -124,7 +118,7 @@ public class RoadmapService
             .Replace("{studentCurrentTranscriptJSON}", studentCurrentTranscriptJSON)
             .Replace("{studentMessage}", studentMessage)
             .Replace("{studentDataJSON}", studentDataJSON)
-            // .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
+            .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
             .Replace("{currentNodesJSON}", currentNodesJSON)
             ;
 
@@ -156,6 +150,85 @@ public class RoadmapService
     }
 
 
+
+    #endregion
+
+
+    #region AI FEATURE CACHING HANDLING
+
+    private async Task<string> GetTranscriptJSON(long studentProfileId, JsonSerializerOptions jsonOptions)
+    {
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetStudentTranscriptByStudentProfileID}{studentProfileId}";
+            var res = await _redisRepository.GetValueAsync<List<TranscriptItemResponse>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+    private async Task<string> GetStudentDataJSON(long studentUserId, JsonSerializerOptions jsonOptions)
+    {
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetStudentDataByUserID}{studentUserId}";
+            var res = await _redisRepository.GetValueAsync<DAL.Entities.User>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+    private async Task<string> GetFLMJSON(JsonSerializerOptions jsonOptions)
+    {
+
+        try
+        {
+            var cacheKey = CacheKeyForAIFeature.PrefixToGetAllDataOfFLMCurComSub;
+            var res = await _redisRepository.GetValueAsync<List<DAL.Entities.Curriculum>>(cacheKey);
+            return JsonSerializer.Serialize(res, jsonOptions);
+        }
+        catch (Exception e)
+        {
+            return "{}";
+        }
+    }
+
+
+
+
+    private async Task<List<SimpleSubjectResponse>> GetPersonalComboSubjects(long studentProfileId)
+    {
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetPersonalComboByStudentProfileID}{studentProfileId}";
+            return await _redisRepository.GetValueAsync<List<SimpleSubjectResponse>>(cacheKey);
+        }
+        catch (Exception e)
+        {
+            return new List<SimpleSubjectResponse>();
+        }
+    }
+
+
+    private async Task<List<SimpleSubjectResponse>> GetPersonalCurSubjects(long studentProfileId)
+    {
+
+        try
+        {
+            var cacheKey = $"{CacheKeyForAIFeature.PrefixToGetPersonalCurByStudentProfileID}{studentProfileId}";
+            return await _redisRepository.GetValueAsync<List<SimpleSubjectResponse>>(cacheKey);
+        }
+        catch (Exception e)
+        {
+            return new List<SimpleSubjectResponse>();
+        }
+    }
 
     #endregion
 
@@ -328,6 +401,10 @@ public class RoadmapService
 
 
     #endregion
+
+
+
+
 }
 
 

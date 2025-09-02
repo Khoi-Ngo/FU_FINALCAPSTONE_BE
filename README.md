@@ -39,9 +39,9 @@ This repository contains the backend services for the **AISEA** project, develop
 
 ## Table of Contents
 
-- [Project Structure](#project-structure)
+- [Project Structure](#project structure)
 - [Prerequisites](#prerequisites)
-- [Setup Instructions](#setup-instructions)
+- [Setup Instructions](#setup instructions)
 - [Running the Application](#running-the-application)
 - [Implementation Notes](#implementation-notes)
 

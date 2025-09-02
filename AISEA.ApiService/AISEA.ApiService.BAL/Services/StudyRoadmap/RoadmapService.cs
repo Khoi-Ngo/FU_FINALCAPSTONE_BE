@@ -14,14 +14,17 @@ namespace AISEA.ApiService.BAL.Services.StudyRoadmap;
 public class RoadmapService
 {
     private readonly RoadmapRepository _roadmapRepository;
+    private readonly RoadmapNodeRepository _roadmapNodeRepository;
+
     private readonly IChatOpenAIService _chatOpenAIService;
     private readonly IJWTService _jWTService;
     private readonly SubjectRepository _subjectRepository;
     private readonly IRedisRepository _redisRepository;
 
-    public RoadmapService(RoadmapRepository roadmapRepository, IChatOpenAIService chatOpenAIService, IJWTService jWTService, SubjectRepository subjectRepository, IRedisRepository redisRepository)
+    public RoadmapService(RoadmapRepository roadmapRepository, RoadmapNodeRepository roadmapNodeRepository, IChatOpenAIService chatOpenAIService, IJWTService jWTService, SubjectRepository subjectRepository, IRedisRepository redisRepository)
     {
         _roadmapRepository = roadmapRepository;
+        _roadmapNodeRepository = roadmapNodeRepository;
         _chatOpenAIService = chatOpenAIService;
         _jWTService = jWTService;
         _subjectRepository = subjectRepository;
@@ -297,22 +300,18 @@ public class RoadmapService
     }
 
     // Update node
-    public async Task<RoadmapNodeDto?> UpdateNodeAsync(long nodeId, CreateNodeDto dto)
+    public async Task UpdateNodeAsync(long nodeId, CreateNodeDto dto)
     {
-        var node = new StudyRoadMapNode
-        {
-            Id = nodeId,
-            SubjectCode = dto.SubjectCode,
-            SemesterNumber = dto.SemesterNumber,
-            SubjectName = dto.SubjectName,
-            Description = dto.Description,
-            IsInternalSubjectData = dto.IsInternalSubjectData
-        };
+        var node = await _roadmapNodeRepository.GetByIdAsync(nodeId);
+        node.SubjectCode = dto.SubjectCode;
+        node.SubjectName = dto.SubjectName;
+        node.SemesterNumber = dto.SemesterNumber;
+        node.Description = dto.Description;
+        node.IsInternalSubjectData = dto.IsInternalSubjectData;
 
-        var updated = await _roadmapRepository.UpdateNodeAsync(node);
-        if (updated == null) return null;
 
-        return MapToNodeDto(updated);
+        await _roadmapNodeRepository.UpdateAsync(node);
+
     }
 
     public async Task<bool> ReplaceAllNodesAsync(long roadmapId, List<CreateNodeDto> nodeDtos)

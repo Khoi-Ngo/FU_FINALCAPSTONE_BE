@@ -133,9 +133,8 @@ namespace AISEA.ApiService.WebApi.Controllers.StudyRoadmap
         [PermissionAuthorize((int)EUserRole.STUDENT)]
         public async Task<IActionResult> UpdateNode(long nodeId, [FromBody] CreateNodeDto dto)
         {
-            var node = await _roadmapService.UpdateNodeAsync(nodeId, dto);
-            if (node == null) return NotFound();
-            return Ok(node);
+            await _roadmapService.UpdateNodeAsync(nodeId, dto);
+            return Ok("Update successfully");
         }
 
 

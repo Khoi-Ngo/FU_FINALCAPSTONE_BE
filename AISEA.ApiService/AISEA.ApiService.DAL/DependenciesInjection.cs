@@ -58,6 +58,8 @@ public static class DependenciesInjection
         services.AddScoped<MarkReportRepository>();
         services.AddScoped<SubjectCommentRepository>();
         services.AddScoped<RoadmapRepository>();
+        services.AddScoped<RoadmapNodeRepository>();
+
 
         services.AddScoped<FLMDashboardRepository>();
 

@@ -130,22 +130,6 @@ namespace AISEA.ApiService.DAL.Repositories
                 .FirstOrDefaultAsync(n => n.Id == nodeId);
         }
 
-        // Update node data (not links)
-        public async Task<StudyRoadMapNode?> UpdateNodeAsync(StudyRoadMapNode node)
-        {
-            var existing = await _context.StudyRoadMapNodes.FindAsync(node.Id);
-            if (existing == null) return null;
-
-            existing.SubjectCode = node.SubjectCode;
-            existing.SemesterNumber = node.SemesterNumber;
-            existing.SubjectName = node.SubjectName;
-            existing.Description = node.Description;
-            existing.IsInternalSubjectData = node.IsInternalSubjectData;
-
-            await _context.SaveChangesAsync();
-            return existing;
-        }
-
 
         public async Task<bool> ReplaceNodesInRoadmapAsync(long roadmapId, List<StudyRoadMapNode> newNodes)
         {

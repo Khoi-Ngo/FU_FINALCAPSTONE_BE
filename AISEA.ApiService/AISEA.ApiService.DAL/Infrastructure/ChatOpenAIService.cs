@@ -200,7 +200,6 @@ public class ChatOpenAIService : IChatOpenAIService
 
     public async Task<string> GetSuggestedComboForStudent(string userPrompt)
     {
-        _logger.LogInformation("==== GetSuggestedComboForStudent : OpenAI Request Prompt ====\n{Prompt}", userPrompt);
 
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _chatBotSettings.ApiKey);
@@ -277,7 +276,6 @@ public class ChatOpenAIService : IChatOpenAIService
 
     public async Task<List<CreateNodeDto>> GenExternalSubjectNodesInStudyRoadmap(string userPrompt)
     {
-        _logger.LogInformation("==== GenExternalSubjectNodesInStudyRoadmap : OpenAI Request Prompt ====\n{Prompt}", userPrompt);
 
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _chatBotSettings.ApiKey);
@@ -371,7 +369,6 @@ public class ChatOpenAIService : IChatOpenAIService
 
     public async Task<List<RoadmapLinkDto>> GetTheCompleteLinkedNodes(string userPrompt)
     {
-        _logger.LogInformation("==== GetTheCompleteLinkedNodes : OpenAI Request Prompt ====\n{Prompt}", userPrompt);
 
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _chatBotSettings.ApiKey);
@@ -465,7 +462,6 @@ public class ChatOpenAIService : IChatOpenAIService
     #region ChatBot
     public async Task<string> SendMsgAsync(string prompt)
     {
-        _logger.LogInformation("==== AI CHATBOT : OpenAI Request Prompt ====\n{Prompt}", prompt);
 
         var _apiKey = _chatBotSettings.ApiKey;
         var _apiUrl = _chatBotSettings.ApiUrl;
@@ -498,7 +494,6 @@ public class ChatOpenAIService : IChatOpenAIService
     {
         try
         {
-            _logger.LogInformation("==== ValidateComment : OpenAI Moderation Request ====\n{Content}", content);
 
             // Use OpenAI's moderation API - purpose-built, faster, and free!
             _httpClient.DefaultRequestHeaders.Authorization =

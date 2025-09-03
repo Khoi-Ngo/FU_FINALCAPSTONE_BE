@@ -100,7 +100,7 @@ public class JoinedSubjectController : BaseController
 
         if (failList.IsNullOrEmpty())
         {
-            await qNotifier.NotifyUserAsync(AccessToken, new NotificationDTO { Title = "Fail import detected", Content = $"Fail import subjects detected, please check your email " });
+            await qNotifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Fail import detected", Content = $"Fail import subjects detected, please check your email " });
             var qNotificationService = sp.GetRequiredService<NotificationService>();
             await qNotificationService.SendBulkNotificationDataAsMail(accessToken, failList);
         }

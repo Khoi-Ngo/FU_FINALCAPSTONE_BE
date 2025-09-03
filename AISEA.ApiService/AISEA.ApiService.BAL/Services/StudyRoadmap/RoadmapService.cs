@@ -65,8 +65,21 @@ public class RoadmapService
             .Replace("{FPTUniversityAcademicResourceDataJSON}", FPTUniversityAcademicResourceDataJSON)
             ;
 
-            var comboOfStudent = await _chatOpenAIService.GetSuggestedComboForStudent(promptToGetSuggestedCombo);
-            studentPersonalSubjectsInCombo = await _subjectRepository.GetAllViaComboNameAsync(comboOfStudent);
+
+
+            try
+            {
+
+
+                var comboOfStudent = await _chatOpenAIService.GetSuggestedComboForStudent(promptToGetSuggestedCombo);
+                studentPersonalSubjectsInCombo = await _subjectRepository.GetAllViaComboNameAsync(comboOfStudent);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
 
         }
 
@@ -76,40 +89,47 @@ public class RoadmapService
         var nodes = new List<CreateNodeDto>();
         var usedSubjectCodes = new HashSet<string>();
 
-        // Add curriculum subjects
-        foreach (var subject in studentPersonalSubjectsInCurriculum)
+        try
         {
-
-            if (!usedSubjectCodes.Contains(subject.SubjectCode))
+            // Add curriculum subjects
+            foreach (var subject in studentPersonalSubjectsInCurriculum)
             {
-                nodes.Add(new CreateNodeDto
+
+                if (!usedSubjectCodes.Contains(subject.SubjectCode))
                 {
-                    SubjectCode = subject.SubjectCode,
-                    SemesterNumber = subject.SemesterNumber,
-                    SubjectName = subject.SubjectName,
-                    Description = subject.Description,
-                    IsInternalSubjectData = true
-                });
-                usedSubjectCodes.Add(subject.SubjectCode);
+                    nodes.Add(new CreateNodeDto
+                    {
+                        SubjectCode = subject.SubjectCode,
+                        SemesterNumber = subject.SemesterNumber,
+                        SubjectName = subject.SubjectName,
+                        Description = subject.Description,
+                        IsInternalSubjectData = true
+                    });
+                    usedSubjectCodes.Add(subject.SubjectCode);
+                }
+            }
+
+            // Add combo subjects
+            foreach (var comboSubject in studentPersonalSubjectsInCombo)
+            {
+
+                if (!usedSubjectCodes.Contains(comboSubject.SubjectCode))
+                {
+                    nodes.Add(new CreateNodeDto
+                    {
+                        SubjectCode = comboSubject.SubjectCode,
+                        SemesterNumber = comboSubject.SemesterNumber,
+                        SubjectName = comboSubject.SubjectName,
+                        Description = comboSubject.Description,
+                        IsInternalSubjectData = true
+                    });
+                    usedSubjectCodes.Add(comboSubject.SubjectCode);
+                }
             }
         }
-
-        // Add combo subjects
-        foreach (var comboSubject in studentPersonalSubjectsInCombo)
+        catch (Exception e)
         {
-
-            if (!usedSubjectCodes.Contains(comboSubject.SubjectCode))
-            {
-                nodes.Add(new CreateNodeDto
-                {
-                    SubjectCode = comboSubject.SubjectCode,
-                    SemesterNumber = comboSubject.SemesterNumber,
-                    SubjectName = comboSubject.SubjectName,
-                    Description = comboSubject.Description,
-                    IsInternalSubjectData = true
-                });
-                usedSubjectCodes.Add(comboSubject.SubjectCode);
-            }
+            Console.WriteLine(e);
         }
         #endregion
 
@@ -125,11 +145,20 @@ public class RoadmapService
             .Replace("{currentNodesJSON}", currentNodesJSON)
             ;
 
-        var externalSubjectNodes = await _chatOpenAIService.GenExternalSubjectNodesInStudyRoadmap(promptToGetExternalSubjectNodes);
 
 
+        try
+        {
+            var externalSubjectNodes = await _chatOpenAIService.GenExternalSubjectNodesInStudyRoadmap(promptToGetExternalSubjectNodes);
 
-        nodes.AddRange(externalSubjectNodes);
+            nodes.AddRange(externalSubjectNodes);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
         return nodes;
 
     }

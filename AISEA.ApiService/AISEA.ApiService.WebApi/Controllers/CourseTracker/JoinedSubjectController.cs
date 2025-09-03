@@ -93,17 +93,17 @@ public class JoinedSubjectController : BaseController
         var qNotifier = sp.GetRequiredService<NotificationHubNotifier>();
         await qNotifier.NotifyUsersAsync(successList);
 
-        var failList = res
-            .Where(x => !x.isSuccess)
-            .Select(x => x.stakeHolderNoti)
-            .ToList();
+        // var failList = res
+        //     .Where(x => !x.isSuccess)
+        //     .Select(x => x.stakeHolderNoti)
+        //     .ToList();
 
-        if (failList.IsNullOrEmpty())
-        {
-            await qNotifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Fail import detected", Content = $"Fail import subjects detected, please check your email " });
-            var qNotificationService = sp.GetRequiredService<NotificationService>();
-            await qNotificationService.SendBulkNotificationDataAsMail(accessToken, failList);
-        }
+        // if (failList.IsNullOrEmpty())
+        // {
+        //     await qNotifier.NotifyUserAsync(accessToken, new NotificationDTO { Title = "Fail import detected", Content = $"Fail import subjects detected, please check your email " });
+        //     var qNotificationService = sp.GetRequiredService<NotificationService>();
+        //     await qNotificationService.SendBulkNotificationDataAsMail(accessToken, failList);
+        // }
 
     });
 

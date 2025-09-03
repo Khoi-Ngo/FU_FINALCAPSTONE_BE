@@ -98,36 +98,37 @@ public class MarkReportService
         if (joinedSubject == null)
             throw new ArgumentException($"JoinedSubject with Id={needCheckJoinedSubjectID} not found.");
 
-        var reports = joinedSubject.SubjectMarkReports;
+        var reports = joinedSubject.SubjectMarkReports?
+            .Where(r => r != null) // drop nulls early
+            .ToList();
 
         bool isPassed = true; // assume passed
 
         if (reports == null || !reports.Any())
         {
-            // No reports means cannot pass
-            isPassed = false;
+            isPassed = false; // no reports means cannot pass
         }
         else
         {
-            foreach (var report in reports)
+            // Any score below minimum -> fail immediately
+            if (reports.Any(r => r.Score < r.MinScore))
             {
-                if (report == null) continue; // skip null entries safely
+                isPassed = false;
+            }
+            else
+            {
+                double totalWeight = reports.Sum(r => r.Weight);
 
-                if (report.Score < report.MinScore)
+                // allow small rounding tolerance instead of exact equality
+                if (Math.Abs(totalWeight - 100.0) > 0.001)
                 {
                     isPassed = false;
-                    break;
                 }
-            }
-
-            if (isPassed)
-            {
-                var totalWeight = reports.Sum(r => r.Weight);
-                if (totalWeight == 100)
+                else
                 {
                     double weightedAverage = reports.Sum(r => r.Score * r.Weight) / totalWeight;
 
-                    if (weightedAverage < 5.0)
+                    if (weightedAverage < 5.0) // threshold constant?
                     {
                         isPassed = false;
                     }

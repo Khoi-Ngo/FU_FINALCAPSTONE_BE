@@ -19,6 +19,13 @@ namespace AISEA.ApiService.DAL.Repositories
                     && c.SubjectId == subjectId);
         }
 
+        public async Task<bool> HasUserCommentedOnSubjectAsync(long studentProfileId, long subjectId)
+        {
+            return await _context.SubjectComments
+                .AnyAsync(c => c.StudentProfileId == studentProfileId
+                    && c.SubjectId == subjectId);
+        }
+
         public async Task<SubjectComment?> GetByIdWithDetailsAsync(long id)
         {
             return await _context.SubjectComments

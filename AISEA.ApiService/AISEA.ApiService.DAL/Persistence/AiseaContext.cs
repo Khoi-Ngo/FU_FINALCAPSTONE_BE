@@ -27,13 +27,8 @@ public partial class AiseaContext : DbContext
                 sqlOptions =>
                 {
                     // Set 5-minute timeout
-                    sqlOptions.CommandTimeout((int)TimeSpan.FromMinutes(5).TotalSeconds);
+                    sqlOptions.CommandTimeout((int)TimeSpan.FromMinutes(1).TotalSeconds);
 
-                    // Enable retries for transient failures
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 5,
-                        maxRetryDelay: TimeSpan.FromSeconds(10),
-                        errorNumbersToAdd: null);
                 });
 
         }

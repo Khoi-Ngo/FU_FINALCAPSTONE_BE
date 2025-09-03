@@ -12,16 +12,17 @@ namespace AISEA.ApiService.DAL.Repositories
         public SubjectRepository(AiseaContext context) : base(context)
         {
         }
-        public async Task<List<SimpleSubjectResponse>> GetAllViaCurriculumNotIncludeComboAsync(string studentCurriculumCode)
+        public async Task<List<SimpleSubjectResponse>> GetAllViaCurriculumNotIncludeComboAsync(string studentCurriculumCode = "")
         {
 
-
-            var subjects = await _context.CurriculumSubjects
+            try
+            {
+                var subjects = await _context.CurriculumSubjects
                 .Where(cs =>
-                
+
                     cs.Curriculum != null &&
                     cs.Curriculum.CurriculumCode == studentCurriculumCode &&
-                    cs.Curriculum.ApprovalStatus ==  EApprovalStatus.APPROVED &&
+                    cs.Curriculum.ApprovalStatus == EApprovalStatus.APPROVED &&
                     cs.Curriculum.IsDeleted == false &&
 
                     cs.SubjectVersion != null &&
@@ -29,7 +30,7 @@ namespace AISEA.ApiService.DAL.Repositories
 
                     !cs.IsDeleted &&
 
-                    cs.SubjectVersion.IsActive&&
+                    cs.SubjectVersion.IsActive &&
                     !cs.SubjectVersion.IsDeleted &&
 
                     !cs.SubjectVersion.Subject.IsDeleted &&
@@ -49,13 +50,21 @@ namespace AISEA.ApiService.DAL.Repositories
                 })
                 .ToListAsync();
 
-            return subjects;
+                return subjects;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR in SubjectRepository");
+                return new List<SimpleSubjectResponse>();
+            }
         }
 
 
         public async Task<List<SimpleSubjectResponse>> GetAllViaComboNameAsync(string studentComboName = "")
         {
-            var subjects = await _context.ComboSubjects
+            try
+            {
+                var subjects = await _context.ComboSubjects
                 .Where(cs =>
                     cs.Combo != null &&
                     cs.Combo.ComboName == studentComboName &&
@@ -92,7 +101,13 @@ namespace AISEA.ApiService.DAL.Repositories
                 })
                 .ToListAsync();
 
-            return subjects;
+                return subjects;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR in SubjectRepository");
+                return new List<SimpleSubjectResponse>();
+            }
         }
 
 

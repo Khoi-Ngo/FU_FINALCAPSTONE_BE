@@ -37,6 +37,7 @@ These subjects should complement the student's existing internal subjects and op
   - Purpose and learning outcomes.
   - Practical applications and benefits to the student.
   - At least 1–3 **reference links** to real-world resources (e.g., courses, articles, documentation).
+  - The description should be in formatted
 - Set `IsInternalSubjectData = false`.
 
 **Goal:**

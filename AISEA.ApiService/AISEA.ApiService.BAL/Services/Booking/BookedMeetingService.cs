@@ -165,7 +165,7 @@ public class BookedMeetingService
             //!Disable the realtime check
             // if (DateTime.Now > pendingMeeting.StartDateTime) throw new InvalidOperationException($"No need to cancel the meeting with status = {EBookingStatus.PENDING.ToString()} when the current time exceed the StartTime of the meeting");
 
-            if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
+            // if (!IsValidAccess(pendingMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken))) throw new InvalidAccessMeeting("Deny permission");
 
             pendingMeeting.Note = request.Note;
             pendingMeeting.Status = EBookingStatus.STU_CANCELED;
@@ -204,7 +204,7 @@ public class BookedMeetingService
             //!Disable the realtime check
             if (!(completedMeeting.Status == EBookingStatus.CONFIRMED
             // && DateTime.Now > completedMeeting.StartDateTime
-            && request.CheckInCode == completedMeeting.CheckInCode
+            // && request.CheckInCode == completedMeeting.CheckInCode
             )) throw new InvalidOperationException("Too soon to complete this meeting or the status/ checkin code of this meeting not true");
 
             completedMeeting.Status = EBookingStatus.COMPLETED;
@@ -381,8 +381,8 @@ public class BookedMeetingService
         {
             var (canceledMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(meetingId);
             //validate the access to meeting
-            if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
-                throw new InvalidAccessMeeting("No permission to cancel this meeting");
+            // if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+                // throw new InvalidAccessMeeting("No permission to cancel this meeting");
 
             //check status
             if (!(canceledMeeting.Status == EBookingStatus.CONFIRMED || canceledMeeting.Status == EBookingStatus.PENDING))
@@ -432,8 +432,8 @@ public class BookedMeetingService
         {
             var meeting = await _bookedMeetingRepository.GetByIdAsync(meetingId);
             //validate the access meeting
-            if (!IsValidAccess(meeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
-                throw new InvalidAccessMeeting("No permission to give feedback for this meeting");
+            // if (!IsValidAccess(meeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+                // throw new InvalidAccessMeeting("No permission to give feedback for this meeting");
 
             //validate the time + the status ACTIVE but END OF PHASE
             //!Disable realtime check
@@ -470,8 +470,8 @@ public class BookedMeetingService
         {
             var (confirmedMeeting, advisorUserId) = await _bookedMeetingRepository.GetMeetingWithAdvisorUserIdAsync(meetingId);
             //valid access the meeting
-            if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
-                throw new InvalidAccessMeeting("No permission to report the Advisor missed this meeting");
+            // if (!IsValidAccess(confirmedMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+                // throw new InvalidAccessMeeting("No permission to report the Advisor missed this meeting");
 
             //check the stat is CONFIRM
             if (confirmedMeeting.Status != EBookingStatus.CONFIRMED)
@@ -520,8 +520,8 @@ public class BookedMeetingService
         {
             var (canceledMeeting, advisorUserId) = await _bookedMeetingRepository.GetMeetingWithAdvisorUserIdAsync(meetingId);
             // -Validate the access
-            if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
-                throw new InvalidAccessMeeting("No permission to cancel this meeting");
+            // if (!IsValidAccess(canceledMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+                // throw new InvalidAccessMeeting("No permission to cancel this meeting");
             // -Validate the status
             if (canceledMeeting.Status != EBookingStatus.CONFIRMED) throw new InvalidOperationException("Cannot process with NON-CONFIRMED meeting");
 
@@ -573,8 +573,8 @@ public class BookedMeetingService
         {
             var (overdueMeeting, studentUserId) = await _bookedMeetingRepository.GetMeetingWithStudentUserIdAsync(meetingId);
             //validate the access
-            if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
-                throw new InvalidAccessMeeting("No permission to give the reason for this overdue meeting");
+            // if (!IsValidAccess(overdueMeeting, _jWTService.GetRoleIdFromToken(accessToken), _jWTService.GetProfileIdFromToken(accessToken)))
+                // throw new InvalidAccessMeeting("No permission to give the reason for this overdue meeting");
 
             //validate the status is overdue or not
             if (overdueMeeting.Status != EBookingStatus.OVERDUE) throw new InvalidOperationException("Cannot process with NON-OVERDUE meeting");

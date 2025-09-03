@@ -40,11 +40,25 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
         {
             var studentProfileId = _jwtService.GetProfileIdFromToken(accessToken);
 
+            // 1. Check if subject exists
             var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
+            if (subject == null)
+            {
+                throw new NotFoundException("Subject not found.");
+            }
+
+            // 2. Check if user has already commented on this subject
+            var hasAlreadyCommented = await _commentRepository.HasUserCommentedOnSubjectAsync(studentProfileId, request.SubjectId);
+            if (hasAlreadyCommented)
+            {
+                throw new InvalidUserCreatedException("You can only comment once per subject. You have already commented on this subject.");
+            }
+
+            // 3. Check if user has completed and passed the subject
             var canComment = await _joinedSubjectRepository.IsValidToPostComment(studentProfileId, subject.SubjectCode);
             if (!canComment)
             {
-                throw new InvalidUserCreatedException("You can only comment on subjects you have completed and passed.");
+                throw new InvalidUserCreatedException("You have not finished this subject yet. You can only comment on subjects you have completed and passed.");
             }
 
             var comment = _mapper.Map<DAL.Entities.SubjectComment>(request);
@@ -55,7 +69,6 @@ namespace AISEA.ApiService.BAL.Services.SubjectComment
             var firstName = _jwtService.GetFirstNameFromToken(accessToken);
             var lastName = _jwtService.GetLastNameFromToken(accessToken);
             comment.FullName = $"{firstName} {lastName}".Trim();
-
 
             await _commentRepository.CreateAsync(comment);
             return comment.Id;

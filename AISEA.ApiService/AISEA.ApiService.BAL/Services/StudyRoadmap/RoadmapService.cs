@@ -193,7 +193,7 @@ public class RoadmapService
         try
         {
             var cacheKey = CacheKeyForAIFeature.PrefixToGetAllDataOfFLMCurComSub;
-            var res = await _redisRepository.GetValueAsync<AcademicDataDto>(cacheKey);
+            var res = await _redisRepository.GetValueAsync<object>(cacheKey);
             return JsonSerializer.Serialize(res, jsonOptions);
         }
         catch (Exception e)

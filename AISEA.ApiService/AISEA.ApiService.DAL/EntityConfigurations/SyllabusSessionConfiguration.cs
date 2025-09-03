@@ -14,7 +14,7 @@ namespace AISEA.ApiService.DAL.EntityConfigurations
 
             builder.Property(e => e.Topic)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(1000);
 
             builder.Property(e => e.Mission)
                 .HasColumnType("nvarchar(max)");

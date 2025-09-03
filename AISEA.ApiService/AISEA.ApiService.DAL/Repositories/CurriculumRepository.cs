@@ -251,8 +251,27 @@ namespace AISEA.ApiService.DAL.Repositories
             //     Semesters = semesters,
             // };
 
-            return await _context.Subjects.Include(s => s.ComboSubjects)
-              .ThenInclude(sc => sc.Combo).Where(s => !s.IsDeleted && s.ApprovalStatus == EApprovalStatus.APPROVED).ToListAsync();
+            return await _context.Subjects
+     .Where(s => !s.IsDeleted && s.ApprovalStatus == EApprovalStatus.APPROVED)
+     .Select(s => new SubjectDto
+     {
+         Id = s.Id,
+         SubjectCode = s.SubjectCode,
+         SubjectName = s.SubjectName,
+         Description = s.Description,
+         Credits = s.Credits,
+         Combos = s.ComboSubjects
+             .Where(cs => !cs.IsDeleted)
+             .Select(cs => new ComboDto
+             {
+                 ComboId = cs.ComboId,
+                 ComboName = cs.Combo.ComboName,
+                 Description = cs.Combo.ComboDescription
+             })
+             .ToList()
+     })
+     .ToListAsync();
+
 
         }
     }
@@ -260,135 +279,22 @@ namespace AISEA.ApiService.DAL.Repositories
 
 
 #region DTO
-
-public class AcademicDataDto
-{
-    public List<ProgramDto> Programs { get; set; }
-    public List<CurriculumDto> Curricula { get; set; }
-    public List<SemesterDto> Semesters { get; set; }
-}
-
-public class ProgramDto
-{
-    public long Id { get; set; }
-    public string ProgramName { get; set; }
-    public string ProgramCode { get; set; }
-    public DateTime? CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-}
-
-public class CurriculumDto
-{
-    public long Id { get; set; }
-    public long ProgramId { get; set; }
-    public string ProgramName { get; set; }
-    public string CurriculumCode { get; set; }
-    public string CurriculumName { get; set; }
-    public DateTimeOffset EffectiveDate { get; set; }
-    public DateTime? CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-    public DateTime? ApprovedAt { get; set; }
-    public string ApprovedBy { get; set; }
-    public List<CurriculumSubjectDto> CurriculumSubjects { get; set; }
-}
-
-public class CurriculumSubjectDto
-{
-    public int SemesterNumber { get; set; }
-    public bool IsMandatory { get; set; }
-    public SubjectVersionDto SubjectVersion { get; set; }
-}
-
-public class SubjectVersionDto
-{
-    public long Id { get; set; }
-    public string VersionCode { get; set; }
-    public string VersionName { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsDefault { get; set; }
-    public DateTime EffectiveFrom { get; set; }
-    public DateTime? EffectiveTo { get; set; }
-    public SubjectDto Subject { get; set; }
-    public List<SyllabusDto> Syllabi { get; set; }
-    public List<SubjectVersionPrerequisiteDto> Prerequisites { get; set; }
-}
-
 public class SubjectDto
 {
     public long Id { get; set; }
     public string SubjectCode { get; set; }
     public string SubjectName { get; set; }
+    public string? Description { get; set; }
     public int Credits { get; set; }
-    public string Description { get; set; }
-    public List<ComboDto> Combos { get; set; }
+    public List<ComboDto> Combos { get; set; } = new();
 }
 
 public class ComboDto
 {
-    public long Id { get; set; }
+    public long ComboId { get; set; }
     public string ComboName { get; set; }
-    public string ComboDescription { get; set; }
+    public string? Description { get; set; }
 }
 
-public class SyllabusDto
-{
-    public long Id { get; set; }
-    public string Content { get; set; }
-    public List<SyllabusAssessmentDto> Assessments { get; set; }
-    public List<SyllabusLearningMaterialDto> LearningMaterials { get; set; }
-    public List<SyllabusLearningOutcomeDto> LearningOutcomes { get; set; }
-    public List<SyllabusSessionDto> Sessions { get; set; }
-}
-
-public class SyllabusAssessmentDto
-{
-    public long Id { get; set; }
-    public string Category { get; set; }
-    public int Quantity { get; set; }
-    public decimal Weight { get; set; }
-    public string CompletionCriteria { get; set; }
-    public int? Duration { get; set; }
-    public string QuestionType { get; set; }
-}
-
-public class SyllabusLearningMaterialDto
-{
-    public long Id { get; set; }
-    public string MaterialName { get; set; }
-    public string AuthorName { get; set; }
-    public DateTimeOffset? PublishedDate { get; set; }
-    public string Description { get; set; }
-    public string FilepathOrUrl { get; set; }
-}
-
-public class SyllabusLearningOutcomeDto
-{
-    public long Id { get; set; }
-    public string OutcomeCode { get; set; }
-    public string Description { get; set; }
-}
-
-public class SyllabusSessionDto
-{
-    public long Id { get; set; }
-    public int SessionNumber { get; set; }
-    public string Topic { get; set; }
-    public string Mission { get; set; }
-    public List<SyllabusLearningOutcomeDto> Outcomes { get; set; }
-}
-
-public class SubjectVersionPrerequisiteDto
-{
-    public long PrerequisiteSubjectVersionId { get; set; }
-    public string PrerequisiteSubjectCode { get; set; }
-    public string PrerequisiteSubjectName { get; set; }
-}
-
-public class SemesterDto
-{
-    public long Id { get; set; }
-    public string SemesterName { get; set; }
-    public DateTime CreatedAt { get; set; }
-}
 
 #endregion

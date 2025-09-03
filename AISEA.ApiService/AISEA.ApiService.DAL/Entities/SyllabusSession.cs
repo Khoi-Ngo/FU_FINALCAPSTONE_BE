@@ -15,7 +15,7 @@ public partial class SyllabusSession
 
     public int SessionNumber { get; set; }
 
-    [StringLength(50)]
+    [StringLength(1000)]
     public string Topic { get; set; } = null!;
 
     [Column(TypeName = "text")]

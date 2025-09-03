@@ -31,7 +31,7 @@ namespace AISEA.ApiService.BAL.Mappings.Syllabus
                 .ForMember(dest => dest.Assessments, opt => opt.MapFrom(src => src.SyllabusAssessments))
                 .ForMember(dest => dest.LearningMaterials, opt => opt.MapFrom(src => src.SyllabusLearningMaterials))
                 .ForMember(dest => dest.LearningOutcomes, opt => opt.MapFrom(src => src.SyllabusLearningOutcomes))
-                .ForMember(dest => dest.Sessions, opt => opt.MapFrom(src => src.SyllabusSessions));
+                .ForMember(dest => dest.Sessions, opt => opt.MapFrom(src => src.SyllabusSessions.OrderBy(s => s.SessionNumber)));
 
             CreateMap<SyllabusAssessment, SyllabusAssessmentResponse>();
             CreateMap<SyllabusLearningMaterial, SyllabusLearningMaterialResponse>();
